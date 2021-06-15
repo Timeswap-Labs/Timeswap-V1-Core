@@ -100,7 +100,7 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
 
     function rateReserve() external view returns (uint128);
 
-    function collateralReserve() external view returns (uint128);
+    function collateralReserve() external view returns (uint256);
 
     function transactionFee() external view returns (uint128);
 

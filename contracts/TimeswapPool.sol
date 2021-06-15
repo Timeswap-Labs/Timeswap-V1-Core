@@ -42,12 +42,12 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Stores the balance of the contract in the ERC20 being lent and borrowed (asset ERC20)
     /// @dev The X pool or the Principal pool
     uint128 public override assetReserve;
-    /// @dev Stores the balance of the contract in the ERC20 used as collateral (collateral ERC20)
-    /// @dev The W pool or the Collateral Locked pool
-    uint128 public override collateralReserve;
     /// @dev Stores the virtual rate reserves
     uint128 public override rateReserve;
-
+    /// @dev Stores the balance of the contract in the ERC20 used as collateral (collateral ERC20)
+    /// @dev The W pool or the Collateral Locked pool
+    uint256 public override collateralReserve;
+    
     /// @dev The address of the factory contract that deployed this contract
     InterfaceTimeswapFactory public override factory; //immutable
 
@@ -257,12 +257,12 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // The pair ERC20 balance of the pool contract is capped at uint128
         // Can be resolved with the sync function if someone transfer tokens to the pool contract such that the balance is greater than uint128
         require(
-            _assetBalance <= MAXIMUM_BALANCE && _collateralBalance <= MAXIMUM_BALANCE && _rateBalance <= MAXIMUM_BALANCE,
+            _assetBalance <= MAXIMUM_BALANCE && _rateBalance <= MAXIMUM_BALANCE,
             "TimeswapPool :: _updateReserves : Reserve Overflow"
         );
         assetReserve = uint128(_assetBalance);
-        collateralReserve = uint128(_collateralBalance);
         rateReserve = uint128(_rateBalance);
+        collateralReserve = _collateralBalance;
 
         emit Sync(
             _assetBalance,
