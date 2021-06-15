@@ -69,9 +69,9 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
     event Sync(
         uint256 _assetBalance,
         uint256 _collateralBalance,
+        uint256 _rateBalance,
         uint256 _bondBalance,
-        uint256 _insuranceBalancee,
-        uint256 _invariance
+        uint256 _insuranceBalancee
     );
 
     // VIEW
@@ -98,9 +98,9 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
 
     function assetReserve() external view returns (uint128);
 
-    function collateralReserve() external view returns (uint128);
+    function rateReserve() external view returns (uint128);
 
-    function invariance() external view returns (uint256);
+    function collateralReserve() external view returns (uint128);
 
     function transactionFee() external view returns (uint128);
 
