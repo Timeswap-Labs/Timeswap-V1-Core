@@ -561,7 +561,11 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateBalance = _rateReserve - (_liquidityIn * _rateReserve / _totalSupply);
 
         // Update all the pools
-        _updateReserves(_assetBalance, _collateralBalance, _rateBalance);  
+        _updateReserves(
+            _assetBalance,
+            _collateralBalance,
+            _rateBalance
+        );  
     }
 
     /* ===== LEND ===== */
