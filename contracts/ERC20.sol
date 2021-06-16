@@ -11,7 +11,7 @@ contract ERC20 is InterfaceERC20 {
     /* ===== MODEL ===== */
 
     // Balances of each address is capped at uint128
-    uint256 private constant MAXIMUM_BALANCE = type(uint128).max;
+    uint256 internal constant MAXIMUM_BALANCE = type(uint128).max;
     address private constant ZERO = address(type(uint160).min);
 
     uint256 public override totalSupply;
