@@ -252,14 +252,14 @@ const testCases = {
       ],
       lend: [
             {
-                  assetReserve: 100n,
-                  bondReserve: 20n,
-                  insuranceReserve: 1100n,
-                  collateralReserve: 240n,
-                  assetIn: 20n,
-                  bondDecrease: 2n,
-                  bondTotalSupplyBefore: 240n,
-                  insuranceTotalSupplyBefore: 1200n,
+                  assetReserve: 10000000000000000n,
+                  bondReserve: 2000000000000000n,
+                  insuranceReserve: 110000000000000000n,
+                  collateralReserve: 24000000000000000n,
+                  assetIn: 2000000000000000n,
+                  bondDecrease: 100000000000000n,
+                  bondTotalSupplyBefore: 24000000000000000n,
+                  insuranceTotalSupplyBefore: 120000000000000000n,
             },
             {
                   assetReserve: 1000n,
