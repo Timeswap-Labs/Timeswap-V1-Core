@@ -1495,11 +1495,10 @@ describe('lend', () => {
 
         receiver = accounts[4]
         // 
-        invariance = BigInt(await pool.invariance())
+        rateReserve = BigInt(await pool.rateReserve())
         // 
 
-        rateReserve = divUp(divUp(invariance, BigInt(assetReserve)), BigInt(bondReserve))
-
+        invariance = rateReserve * BigInt(assetReserve) * BigInt(bondReserve)
         calculate()
 
         await lend(receiver, assetIn, bondDecrease, rateDecrease)
@@ -1510,8 +1509,11 @@ describe('lend', () => {
 
         const result = await bondERC20.balanceOf(receiver)
 
+        bondMint = div(
+          div(bondDecrease * rateReserve, assetReserve) * (BigInt(maturity) - timestamp),
+          year
+        )
         const bondReceived = bondDecrease + bondMint
-
         checkBigIntEquality(result, bondReceived)
       })
 
