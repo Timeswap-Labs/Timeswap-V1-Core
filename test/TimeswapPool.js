@@ -163,8 +163,8 @@ describe('initialize', () => {
       checkBigIntEquality(result, 0)
     })
 
-    it('Should have a zero invariance', async () => {
-      const result = await pool.invariance()
+    it('Should have a zero rateReserve', async () => {
+      const result = await pool.rateReserve()
       checkBigIntEquality(result, 0)
     })
 
@@ -363,18 +363,12 @@ describe('mint', () => {
           checkBigIntEquality(result, liquidityFeeTo)
         })
 
-        it('Should have a correct invariance', async () => {
-          const result = await pool.invariance()
-
-          // 
-          // 
-
-          const invariance =
-            assetIn *
-            bondIncrease *
+        it('Should have a correct rateReserve', async () => {
+          const result = await pool.rateReserve()
+          const rateReserve =
             div(insuranceIncrease * year, maturity - timestamp)
 
-          checkBigIntEquality(result, invariance)
+          checkBigIntEquality(result, rateReserve)
         })
 
         it('Should have the correct bond total supply', async () => {
@@ -1501,11 +1495,10 @@ describe('lend', () => {
 
         receiver = accounts[4]
         // 
-        invariance = BigInt(await pool.invariance())
+        rateReserve = BigInt(await pool.rateReserve())
         // 
 
-        rateReserve = divUp(divUp(invariance, BigInt(assetReserve)), BigInt(bondReserve))
-
+        invariance = rateReserve * BigInt(assetReserve) * BigInt(bondReserve)
         calculate()
 
         await lend(receiver, assetIn, bondDecrease, rateDecrease)
@@ -1516,8 +1509,11 @@ describe('lend', () => {
 
         const result = await bondERC20.balanceOf(receiver)
 
+        bondMint = div(
+          div(bondDecrease * rateReserve, assetReserve) * (BigInt(maturity) - timestamp),
+          year
+        )
         const bondReceived = bondDecrease + bondMint
-
         checkBigIntEquality(result, bondReceived)
       })
 
