@@ -513,15 +513,7 @@ describe('mint', () => {
 
           receiver = accounts[4]
 
-
-          rateReserve = divUp(
-            divUp(
-              BigInt(await pool.invariance()),
-              assetReserve
-            ),
-
-            bondReserve
-          )
+          rateReserve = await pool.rateReserve()
 
           await mint(
             receiver,
@@ -619,23 +611,16 @@ describe('mint', () => {
           checkBigIntEquality(result, (feeToBalance + liquidityFeeTo))
         })
 
-        it('Should have a correct invariance', async () => {
-          const result = await pool.invariance()
+        it('Should have a correct rateReserve', async () => {
+          const result = await pool.rateReserve()
           const rateIncrease = divUp(
-            rateReserve * (liquidityReceived + liquidityFeeTo),
+            BigInt(rateReserve) * (liquidityReceived + liquidityFeeTo),
             insuranceReserve
           )
-          const invariance =
-            (assetReserve + assetIn) *
-            (bondReserve + bondIncrease) *
-            (rateReserve + rateIncrease)
 
+          const newRateReserve = BigInt(rateReserve) + BigInt(rateIncrease)
 
-
-
-
-
-          checkBigIntEquality(result, invariance)
+          checkBigIntEquality(result, newRateReserve)
         })
 
         it('Should have the correct ratio on its asset reserves', async () => {
@@ -866,13 +851,7 @@ describe('burn', () => {
             const owner = accounts[3]
             receiver = accounts[4]
 
-            rateReserve = div(
-              div(
-                BigInt(await pool.invariance()),
-                BigInt(assetReserve)
-              ),
-              BigInt(bondReserve)
-            )
+            rateReserve = BigInt(await pool.rateReserve())
 
             await burn(owner, receiver, liquidityIn, collateralIn)
           })
@@ -956,19 +935,17 @@ describe('burn', () => {
             checkBigIntEquality(result, insuranceBalance)
           })
 
-          it('Should have a correct invariance', async () => {
-            const result = await pool.invariance()
+          it('Should have a correct rateReserve', async () => {
+            const result = await pool.rateReserve()
 
             const rateDecrease = div(
               rateReserve * liquidityIn,
               liquidityTotalSupplyBefore
             )
-            const invariance =
-              (assetReserve - assetMax) *
-              (bondReserve - bondReceived) *
-              (rateReserve - rateDecrease)
 
-            checkBigIntEquality(result, invariance)
+            const newRateReserve = BigInt(rateReserve - rateDecrease)
+
+            checkBigIntEquality(result, newRateReserve)
           })
 
           it('Should have the correct ratio on its bond reserves', async () => {
@@ -1043,13 +1020,7 @@ describe('burn', () => {
             const owner = accounts[3]
             receiver = accounts[4]
 
-            rateReserve = div(
-              div(
-                BigInt(await pool.invariance()),
-                BigInt(assetReserve)
-              ),
-              BigInt(bondReserve)
-            )
+            rateReserve = BigInt(await pool.rateReserve())
 
             await burn(owner, receiver, liquidityIn, collateralIn)
           })
@@ -1137,19 +1108,16 @@ describe('burn', () => {
           })
 
           it('Should have a correct invariance', async () => {
-            const result = await pool.invariance()
+            const result = await pool.rateReserve()
 
             const rateDecrease = div(
               rateReserve * liquidityIn,
               liquidityTotalSupplyBefore
             )
 
-            const invariance =
-              (assetReserve - assetReceived) *
-              (bondReserve - bondReceived) *
-              (rateReserve - rateDecrease)
+            const newRateReserve = BigInt(rateReserve - rateDecrease)
 
-            checkBigIntEquality(result, invariance)
+            checkBigIntEquality(result, newRateReserve)
           })
 
           it('Should have the correct ratio on its asset reserve and balance', async () => {
@@ -1235,10 +1203,7 @@ describe('burn', () => {
             insuranceReserve
           )
 
-          rateReserve = divUp(
-            divUp(BigInt(await pool.invariance()), BigInt(assetReserve)),
-            BigInt(bondReserve)
-          )
+          rateReserve = await pool.rateReserve()
         })
 
         it('Should revert if insufficient input amount', async () => {
@@ -1409,10 +1374,7 @@ describe('burn', () => {
             insuranceReserve
           )
 
-          rateReserve = divUp(
-            divUp(BigInt(await pool.invariance()), BigInt(assetReserve)),
-            BigInt(bondReserve)
-          )
+          rateReserve = await pool.rateReserve()
 
           await advanceTimeAndBlock(duration)
         })
@@ -1508,7 +1470,6 @@ describe('lend', () => {
         const bondERC20 = await Bond.at(await pool.bond())
 
         const result = await bondERC20.balanceOf(receiver)
-
         bondMint = div(
           div(bondDecrease * rateReserve, assetReserve) * (BigInt(maturity) - timestamp),
           year
@@ -1520,7 +1481,8 @@ describe('lend', () => {
       it('Should have receiver have correct amount of insurance tokens', async () => {
         const insuranceERC20 = await Insurance.at(await pool.insurance())
         const result = await insuranceERC20.balanceOf(receiver)
-
+        insuranceDecrease = div(BigInt(rateDecrease) * (BigInt(maturity) - timestamp), year)
+        insuranceMint = div(BigInt(rateDecrease) * (assetReserve + assetIn), BigInt(rateReserve))
         const insuranceReceived = insuranceDecrease + insuranceMint
 
         checkBigIntEquality(result, insuranceReceived)
@@ -1599,9 +1561,12 @@ describe('lend', () => {
 
         receiver = accounts[4]
 
-        invariance = await pool.invariance()
+        // invariance = await pool.invariance()
 
-        rateReserve = divUp(divUp(BigInt(invariance), assetReserve), bondReserve)
+        // rateReserve = await pool.rateReserve()
+
+        rateReserve = BigInt(await pool.rateReserve())
+        invariance = BigInt(assetReserve) * BigInt(bondReserve) * rateReserve
 
         calculate()
       })
@@ -1722,9 +1687,12 @@ describe('borrow', () => {
 
         receiver = accounts[4]
 
-        invariance = BigInt(await pool.invariance())
+        // invariance = BigInt(await pool.invariance())
 
-        rateReserve = div(div(invariance, assetReserve), bondReserve)
+        // rateReserve = div(div(invariance, assetReserve), bondReserve)
+
+        rateReserve = BigInt(await pool.rateReserve())
+        invariance = BigInt(assetReserve) * BigInt(bondReserve) * rateReserve
 
         calculate()
 
@@ -1738,7 +1706,7 @@ describe('borrow', () => {
       })
 
       it('Should have receiver have correct amount of asset', async () => {
-        const result = await testToken1.balanceOf(receiver)
+        const result = BigInt(await testToken1.balanceOf(receiver))
 
         checkBigIntEquality(result, assetReceived)
       })
@@ -1828,9 +1796,12 @@ describe('borrow', () => {
 
         receiver = accounts[4]
 
-        invariance = await pool.invariance()
-        // 
-        rateReserve = div(div(BigInt(invariance), BigInt(assetReserve)), BigInt(bondReserve))
+        // invariance = await pool.invariance()
+        // // 
+        // rateReserve = div(div(BigInt(invariance), BigInt(assetReserve)), BigInt(bondReserve))
+
+        rateReserve = BigInt(await pool.rateReserve())
+        invariance = BigInt(assetReserve) * BigInt(bondReserve) * rateReserve
 
         calculate()
       })
