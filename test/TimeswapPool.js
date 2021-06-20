@@ -1470,7 +1470,10 @@ describe('lend', () => {
         const bondERC20 = await Bond.at(await pool.bond())
 
         const result = await bondERC20.balanceOf(receiver)
-
+        bondMint = div(
+          div(bondDecrease * rateReserve, assetReserve) * (BigInt(maturity) - timestamp),
+          year
+        )
         const bondReceived = bondDecrease + bondMint
         checkBigIntEquality(result, bondReceived)
       })
@@ -1478,7 +1481,8 @@ describe('lend', () => {
       it('Should have receiver have correct amount of insurance tokens', async () => {
         const insuranceERC20 = await Insurance.at(await pool.insurance())
         const result = await insuranceERC20.balanceOf(receiver)
-
+        insuranceDecrease = div(BigInt(rateDecrease) * (BigInt(maturity) - timestamp), year)
+        insuranceMint = div(BigInt(rateDecrease) * (assetReserve + assetIn), BigInt(rateReserve))
         const insuranceReceived = insuranceDecrease + insuranceMint
 
         checkBigIntEquality(result, insuranceReceived)
