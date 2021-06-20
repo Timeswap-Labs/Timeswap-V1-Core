@@ -1021,7 +1021,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Get the correct proportion of ERC20 received
         _tokenOut = _token.balanceOf(address(this));
         _tokenOut = _tokenOut >= MAXIMUM_BALANCE ? MAXIMUM_BALANCE : _tokenOut;
-        _tokenOut += _timeswapTokenIn;
+        _tokenOut *= _timeswapTokenIn;
         _tokenOut /= _timeswapTokenBalance;
 
         // Transfer the ERC20 to the receiver
