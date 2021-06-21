@@ -41,15 +41,14 @@ let pool
 let timestamp
 
 const div = (x, y) => {
-
   const z = x / y
   return z
 }
 
 const divUp = (x, y) => {
   const z = x / y
-  // 
-  // 
+  //
+  //
   if (z * y === x) {
     return z
   }
@@ -57,16 +56,16 @@ const divUp = (x, y) => {
 }
 
 const checkBigIntEquality = (result, expected) => {
-  // 
+  //
   expect(String(result)).to.equal(String(expected))
 }
 
 const checkBigIntGte = (result, expected) => {
-  res = (result >= expected ? true : false)
+  res = result >= expected ? true : false
   expect(res).to.equal(true)
 }
 const checkBigIntLte = (result, expected) => {
-  res = (result <= expected ? true : false)
+  res = result <= expected ? true : false
   expect(res).to.equal(true)
 }
 
@@ -221,8 +220,8 @@ describe('initialize', () => {
 
   describe('fail case', () => {
     it('Should revert if incorrect maturity', async () => {
-      // 
-      // 
+      //
+      //
       const wrongMaturity = (await now()) - duration
 
       await expect(deployTry(wrongMaturity)).to.be.reverted
@@ -280,7 +279,6 @@ describe('mint', () => {
         })
 
         it('Should have receiver have correct amount of liquidity tokens', async () => {
-
           const result = await pool.balanceOf(receiver)
           checkBigIntEquality(result, liquidityReceived)
         })
@@ -365,8 +363,10 @@ describe('mint', () => {
 
         it('Should have a correct rateReserve', async () => {
           const result = await pool.rateReserve()
-          const rateReserve =
-            div(insuranceIncrease * year, maturity - timestamp)
+          const rateReserve = div(
+            insuranceIncrease * year,
+            maturity - timestamp
+          )
 
           checkBigIntEquality(result, rateReserve)
         })
@@ -543,7 +543,6 @@ describe('mint', () => {
 
           const result = await insuranceERC20.balanceOf(receiver)
 
-
           checkBigIntEquality(result, insuranceReceived)
         })
 
@@ -608,7 +607,7 @@ describe('mint', () => {
         it('Should have factory receive correct amount of liquidity tokens', async () => {
           const result = await pool.balanceOf(feeTo)
 
-          checkBigIntEquality(result, (feeToBalance + liquidityFeeTo))
+          checkBigIntEquality(result, feeToBalance + liquidityFeeTo)
         })
 
         it('Should have a correct rateReserve', async () => {
@@ -628,11 +627,8 @@ describe('mint', () => {
           const ratioLiquidity =
             BigInt(totalSupply) / BigInt(liquidityReceived + liquidityFeeTo)
 
-
-
           const resultAsset = await testToken1.balanceOf(pool.address)
           const ratioAsset = BigInt(resultAsset) / BigInt(assetIn)
-
 
           checkBigIntGte(ratioLiquidity, ratioAsset)
         })
@@ -661,7 +657,8 @@ describe('mint', () => {
             pool.address
           )
           const resultInsurance = resultInsuranceHex
-          const ratioInsurance = BigInt(resultInsurance) / BigInt(insuranceIncrease)
+          const ratioInsurance =
+            BigInt(resultInsurance) / BigInt(insuranceIncrease)
 
           checkBigIntGte(ratioLiquidity, ratioInsurance)
         })
@@ -884,13 +881,10 @@ describe('burn', () => {
 
             const tokenId = await collateralizedDebtERC721.totalSupply()
             const result = await collateralizedDebtERC721.ownerOf(tokenId)
-            const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-              tokenId
-            )
+            const resultHex =
+              await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
             const resultDebt = resultHex.debt
-            const resultCollateral =
-              resultHex.collateral
-
+            const resultCollateral = resultHex.collateral
 
             expect(result).to.equal(receiver)
             checkBigIntEquality(resultDebt, assetReceived)
@@ -970,7 +964,8 @@ describe('burn', () => {
               pool.address
             )
             const resultInsurance = resultInsuranceHex
-            const ratioInsurance = BigInt(resultInsurance) / BigInt(insuranceReceived)
+            const ratioInsurance =
+              BigInt(resultInsurance) / BigInt(insuranceReceived)
 
             checkBigIntLte(ratioLiquidity, ratioInsurance)
           })
@@ -1054,13 +1049,10 @@ describe('burn', () => {
 
             const tokenId = await collateralizedDebtERC721.totalSupply()
             const result = await collateralizedDebtERC721.ownerOf(tokenId)
-            const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-              tokenId
-            )
-            const resultDebt = (resultHex.debt)
-            const resultCollateral = (
-              resultHex.collateral
-            )
+            const resultHex =
+              await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+            const resultDebt = resultHex.debt
+            const resultCollateral = resultHex.collateral
 
             expect(result).to.equal(receiver)
             checkBigIntEquality(resultDebt, assetReceived)
@@ -1128,10 +1120,9 @@ describe('burn', () => {
             const ratioAsset = BigInt(resultAsset) / BigInt(assetReceived)
 
             const resultAssetReserveHex = await pool.assetReserve()
-            const resultAssetReserve = (
-              resultAssetReserveHex
-            )
-            const ratioAssetReserve = BigInt(resultAssetReserve) / BigInt(assetReceived)
+            const resultAssetReserve = resultAssetReserveHex
+            const ratioAssetReserve =
+              BigInt(resultAssetReserve) / BigInt(assetReceived)
 
             checkBigIntLte(ratioLiquidity, ratioAsset)
             checkBigIntLte(ratioLiquidity, ratioAssetReserve)
@@ -1159,7 +1150,8 @@ describe('burn', () => {
               pool.address
             )
             const resultInsurance = resultInsuranceHex
-            const ratioInsurance = BigInt(resultInsurance) / BigInt(insuranceReceived)
+            const ratioInsurance =
+              BigInt(resultInsurance) / BigInt(insuranceReceived)
 
             checkBigIntLte(ratioLiquidity, ratioInsurance)
           })
@@ -1317,7 +1309,7 @@ describe('burn', () => {
 
           const resultBondHex = await bondERC20.balanceOf(pool.address)
           const resultBond = resultBondHex
-          const ratioBond = BigInt(resultBond) / (bondReceived)
+          const ratioBond = BigInt(resultBond) / bondReceived
 
           checkBigIntLte(ratioLiquidity, ratioBond)
         })
@@ -1332,7 +1324,8 @@ describe('burn', () => {
             pool.address
           )
           const resultInsurance = resultInsuranceHex
-          const ratioInsurance = BigInt(resultInsurance) / BigInt(insuranceReceived)
+          const ratioInsurance =
+            BigInt(resultInsurance) / BigInt(insuranceReceived)
 
           checkBigIntLte(ratioLiquidity, ratioInsurance)
         })
@@ -1389,9 +1382,9 @@ describe('burn', () => {
 const lend = async (to, assetIn, bondDecrease, rateDecrease) => {
   await testToken1.mint(pool.address, assetIn)
 
-  // 
-  // 
-  // 
+  //
+  //
+  //
 
   const transaction = await pool.lend(to, bondDecrease, rateDecrease)
 
@@ -1435,12 +1428,19 @@ describe('lend', () => {
       )
 
       bondMint = div(
-        div(bondDecrease * rateReserve, assetReserve) * (BigInt(maturity) - timestamp),
+        div(bondDecrease * rateReserve, assetReserve) *
+          (BigInt(maturity) - timestamp),
         year
       )
 
-      insuranceDecrease = div(BigInt(rateDecrease) * (BigInt(maturity) - timestamp), year)
-      insuranceMint = div(BigInt(rateDecrease) * (assetReserve + assetIn), BigInt(rateReserve))
+      insuranceDecrease = div(
+        BigInt(rateDecrease) * (BigInt(maturity) - timestamp),
+        year
+      )
+      insuranceMint = div(
+        BigInt(rateDecrease) * (assetReserve + assetIn),
+        BigInt(rateReserve)
+      )
     }
 
     describe(`success case ${idx + 1}`, () => {
@@ -1456,9 +1456,9 @@ describe('lend', () => {
         )
 
         receiver = accounts[4]
-        // 
+        //
         rateReserve = BigInt(await pool.rateReserve())
-        // 
+        //
 
         invariance = rateReserve * BigInt(assetReserve) * BigInt(bondReserve)
         calculate()
@@ -1471,7 +1471,8 @@ describe('lend', () => {
 
         const result = await bondERC20.balanceOf(receiver)
         bondMint = div(
-          div(bondDecrease * rateReserve, assetReserve) * (BigInt(maturity) - timestamp),
+          div(bondDecrease * rateReserve, assetReserve) *
+            (BigInt(maturity) - timestamp),
           year
         )
         const bondReceived = bondDecrease + bondMint
@@ -1481,8 +1482,14 @@ describe('lend', () => {
       it('Should have receiver have correct amount of insurance tokens', async () => {
         const insuranceERC20 = await Insurance.at(await pool.insurance())
         const result = await insuranceERC20.balanceOf(receiver)
-        insuranceDecrease = div(BigInt(rateDecrease) * (BigInt(maturity) - timestamp), year)
-        insuranceMint = div(BigInt(rateDecrease) * (assetReserve + assetIn), BigInt(rateReserve))
+        insuranceDecrease = div(
+          BigInt(rateDecrease) * (BigInt(maturity) - timestamp),
+          year
+        )
+        insuranceMint = div(
+          BigInt(rateDecrease) * (assetReserve + assetIn),
+          BigInt(rateReserve)
+        )
         const insuranceReceived = insuranceDecrease + insuranceMint
 
         checkBigIntEquality(result, insuranceReceived)
@@ -1596,7 +1603,6 @@ const borrow = async (
   collateralIn
 ) => {
   await testToken2.mint(pool.address, collateralIn)
-
   const transaction = await pool.borrow(
     to,
     assetReceived,
@@ -1635,10 +1641,14 @@ describe('borrow', () => {
 
     const calculate = () => {
       const bondIncreaseAdjusted =
-        bondReserve * base + bondIncrease * (base - transactionFee)
+        BigInt(bondReserve) * BigInt(base) +
+        BigInt(bondIncrease) * BigInt(base - transactionFee)
       const rateIncreaseAdjusted = divUp(
-        divUp(BigInt(invariance) * base * base, assetReserve - assetReceived),
-        bondIncreaseAdjusted
+        divUp(
+          BigInt(invariance) * base * base,
+          BigInt(assetReserve - assetReceived)
+        ),
+        BigInt(bondIncreaseAdjusted)
       )
       rateIncrease = divUp(
         rateIncreaseAdjusted - rateReserve * base,
@@ -1654,12 +1664,24 @@ describe('borrow', () => {
         assetReserve - assetReceived
       )
 
-      collateralLocked = divUp(BigInt(bondMaxUp) * BigInt(bondIncrease), BigInt(bondMax) - BigInt(bondIncrease))
-      collateralLocked = divUp(BigInt(collateralLocked) * BigInt(rateReserve), BigInt(assetReserve))
-      collateralLocked = divUp(BigInt(collateralLocked) * BigInt(maturity - timestamp), BigInt(year))
+      collateralLocked = divUp(
+        BigInt(bondMaxUp) * BigInt(bondIncrease),
+        BigInt(bondMax) - BigInt(bondIncrease)
+      )
+      collateralLocked = divUp(
+        BigInt(collateralLocked) * BigInt(rateReserve),
+        BigInt(assetReserve)
+      )
+      // collateralLocked = divUp(
+      //   BigInt(collateralLocked) * BigInt(maturity - timestamp),
+      //   BigInt(year)
+      // )
       collateralLocked += BigInt(bondMaxUp)
 
-      insuranceIncrease = divUp(BigInt(rateIncrease) * (BigInt(maturity) - BigInt(timestamp)), BigInt(year))
+      insuranceIncrease = divUp(
+        BigInt(rateIncrease) * (BigInt(maturity) - BigInt(timestamp)),
+        BigInt(year)
+      )
 
       const rateMax = div(
         BigInt(assetReceived) * BigInt(rateReserve),
@@ -1669,8 +1691,14 @@ describe('borrow', () => {
         BigInt(assetReceived) * BigInt(rateReserve),
         BigInt(assetReserve) - BigInt(assetReceived)
       )
-      debtRequired = divUp(BigInt(rateMaxUp * rateIncrease), BigInt(rateMax - rateIncrease))
-      debtRequired = divUp(BigInt(debtRequired) * BigInt(maturity - timestamp), year)
+      debtRequired = divUp(
+        BigInt(rateMaxUp * rateIncrease),
+        BigInt(rateMax - rateIncrease)
+      )
+      debtRequired = divUp(
+        BigInt(debtRequired) * (BigInt(maturity) - BigInt(timestamp)),
+        BigInt(year)
+      )
       debtRequired = debtRequired + BigInt(assetReceived)
     }
     describe(`success case ${idx + 1}`, () => {
@@ -1703,6 +1731,7 @@ describe('borrow', () => {
           rateIncrease,
           collateralLocked
         )
+        calculate()
       })
 
       it('Should have receiver have correct amount of asset', async () => {
@@ -1720,8 +1749,8 @@ describe('borrow', () => {
         const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
           tokenId
         )
-        const resultDebt = (resultHex.debt)
-        const resultCollateral = (resultHex.collateral)
+        const resultDebt = resultHex.debt
+        const resultCollateral = resultHex.collateral
 
         expect(result).to.equal(receiver)
         checkBigIntLte(resultDebt, debtRequired)
@@ -1788,16 +1817,22 @@ describe('borrow', () => {
       })
     })
 
-    describe("fail case", () => {
+    describe('fail case', () => {
       beforeEach(async () => {
         await deploy()
 
-        await mint(receiver, assetReserve, collateralReserve, bondReserve, insuranceReserve)
+        await mint(
+          receiver,
+          assetReserve,
+          collateralReserve,
+          bondReserve,
+          insuranceReserve
+        )
 
         receiver = accounts[4]
 
         // invariance = await pool.invariance()
-        // // 
+        // //
         // rateReserve = div(div(BigInt(invariance), BigInt(assetReserve)), BigInt(bondReserve))
 
         rateReserve = BigInt(await pool.rateReserve())
@@ -1809,19 +1844,42 @@ describe('borrow', () => {
       it('Should revert if no asset output amount', async () => {
         const wrongAssetReceived = 0n
 
-        await expect(borrow(receiver, wrongAssetReceived, bondIncrease, rateIncrease, collateralLocked)).to.be.reverted
+        await expect(
+          borrow(
+            receiver,
+            wrongAssetReceived,
+            bondIncrease,
+            rateIncrease,
+            collateralLocked
+          )
+        ).to.be.reverted
       })
 
-      it("Should revert if not enough collateral amount", async () => {
-        const wrongCollateralLocked = collateralLocked - 2n
+      it('Should revert if not enough collateral amount', async () => {
+        const wrongCollateralLocked = collateralLocked / 1000000000000n
 
-        await expect(borrow(receiver, assetReceived, bondIncrease, rateIncrease, wrongCollateralLocked)).to.be.reverted
+        await expect(
+          borrow(
+            receiver,
+            assetReceived,
+            bondIncrease,
+            rateIncrease,
+            wrongCollateralLocked
+          )
+        ).to.be.reverted
       })
 
-      it("Should revert if pool matured", async () => {
+      it('Should revert if pool matured', async () => {
         await advanceTimeAndBlock(duration)
-
-        await expect(borrow(receiver, assetReceived, bondIncrease, rateIncrease, collateralLocked)).to.be.reverted
+        await expect(
+          borrow(
+            receiver,
+            assetReceived,
+            bondIncrease,
+            rateIncrease,
+            collateralLocked
+          )
+        ).to.be.reverted
       })
     })
   })
@@ -1987,7 +2045,6 @@ describe('pay', () => {
       assetInExecessive,
       collateralReceivedExecessive,
       assetInFail,
-
     } = test
     describe(`success case ${idx + 1}`, () => {
       describe('asset deposit is not excessive', () => {
@@ -2148,7 +2205,7 @@ describe('pay', () => {
 
       it('Should revert if pool already matured', async () => {
         numberDuration = duration
-        // 
+        //
         await advanceTimeAndBlock(numberDuration)
 
         await expect(pay(tokenId, assetIn)).to.be.reverted
@@ -2193,7 +2250,6 @@ describe('skim', () => {
       it('Should have receiver a correct amount of asset', async () => {
         const result = await testToken1.balanceOf(receiver)
 
-
         checkBigIntEquality(result, assetSkim)
       })
 
@@ -2222,4 +2278,3 @@ describe('skim', () => {
     })
   })
 })
-
