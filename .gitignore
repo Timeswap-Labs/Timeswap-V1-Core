@@ -105,7 +105,16 @@ dist
 
 # Solidity stuff
 cache/
-artifacts
+artifacts/
+
+# Typechain stuff
+typechain/
+
+# MacOS
+.DS_Store
+
+# Code
+.vscode
 
 # Scripts
 scripts/

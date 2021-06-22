@@ -1,46 +1,68 @@
-const { expect } = require("chai");
-const { stripZeros } = require("ethers/lib/utils");
-const { web3 } = require("hardhat");
-const { now } = require("./Helper");
+import chai from "chai";
+import helper from "./Helper";
 
-const TimeswapFactory = artifacts.require("TimeswapFactory");
-const TimeswapPool = artifacts.require("TimeswapPool");
-const Insurance = artifacts.require("Insurance");
-const Bond = artifacts.require("Bond");
-const CollateralizedDebt = artifacts.require("CollateralizedDebt");
-const TestToken = artifacts.require("TestToken");
+import { ethers } from "hardhat";
+import { solidity } from "ethereum-waffle";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+
+import { TimeswapFactory } from "../typechain/TimeswapFactory";
+import { TimeswapPool } from "../typechain/TimeswapPool";
+import { Insurance } from "../typechain/Insurance";
+import { Bond } from "../typechain/Bond";
+import { CollateralizedDebt } from "../typechain/CollateralizedDebt";
+import { TestToken } from "../typechain/TestToken";
+
+chai.use(solidity);
+const { expect } = chai;
+const { now } = helper;
 
 const transactionFee = 100n;
 const protocolFee = 100n;
 
 const duration = 86400n;
 
-const checkBigIntEquality = (result, expected) => {
-  expect(String(result)).to.equal(String(expected));
-};
+let accounts: SignerWithAddress[];
+let timeswapFactory: TimeswapFactory;
+let timeswapPool: TimeswapPool;
+let insurance: Insurance;
+let bond: Bond;
+let collateralizedDebt: CollateralizedDebt;
 
-let accounts;
-let timeswapFactory;
-let timeswapPool;
-let insurance;
-let bond;
-let collateralizedDebt;
+let feeTo: string;
+let feeToSetter: string;
 
-let feeTo;
-let feeToSetter;
+const deployTry = async (
+  desiredTransactionFee: bigint,
+  desiredProtocolFee: bigint
+) => {
+  accounts = await ethers.getSigners();
 
-const deployTry = async (desiredTransactionFee, desiredProtocolFee) => {
-  accounts = await web3.eth.getAccounts();
+  const timeswapPoolFactory = await ethers.getContractFactory("TimeswapPool");
+  timeswapPool = (await timeswapPoolFactory.deploy()) as TimeswapPool;
+  await timeswapPool.deployed();
 
-  timeswapPool = await TimeswapPool.new();
-  bond = await Bond.new();
-  insurance = await Insurance.new();
-  collateralizedDebt = await CollateralizedDebt.new();
+  const bondFactory = await ethers.getContractFactory("Bond");
+  bond = (await bondFactory.deploy()) as Bond;
+  await bond.deployed();
 
-  feeTo = accounts[1];
-  feeToSetter = accounts[2];
+  const insuranceFactory = await ethers.getContractFactory("Insurance");
+  insurance = (await insuranceFactory.deploy()) as Insurance;
+  await insurance.deployed();
 
-  timeswapFactory = await TimeswapFactory.new(
+  const collateralizedDebtFactory = await ethers.getContractFactory(
+    "CollateralizedDebt"
+  );
+  collateralizedDebt =
+    (await collateralizedDebtFactory.deploy()) as CollateralizedDebt;
+  await collateralizedDebt.deployed();
+
+  feeTo = accounts[1].address;
+  feeToSetter = accounts[2].address;
+
+  const timeswapFactoryFactory = await ethers.getContractFactory(
+    "TimeswapFactory"
+  );
+  timeswapFactory = (await timeswapFactoryFactory.deploy(
     feeTo,
     feeToSetter,
     timeswapPool.address,
@@ -49,13 +71,14 @@ const deployTry = async (desiredTransactionFee, desiredProtocolFee) => {
     collateralizedDebt.address,
     desiredTransactionFee,
     desiredProtocolFee
-  );
+  )) as TimeswapFactory;
+  await timeswapFactory.deployed();
 };
 
 const deploy = async () => await deployTry(transactionFee, protocolFee);
 
 describe("constructor", () => {
-  describe("sucess case", () => {
+  describe("success case", () => {
     before(async () => {
       await deploy();
     });
@@ -104,26 +127,26 @@ describe("constructor", () => {
       const resultHex = await timeswapFactory.transactionFee();
       const result = resultHex;
 
-      checkBigIntEquality(result, transactionFee);
+      expect(result).to.equal(transactionFee);
     });
 
     it("Should have the correct protocol fee", async () => {
       const resultHex = await timeswapFactory.protocolFee();
       const result = resultHex;
 
-      checkBigIntEquality(result, protocolFee);
+      expect(result).to.equal(protocolFee);
     });
   });
 
   describe("fail case", () => {
     it("Should revert if incorrect transaction fee", async () => {
-      const wrongTransactionFee = 10000;
+      const wrongTransactionFee = BigInt(10000);
 
       await expect(deployTry(wrongTransactionFee, protocolFee)).to.be.reverted;
     });
 
     it("Should revert if incorrect protocol fee", async () => {
-      const wrongProtocolFee = 10000;
+      const wrongProtocolFee = BigInt(10000);
 
       await expect(deployTry(transactionFee, wrongProtocolFee)).to.be.reverted;
     });
@@ -134,16 +157,21 @@ describe("createPool", () => {
   const decimals1 = 8;
   const decimals2 = 18;
 
-  let testToken1;
-  let testToken2;
+  let testToken1: TestToken;
+  let testToken2: TestToken;
 
-  let maturity;
+  let maturity: bigint;
 
   before(async () => {
     await deploy();
 
-    testToken1 = await TestToken.new(decimals1);
-    testToken2 = await TestToken.new(decimals2);
+    const testTokenFactory = await ethers.getContractFactory("TestToken");
+
+    testToken1 = (await testTokenFactory.deploy(decimals1)) as TestToken;
+    await testToken1.deployed();
+
+    testToken2 = (await testTokenFactory.deploy(decimals2)) as TestToken;
+    await testToken2.deployed();
 
     maturity = (await now()) + duration;
 
@@ -180,12 +208,12 @@ describe("createPool", () => {
 });
 
 describe("setFeeTo", () => {
-  let newFeeTo;
+  let newFeeTo: string;
 
   beforeEach(async () => {
     await deploy();
 
-    newFeeTo = accounts[3];
+    newFeeTo = accounts[3].address;
   });
 
   describe("success case", () => {
@@ -206,12 +234,12 @@ describe("setFeeTo", () => {
 });
 
 describe("setFeeToSetter", () => {
-  let newFeeToSetter;
+  let newFeeToSetter: string;
 
   beforeEach(async () => {
     await deploy();
 
-    newFeeToSetter = accounts[3];
+    newFeeToSetter = accounts[3].address;
   });
 
   describe("success case", () => {
