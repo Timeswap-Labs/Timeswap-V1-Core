@@ -146,7 +146,7 @@ const testCases = {
 
       collateralInExcessive: 2n,
       collateralLockedExcessive: 1n,
-      assetReceivedExecessive: 8n,
+      assetReceivedExcessive: 8n,
     },
     {
       assetReserve: 1000n,
@@ -168,7 +168,7 @@ const testCases = {
 
       collateralInExcessive: 20n,
       collateralLockedExcessive: 6n,
-      assetReceivedExecessive: 30n,
+      assetReceivedExcessive: 30n,
     },
 
     {
@@ -191,7 +191,7 @@ const testCases = {
 
       collateralInExcessive: 6181818181818182n,
       collateralLockedExcessive: 6181818181818181n,
-      assetReceivedExecessive: 30909090909090909n,
+      assetReceivedExcessive: 30909090909090909n,
     },
   ],
   burnAfterMaturity: [
@@ -250,57 +250,46 @@ const testCases = {
       insuranceTotalSupplyBefore: 120000000000000000n,
     },
     {
-      assetReserve: 1000n,
-      bondReserve: 200n,
-      insuranceReserve: 11000n,
-      collateralReserve: 2400n,
-      assetIn: 200n,
-      bondDecrease: 20n,
-      bondTotalSupplyBefore: 2400n,
-      insuranceTotalSupplyBefore: 12000n,
+      assetReserve: 10000000000000000000n,
+      bondReserve: 2000000000000000000n,
+      insuranceReserve: 110000000000000000000n,
+      collateralReserve: 24000000000000000000n,
+      assetIn: 2000000000000000000n,
+      bondDecrease: 200000000000000000n,
+      bondTotalSupplyBefore: 24000000000000000000n,
+      insuranceTotalSupplyBefore: 120000000000000000000n,
     },
     {
-      assetReserve: 2000n,
-      bondReserve: 400n,
-      insuranceReserve: 22000n,
-      collateralReserve: 4800n,
-      assetIn: 400n,
-      bondDecrease: 40n,
-      bondTotalSupplyBefore: 4800n,
-      insuranceTotalSupplyBefore: 24000n,
+      assetReserve: 20000000000000000000n,
+      bondReserve: 4000000000000000000n,
+      insuranceReserve: 220000000000000000000n,
+      collateralReserve: 48000000000000000000n,
+      assetIn: 4000000000000000000n,
+      bondDecrease: 400000000000000000n,
+      bondTotalSupplyBefore: 48000000000000000000n,
+      insuranceTotalSupplyBefore: 240000000000000000000n,
     },
   ],
   borrow: [
     {
-      assetReserve: 100n,
-      bondReserve: 20n,
-      insuranceReserve: 1100n,
-      collateralReserve: 240n,
-      assetReceived: 20n,
-      bondIncrease: 2n,
-      bondTotalSupplyBefore: 240n,
-      insuranceTotalSupplyBefore: 1200n,
+      assetReserve: 30000000000000000000000n,
+      bondReserve: 6000000000000000000000n,
+      insuranceReserve: 330000000000000000000000n,
+      collateralReserve: 72000000000000000000000n,
+      assetReceived: 4000000000000000000000n,
+      bondIncrease: 90000000000000000000n,
+      bondTotalSupplyBefore: 72000000000000000000000n,
+      insuranceTotalSupplyBefore: 360000000000000000000000n,
     },
     {
-      assetReserve: 1000n,
-      bondReserve: 200n,
-      insuranceReserve: 11000n,
-      collateralReserve: 2400n,
-      assetReceived: 200n,
-      bondIncrease: 20n,
-      bondTotalSupplyBefore: 2400n,
-      insuranceTotalSupplyBefore: 12000n,
-    },
-
-    {
-      assetReserve: 3000n,
-      bondReserve: 600n,
-      insuranceReserve: 33000n,
-      collateralReserve: 7200n,
-      assetReceived: 600n,
-      bondIncrease: 60n,
-      bondTotalSupplyBefore: 7200n,
-      insuranceTotalSupplyBefore: 36000n,
+      assetReserve: 30000000000000000000000000n,
+      bondReserve: 6000000000000000000000000n,
+      insuranceReserve: 330000000000000000000000000n,
+      collateralReserve: 72000000000000000000000000n,
+      assetReceived: 4000000000000000000000000n,
+      bondIncrease: 90000000000000000000000n,
+      bondTotalSupplyBefore: 72000000000000000000000000n,
+      insuranceTotalSupplyBefore: 360000000000000000000000000n,
     },
   ],
   withdraw: [
@@ -417,8 +406,8 @@ const testCases = {
       collateralSkim: 4000n,
     },
   ],
-};
+}
 
 export default {
   testCases,
-};
+}
