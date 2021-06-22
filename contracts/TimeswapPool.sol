@@ -1141,6 +1141,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Proportionally unlock and transfer collateral ERC20 back to the owner of collateralized debt ERC721
     /// @dev Must atomically increase the asset ERC20 balance of the pool contract with a transaction before calling the pay function
     /// @dev Increasing the asset ERC20 balance of the pool contract before calling this function will determine the assetIn parameter
+    /// @param _to The receiver of the pay function
     /// @param _tokenId The id of the collateralized debt ERC721
     /// @return _collateralReceived The collateral ERC20 received by the owner of collateralized debt ERC721
     function pay(
@@ -1163,15 +1164,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // _assetIn is the increase in the X pool
         uint256 _assetBalance = asset.balanceOf(address(this));
         uint256 _assetIn = _assetBalance.subOrZero(uint256(assetReserve));
-        require(
-            _assetIn > 0,
-            "TimeswapPool :: pay : Insufficient Asset Input Amount"
-        );
 
         // Get the collateral locked and asset debt information from the collateralized debt ERC721
-        (uint128 _tokenCollateral, uint128 _tokenDebt) = _collateralizedDebt
-        .collateralizedDebtOf(_tokenId);
-        require(_tokenDebt > 0, "TimeswapPool :: pay : Debt Already Paid");
+        (uint128 _tokenCollateral, uint128 _tokenDebt) = _collateralizedDebt.collateralizedDebtOf(_tokenId);
 
         // Calculate collateral ERC20 received by the borrower based on assetIn amount
         // Capped the assetIn at the debt required from the collateralized debt ERC721
