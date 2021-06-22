@@ -1,13 +1,13 @@
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-truffle5')
-require('dotenv').config()
+require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-truffle5");
+require("dotenv").config();
 
-const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID
-const PRIVATE_KEY = process.env.PRIVATE_KEY
+const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
   solidity: {
-    version: '0.8.1',
+    version: "0.8.1",
     settings: {
       optimizer: {
         enabled: true,
@@ -21,4 +21,4 @@ module.exports = {
       accounts: [`0x${PRIVATE_KEY}`],
     },
   },
-}
+};
