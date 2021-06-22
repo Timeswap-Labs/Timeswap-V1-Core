@@ -1,0 +1,29 @@
+name: Lint
+
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+
+      - name: Run linters
+        uses: wearerequired/lint-action@a8497ddb33fb1205941fd40452ca9fff07e0770d
+        with:
+          auto_fix: true
+          prettier: true
+          prettier_extensions: 'js,json,md,ts,sol'
