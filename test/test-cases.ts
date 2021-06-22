@@ -79,10 +79,10 @@ const testCases = {
       bondReserve: 300n,
       insuranceReserve: 5600n,
 
-      collateralReserve: 3660n, // (bondReserve * insuranceResuranceReserve).divUp(AssetReserve) + bondR    eserve
-      //liquidity recieved by the initial minter 4,586
+      collateralReserve: 3660n, // (bondReserve * insuranceReserve).divUp(AssetReserve) + bondReserve
+      //liquidity received by the initial minter 4,586
 
-      feeToBalance: 14n, // insuranceIncrease- liquidityRecieved - MINIMUM_LIQUIDITY = 5600 -4586 -1000
+      feeToBalance: 14n, // insuranceIncrease- liquidityReceived - MINIMUM_LIQUIDITY = 5600 -4586 -1000
 
       assetIn: 10n,
       bondIncrease: 6n,
@@ -104,10 +104,10 @@ const testCases = {
       bondReserve: 480n,
       insuranceReserve: 8960n,
 
-      collateralReserve: 1018n, // (bondReserve * insuranceResuranceReserve).divUp(AssetReserve) + bondR    eserve
-      //liquidity recieved by the initial minter 4,586
+      collateralReserve: 1018n, // (bondReserve * insuranceReserve).divUp(AssetReserve) + bondReserve
+      //liquidity received by the initial minter 4,586
 
-      feeToBalance: 24n, // insuranceIncrease- liquidityRecieved - MINIMUM_LIQUIDITY = 5600 -4586 -1000
+      feeToBalance: 24n, // insuranceIncrease- liquidityReceived - MINIMUM_LIQUIDITY = 5600 -4586 -1000
 
       assetIn: 100n,
       bondIncrease: 6n,
@@ -146,7 +146,7 @@ const testCases = {
 
       collateralInExcessive: 2n,
       collateralLockedExcessive: 1n,
-      assetReceivedExecessive: 8n,
+      assetReceivedExcessive: 8n,
     },
     {
       assetReserve: 1000n,
@@ -168,7 +168,7 @@ const testCases = {
 
       collateralInExcessive: 20n,
       collateralLockedExcessive: 6n,
-      assetReceivedExecessive: 30n,
+      assetReceivedExcessive: 30n,
     },
 
     {
@@ -191,7 +191,7 @@ const testCases = {
 
       collateralInExcessive: 6181818181818182n,
       collateralLockedExcessive: 6181818181818181n,
-      assetReceivedExecessive: 30909090909090909n,
+      assetReceivedExcessive: 30909090909090909n,
     },
   ],
   burnAfterMaturity: [
@@ -406,8 +406,8 @@ const testCases = {
       collateralSkim: 4000n,
     },
   ],
-};
+}
 
-module.exports = {
+export default {
   testCases,
-};
+}
