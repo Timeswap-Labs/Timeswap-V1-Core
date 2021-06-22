@@ -1,86 +1,126 @@
-const { expect } = require('chai')
-const { web3 } = require('hardhat')
-const { advanceTimeAndBlock, now, getTimestamp } = require('./Helper.js')
-const { testCases } = require('./test-cases.js')
+import chai from 'chai'
+import helper from './Helper'
+import testCasesFile from './test-cases'
 
-const TimeswapFactory = artifacts.require('TimeswapFactory')
-const TimeswapPool = artifacts.require('TimeswapPool')
-const Insurance = artifacts.require('Insurance')
-const Bond = artifacts.require('Bond')
-const CollateralizedDebt = artifacts.require('CollateralizedDebt')
-const TestToken = artifacts.require('TestToken')
+import { ethers } from 'hardhat'
+import { solidity } from 'ethereum-waffle'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
-const transactionFee = BigInt(30)
-const protocolFee = BigInt(30)
+import { TimeswapFactory } from '../typechain/TimeswapFactory'
+import { TimeswapPool } from '../typechain/TimeswapPool'
+import { Insurance } from '../typechain/Insurance'
+import { Bond } from '../typechain/Bond'
+import { CollateralizedDebt } from '../typechain/CollateralizedDebt'
+import { TestToken } from '../typechain/TestToken'
 
-const base = BigInt(10000)
-const duration = BigInt(86400)
-const year = BigInt(31556926)
+chai.use(solidity)
+const { expect } = chai
+const { advanceTimeAndBlock, now, getTimestamp } = helper
+const { testCases } = testCasesFile
 
-let accounts
-let timeswapFactory
-let timeswapPool
-let insurance
-let bond
-let collateralizedDebt
+const transactionFee = 30n
+const protocolFee = 30n
 
-let feeTo
-let feeToSetter
-let receiver
+const base = 10000n
+const duration = 86400
+const year = 31556926n
+
+let accounts: SignerWithAddress[]
+let timeswapFactory: TimeswapFactory
+let timeswapPool: TimeswapPool
+let insurance: Insurance
+let bond: Bond
+let collateralizedDebt: CollateralizedDebt
+
+let feeTo: string
+let feeToSetter: string
+let receiver: SignerWithAddress
 
 const decimals1 = 8
 const decimals2 = 18
 
-let testToken1
-let testToken2
+let testToken1: TestToken
+let testToken2: TestToken
 
-let maturity
+let maturity: bigint
+let pool: TimeswapPool
+let timestamp: number
 
-let pool
-
-let timestamp
-
-const div = (x, y) => {
-  const z = x / y
-  return z
+const div = (x: bigint, y: bigint) => {
+  return x / y
 }
 
-const divUp = (x, y) => {
-  const z = x / y
-  //
-  //
-  if (z * y === x) {
-    return z
-  }
-  return z + 1n
+const divUp = (x: bigint, y: bigint) => {
+  return x / y + 1n
 }
 
-const checkBigIntEquality = (result, expected) => {
-  //
+const checkBigIntEquality = (result: bigint, expected: bigint) => {
   expect(String(result)).to.equal(String(expected))
 }
 
-const checkBigIntGte = (result, expected) => {
-  res = result >= expected ? true : false
-  expect(res).to.equal(true)
-}
-const checkBigIntLte = (result, expected) => {
-  res = result <= expected ? true : false
+const checkBigIntGte = (result: bigint, expected: bigint) => {
+  const res = result >= expected ? true : false
   expect(res).to.equal(true)
 }
 
-const deployTry = async (desiredMaturity) => {
-  accounts = await web3.eth.getAccounts()
+const checkBigIntLte = (result: bigint, expected: bigint) => {
+  const res = result <= expected ? true : false
+  expect(res).to.equal(true)
+}
 
-  timeswapPool = await TimeswapPool.new()
-  bond = await Bond.new()
-  insurance = await Insurance.new()
-  collateralizedDebt = await CollateralizedDebt.new()
+const insuranceAt = async (address: string) => {
+  const insuranceFactory = await ethers.getContractFactory('Insurance')
+  const insurance = insuranceFactory.attach(address) as Insurance
 
-  feeTo = accounts[1]
-  feeToSetter = accounts[2]
+  return insurance
+}
 
-  timeswapFactory = await TimeswapFactory.new(
+const bondAt = async (address: string) => {
+  const bondFactory = await ethers.getContractFactory('Bond')
+  const bond = bondFactory.attach(address) as Bond
+
+  return bond
+}
+
+const collateralizedDebtAt = async (address: string) => {
+  const collateralizedDebtFactory = await ethers.getContractFactory('CollateralizedDebt')
+  const collateralizedDebt = collateralizedDebtFactory.attach(address) as CollateralizedDebt
+
+  return collateralizedDebt
+}
+
+const testTokenNew = async (value: number) => {
+  const testTokenFactory = await ethers.getContractFactory('TestToken')
+  const testToken = (await testTokenFactory.deploy(value)) as TestToken
+  await testToken.deployed()
+
+  return testToken
+}
+
+const deployTry = async (desiredMaturity: bigint) => {
+  accounts = await ethers.getSigners()
+
+  const timeswapPoolFactory = await ethers.getContractFactory('TimeswapPool')
+  timeswapPool = (await timeswapPoolFactory.deploy()) as TimeswapPool
+  await timeswapPool.deployed()
+
+  const bondFactory = await ethers.getContractFactory('Bond')
+  bond = (await bondFactory.deploy()) as Bond
+  await bond.deployed()
+
+  const insuranceFactory = await ethers.getContractFactory('Insurance')
+  insurance = (await insuranceFactory.deploy()) as Insurance
+  await insurance.deployed()
+
+  const collateralizedDebtFactory = await ethers.getContractFactory('CollateralizedDebt')
+  collateralizedDebt = (await collateralizedDebtFactory.deploy()) as CollateralizedDebt
+  await collateralizedDebt.deployed()
+
+  feeTo = accounts[1].address
+  feeToSetter = accounts[2].address
+
+  const timeswapFactoryFactory = await ethers.getContractFactory('TimeswapFactory')
+  timeswapFactory = (await timeswapFactoryFactory.deploy(
     feeTo,
     feeToSetter,
     timeswapPool.address,
@@ -89,29 +129,21 @@ const deployTry = async (desiredMaturity) => {
     collateralizedDebt.address,
     transactionFee,
     protocolFee
-  )
+  )) as TimeswapFactory
+  await timeswapFactory.deployed()
 
-  testToken1 = await TestToken.new(decimals1)
-  testToken2 = await TestToken.new(decimals2)
+  testToken1 = await testTokenNew(decimals1)
+  testToken2 = await testTokenNew(decimals2)
 
-  await timeswapFactory.createPool(
-    testToken1.address,
-    testToken2.address,
-    desiredMaturity
-  )
+  await timeswapFactory.createPool(testToken1.address, testToken2.address, desiredMaturity)
 
-  pool = await TimeswapPool.at(
-    await timeswapFactory.getPool(
-      testToken1.address,
-      testToken2.address,
-      maturity
-    )
-  )
+  pool = timeswapPoolFactory.attach(
+    await timeswapFactory.getPool(testToken1.address, testToken2.address, maturity)
+  ) as TimeswapPool
 }
 
 const deploy = async () => {
-  maturity = (await now()) + duration
-
+  maturity = (await now()) + BigInt(duration)
   await deployTry(maturity)
 
   receiver = accounts[3]
@@ -128,7 +160,7 @@ describe('initialize', () => {
     })
 
     it('Should have a correct maturity', async () => {
-      const result = await pool.maturity()
+      const result = (await pool.maturity()).toBigInt()
 
       checkBigIntEquality(result, maturity)
     })
@@ -152,35 +184,33 @@ describe('initialize', () => {
     })
 
     it('Should have a zero assetReserve', async () => {
-      const result = await pool.assetReserve()
-      checkBigIntEquality(result, 0)
+      const result = (await pool.assetReserve()).toBigInt()
+      checkBigIntEquality(result, 0n)
     })
 
     it('Should have a zero collateralReserve', async () => {
-      const result = await pool.collateralReserve()
-
-      checkBigIntEquality(result, 0)
+      const result = (await pool.collateralReserve()).toBigInt()
+      checkBigIntEquality(result, 0n)
     })
 
     it('Should have a zero rateReserve', async () => {
-      const result = await pool.rateReserve()
-      checkBigIntEquality(result, 0)
+      const result = (await pool.rateReserve()).toBigInt()
+      checkBigIntEquality(result, 0n)
     })
 
     it('Should have a correct transaction fee', async () => {
-      const result = await pool.transactionFee()
+      const result = (await pool.transactionFee()).toBigInt()
       checkBigIntEquality(result, transactionFee)
     })
 
     it('Should have a correct protocol fee', async () => {
-      const result = await pool.protocolFee()
+      const result = (await pool.protocolFee()).toBigInt()
       checkBigIntEquality(result, protocolFee)
     })
 
     it('Should have a correct decimals', async () => {
-      const decimals = await testToken1.decimals()
-
-      const result = await pool.decimals()
+      const decimals = BigInt(await testToken1.decimals())
+      const result = BigInt(await pool.decimals())
 
       checkBigIntEquality(result, decimals)
     })
@@ -192,7 +222,7 @@ describe('initialize', () => {
     })
 
     it('Should have the bond contract have the correct symbol', async () => {
-      const bondContract = await Bond.at(await pool.bond())
+      const bondContract = await bondAt(await pool.bond())
 
       const result = await bondContract.symbol()
 
@@ -200,7 +230,7 @@ describe('initialize', () => {
     })
 
     it('Should have the insurance contract have the correct symbol', async () => {
-      const insuranceContract = await Insurance.at(await pool.insurance())
+      const insuranceContract = await insuranceAt(await pool.insurance())
 
       const result = await insuranceContract.symbol()
 
@@ -208,9 +238,7 @@ describe('initialize', () => {
     })
 
     it('Should have the collateralized debt contract have the correct symbol', async () => {
-      const collateralizedDebtContract = await CollateralizedDebt.at(
-        await pool.collateralizedDebt()
-      )
+      const collateralizedDebtContract = await collateralizedDebtAt(await pool.collateralizedDebt())
 
       const result = await collateralizedDebtContract.symbol()
 
@@ -220,9 +248,7 @@ describe('initialize', () => {
 
   describe('fail case', () => {
     it('Should revert if incorrect maturity', async () => {
-      //
-      //
-      const wrongMaturity = (await now()) - duration
+      const wrongMaturity = (await now()) - BigInt(duration)
 
       await expect(deployTry(wrongMaturity)).to.be.reverted
     })
@@ -230,23 +256,23 @@ describe('initialize', () => {
 })
 
 const mint = async (
-  to,
-  assetIn,
-  collateralIn,
-  bondIncrease,
-  insuranceIncrease
+  to: string,
+  assetIn: bigint,
+  collateralIn: bigint,
+  bondIncrease: bigint,
+  insuranceIncrease: bigint
 ) => {
   await testToken1.mint(pool.address, assetIn)
   await testToken2.mint(pool.address, collateralIn)
 
   const transaction = await pool.mint(to, bondIncrease, insuranceIncrease)
 
-  timestamp = BigInt(await getTimestamp(transaction.receipt.blockHash))
+  timestamp = await getTimestamp(transaction.blockHash!)
 }
 
 describe('mint', () => {
   describe('mint initial', () => {
-    tests = testCases.mintInitial
+    const tests = testCases.mintInitial
     tests.forEach((test, idx) => {
       const {
         assetIn,
@@ -269,126 +295,107 @@ describe('mint', () => {
         before(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetIn,
-            collateralIn,
-            bondIncrease,
-            insuranceIncrease
-          )
+          await mint(receiver.address, assetIn, collateralIn, bondIncrease, insuranceIncrease)
         })
 
         it('Should have receiver have correct amount of liquidity tokens', async () => {
-          const result = await pool.balanceOf(receiver)
+          const result = (await pool.balanceOf(receiver.address)).toBigInt()
           checkBigIntEquality(result, liquidityReceived)
         })
 
         it('Should have receiver have correct amount of bond tokens', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
-          const result = await bondERC20.balanceOf(receiver)
+          const bondERC20 = await bondAt(await pool.bond())
+          const result = (await bondERC20.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, bondReceived)
         })
 
         it('Should have receiver have correct amount of insurance tokens', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
-
-          const result = await insuranceERC20.balanceOf(receiver)
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
+          const result = (await insuranceERC20.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, insuranceReceived)
         })
 
         it('Should have receiver have a correct collateralized debt token', async () => {
-          const collateralizedDebtERC721 = await CollateralizedDebt.at(
-            await pool.collateralizedDebt()
-          )
+          const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
 
           const tokenId = await collateralizedDebtERC721.totalSupply()
           const result = await collateralizedDebtERC721.ownerOf(tokenId)
-          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-            tokenId
-          )
-          const resultDebt = resultHex.debt
-          const resultCollateral = resultHex.collateral
+          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+          const resultDebt = resultHex.debt.toBigInt()
+          const resultCollateral = resultHex.collateral.toBigInt()
 
-          expect(result).to.equal(receiver)
+          expect(result).to.equal(receiver.address)
           checkBigIntEquality(resultDebt, insuranceIncrease)
           checkBigIntEquality(resultCollateral, bondReceived)
         })
 
         it('Should have pool have a correct assets reserve and balance', async () => {
-          const result = await testToken1.balanceOf(pool.address)
-          const resultReserve = await pool.assetReserve()
+          const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.assetReserve()).toBigInt()
           checkBigIntEquality(result, assetIn)
           checkBigIntEquality(resultReserve, assetIn)
         })
 
         it('Should have pool have correct collateral reserve and balance', async () => {
-          const result = await testToken2.balanceOf(pool.address)
-          const resultReserve = await pool.collateralReserve()
+          const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.collateralReserve()).toBigInt()
 
           checkBigIntEquality(result, collateralIn)
           checkBigIntEquality(resultReserve, collateralIn)
         })
 
         it('Should have pool have correct amount of bond tokens', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
-
-          const result = await bondERC20.balanceOf(pool.address)
+          const bondERC20 = await bondAt(await pool.bond())
+          const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
           checkBigIntEquality(result, bondIncrease)
         })
 
         it('Should have pool have correct amount of insurance tokens', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
-
-          const result = await insuranceERC20.balanceOf(pool.address)
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
+          const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
           checkBigIntEquality(result, insuranceIncrease)
         })
 
         it('Should burn 1000 liquidity tokens', async () => {
           const zero = '0x0000000000000000000000000000000000000000'
-
-          const result = await pool.balanceOf(zero)
+          const result = (await pool.balanceOf(zero)).toBigInt()
 
           checkBigIntEquality(result, liquidityBurn)
         })
 
         it('Should have factory receive correct amount of liquidity tokens', async () => {
-          const result = await pool.balanceOf(feeTo)
+          const result = (await pool.balanceOf(feeTo)).toBigInt()
 
           checkBigIntEquality(result, liquidityFeeTo)
         })
 
         it('Should have a correct rateReserve', async () => {
-          const result = await pool.rateReserve()
-          const rateReserve = div(
-            insuranceIncrease * year,
-            maturity - timestamp
-          )
+          const result = (await pool.rateReserve()).toBigInt()
+          const rateReserve = div(insuranceIncrease * year, maturity - BigInt(timestamp))
 
           checkBigIntEquality(result, rateReserve)
         })
 
         it('Should have the correct bond total supply', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
-
-          const result = await bondERC20.totalSupply()
+          const bondERC20 = await bondAt(await pool.bond())
+          const result = (await bondERC20.totalSupply()).toBigInt()
 
           checkBigIntEquality(result, bondTotalSupply)
         })
 
         it('Should have the correct insurance total supply', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
-
-          const result = await insuranceERC20.totalSupply()
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
+          const result = (await insuranceERC20.totalSupply()).toBigInt()
 
           checkBigIntEquality(result, insuranceTotalSupply)
         })
 
         it('Should have the correct liquidity total supply', async () => {
-          const result = await pool.totalSupply()
+          const result = (await pool.totalSupply()).toBigInt()
 
           checkBigIntEquality(result, liquidityTotalSupply)
         })
@@ -400,83 +407,47 @@ describe('mint', () => {
         })
 
         it('Should revert if no asset input amount', async () => {
-          const wrongAssetIn = 0
+          const wrongAssetIn = 0n
 
-          await expect(
-            mint(
-              receiver,
-              wrongAssetIn,
-              collateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, wrongAssetIn, collateralIn, bondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if no collateral input amount', async () => {
-          const wrongCollateralIn = 0
+          const wrongCollateralIn = 0n
 
           receiver = accounts[4]
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              wrongCollateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, wrongCollateralIn, bondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if there is no bond output amount', async () => {
-          const wrongBondIncrease = 0
+          const wrongBondIncrease = 0n
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              collateralIn,
-              wrongBondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, collateralIn, wrongBondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if there is no insurance output amount', async () => {
-          const wrongInsuranceIncrease = 0
+          const wrongInsuranceIncrease = 0n
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              collateralIn,
-              bondIncrease,
-              wrongInsuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, collateralIn, bondIncrease, wrongInsuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if pool matured', async () => {
           await advanceTimeAndBlock(duration)
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              collateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, collateralIn, bondIncrease, insuranceIncrease)).to.be.reverted
         })
       })
     })
   })
 
   describe('mint proportional', () => {
-    let rateReserve
-    tests = testCases.mintProportional
+    let rateReserve: bigint
+    const tests = testCases.mintProportional
     tests.forEach((test, idx) => {
       const {
         assetReserve,
@@ -503,70 +474,51 @@ describe('mint', () => {
         before(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
           receiver = accounts[4]
+          rateReserve = (await pool.rateReserve()).toBigInt()
 
-          rateReserve = await pool.rateReserve()
-
-          await mint(
-            receiver,
-            assetIn,
-            collateralIn,
-            bondIncrease,
-            insuranceIncrease
-          )
+          await mint(receiver.address, assetIn, collateralIn, bondIncrease, insuranceIncrease)
         })
 
         it('Should have receiver have correct amount of liquidity tokens', async () => {
-          const result = await pool.balanceOf(receiver)
+          const result = (await pool.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, liquidityReceived)
         })
 
         it('Should have receiver have correct amount of bond tokens', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
-
-          const result = await bondERC20.balanceOf(receiver)
+          const bondERC20 = await bondAt(await pool.bond())
+          const result = (await bondERC20.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, bondReceived)
         })
 
         it('Should have receiver have correct amount of insurance tokens', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
-
-          const result = await insuranceERC20.balanceOf(receiver)
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
+          const result = (await insuranceERC20.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, insuranceReceived)
         })
 
         it('Should have receiver have a correct collateralized debt token', async () => {
-          const collateralizedDebtERC721 = await CollateralizedDebt.at(
-            await pool.collateralizedDebt()
-          )
+          const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
 
           const tokenId = await collateralizedDebtERC721.totalSupply()
           const result = await collateralizedDebtERC721.ownerOf(tokenId)
-          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-            tokenId
-          )
-          const resultDebt = resultHex.debt
-          const resultCollateral = resultHex.collateral
+          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+          const resultDebt = resultHex.debt.toBigInt()
+          const resultCollateral = resultHex.collateral.toBigInt()
 
-          expect(result).to.equal(receiver)
+          expect(result).to.equal(receiver.address)
           checkBigIntEquality(resultDebt, insuranceIncrease)
           checkBigIntEquality(resultCollateral, bondReceived)
         })
 
         it('Should have pool have a correct assets reserve and balance', async () => {
-          const result = await testToken1.balanceOf(pool.address)
-          const resultReserve = await pool.assetReserve()
+          const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.assetReserve()).toBigInt()
 
           const assetBalance = assetReserve + assetIn
 
@@ -575,8 +527,8 @@ describe('mint', () => {
         })
 
         it('Should have pool have correct collateral reserve and balance', async () => {
-          const result = await testToken2.balanceOf(pool.address)
-          const resultReserve = await pool.collateralReserve()
+          const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.collateralReserve()).toBigInt()
 
           const collateralBalance = collateralReserve + collateralIn
 
@@ -585,9 +537,9 @@ describe('mint', () => {
         })
 
         it('Should have pool have correct amount of bond tokens', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const result = await bondERC20.balanceOf(pool.address)
+          const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
           const bondBalance = bondReserve + bondIncrease
 
@@ -595,9 +547,9 @@ describe('mint', () => {
         })
 
         it('Should have pool have correct amount of insurance tokens', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const result = await insuranceERC20.balanceOf(pool.address)
+          const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
           const insuranceBalance = insuranceReserve + insuranceIncrease
 
@@ -605,91 +557,78 @@ describe('mint', () => {
         })
 
         it('Should have factory receive correct amount of liquidity tokens', async () => {
-          const result = await pool.balanceOf(feeTo)
+          const result = (await pool.balanceOf(feeTo)).toBigInt()
 
           checkBigIntEquality(result, feeToBalance + liquidityFeeTo)
         })
 
         it('Should have a correct rateReserve', async () => {
-          const result = await pool.rateReserve()
-          const rateIncrease = divUp(
-            BigInt(rateReserve) * (liquidityReceived + liquidityFeeTo),
-            insuranceReserve
-          )
+          const result = (await pool.rateReserve()).toBigInt()
+          const rateIncrease = divUp(rateReserve * (liquidityReceived + liquidityFeeTo), insuranceReserve)
 
-          const newRateReserve = BigInt(rateReserve) + BigInt(rateIncrease)
+          const newRateReserve = rateReserve + rateIncrease
 
           checkBigIntEquality(result, newRateReserve)
         })
 
         it('Should have the correct ratio on its asset reserves', async () => {
-          const totalSupply = await pool.totalSupply()
-          const ratioLiquidity =
-            BigInt(totalSupply) / BigInt(liquidityReceived + liquidityFeeTo)
+          const totalSupply = (await pool.totalSupply()).toBigInt()
+          const ratioLiquidity = totalSupply / (liquidityReceived + liquidityFeeTo)
 
-          const resultAsset = await testToken1.balanceOf(pool.address)
-          const ratioAsset = BigInt(resultAsset) / BigInt(assetIn)
+          const resultAsset = (await testToken1.balanceOf(pool.address)).toBigInt()
+          const ratioAsset = resultAsset / assetIn
 
           checkBigIntGte(ratioLiquidity, ratioAsset)
         })
 
         it('Should have the correct ratio on its bond reserves', async () => {
-          const totalSupply = await pool.totalSupply()
-          const ratioLiquidity =
-            BigInt(totalSupply) / BigInt(liquidityReceived + liquidityFeeTo)
+          const totalSupply = (await pool.totalSupply()).toBigInt()
+          const ratioLiquidity = totalSupply / (liquidityReceived + liquidityFeeTo)
 
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const resultBond = await bondERC20.balanceOf(pool.address)
-          const ratioBond = BigInt(resultBond) / BigInt(bondIncrease)
+          const resultBond = (await bondERC20.balanceOf(pool.address)).toBigInt()
+          const ratioBond = resultBond / bondIncrease
 
           checkBigIntGte(ratioLiquidity, ratioBond)
         })
 
         it('Should have the correct ratio on its insurance reserves', async () => {
-          const totalSupply = await pool.totalSupply()
-          const ratioLiquidity =
-            BigInt(totalSupply) / BigInt(liquidityReceived + liquidityFeeTo)
+          const totalSupply = (await pool.totalSupply()).toBigInt()
+          const ratioLiquidity = totalSupply / (liquidityReceived + liquidityFeeTo)
 
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const resultInsuranceHex = await insuranceERC20.balanceOf(
-            pool.address
-          )
-          const resultInsurance = resultInsuranceHex
-          const ratioInsurance =
-            BigInt(resultInsurance) / BigInt(insuranceIncrease)
+          const resultInsurance = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
+          const ratioInsurance = resultInsurance / insuranceIncrease
 
           checkBigIntGte(ratioLiquidity, ratioInsurance)
         })
 
         it('Should have the correct bond total supply', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const result = await bondERC20.totalSupply()
+          const result = (await bondERC20.totalSupply()).toBigInt()
 
-          const bondTotalSupply =
-            bondTotalSupplyBefore + bondIncrease + bondReceived
+          const bondTotalSupply = bondTotalSupplyBefore + bondIncrease + bondReceived
 
           checkBigIntEquality(result, bondTotalSupply)
         })
 
         it('Should have the correct insurance total supply', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const result = await insuranceERC20.totalSupply()
+          const result = (await insuranceERC20.totalSupply()).toBigInt()
 
-          const insuranceTotalSupply =
-            insuranceTotalSupplyBefore + insuranceIncrease + insuranceReceived
+          const insuranceTotalSupply = insuranceTotalSupplyBefore + insuranceIncrease + insuranceReceived
 
           checkBigIntEquality(result, insuranceTotalSupply)
         })
 
         it('Should have the correct liquidity total supply', async () => {
-          const result = await pool.totalSupply()
+          const result = (await pool.totalSupply()).toBigInt()
 
-          const liquidityTotalSupply =
-            liquidityTotalSupplyBefore + liquidityReceived + liquidityFeeTo
+          const liquidityTotalSupply = liquidityTotalSupplyBefore + liquidityReceived + liquidityFeeTo
 
           checkBigIntEquality(result, liquidityTotalSupply)
         })
@@ -699,13 +638,7 @@ describe('mint', () => {
         beforeEach(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
           receiver = accounts[4]
         })
@@ -713,104 +646,61 @@ describe('mint', () => {
         it('Should revert if no asset input amount', async () => {
           const wrongAssetIn = 0n
 
-          await expect(
-            mint(
-              receiver,
-              wrongAssetIn,
-              collateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, wrongAssetIn, collateralIn, bondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if no collateral input amount', async () => {
           const wrongCollateralIn = 0n
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              wrongCollateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, wrongCollateralIn, bondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if no bond output amount', async () => {
           const wrongBondIncrease = 0n
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              collateralIn,
-              wrongBondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, collateralIn, wrongBondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if no insurance output amount', async () => {
           const wrongInsuranceIncrease = 0n
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              collateralIn,
-              bondIncrease,
-              wrongInsuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, collateralIn, bondIncrease, wrongInsuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if collateral transferred is not enough', async () => {
           const wrongCollateralIn = collateralIn - 1n
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              wrongCollateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, wrongCollateralIn, bondIncrease, insuranceIncrease)).to.be
+            .reverted
         })
 
         it('Should revert if pool matured', async () => {
           await advanceTimeAndBlock(duration)
 
-          await expect(
-            mint(
-              receiver,
-              assetIn,
-              collateralIn,
-              bondIncrease,
-              insuranceIncrease
-            )
-          ).to.be.reverted
+          await expect(mint(receiver.address, assetIn, collateralIn, bondIncrease, insuranceIncrease)).to.be.reverted
         })
       })
     })
   })
 })
 
-const burn = async (owner, to, liquidityIn, collateralIn) => {
-  await pool.transfer(pool.address, liquidityIn, { from: owner })
+const burn = async (owner: SignerWithAddress, to: string, liquidityIn: bigint, collateralIn: bigint) => {
+  await pool.connect(owner).transfer(pool.address, liquidityIn)
   await testToken2.mint(pool.address, collateralIn)
 
   const transaction = await pool.burn(to)
 
-  timestamp = await getTimestamp(transaction.receipt.blockHash)
+  timestamp = await getTimestamp(transaction.blockHash!)
 }
 
 describe('burn', () => {
-  let rateReserve
+  let rateReserve: bigint
   describe('burn before maturity', () => {
-    tests = testCases.burnBeforeMaturity
+    const tests = testCases.burnBeforeMaturity
     tests.forEach((test, idx) => {
       const {
         assetReserve,
@@ -829,7 +719,7 @@ describe('burn', () => {
         assetMax,
         assetReceived,
         collateralInExcessive,
-        assetReceivedExecessive,
+        assetReceivedExcessive,
         collateralLockedExcessive,
       } = test
       describe(`success case ${idx + 1}`, async () => {
@@ -837,63 +727,53 @@ describe('burn', () => {
           before(async () => {
             await deploy()
 
-            await mint(
-              receiver,
-              assetReserve,
-              collateralReserve,
-              bondReserve,
-              insuranceReserve
-            )
+            await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
             const owner = accounts[3]
             receiver = accounts[4]
 
-            rateReserve = BigInt(await pool.rateReserve())
+            rateReserve = (await pool.rateReserve()).toBigInt()
 
-            await burn(owner, receiver, liquidityIn, collateralIn)
+            await burn(owner, receiver.address, liquidityIn, collateralIn)
           })
 
           it('Should have receiver have correct amount of asset', async () => {
-            const result = BigInt(await testToken1.balanceOf(receiver))
+            const result = (await testToken1.balanceOf(receiver.address)).toBigInt()
 
             checkBigIntEquality(result, assetReceived)
           })
 
           it('Should have receiver have correct amount of bond tokens', async () => {
-            const bondERC20 = await Bond.at(await pool.bond())
-
-            const result = await bondERC20.balanceOf(receiver)
+            const bondERC20 = await bondAt(await pool.bond())
+            const result = (await bondERC20.balanceOf(receiver.address)).toBigInt()
 
             checkBigIntEquality(result, bondReceived)
           })
 
           it('Should have receiver have correct amount of insurance tokens', async () => {
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
+            const result = (await insuranceERC20.balanceOf(receiver.address)).toBigInt()
 
-            const result = await insuranceERC20.balanceOf(receiver)
             checkBigIntEquality(result, insuranceReceived)
           })
 
           it('Should have receiver have a correct collateralized debt token', async () => {
-            const collateralizedDebtERC721 = await CollateralizedDebt.at(
-              await pool.collateralizedDebt()
-            )
+            const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
 
             const tokenId = await collateralizedDebtERC721.totalSupply()
             const result = await collateralizedDebtERC721.ownerOf(tokenId)
-            const resultHex =
-              await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
-            const resultDebt = resultHex.debt
-            const resultCollateral = resultHex.collateral
+            const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+            const resultDebt = resultHex.debt.toBigInt()
+            const resultCollateral = resultHex.collateral.toBigInt()
 
-            expect(result).to.equal(receiver)
+            expect(result).to.equal(receiver.address)
             checkBigIntEquality(resultDebt, assetReceived)
             checkBigIntEquality(resultCollateral, collateralIn)
           })
 
           it('Should have pool have a correct assets', async () => {
-            const result = await testToken1.balanceOf(pool.address)
-            const resultReserve = await pool.assetReserve()
+            const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+            const resultReserve = (await pool.assetReserve()).toBigInt()
             const assetBalance = assetReserve - assetReceived
 
             checkBigIntEquality(result, assetBalance)
@@ -901,8 +781,8 @@ describe('burn', () => {
           })
 
           it('Should have pool have correct collateral', async () => {
-            const result = await testToken2.balanceOf(pool.address)
-            const resultReserve = await pool.collateralReserve()
+            const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+            const resultReserve = (await pool.collateralReserve()).toBigInt()
             const collateralBalance = collateralReserve + collateralIn
 
             checkBigIntEquality(result, collateralBalance)
@@ -910,9 +790,9 @@ describe('burn', () => {
           })
 
           it('Should have pool have correct amount of bond tokens', async () => {
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const result = await bondERC20.balanceOf(pool.address)
+            const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
             const bondBalance = bondReserve - bondReceived
 
@@ -920,9 +800,9 @@ describe('burn', () => {
           })
 
           it('Should have pool have correct amount of insurance tokens', async () => {
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const result = await insuranceERC20.balanceOf(pool.address)
+            const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
             const insuranceBalance = insuranceReserve - insuranceReceived
 
@@ -930,67 +810,59 @@ describe('burn', () => {
           })
 
           it('Should have a correct rateReserve', async () => {
-            const result = await pool.rateReserve()
+            const result = (await pool.rateReserve()).toBigInt()
 
-            const rateDecrease = div(
-              rateReserve * liquidityIn,
-              liquidityTotalSupplyBefore
-            )
+            const rateDecrease = div(rateReserve * liquidityIn, liquidityTotalSupplyBefore)
 
-            const newRateReserve = BigInt(rateReserve - rateDecrease)
+            const newRateReserve = rateReserve - rateDecrease
 
             checkBigIntEquality(result, newRateReserve)
           })
 
           it('Should have the correct ratio on its bond reserves', async () => {
-            const resultLiquidity = await pool.balanceOf(receiver)
-            const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+            const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+            const ratioLiquidity = resultLiquidity / liquidityIn
 
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const resultBond = await bondERC20.balanceOf(pool.address)
-            const ratioBond = BigInt(resultBond) / BigInt(bondReceived)
+            const resultBond = (await bondERC20.balanceOf(pool.address)).toBigInt()
+            const ratioBond = resultBond / bondReceived
 
             checkBigIntLte(ratioLiquidity, ratioBond)
           })
 
           it('Should have the correct ratio on its insurance reserves', async () => {
-            const resultLiquidity = await pool.balanceOf(receiver)
-            const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+            const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+            const ratioLiquidity = resultLiquidity / liquidityIn
 
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const resultInsuranceHex = await insuranceERC20.balanceOf(
-              pool.address
-            )
-            const resultInsurance = resultInsuranceHex
-            const ratioInsurance =
-              BigInt(resultInsurance) / BigInt(insuranceReceived)
+            const resultInsurance = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
+            const ratioInsurance = resultInsurance / insuranceReceived
 
             checkBigIntLte(ratioLiquidity, ratioInsurance)
           })
 
           it('Should have the correct bond total supply', async () => {
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const result = await bondERC20.totalSupply()
+            const result = (await bondERC20.totalSupply()).toBigInt()
 
             checkBigIntEquality(result, bondTotalSupplyBefore)
           })
 
           it('Should have the correct insurance total supply', async () => {
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const result = await insuranceERC20.totalSupply()
+            const result = (await insuranceERC20.totalSupply()).toBigInt()
 
             checkBigIntEquality(result, insuranceTotalSupplyBefore)
           })
 
           it('Should have the correct liquidity total supply', async () => {
-            const result = await pool.totalSupply()
+            const result = (await pool.totalSupply()).toBigInt()
 
-            const liquidityTotalSupply =
-              liquidityTotalSupplyBefore - liquidityIn
+            const liquidityTotalSupply = liquidityTotalSupplyBefore - liquidityIn
 
             checkBigIntEquality(result, liquidityTotalSupply)
           })
@@ -999,69 +871,60 @@ describe('burn', () => {
         describe('collateral locked is excessive', () => {
           const collateralIn = collateralInExcessive
           const collateralLocked = collateralLockedExcessive
-          const assetReceived = assetReceivedExecessive
+          const assetReceived = assetReceivedExcessive
 
           before(async () => {
             await deploy()
 
-            await mint(
-              receiver,
-              assetReserve,
-              collateralReserve,
-              bondReserve,
-              insuranceReserve
-            )
+            await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
             const owner = accounts[3]
             receiver = accounts[4]
 
-            rateReserve = BigInt(await pool.rateReserve())
+            rateReserve = (await pool.rateReserve()).toBigInt()
 
-            await burn(owner, receiver, liquidityIn, collateralIn)
+            await burn(owner, receiver.address, liquidityIn, collateralIn)
           })
 
           it('Should have receiver have correct amount of asset', async () => {
-            const result = await testToken1.balanceOf(receiver)
+            const result = (await testToken1.balanceOf(receiver.address)).toBigInt()
 
             checkBigIntEquality(result, assetReceived)
           })
 
           it('Should have receiver have correct amount of bond tokens', async () => {
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const result = await bondERC20.balanceOf(receiver)
+            const result = (await bondERC20.balanceOf(receiver.address)).toBigInt()
 
             checkBigIntEquality(result, bondReceived)
           })
 
           it('Should have receiver have correct amount of insurance tokens', async () => {
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const result = await insuranceERC20.balanceOf(receiver)
+            const result = (await insuranceERC20.balanceOf(receiver.address)).toBigInt()
 
             checkBigIntEquality(result, insuranceReceived)
           })
 
           it('Should have receiver have a correct collateralized debt token', async () => {
-            const collateralizedDebtERC721 = await CollateralizedDebt.at(
-              await pool.collateralizedDebt()
-            )
+            const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
 
             const tokenId = await collateralizedDebtERC721.totalSupply()
             const result = await collateralizedDebtERC721.ownerOf(tokenId)
-            const resultHex =
-              await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
-            const resultDebt = resultHex.debt
-            const resultCollateral = resultHex.collateral
+            const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+            const resultDebt = resultHex.debt.toBigInt()
+            const resultCollateral = resultHex.collateral.toBigInt()
 
-            expect(result).to.equal(receiver)
+            expect(result).to.equal(receiver.address)
             checkBigIntEquality(resultDebt, assetReceived)
             checkBigIntEquality(resultCollateral, collateralLocked)
           })
 
           it('Should have pool have a correct assets', async () => {
-            const result = await testToken1.balanceOf(pool.address)
-            const resultReserve = await pool.assetReserve()
+            const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+            const resultReserve = (await pool.assetReserve()).toBigInt()
 
             const assetBalance = assetReserve - assetReceived
 
@@ -1070,8 +933,8 @@ describe('burn', () => {
           })
 
           it('Should have pool have correct collateral', async () => {
-            const result = await testToken2.balanceOf(pool.address)
-            const resultReserve = await pool.collateralReserve()
+            const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+            const resultReserve = (await pool.collateralReserve()).toBigInt()
 
             const collateralBalance = collateralReserve + collateralIn
 
@@ -1080,9 +943,9 @@ describe('burn', () => {
           })
 
           it('Should have pool have correct amount of bond tokens', async () => {
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const result = await bondERC20.balanceOf(pool.address)
+            const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
             const bondBalance = bondReserve - bondReceived
 
@@ -1090,9 +953,9 @@ describe('burn', () => {
           })
 
           it('Should have pool have correct amount of insurance tokens', async () => {
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const result = await insuranceERC20.balanceOf(pool.address)
+            const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
             const insuranceBalance = insuranceReserve - insuranceReceived
 
@@ -1100,83 +963,73 @@ describe('burn', () => {
           })
 
           it('Should have a correct invariance', async () => {
-            const result = await pool.rateReserve()
+            const result = (await pool.rateReserve()).toBigInt()
 
-            const rateDecrease = div(
-              rateReserve * liquidityIn,
-              liquidityTotalSupplyBefore
-            )
+            const rateDecrease = div(rateReserve * liquidityIn, liquidityTotalSupplyBefore)
 
-            const newRateReserve = BigInt(rateReserve - rateDecrease)
+            const newRateReserve = rateReserve - rateDecrease
 
             checkBigIntEquality(result, newRateReserve)
           })
 
           it('Should have the correct ratio on its asset reserve and balance', async () => {
-            const resultLiquidity = await pool.balanceOf(receiver)
-            const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+            const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+            const ratioLiquidity = resultLiquidity / liquidityIn
 
-            const resultAsset = await testToken1.balanceOf(pool.address)
-            const ratioAsset = BigInt(resultAsset) / BigInt(assetReceived)
+            const resultAsset = (await testToken1.balanceOf(pool.address)).toBigInt()
+            const ratioAsset = resultAsset / assetReceived
 
-            const resultAssetReserveHex = await pool.assetReserve()
-            const resultAssetReserve = resultAssetReserveHex
-            const ratioAssetReserve =
-              BigInt(resultAssetReserve) / BigInt(assetReceived)
+            const resultAssetReserve = (await pool.assetReserve()).toBigInt()
+            const ratioAssetReserve = resultAssetReserve / assetReceived
 
             checkBigIntLte(ratioLiquidity, ratioAsset)
             checkBigIntLte(ratioLiquidity, ratioAssetReserve)
           })
 
           it('Should have the correct ratio on its bond reserves', async () => {
-            const resultLiquidity = await pool.balanceOf(receiver)
-            const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+            const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+            const ratioLiquidity = resultLiquidity / liquidityIn
 
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const resultBond = await bondERC20.balanceOf(pool.address)
-            const ratioBond = BigInt(resultBond) / BigInt(bondReceived)
+            const resultBond = (await bondERC20.balanceOf(pool.address)).toBigInt()
+            const ratioBond = resultBond / bondReceived
 
             checkBigIntLte(ratioLiquidity, ratioBond)
           })
 
           it('Should have the correct ratio on its insurance reserves', async () => {
-            const resultLiquidity = await pool.balanceOf(receiver)
-            const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+            const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+            const ratioLiquidity = resultLiquidity / liquidityIn
 
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const resultInsuranceHex = await insuranceERC20.balanceOf(
-              pool.address
-            )
-            const resultInsurance = resultInsuranceHex
-            const ratioInsurance =
-              BigInt(resultInsurance) / BigInt(insuranceReceived)
+            const resultInsurance = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
+            const ratioInsurance = resultInsurance / insuranceReceived
 
             checkBigIntLte(ratioLiquidity, ratioInsurance)
           })
 
           it('Should have the correct bond total supply', async () => {
-            const bondERC20 = await Bond.at(await pool.bond())
+            const bondERC20 = await bondAt(await pool.bond())
 
-            const result = await bondERC20.totalSupply()
+            const result = (await bondERC20.totalSupply()).toBigInt()
 
             checkBigIntEquality(result, bondTotalSupplyBefore)
           })
 
           it('Should have the correct insurance total supply', async () => {
-            const insuranceERC20 = await Insurance.at(await pool.insurance())
+            const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-            const result = await insuranceERC20.totalSupply()
+            const result = (await insuranceERC20.totalSupply()).toBigInt()
 
             checkBigIntEquality(result, insuranceTotalSupplyBefore)
           })
 
           it('Should have the correct liquidity total supply', async () => {
-            const result = await pool.totalSupply()
+            const result = (await pool.totalSupply()).toBigInt()
 
-            const liquidityTotalSupply =
-              liquidityTotalSupplyBefore - liquidityIn
+            const liquidityTotalSupply = liquidityTotalSupplyBefore - liquidityIn
 
             checkBigIntEquality(result, liquidityTotalSupply)
           })
@@ -1187,26 +1040,20 @@ describe('burn', () => {
         beforeEach(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
-          rateReserve = await pool.rateReserve()
+          rateReserve = (await pool.rateReserve()).toBigInt()
         })
 
         it('Should revert if insufficient input amount', async () => {
-          await expect(burn(receiver, receiver, 0, 0)).to.be.reverted
+          await expect(burn(receiver, receiver.address, 0n, 0n)).to.be.reverted
         })
       })
     })
   })
 
   describe('burn after maturity', () => {
-    tests = testCases.burnAfterMaturity
+    const tests = testCases.burnAfterMaturity
     tests.forEach((test, idx) => {
       const {
         assetReserve,
@@ -1226,64 +1073,58 @@ describe('burn', () => {
         before(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
           const owner = accounts[3]
           receiver = accounts[4]
 
           await advanceTimeAndBlock(duration)
 
-          await burn(owner, receiver, liquidityIn, 0)
+          await burn(owner, receiver.address, liquidityIn, 0n)
         })
 
         it('Should have receiver have correct amount of asset', async () => {
-          const result = await testToken1.balanceOf(receiver)
+          const result = (await testToken1.balanceOf(receiver.address)).toBigInt()
 
-          checkBigIntEquality(result, 0)
+          checkBigIntEquality(result, 0n)
         })
 
         it('Should have receiver have correct amount of bond tokens', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const result = await bondERC20.balanceOf(receiver)
+          const result = (await bondERC20.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, bondReceived)
         })
 
         it('Should have receiver have correct amount of insurance tokens', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const result = await insuranceERC20.balanceOf(receiver)
+          const result = (await insuranceERC20.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, insuranceReceived)
         })
 
         it('Should have pool have a correct assets', async () => {
-          const result = await testToken1.balanceOf(pool.address)
-          const resultReserve = await pool.assetReserve()
+          const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.assetReserve()).toBigInt()
 
           checkBigIntEquality(result, assetReserve)
           checkBigIntEquality(resultReserve, assetReserve)
         })
 
         it('Should have pool have correct collateral', async () => {
-          const result = await testToken2.balanceOf(pool.address)
-          const resultReserve = await pool.collateralReserve()
+          const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.collateralReserve()).toBigInt()
 
           checkBigIntEquality(result, collateralReserve)
           checkBigIntEquality(resultReserve, collateralReserve)
         })
 
         it('Should have pool have correct amount of bond tokens', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const result = await bondERC20.balanceOf(pool.address)
+          const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
           const bondBalance = bondReserve - bondReceived
 
@@ -1291,9 +1132,9 @@ describe('burn', () => {
         })
 
         it('Should have pool have correct amount of insurance tokens', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const result = await insuranceERC20.balanceOf(pool.address)
+          const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
           const insuranceBalance = insuranceReserve - insuranceReceived
 
@@ -1301,53 +1142,47 @@ describe('burn', () => {
         })
 
         it('Should have the correct ratio on its bond reserves', async () => {
-          const resultLiquidityHex = await pool.balanceOf(receiver)
-          const resultLiquidity = resultLiquidityHex
-          const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+          const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+          const ratioLiquidity = resultLiquidity / liquidityIn
 
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const resultBondHex = await bondERC20.balanceOf(pool.address)
-          const resultBond = resultBondHex
-          const ratioBond = BigInt(resultBond) / bondReceived
+          const resultBond = (await bondERC20.balanceOf(pool.address)).toBigInt()
+          const ratioBond = resultBond / bondReceived
 
           checkBigIntLte(ratioLiquidity, ratioBond)
         })
 
         it('Should have the correct ratio on its insurance reserves', async () => {
-          const resultLiquidity = await pool.balanceOf(receiver)
-          const ratioLiquidity = BigInt(resultLiquidity) / BigInt(liquidityIn)
+          const resultLiquidity = (await pool.balanceOf(receiver.address)).toBigInt()
+          const ratioLiquidity = resultLiquidity / liquidityIn
 
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const resultInsuranceHex = await insuranceERC20.balanceOf(
-            pool.address
-          )
-          const resultInsurance = resultInsuranceHex
-          const ratioInsurance =
-            BigInt(resultInsurance) / BigInt(insuranceReceived)
+          const resultInsurance = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
+          const ratioInsurance = resultInsurance / insuranceReceived
 
           checkBigIntLte(ratioLiquidity, ratioInsurance)
         })
 
         it('Should have the correct bond total supply', async () => {
-          const bondERC20 = await Bond.at(await pool.bond())
+          const bondERC20 = await bondAt(await pool.bond())
 
-          const result = await bondERC20.totalSupply()
+          const result = (await bondERC20.totalSupply()).toBigInt()
 
           checkBigIntEquality(result, bondTotalSupplyBefore)
         })
 
         it('Should have the correct insurance total supply', async () => {
-          const insuranceERC20 = await Insurance.at(await pool.insurance())
+          const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-          const result = await insuranceERC20.totalSupply()
+          const result = (await insuranceERC20.totalSupply()).toBigInt()
 
           checkBigIntEquality(result, insuranceTotalSupplyBefore)
         })
 
         it('Should have the correct liquidity total supply', async () => {
-          const result = await pool.totalSupply()
+          const result = (await pool.totalSupply()).toBigInt()
 
           const liquidityTotalSupply = liquidityTotalSupplyBefore - liquidityIn
 
@@ -1359,41 +1194,32 @@ describe('burn', () => {
         beforeEach(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
-          rateReserve = await pool.rateReserve()
+          rateReserve = (await pool.rateReserve()).toBigInt()
 
           await advanceTimeAndBlock(duration)
         })
 
         it('Should revert if insufficient input amount', async () => {
-          await expect(burn(receiver, receiver, 0, 0)).to.be.reverted
+          await expect(burn(receiver, receiver.address, 0n, 0n)).to.be.reverted
         })
       })
     })
   })
 })
-const lend = async (to, assetIn, bondDecrease, rateDecrease) => {
-  await testToken1.mint(pool.address, assetIn)
 
-  //
-  //
-  //
+const lend = async (to: string, assetIn: bigint, bondDecrease: bigint, rateDecrease: bigint) => {
+  await testToken1.mint(pool.address, assetIn)
 
   const transaction = await pool.lend(to, bondDecrease, rateDecrease)
 
-  timestamp = BigInt(await getTimestamp(transaction.receipt.blockHash))
+  timestamp = await getTimestamp(transaction.blockHash!)
 }
 
 describe('lend', () => {
-  let tests = testCases.lend
-
+  let rateReserve: bigint
+  const tests = testCases.lend
   tests.forEach((test, idx) => {
     const {
       assetReserve,
@@ -1406,99 +1232,62 @@ describe('lend', () => {
       insuranceTotalSupplyBefore,
     } = test
 
-    let rateDecrease
+    let rateDecrease: bigint
 
-    let bondMint
+    let bondMint: bigint
+    let insuranceDecrease: bigint
+    let insuranceMint: bigint
 
-    let insuranceDecrease
-    let insuranceMint
-
-    let invariance
+    let invariance: bigint
 
     const calculate = () => {
-      const bondDecreaseAdjusted =
-        bondReserve * base - bondDecrease * (base + transactionFee)
-      const rateDecreaseAdjusted = divUp(
-        divUp(BigInt(invariance) * base * base, assetReserve + assetIn),
-        bondDecreaseAdjusted
-      )
-      rateDecrease = div(
-        rateReserve * base - rateDecreaseAdjusted,
-        base + transactionFee
-      )
+      const bondDecreaseAdjusted = bondReserve * base - bondDecrease * (base + transactionFee)
+      const rateDecreaseAdjusted = divUp(divUp(invariance * base * base, assetReserve + assetIn), bondDecreaseAdjusted)
+      rateDecrease = div(rateReserve * base - rateDecreaseAdjusted, base + transactionFee)
 
-      bondMint = div(
-        div(bondDecrease * rateReserve, assetReserve) *
-          (BigInt(maturity) - timestamp),
-        year
-      )
+      bondMint = div(div(bondDecrease * rateReserve, assetReserve) * (maturity - BigInt(timestamp)), year)
 
-      insuranceDecrease = div(
-        BigInt(rateDecrease) * (BigInt(maturity) - timestamp),
-        year
-      )
-      insuranceMint = div(
-        BigInt(rateDecrease) * (assetReserve + assetIn),
-        BigInt(rateReserve)
-      )
+      insuranceDecrease = div(rateDecrease * (maturity - BigInt(timestamp)), year)
+      insuranceMint = div(rateDecrease * (assetReserve + assetIn), rateReserve)
     }
 
     describe(`success case ${idx + 1}`, () => {
       before(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
         receiver = accounts[4]
-        //
-        rateReserve = BigInt(await pool.rateReserve())
-        //
+        rateReserve = (await pool.rateReserve()).toBigInt()
 
-        invariance = rateReserve * BigInt(assetReserve) * BigInt(bondReserve)
+        invariance = rateReserve * assetReserve * bondReserve
         calculate()
 
-        await lend(receiver, assetIn, bondDecrease, rateDecrease)
+        await lend(receiver.address, assetIn, bondDecrease, rateDecrease)
       })
 
       it('Should have receiver have correct amount of bond tokens', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.balanceOf(receiver)
-        bondMint = div(
-          div(bondDecrease * rateReserve, assetReserve) *
-            (BigInt(maturity) - timestamp),
-          year
-        )
+        const result = (await bondERC20.balanceOf(receiver.address)).toBigInt()
+        bondMint = div(div(bondDecrease * rateReserve, assetReserve) * (maturity - BigInt(timestamp)), year)
         const bondReceived = bondDecrease + bondMint
         checkBigIntEquality(result, bondReceived)
       })
 
       it('Should have receiver have correct amount of insurance tokens', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
-        const result = await insuranceERC20.balanceOf(receiver)
-        insuranceDecrease = div(
-          BigInt(rateDecrease) * (BigInt(maturity) - timestamp),
-          year
-        )
-        insuranceMint = div(
-          BigInt(rateDecrease) * (assetReserve + assetIn),
-          BigInt(rateReserve)
-        )
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
+        const result = (await insuranceERC20.balanceOf(receiver.address)).toBigInt()
+        insuranceDecrease = div(rateDecrease * (maturity - BigInt(timestamp)), year)
+        insuranceMint = div(rateDecrease * (assetReserve + assetIn), rateReserve)
         const insuranceReceived = insuranceDecrease + insuranceMint
 
         checkBigIntEquality(result, insuranceReceived)
       })
 
       it('Should have pool have a correct assets reserve and balance', async () => {
-        const result = await testToken1.balanceOf(pool.address)
-
-        const resultReserve = await pool.assetReserve()
+        const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+        const resultReserve = (await pool.assetReserve()).toBigInt()
 
         const assetBalance = assetReserve + assetIn
 
@@ -1507,17 +1296,17 @@ describe('lend', () => {
       })
 
       it('Should have pool have correct collateral reserve and balance', async () => {
-        const result = await testToken2.balanceOf(pool.address)
-        const resultReserve = await pool.collateralReserve()
+        const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+        const resultReserve = (await pool.collateralReserve()).toBigInt()
 
         checkBigIntEquality(result, collateralReserve)
         checkBigIntEquality(resultReserve, collateralReserve)
       })
 
       it('Should have pool have correct amount of bond tokens', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.balanceOf(pool.address)
+        const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
         const bondBalance = bondReserve - bondDecrease
 
@@ -1525,9 +1314,9 @@ describe('lend', () => {
       })
 
       it('Should have pool have correct amount of insurance tokens', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-        const result = await insuranceERC20.balanceOf(pool.address)
+        const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
         const insuranceBalance = insuranceReserve - insuranceDecrease
 
@@ -1535,18 +1324,18 @@ describe('lend', () => {
       })
 
       it('Should have the correct bond total supply', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.totalSupply()
+        const result = (await bondERC20.totalSupply()).toBigInt()
         const bondTotalSupply = bondTotalSupplyBefore + bondMint
 
         checkBigIntEquality(result, bondTotalSupply)
       })
 
       it('Should have the correct insurance total supply', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-        const result = await insuranceERC20.totalSupply()
+        const result = (await insuranceERC20.totalSupply()).toBigInt()
 
         const insuranceTotalSupply = insuranceTotalSupplyBefore + insuranceMint
 
@@ -1558,22 +1347,12 @@ describe('lend', () => {
       beforeEach(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
         receiver = accounts[4]
 
-        // invariance = await pool.invariance()
-
-        // rateReserve = await pool.rateReserve()
-
-        rateReserve = BigInt(await pool.rateReserve())
-        invariance = BigInt(assetReserve) * BigInt(bondReserve) * rateReserve
+        rateReserve = (await pool.rateReserve()).toBigInt()
+        invariance = assetReserve * bondReserve * rateReserve
 
         calculate()
       })
@@ -1581,41 +1360,33 @@ describe('lend', () => {
       it('Should revert if no asset input amount', async () => {
         const wrongAssetIn = 0n
 
-        await expect(lend(receiver, wrongAssetIn, bondDecrease, rateDecrease))
-          .to.be.reverted
+        await expect(lend(receiver.address, wrongAssetIn, bondDecrease, rateDecrease)).to.be.reverted
       })
 
       it('Should revert if pool matured', async () => {
         await advanceTimeAndBlock(duration)
 
-        await expect(lend(receiver, assetIn, bondDecrease, rateDecrease)).to.be
-          .reverted
+        await expect(lend(receiver.address, assetIn, bondDecrease, rateDecrease)).to.be.reverted
       })
     })
   })
 })
 
 const borrow = async (
-  to,
-  assetReceived,
-  bondIncrease,
-  rateIncrease,
-  collateralIn
+  to: string,
+  assetReceived: bigint,
+  bondIncrease: bigint,
+  rateIncrease: bigint,
+  collateralIn: bigint
 ) => {
   await testToken2.mint(pool.address, collateralIn)
-  const transaction = await pool.borrow(
-    to,
-    assetReceived,
-    bondIncrease,
-    rateIncrease
-  )
+  const transaction = await pool.borrow(to, assetReceived, bondIncrease, rateIncrease)
 
-  timestamp = await getTimestamp(transaction.receipt.blockHash)
+  timestamp = await getTimestamp(transaction.blockHash!)
 }
 
 describe('borrow', () => {
-  let tests = testCases.borrow
-
+  const tests = testCases.borrow
   tests.forEach((test, idx) => {
     const {
       assetReserve,
@@ -1628,138 +1399,85 @@ describe('borrow', () => {
       insuranceTotalSupplyBefore,
     } = test
 
-    let rateReserve
+    let rateReserve: bigint
 
-    let rateIncrease
+    let rateIncrease: bigint
 
-    let collateralLocked
+    let collateralLocked: bigint
 
-    let insuranceIncrease
-    let debtRequired
+    let insuranceIncrease: bigint
+    let debtRequired: bigint
 
-    let invariance
+    let invariance: bigint
 
     const calculate = () => {
-      const bondIncreaseAdjusted =
-        BigInt(bondReserve) * BigInt(base) +
-        BigInt(bondIncrease) * BigInt(base - transactionFee)
+      const bondIncreaseAdjusted = bondReserve * base + bondIncrease * (base - transactionFee)
       const rateIncreaseAdjusted = divUp(
-        divUp(
-          BigInt(invariance) * base * base,
-          BigInt(assetReserve - assetReceived)
-        ),
-        BigInt(bondIncreaseAdjusted)
-      )
-      rateIncrease = divUp(
-        rateIncreaseAdjusted - rateReserve * base,
-        base - transactionFee
+        divUp(invariance * base * base, assetReserve - assetReceived),
+        bondIncreaseAdjusted
       )
 
-      const bondMax = div(
-        assetReceived * bondReserve,
-        assetReserve - assetReceived
-      )
-      const bondMaxUp = divUp(
-        assetReceived * bondReserve,
-        assetReserve - assetReceived
-      )
+      rateIncrease = divUp(rateIncreaseAdjusted - rateReserve * base, base - transactionFee)
 
-      collateralLocked = divUp(
-        BigInt(bondMaxUp) * BigInt(bondIncrease),
-        BigInt(bondMax) - BigInt(bondIncrease)
-      )
-      collateralLocked = divUp(
-        BigInt(collateralLocked) * BigInt(rateReserve),
-        BigInt(assetReserve)
-      )
+      const bondMax = div(assetReceived * bondReserve, assetReserve - assetReceived)
+      const bondMaxUp = divUp(assetReceived * bondReserve, assetReserve - assetReceived)
+
+      collateralLocked = divUp(bondMaxUp * bondIncrease, bondMax - bondIncrease)
+      collateralLocked = divUp(collateralLocked * rateReserve, assetReserve)
       // collateralLocked = divUp(
       //   BigInt(collateralLocked) * BigInt(maturity - timestamp),
       //   BigInt(year)
       // )
-      collateralLocked += BigInt(bondMaxUp)
+      collateralLocked += bondMaxUp
 
-      insuranceIncrease = divUp(
-        BigInt(rateIncrease) * (BigInt(maturity) - BigInt(timestamp)),
-        BigInt(year)
-      )
+      insuranceIncrease = divUp(rateIncrease * (maturity - BigInt(timestamp)), year)
 
-      const rateMax = div(
-        BigInt(assetReceived) * BigInt(rateReserve),
-        BigInt(assetReserve) - BigInt(assetReceived)
-      )
-      const rateMaxUp = divUp(
-        BigInt(assetReceived) * BigInt(rateReserve),
-        BigInt(assetReserve) - BigInt(assetReceived)
-      )
-      debtRequired = divUp(
-        BigInt(rateMaxUp * rateIncrease),
-        BigInt(rateMax - rateIncrease)
-      )
-      debtRequired = divUp(
-        BigInt(debtRequired) * (BigInt(maturity) - BigInt(timestamp)),
-        BigInt(year)
-      )
-      debtRequired = debtRequired + BigInt(assetReceived)
+      const rateMax = div(assetReceived * rateReserve, assetReserve - assetReceived)
+      const rateMaxUp = divUp(assetReceived * rateReserve, assetReserve - assetReceived)
+      debtRequired = divUp(rateMaxUp * rateIncrease, rateMax - rateIncrease)
+      debtRequired = divUp(debtRequired * (maturity - BigInt(timestamp)), year)
+      debtRequired = debtRequired + assetReceived
     }
+
     describe(`success case ${idx + 1}`, () => {
       before(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
         receiver = accounts[4]
 
-        // invariance = BigInt(await pool.invariance())
-
-        // rateReserve = div(div(invariance, assetReserve), bondReserve)
-
-        rateReserve = BigInt(await pool.rateReserve())
-        invariance = BigInt(assetReserve) * BigInt(bondReserve) * rateReserve
+        rateReserve = (await pool.rateReserve()).toBigInt()
+        invariance = assetReserve * bondReserve * rateReserve
 
         calculate()
 
-        await borrow(
-          receiver,
-          assetReceived,
-          bondIncrease,
-          rateIncrease,
-          collateralLocked
-        )
+        await borrow(receiver.address, assetReceived, bondIncrease, rateIncrease, collateralLocked)
         calculate()
       })
 
       it('Should have receiver have correct amount of asset', async () => {
-        const result = BigInt(await testToken1.balanceOf(receiver))
+        const result = (await testToken1.balanceOf(receiver.address)).toBigInt()
 
         checkBigIntEquality(result, assetReceived)
       })
 
       it('Should have receiver have a correct collateralized debt token', async () => {
-        const collateralizedDebtERC721 = await CollateralizedDebt.at(
-          await pool.collateralizedDebt()
-        )
+        const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
         const tokenId = await collateralizedDebtERC721.totalSupply()
         const result = await collateralizedDebtERC721.ownerOf(tokenId)
-        const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-          tokenId
-        )
-        const resultDebt = resultHex.debt
-        const resultCollateral = resultHex.collateral
+        const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+        const resultDebt = resultHex.debt.toBigInt()
+        const resultCollateral = resultHex.collateral.toBigInt()
 
-        expect(result).to.equal(receiver)
+        expect(result).to.equal(receiver.address)
         checkBigIntLte(resultDebt, debtRequired)
         checkBigIntLte(resultCollateral, collateralLocked)
       })
 
       it('Should have pool have a correct assets', async () => {
-        const result = await testToken1.balanceOf(pool.address)
-        const resultReserve = await pool.assetReserve()
+        const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+        const resultReserve = (await pool.assetReserve()).toBigInt()
 
         const assetBalance = assetReserve - assetReceived
 
@@ -1768,8 +1486,8 @@ describe('borrow', () => {
       })
 
       it('Should have pool have correct collateral', async () => {
-        const result = await testToken2.balanceOf(pool.address)
-        const resultReserve = await pool.collateralReserve()
+        const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+        const resultReserve = (await pool.collateralReserve()).toBigInt()
         const collateralBalance = collateralReserve + collateralLocked
 
         checkBigIntEquality(result, collateralBalance)
@@ -1777,9 +1495,9 @@ describe('borrow', () => {
       })
 
       it('Should have pool have correct amount of bond tokens', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.balanceOf(pool.address)
+        const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
         const bondBalance = bondReserve + bondIncrease
 
@@ -1787,9 +1505,9 @@ describe('borrow', () => {
       })
 
       it('Should have pool have correct amount of insurance tokens', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-        const result = await insuranceERC20.balanceOf(pool.address)
+        const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
         const insuranceBalance = insuranceReserve + insuranceIncrease
 
@@ -1797,21 +1515,20 @@ describe('borrow', () => {
       })
 
       it('Should have the correct bond total supply', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.totalSupply()
+        const result = (await bondERC20.totalSupply()).toBigInt()
         const bondTotalSupply = bondTotalSupplyBefore + bondIncrease
 
         checkBigIntEquality(result, bondTotalSupply)
       })
 
       it('Should have the correct insurance total supply', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-        const result = await insuranceERC20.totalSupply()
+        const result = (await insuranceERC20.totalSupply()).toBigInt()
 
-        const insuranceTotalSupply =
-          insuranceTotalSupplyBefore + insuranceIncrease
+        const insuranceTotalSupply = insuranceTotalSupplyBefore + insuranceIncrease
 
         checkBigIntEquality(result, insuranceTotalSupply)
       })
@@ -1821,22 +1538,12 @@ describe('borrow', () => {
       beforeEach(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
         receiver = accounts[4]
 
-        // invariance = await pool.invariance()
-        // //
-        // rateReserve = div(div(BigInt(invariance), BigInt(assetReserve)), BigInt(bondReserve))
-
-        rateReserve = BigInt(await pool.rateReserve())
-        invariance = BigInt(assetReserve) * BigInt(bondReserve) * rateReserve
+        rateReserve = (await pool.rateReserve()).toBigInt()
+        invariance = assetReserve * bondReserve * rateReserve
 
         calculate()
       })
@@ -1844,49 +1551,27 @@ describe('borrow', () => {
       it('Should revert if no asset output amount', async () => {
         const wrongAssetReceived = 0n
 
-        await expect(
-          borrow(
-            receiver,
-            wrongAssetReceived,
-            bondIncrease,
-            rateIncrease,
-            collateralLocked
-          )
-        ).to.be.reverted
+        await expect(borrow(receiver.address, wrongAssetReceived, bondIncrease, rateIncrease, collateralLocked)).to.be
+          .reverted
       })
 
       it('Should revert if not enough collateral amount', async () => {
         const wrongCollateralLocked = collateralLocked / 1000000000000n
 
-        await expect(
-          borrow(
-            receiver,
-            assetReceived,
-            bondIncrease,
-            rateIncrease,
-            wrongCollateralLocked
-          )
-        ).to.be.reverted
+        await expect(borrow(receiver.address, assetReceived, bondIncrease, rateIncrease, wrongCollateralLocked)).to.be
+          .reverted
       })
 
       it('Should revert if pool matured', async () => {
         await advanceTimeAndBlock(duration)
-        await expect(
-          borrow(
-            receiver,
-            assetReceived,
-            bondIncrease,
-            rateIncrease,
-            collateralLocked
-          )
-        ).to.be.reverted
+        await expect(borrow(receiver.address, assetReceived, bondIncrease, rateIncrease, collateralLocked)).to.be
+          .reverted
       })
     })
   })
 })
 describe('withdraw', () => {
-  let tests = testCases.withdraw
-
+  const tests = testCases.withdraw
   tests.forEach((test, idx) => {
     const {
       assetReserve,
@@ -1904,32 +1589,26 @@ describe('withdraw', () => {
       before(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
         await advanceTimeAndBlock(duration)
 
-        await pool.withdraw(receiver, bondIn, insuranceIn, { from: receiver })
+        await pool.connect(receiver).withdraw(receiver.address, bondIn, insuranceIn)
       })
 
       it('Should have receiver have correct amount of asset', async () => {
-        const result = await testToken1.balanceOf(receiver)
+        const result = (await testToken1.balanceOf(receiver.address)).toBigInt()
         checkBigIntEquality(result, assetReceived)
       })
 
       it('Should have receiver have correct amount of collateral', async () => {
-        const result = await testToken2.balanceOf(receiver)
+        const result = (await testToken2.balanceOf(receiver.address)).toBigInt()
 
         checkBigIntEquality(result, collateralReceived)
       })
 
       it('Should have pool have a correct assets', async () => {
-        const result = await testToken1.balanceOf(pool.address)
+        const result = (await testToken1.balanceOf(pool.address)).toBigInt()
 
         const assetBalance = assetReserve - assetReceived
 
@@ -1937,7 +1616,7 @@ describe('withdraw', () => {
       })
 
       it('Should have pool have correct collateral', async () => {
-        const result = await testToken2.balanceOf(pool.address)
+        const result = (await testToken2.balanceOf(pool.address)).toBigInt()
 
         const collateralBalance = collateralReserve - collateralReceived
 
@@ -1945,25 +1624,25 @@ describe('withdraw', () => {
       })
 
       it('Should have pool have correct amount of bond tokens', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.balanceOf(pool.address)
+        const result = (await bondERC20.balanceOf(pool.address)).toBigInt()
 
         checkBigIntEquality(result, bondReserve)
       })
 
       it('Should have pool have correct amount of insurance tokens', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-        const result = await insuranceERC20.balanceOf(pool.address)
+        const result = (await insuranceERC20.balanceOf(pool.address)).toBigInt()
 
         checkBigIntEquality(result, insuranceReserve)
       })
 
       it('Should have the correct bond total supply', async () => {
-        const bondERC20 = await Bond.at(await pool.bond())
+        const bondERC20 = await bondAt(await pool.bond())
 
-        const result = await bondERC20.totalSupply()
+        const result = (await bondERC20.totalSupply()).toBigInt()
 
         const bondTotalSupply = bondTotalSupplyBefore - bondIn
 
@@ -1971,9 +1650,9 @@ describe('withdraw', () => {
       })
 
       it('Should have the correct insurance total supply', async () => {
-        const insuranceERC20 = await Insurance.at(await pool.insurance())
+        const insuranceERC20 = await insuranceAt(await pool.insurance())
 
-        const result = await insuranceERC20.totalSupply()
+        const result = (await insuranceERC20.totalSupply()).toBigInt()
 
         const insuranceTotalSupply = insuranceTotalSupplyBefore - insuranceIn
 
@@ -1985,13 +1664,7 @@ describe('withdraw', () => {
       beforeEach(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
       })
 
       it('Should revert if insufficient input amount', async () => {
@@ -2000,8 +1673,7 @@ describe('withdraw', () => {
 
         await advanceTimeAndBlock(duration)
 
-        await expect(pool.withdraw(receiver, wrongBondIn, wrongInsuranceIn)).to
-          .be.reverted
+        await expect(pool.withdraw(receiver.address, wrongBondIn, wrongInsuranceIn)).to.be.reverted
       })
 
       it('Should revert if receiver is the pool address', async () => {
@@ -2009,27 +1681,23 @@ describe('withdraw', () => {
 
         await advanceTimeAndBlock(duration)
 
-        await expect(pool.withdraw(wrongReceiver, bondIn, insuranceIn)).to.be
-          .reverted
+        await expect(pool.withdraw(wrongReceiver, bondIn, insuranceIn)).to.be.reverted
       })
 
       it('Should revert if pool has not matured yet', async () => {
-        await expect(pool.withdraw(receiver, bondIn, insuranceIn)).to.be
-          .reverted
+        await expect(pool.withdraw(receiver.address, bondIn, insuranceIn)).to.be.reverted
       })
     })
   })
 })
 
-const pay = async (tokenId, assetIn) => {
+const pay = async (tokenId: bigint, assetIn: bigint) => {
   await testToken1.mint(pool.address, assetIn)
-
   await pool.pay(tokenId)
 }
 
 describe('pay', () => {
-  tests = testCases.pay
-
+  const tests = testCases.pay
   tests.forEach((test, idx) => {
     const {
       assetReserve,
@@ -2054,33 +1722,23 @@ describe('pay', () => {
         before(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
           await pay(tokenId, assetIn)
         })
 
         it('Should have receiver have correct amount of collateral', async () => {
-          const result = await testToken2.balanceOf(receiver)
+          const result = (await testToken2.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, collateralReceived)
         })
 
         it('Should have receiver have a correct collateralized debt token', async () => {
-          const collateralizedDebtERC721 = await CollateralizedDebt.at(
-            await pool.collateralizedDebt()
-          )
+          const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
 
-          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-            tokenId
-          )
-          const resultDebt = resultHex.debt
-          const resultCollateral = resultHex.collateral
+          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+          const resultDebt = resultHex.debt.toBigInt()
+          const resultCollateral = resultHex.collateral.toBigInt()
 
           const debtRemaining = tokenDebt - assetIn
           const collateralRemaining = tokenCollateral - collateralReceived
@@ -2090,8 +1748,8 @@ describe('pay', () => {
         })
 
         it('Should have pool have a correct assets', async () => {
-          const result = await testToken1.balanceOf(pool.address)
-          const resultReserve = await pool.assetReserve()
+          const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.assetReserve()).toBigInt()
 
           const assetBalance = assetReserve + assetIn
 
@@ -2100,8 +1758,8 @@ describe('pay', () => {
         })
 
         it('Should have pool have correct collateral', async () => {
-          const result = await testToken2.balanceOf(pool.address)
-          const resultReserve = await pool.collateralReserve()
+          const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.collateralReserve()).toBigInt()
 
           const collateralBalance = collateralReserve - collateralReceived
 
@@ -2117,44 +1775,34 @@ describe('pay', () => {
         before(async () => {
           await deploy()
 
-          await mint(
-            receiver,
-            assetReserve,
-            collateralReserve,
-            bondReserve,
-            insuranceReserve
-          )
+          await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
           await pay(tokenId, assetIn)
         })
 
         it('Should have receiver have correct amount of collateral', async () => {
-          const result = await testToken2.balanceOf(receiver)
+          const result = (await testToken2.balanceOf(receiver.address)).toBigInt()
 
           checkBigIntEquality(result, collateralReceived)
         })
 
         it('Should have receiver have a correct collateralized debt token', async () => {
-          const collateralizedDebtERC721 = await CollateralizedDebt.at(
-            await pool.collateralizedDebt()
-          )
+          const collateralizedDebtERC721 = await collateralizedDebtAt(await pool.collateralizedDebt())
 
-          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-            tokenId
-          )
-          const resultDebt = resultHex.debt
-          const resultCollateral = resultHex.collateral
+          const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(tokenId)
+          const resultDebt = resultHex.debt.toBigInt()
+          const resultCollateral = resultHex.collateral.toBigInt()
 
-          const debtRemaining = 0
-          const collateralRemaining = 0
+          const debtRemaining = 0n
+          const collateralRemaining = 0n
 
           checkBigIntEquality(resultDebt, debtRemaining)
           checkBigIntEquality(resultCollateral, collateralRemaining)
         })
 
         it('Should have pool have a correct assets', async () => {
-          const result = await testToken1.balanceOf(pool.address)
-          const resultReserve = await pool.assetReserve()
+          const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.assetReserve()).toBigInt()
 
           const assetBalance = assetReserve + assetIn
 
@@ -2163,8 +1811,8 @@ describe('pay', () => {
         })
 
         it('Should have pool have correct collateral', async () => {
-          const result = await testToken2.balanceOf(pool.address)
-          const resultReserve = await pool.collateralReserve()
+          const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+          const resultReserve = (await pool.collateralReserve()).toBigInt()
 
           const collateralBalance = collateralReserve - collateralReceived
 
@@ -2180,13 +1828,7 @@ describe('pay', () => {
       beforeEach(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
       })
 
       it('Should revert if there is no asset input', async () => {
@@ -2204,8 +1846,8 @@ describe('pay', () => {
       })
 
       it('Should revert if pool already matured', async () => {
-        numberDuration = duration
-        //
+        const numberDuration = duration
+
         await advanceTimeAndBlock(numberDuration)
 
         await expect(pay(tokenId, assetIn)).to.be.reverted
@@ -2214,7 +1856,7 @@ describe('pay', () => {
   })
 })
 
-const skim = async (to, assetIn, collateralIn) => {
+const skim = async (to: string, assetIn: bigint, collateralIn: bigint) => {
   await testToken1.mint(pool.address, assetIn)
   await testToken2.mint(pool.address, collateralIn)
 
@@ -2222,54 +1864,42 @@ const skim = async (to, assetIn, collateralIn) => {
 }
 
 describe('skim', () => {
-  tests = testCases.skim
+  const tests = testCases.skim
   tests.forEach((test, idx) => {
-    const {
-      assetReserve,
-      bondReserve,
-      insuranceReserve,
-      collateralReserve,
-      assetSkim,
-      collateralSkim,
-    } = test
+    const { assetReserve, bondReserve, insuranceReserve, collateralReserve, assetSkim, collateralSkim } = test
     describe(`success case ${idx + 1}`, () => {
       before(async () => {
         await deploy()
 
-        await mint(
-          receiver,
-          assetReserve,
-          collateralReserve,
-          bondReserve,
-          insuranceReserve
-        )
+        await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
 
-        await skim(receiver, assetSkim, collateralSkim)
+        await skim(receiver.address, assetSkim, collateralSkim)
       })
 
       it('Should have receiver a correct amount of asset', async () => {
-        const result = await testToken1.balanceOf(receiver)
+        const result = (await testToken1.balanceOf(receiver.address)).toBigInt()
 
         checkBigIntEquality(result, assetSkim)
       })
 
       it('Should have receiver a correct amount of collateral', async () => {
-        const result = await testToken2.balanceOf(receiver)
+        const result = (await testToken2.balanceOf(receiver.address)).toBigInt()
 
         checkBigIntEquality(result, collateralSkim)
       })
 
       it('Should have pool have a correct assets', async () => {
-        const result = await testToken1.balanceOf(pool.address)
-        const resultReserve = await pool.assetReserve()
+        const result = (await testToken1.balanceOf(pool.address)).toBigInt()
+        const resultReserve = (await pool.assetReserve()).toBigInt()
+
         checkBigIntEquality(result, assetReserve)
         checkBigIntEquality(resultReserve, assetReserve)
         checkBigIntEquality(result, resultReserve)
       })
 
       it('Should have pool have correct collateral', async () => {
-        const result = await testToken2.balanceOf(pool.address)
-        const resultReserve = await pool.collateralReserve()
+        const result = (await testToken2.balanceOf(pool.address)).toBigInt()
+        const resultReserve = (await pool.collateralReserve()).toBigInt()
 
         checkBigIntEquality(result, collateralReserve)
         checkBigIntEquality(resultReserve, collateralReserve)

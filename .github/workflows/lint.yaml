@@ -1,8 +1,9 @@
 name: Lint
 
-on: [push]
+on: [push, pull_request]
+branches: [main]
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +22,11 @@ jobs:
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
 
-      - name: Run linters
-        uses: wearerequired/lint-action@a8497ddb33fb1205941fd40452ca9fff07e0770d
-        with:
-          auto_fix: true
-          prettier: true
-          prettier_extensions: 'js,json,md,ts,sol'
+      - name: Install Dependecies
+        run: npm ci
+
+      - name: Add prettierignorerc
+        run: echo '.github/*\n.gitignore ' > .prettierignorerc
+
+      - name: Run prettier
+        run: npx prettier --write --ignore-path .prettierignorerc .

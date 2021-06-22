@@ -1,6 +1,7 @@
 name: Build
 
-on: [push]
+on: [push, pull_request]
+branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,6 +15,9 @@ jobs:
         with:
           node-version: 14
 
+      - name: Create a dummy .env file
+        run: mv .env.sample .env
+
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -25,6 +29,4 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Run unit tests
-        run: |
-          npx hardhat node &
-          npx hardhat --network localhost test
+        run: npx hardhat test
