@@ -16,5 +16,12 @@ interface InterfaceERC721Permit is InterfaceERC721 {
 
     // UPDATE
 
-    function permit(address _approved, uint256 _tokenId, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) external;
+    function permit(
+        address _approved,
+        uint256 _tokenId,
+        uint256 _deadline,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external;
 }

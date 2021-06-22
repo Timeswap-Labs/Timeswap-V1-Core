@@ -24,7 +24,10 @@ interface InterfaceTimeswapFactory {
 
     function insurance() external view returns (InterfaceTimeswapERC20);
 
-    function collateralizedDebt() external view returns (InterfaceTimeswapERC721);
+    function collateralizedDebt()
+        external
+        view
+        returns (InterfaceTimeswapERC721);
 
     function feeTo() external view returns (address);
 

@@ -17,15 +17,30 @@ interface InterfaceTimeswapERC721 is InterfaceERC721Permit {
 
     function collateralDecimals() external view returns (uint8);
 
-    function collateralizedDebtOf(uint256 _tokenId) external view returns (uint128 _debt, uint128 _collateral);
+    function collateralizedDebtOf(uint256 _tokenId)
+        external
+        view
+        returns (uint128 _debt, uint128 _collateral);
 
     function totalSupply() external view returns (uint256);
 
     // UPDATE
 
-    function initialize(string memory _string, uint8 _debtDecimals, uint8 _collateralDecimals) external;
+    function initialize(
+        string memory _string,
+        uint8 _debtDecimals,
+        uint8 _collateralDecimals
+    ) external;
 
-    function mint(address _to, uint256 _debt, uint256 _collateral) external;
+    function mint(
+        address _to,
+        uint256 _debt,
+        uint256 _collateral
+    ) external;
 
-    function burn(uint256 _tokenId, uint256 _debt, uint256 _collateral) external;
+    function burn(
+        uint256 _tokenId,
+        uint256 _debt,
+        uint256 _collateral
+    ) external;
 }

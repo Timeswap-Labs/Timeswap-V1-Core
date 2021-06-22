@@ -406,8 +406,8 @@ const testCases = {
       collateralSkim: 4000n,
     },
   ],
-}
+};
 
 module.exports = {
   testCases,
-}
+};

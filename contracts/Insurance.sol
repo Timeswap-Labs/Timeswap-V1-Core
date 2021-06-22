@@ -18,7 +18,10 @@ contract Insurance is TimeswapERC20 {
     /// @dev Initializes the insurance ERC20 contract
     /// @param _symbol The additional symbol ticker added in the format of -{asset symbol}-{collateral symbol}-{maturity time in unix timestamp}
     /// @param _decimals The decimals set for the insurance ERC20 contract
-    function initialize(string memory _symbol, uint8 _decimals) external override {
+    function initialize(string memory _symbol, uint8 _decimals)
+        external
+        override
+    {
         // The symbol ticker of the insurance ERC20 token contract follows this format
         // IN-{asset symbol}-{collateral symbol}-{maturity time in unix timestamp}
         // Example for pair DAI as the asset and WETH as the collateral at maturity time 1750000000

@@ -19,7 +19,11 @@ contract CollateralizedDebt is TimeswapERC721 {
     /// @param _symbol The additional symbol ticker added in the format of -{asset symbol}-{collateral symbol}-{maturity time in unix timestamp}
     /// @param _collateralDecimals The decimals set for collateral locked amount
     /// @param _assetDecimals The decimals set for the debt required amount
-    function initialize(string memory _symbol, uint8 _collateralDecimals, uint8 _assetDecimals) external override {
+    function initialize(
+        string memory _symbol,
+        uint8 _collateralDecimals,
+        uint8 _assetDecimals
+    ) external override {
         // The symbol ticker of the collateralized debt ERC721 token contract follows this format
         // CD-{asset symbol}-{collateral symbol}-{maturity time in unix timestamp}
         // Example for pair DAI as the asset and WETH as the collateral at maturity time 1750000000
