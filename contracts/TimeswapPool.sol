@@ -1143,7 +1143,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Increasing the asset ERC20 balance of the pool contract before calling this function will determine the assetIn parameter
     /// @param _tokenId The id of the collateralized debt ERC721
     /// @return _collateralReceived The collateral ERC20 received by the owner of collateralized debt ERC721
-    function pay(uint256 _tokenId)
+    function pay(
+        address _to,
+        uint256 _tokenId
+    )
         external
         override
         reentrancyLock()
@@ -1175,17 +1178,18 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Must precalculate the assetIn with a convenience contract to avoid unecessary loss of asset ERC20
         (_assetIn, _collateralReceived) = _assetIn >= _tokenDebt
             ? (_tokenDebt, _tokenCollateral)
-            : (_assetIn, (_assetIn * _tokenCollateral) / _tokenDebt);
-        _collateralizedDebt.burn(_tokenId, _collateralReceived, _assetIn);
-
+            : (_assetIn, _assetIn * _tokenCollateral / _tokenDebt);
+        
         // Get the owner of the collateralized debt ERC721
         // Transfer the collateral received to the owner
-        address _to = _collateralizedDebt.ownerOf(_tokenId);
-        uint256 _collateralBalance = _transferAndBalanceOf(
-            collateral,
-            _to,
-            _collateralReceived
-        );
+        address _owner = _collateralizedDebt.ownerOf(_tokenId);
+
+        _collateralReceived = _owner == msg.sender ? _collateralReceived : 0;
+        _collateralizedDebt.burn(_tokenId, _collateralReceived, _assetIn);
+
+        uint256 _collateralBalance;
+        if (_collateralReceived > 0)
+            _collateralBalance = _transferAndBalanceOf(collateral, _to, _collateralReceived);
 
         // Update all the pools
         // The pay function simply increase the X pool and decrease the W pool which means the Z virtual pool for the next transaction decreases

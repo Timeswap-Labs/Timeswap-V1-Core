@@ -170,7 +170,10 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
         uint256 _insuranceIn
     ) external returns (uint256 _assetReceived, uint256 _collateralReceived);
 
-    function pay(uint256 _tokenId)
+    function pay(
+        address _to,
+        uint256 _tokenId
+    )
         external
         returns (uint256 _collateralReceived);
 
