@@ -1,6 +1,7 @@
 name: Lint
 
-on: [push]
+on: [push, pull_request]
+branches: [main]
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -20,12 +21,12 @@ jobs:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
-        
+
       - name: Install Dependecies
         run: npm ci
-        
+
       - name: Add prettierignorerc
-        run:  echo '.github/*\n.gitignore ' > .prettierignorerc
-        
+        run: echo '.github/*\n.gitignore ' > .prettierignorerc
+
       - name: Run prettier
         run: npx prettier --write --ignore-path .prettierignorerc .
