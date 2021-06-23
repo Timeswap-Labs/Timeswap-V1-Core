@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {InterfaceERC20Permit} from "./interfaces/InterfaceERC20Permit.sol";
-import {ERC20} from "./ERC20.sol";
+import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
+import {InterfaceERC20Permit} from './interfaces/InterfaceERC20Permit.sol';
+import {ERC20} from './ERC20.sol';
 
 /// @title ERC20 Permit
 /// @author Ricsson W. Ngo
@@ -15,13 +15,9 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
     /* ===== MODEL ===== */
 
     bytes32 public constant override DOMAIN_TYPEHASH =
-        keccak256(
-            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
-        );
+        keccak256('EIP712Domain(string name,uint256 chainId,address verifyingContract)');
     bytes32 public constant override PERMIT_TYPEHASH =
-        keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
+        keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
     bytes32 public override DOMAIN_SEPARATOR; // immutable
 
@@ -39,24 +35,12 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
         bytes32 _s
     ) external override {
         bytes32 _structHash = keccak256(
-            abi.encode(
-                PERMIT_TYPEHASH,
-                _owner,
-                _spender,
-                _value,
-                nonces[_owner]++,
-                _deadline
-            )
+            abi.encode(PERMIT_TYPEHASH, _owner, _spender, _value, nonces[_owner]++, _deadline)
         );
-        bytes32 _digest = keccak256(
-            abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, _structHash)
-        );
+        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, _structHash));
         address _signatory = _digest.recover(_v, _r, _s);
-        require(_signatory == _owner, "ERC20Permit :: permit : Unauthorized");
-        require(
-            block.timestamp <= _deadline,
-            "ERC20Permit :: permit : Signature Expired"
-        );
+        require(_signatory == _owner, 'ERC20Permit :: permit : Unauthorized');
+        require(block.timestamp <= _deadline, 'ERC20Permit :: permit : Signature Expired');
 
         allowance[_owner][_spender] = _value;
 
@@ -71,13 +55,6 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
             chainId := chainid()
         }
 
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                DOMAIN_TYPEHASH,
-                keccak256(bytes(_name)),
-                chainId,
-                address(this)
-            )
-        );
+        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(_name)), chainId, address(this)));
     }
 }

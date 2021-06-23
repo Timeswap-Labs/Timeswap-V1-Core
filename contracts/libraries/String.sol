@@ -4,7 +4,7 @@ pragma solidity =0.8.1;
 library String {
     function toString(uint256 _i) internal pure returns (string memory str) {
         if (_i == 0) {
-            return "0";
+            return '0';
         }
 
         uint256 j = _i;

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from "./InterfaceERC20.sol";
-import {InterfaceERC20Permit} from "./InterfaceERC20Permit.sol";
-import {InterfaceTimeswapERC20} from "./InterfaceTimeswapERC20.sol";
-import {InterfaceTimeswapERC721} from "./InterfaceTimeswapERC721.sol";
-import {InterfaceTimeswapFactory} from "./InterfaceTimeswapFactory.sol";
+import {InterfaceERC20} from './InterfaceERC20.sol';
+import {InterfaceERC20Permit} from './InterfaceERC20Permit.sol';
+import {InterfaceTimeswapERC20} from './InterfaceTimeswapERC20.sol';
+import {InterfaceTimeswapERC721} from './InterfaceTimeswapERC721.sol';
+import {InterfaceTimeswapFactory} from './InterfaceTimeswapFactory.sol';
 
 interface InterfaceTimeswapPool is InterfaceERC20Permit {
     // EVENT
@@ -94,10 +94,7 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
 
     function insurance() external view returns (InterfaceTimeswapERC20);
 
-    function collateralizedDebt()
-        external
-        view
-        returns (InterfaceTimeswapERC721);
+    function collateralizedDebt() external view returns (InterfaceTimeswapERC721);
 
     function assetReserve() external view returns (uint128);
 
@@ -170,12 +167,7 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
         uint256 _insuranceIn
     ) external returns (uint256 _assetReceived, uint256 _collateralReceived);
 
-    function pay(
-        address _to,
-        uint256 _tokenId
-    )
-        external
-        returns (uint256 _collateralReceived);
+    function pay(address _to, uint256 _tokenId) external returns (uint256 _collateralReceived);
 
     function skim(address _to) external;
 }

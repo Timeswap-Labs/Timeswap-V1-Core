@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {InterfaceTimeswapFactory} from "./interfaces/InterfaceTimeswapFactory.sol";
-import {InterfaceTimeswapPool} from "./interfaces/InterfaceTimeswapPool.sol";
-import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
-import {InterfaceTimeswapERC20} from "./interfaces/InterfaceTimeswapERC20.sol";
-import {InterfaceTimeswapERC721} from "./interfaces/InterfaceTimeswapERC721.sol";
-import {Math} from "./libraries/Math.sol";
-import {String} from "./libraries/String.sol";
+import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
+import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
+import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
+import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
+import {InterfaceTimeswapERC20} from './interfaces/InterfaceTimeswapERC20.sol';
+import {InterfaceTimeswapERC721} from './interfaces/InterfaceTimeswapERC721.sol';
+import {Math} from './libraries/Math.sol';
+import {String} from './libraries/String.sol';
 
 /// @title Timeswap Factory
 /// @author Ricsson W. Ngo
@@ -71,48 +71,27 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
         uint128 _protocolFee
     ) {
         // Sanity checks
-        require(
-            _feeTo != ZERO && _feeToSetter != ZERO,
-            "TimeswapFactory :: constructor : Cannot be Zero Address"
-        );
+        require(_feeTo != ZERO && _feeToSetter != ZERO, 'TimeswapFactory :: constructor : Cannot be Zero Address');
         feeTo = _feeTo;
         feeToSetter = _feeToSetter;
 
-        require(
-            _pool != InterfaceTimeswapPool(ZERO),
-            "TimeswapFactory :: constructor : Cannot be Zero Address"
-        );
+        require(_pool != InterfaceTimeswapPool(ZERO), 'TimeswapFactory :: constructor : Cannot be Zero Address');
         pool = _pool;
 
-        require(
-            _bond != InterfaceTimeswapERC20(ZERO),
-            "TimeswapFactory :: constructor : Cannot be Zero Address"
-        );
-        require(
-            _insurance != InterfaceTimeswapERC20(ZERO),
-            "TimeswapFactory :: constructor : Cannot be Zero Address"
-        );
-        require(
-            _bond != _insurance,
-            "TimeswapPool :: initialize : Cannot be the same address"
-        );
+        require(_bond != InterfaceTimeswapERC20(ZERO), 'TimeswapFactory :: constructor : Cannot be Zero Address');
+        require(_insurance != InterfaceTimeswapERC20(ZERO), 'TimeswapFactory :: constructor : Cannot be Zero Address');
+        require(_bond != _insurance, 'TimeswapPool :: initialize : Cannot be the same address');
         require(
             _collateralizedDebt != InterfaceTimeswapERC721(ZERO),
-            "TimeswapFactory :: constructor : Cannot be Zero Address"
+            'TimeswapFactory :: constructor : Cannot be Zero Address'
         );
         bond = _bond;
         insurance = _insurance;
         collateralizedDebt = _collateralizedDebt;
 
         // fee rates cannot be greater than precision BASE
-        require(
-            _transactionFee < BASE,
-            "TimeswapFactory :: constructor : Invalid Fee"
-        );
-        require(
-            _protocolFee < BASE,
-            "TimeswapFactory :: constructor : Invalid Fee"
-        );
+        require(_transactionFee < BASE, 'TimeswapFactory :: constructor : Invalid Fee');
+        require(_protocolFee < BASE, 'TimeswapFactory :: constructor : Invalid Fee');
         transactionFee = _transactionFee;
         protocolFee = _protocolFee;
     }
@@ -131,30 +110,20 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
         uint256 _maturity
     ) external override returns (InterfaceTimeswapPool _pool) {
         // Sanity checks
+        require(_asset != _collateral, 'TimeswapFactory :: createPool : Identical Address');
         require(
-            _asset != _collateral,
-            "TimeswapFactory :: createPool : Identical Address"
+            _asset != InterfaceERC20(ZERO) && _collateral != InterfaceERC20(ZERO),
+            'TimeswapFactory :: createPool : Zero Address'
         );
+        require(block.timestamp < _maturity, 'TimeswapFactory :: createPool : Invalid Maturity');
         require(
-            _asset != InterfaceERC20(ZERO) &&
-                _collateral != InterfaceERC20(ZERO),
-            "TimeswapFactory :: createPool : Zero Address"
-        );
-        require(
-            block.timestamp < _maturity,
-            "TimeswapFactory :: createPool : Invalid Maturity"
-        );
-        require(
-            getPool[_asset][_collateral][_maturity] ==
-                InterfaceTimeswapPool(ZERO),
-            "TimeswapFactory :: createPool : Pool Existed"
+            getPool[_asset][_collateral][_maturity] == InterfaceTimeswapPool(ZERO),
+            'TimeswapFactory :: createPool : Pool Existed'
         );
 
         // The salt is the keccak hash of the packed address of the asset ERC20, collateral ERC20, and the maturity time in string
         // Uses the create2 for predictable address using the correct salt
-        bytes32 _salt = keccak256(
-            abi.encodePacked(_asset, _collateral, _maturity.toString())
-        );
+        bytes32 _salt = keccak256(abi.encodePacked(_asset, _collateral, _maturity.toString()));
 
         // Clone the original TimeswapPool contract based on the minimal proxy standard
         _pool = InterfaceTimeswapPool(address(pool).cloneDeterministic(_salt));
@@ -180,25 +149,16 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     /// @dev Change the feeTo address
     /// @param _feeTo The address of the new feeTo
     function setFeeTo(address _feeTo) external override {
-        require(
-            msg.sender == feeToSetter,
-            "TimeswapFactory :: setFeeTo : Forbidden"
-        );
-        require(_feeTo != ZERO, "TimeswapFactory :: setFeeTo : Zero Address");
+        require(msg.sender == feeToSetter, 'TimeswapFactory :: setFeeTo : Forbidden');
+        require(_feeTo != ZERO, 'TimeswapFactory :: setFeeTo : Zero Address');
         feeTo = _feeTo;
     }
 
     /// @dev Change the feeToSetter address
     /// @param _feeToSetter The address of the new feeToSetter
     function setFeeToSetter(address _feeToSetter) external override {
-        require(
-            msg.sender == feeToSetter,
-            "TimeswapFactory :: setFeeToSetter : Forbidden"
-        );
-        require(
-            _feeToSetter != ZERO,
-            "TimeswapFactory :: setFeeToSetter : Zero Address"
-        );
+        require(msg.sender == feeToSetter, 'TimeswapFactory :: setFeeToSetter : Forbidden');
+        require(_feeToSetter != ZERO, 'TimeswapFactory :: setFeeToSetter : Zero Address');
         feeToSetter = _feeToSetter;
     }
 }

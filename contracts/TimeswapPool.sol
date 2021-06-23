@@ -79,8 +79,6 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev The function selector of the transfer function on ERC20 standard
     bytes4 private constant TRANSFER = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
-    address private constant ZERO_ADDRESS = address(type(uint160).min);
-
     /// @dev Stores the access state of the contract for reentrancy guard
     bool private locked;
 
@@ -117,7 +115,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Sanity check
         require(block.timestamp < _maturity, 'TimeswapPool :: initialize : Invalid Maturity');
         // Can only be called once
-        require(factory == InterfaceTimeswapFactory(ZERO_ADDRESS), 'TimeswapPool :: initialize : Forbidden');
+        require(factory == InterfaceTimeswapFactory(ZERO), 'TimeswapPool :: initialize : Forbidden');
 
         maturity = _maturity;
 
@@ -373,7 +371,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // Burn MINIMUM_LIQUIDITY amount of liquidity ERC20 to avoid DOS attack to other liquidity providers
         // Enforce protocol fee minted to the feeTo address
-        _mint(ZERO_ADDRESS, MINIMUM_LIQUIDITY); // burn minimum liquidity
+        _mint(ZERO, MINIMUM_LIQUIDITY); // burn minimum liquidity
         _mint(_to, _liquidityReceived);
         _mint(factory.feeTo(), _insuranceIncreaseAndDebtRequired - _liquidityReceived - MINIMUM_LIQUIDITY);
 

@@ -4,8 +4,8 @@ pragma solidity =0.8.1;
 contract TestToken {
     // MODEL
 
-    string public constant name = "Test Token";
-    string public constant symbol = "TEST";
+    string public constant name = 'Test Token';
+    string public constant symbol = 'TEST';
     uint8 public immutable decimals;
 
     address private constant ZERO = address(type(uint160).min);
@@ -16,11 +16,7 @@ contract TestToken {
 
     // EVENT
 
-    event Approval(
-        address indexed _owner,
-        address indexed _spender,
-        uint256 _value
-    );
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
@@ -47,10 +43,7 @@ contract TestToken {
         address _to,
         uint256 _value
     ) external returns (bool) {
-        if (
-            msg.sender != _from &&
-            allowance[_from][msg.sender] != type(uint256).max
-        ) {
+        if (msg.sender != _from && allowance[_from][msg.sender] != type(uint256).max) {
             allowance[_from][msg.sender] -= _value;
 
             emit Approval(_from, msg.sender, allowance[_from][msg.sender]);
