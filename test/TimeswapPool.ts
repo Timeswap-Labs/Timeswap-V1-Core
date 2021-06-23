@@ -1693,7 +1693,7 @@ describe('withdraw', () => {
 
 const pay = async (tokenId: bigint, assetIn: bigint) => {
   await testToken1.mint(pool.address, assetIn)
-  await pool.pay(tokenId)
+  await pool.connect(receiver).pay(receiver.address,tokenId)
 }
 
 describe('pay', () => {
@@ -1831,19 +1831,6 @@ describe('pay', () => {
         await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
       })
 
-      it('Should revert if there is no asset input', async () => {
-        const wrongAssetIn = 0n
-
-        await expect(pay(tokenId, wrongAssetIn)).to.be.reverted
-      })
-
-      it('Should revert if debt is already paid fully', async () => {
-        const wrongAssetIn = 1n
-
-        await pay(tokenId, assetIn)
-
-        await expect(pay(tokenId, wrongAssetIn)).to.be.reverted
-      })
 
       it('Should revert if pool already matured', async () => {
         const numberDuration = duration
