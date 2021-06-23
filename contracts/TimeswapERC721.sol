@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapERC721} from "./interfaces/InterfaceTimeswapERC721.sol";
-import {InterfaceTimeswapPool} from "./interfaces/InterfaceTimeswapPool.sol";
-import {ERC721Permit} from "./ERC721Permit.sol";
+import {InterfaceTimeswapERC721} from './interfaces/InterfaceTimeswapERC721.sol';
+import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
+import {ERC721Permit} from './ERC721Permit.sol';
 
 /// @title Timeswap ERC721
 /// @author Ricsson W. Ngo
@@ -41,22 +41,13 @@ abstract contract TimeswapERC721 is ERC721Permit, InterfaceTimeswapERC721 {
         uint256 _collateral,
         uint256 _debt
     ) external override {
-        require(
-            InterfaceTimeswapPool(msg.sender) == pool,
-            "TimeswapERC721 :: mint : Forbidden"
-        );
-        require(
-            _collateral <= MAXIMUM_BALANCE && _debt <= MAXIMUM_BALANCE,
-            "TimeswapERC721 :: mint : Overflow"
-        );
+        require(InterfaceTimeswapPool(msg.sender) == pool, 'TimeswapERC721 :: mint : Forbidden');
+        require(_collateral <= MAXIMUM_BALANCE && _debt <= MAXIMUM_BALANCE, 'TimeswapERC721 :: mint : Overflow');
 
         // Minted tokens starts at id 1
         tokenId++;
         uint256 _tokenId = tokenId; // gas saving
-        collateralizedDebtOf[_tokenId] = CollateralizedDebt(
-            uint128(_collateral),
-            uint128(_debt)
-        );
+        collateralizedDebtOf[_tokenId] = CollateralizedDebt(uint128(_collateral), uint128(_debt));
         _safeMint(_to, _tokenId);
     }
 
@@ -65,10 +56,7 @@ abstract contract TimeswapERC721 is ERC721Permit, InterfaceTimeswapERC721 {
         uint256 _collateral,
         uint256 _debt
     ) external override {
-        require(
-            InterfaceTimeswapPool(msg.sender) == pool,
-            "TimeswapERC721 :: mint : Forbidden"
-        );
+        require(InterfaceTimeswapPool(msg.sender) == pool, 'TimeswapERC721 :: mint : Forbidden');
 
         collateralizedDebtOf[_tokenId].collateral -= uint128(_collateral);
         collateralizedDebtOf[_tokenId].debt -= uint128(_debt);
@@ -81,10 +69,7 @@ abstract contract TimeswapERC721 is ERC721Permit, InterfaceTimeswapERC721 {
         uint8 _collateralDecimals,
         uint8 _assetDecimals
     ) internal {
-        require(
-            pool == InterfaceTimeswapPool(address(type(uint160).min)),
-            "TimeswapERC721 :: _initialize : Forbidden"
-        );
+        require(pool == InterfaceTimeswapPool(address(type(uint160).min)), 'TimeswapERC721 :: _initialize : Forbidden');
         pool = InterfaceTimeswapPool(msg.sender);
         collateralDecimals = _collateralDecimals;
         debtDecimals = _assetDecimals;

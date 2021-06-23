@@ -11,16 +11,11 @@ library ConstantProduct {
         (uint256 newProd0, uint256 newProd1) = mul512(newX, newYZ);
         (uint256 prod0, uint256 prod1) = mul512(x, yz);
 
-        require(newProd1 >= prod1, "ConstantProduct :: check : invariance");
-        if (newProd1 == prod1)
-            require(newProd0 >= prod0, "ConstantProduct :: check : invariance");
+        require(newProd1 >= prod1, 'ConstantProduct :: check : invariance');
+        if (newProd1 == prod1) require(newProd0 >= prod0, 'ConstantProduct :: check : invariance');
     }
 
-    function mul512(uint256 a, uint256 b)
-        private
-        pure
-        returns (uint256 prod0, uint256 prod1)
-    {
+    function mul512(uint256 a, uint256 b) private pure returns (uint256 prod0, uint256 prod1) {
         // 512-bit multiply [prod1 prod0] = a * b
         // Compute the product mod 2**256 and mod 2**256 - 1
         // then use the Chinese Remainder Theorem to reconstruct

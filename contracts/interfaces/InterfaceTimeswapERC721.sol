@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC721Permit} from "./InterfaceERC721Permit.sol";
-import {InterfaceTimeswapPool} from "./InterfaceTimeswapPool.sol";
+import {InterfaceERC721Permit} from './InterfaceERC721Permit.sol';
+import {InterfaceTimeswapPool} from './InterfaceTimeswapPool.sol';
 
 interface InterfaceTimeswapERC721 is InterfaceERC721Permit {
     // VIEW
@@ -17,10 +17,7 @@ interface InterfaceTimeswapERC721 is InterfaceERC721Permit {
 
     function collateralDecimals() external view returns (uint8);
 
-    function collateralizedDebtOf(uint256 _tokenId)
-        external
-        view
-        returns (uint128 _debt, uint128 _collateral);
+    function collateralizedDebtOf(uint256 _tokenId) external view returns (uint128 _debt, uint128 _collateral);
 
     function totalSupply() external view returns (uint256);
 

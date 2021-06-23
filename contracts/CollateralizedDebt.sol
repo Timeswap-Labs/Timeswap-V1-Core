@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {TimeswapERC721} from "./TimeswapERC721.sol";
+import {TimeswapERC721} from './TimeswapERC721.sol';
 
 /// @title Timeswap Collateralized Debt
 /// @author Ricsson W. Ngo
@@ -10,7 +10,7 @@ import {TimeswapERC721} from "./TimeswapERC721.sol";
 contract CollateralizedDebt is TimeswapERC721 {
     /* ===== MODEL ===== */
 
-    string public constant override name = "Timeswap Collateralized Debt";
+    string public constant override name = 'Timeswap Collateralized Debt';
     string public override symbol; // immutable
 
     /* ===== INIT ===== */
@@ -30,7 +30,7 @@ contract CollateralizedDebt is TimeswapERC721 {
         // CD-DAI-WETH-1750000000
         // Example for another pair DAI as the asset but the collateral ERC20 has no symbol ticker with the same maturity as above
         // CD-DAI--1750000000
-        symbol = string(abi.encodePacked("CD", _symbol));
+        symbol = string(abi.encodePacked('CD', _symbol));
         // The decimal place of the collateral locked is the same as the decimal place of the collateral ERC20
         // The decimal place of the debt required is the same as the decimal place of the asset ERC20
         _initialize(name, _collateralDecimals, _assetDecimals);

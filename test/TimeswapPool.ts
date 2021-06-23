@@ -1693,7 +1693,7 @@ describe('withdraw', () => {
 
 const pay = async (tokenId: bigint, assetIn: bigint) => {
   await testToken1.mint(pool.address, assetIn)
-  await pool.connect(receiver).pay(receiver.address,tokenId)
+  await pool.connect(receiver).pay(receiver.address, tokenId)
 }
 
 describe('pay', () => {
@@ -1830,7 +1830,6 @@ describe('pay', () => {
 
         await mint(receiver.address, assetReserve, collateralReserve, bondReserve, insuranceReserve)
       })
-
 
       it('Should revert if pool already matured', async () => {
         const numberDuration = duration

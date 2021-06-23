@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
+import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 
 /// @title ERC20
 /// @author Ricsson W. Ngo
@@ -11,7 +11,7 @@ contract ERC20 is InterfaceERC20 {
 
     // Balances of each address is capped at uint128
     uint256 internal constant MAXIMUM_BALANCE = type(uint128).max;
-    address private constant ZERO = address(type(uint160).min);
+    address internal constant ZERO = address(type(uint160).min);
 
     uint256 public override totalSupply;
     mapping(address => uint256) public override balanceOf;
@@ -19,20 +19,12 @@ contract ERC20 is InterfaceERC20 {
 
     /* ===== UPDATE ===== */
 
-    function approve(address _spender, uint256 _value)
-        external
-        override
-        returns (bool)
-    {
+    function approve(address _spender, uint256 _value) external override returns (bool) {
         _approve(msg.sender, _spender, _value);
         return true;
     }
 
-    function transfer(address _to, uint256 _value)
-        external
-        override
-        returns (bool)
-    {
+    function transfer(address _to, uint256 _value) external override returns (bool) {
         _transfer(msg.sender, _to, _value);
         return true;
     }
@@ -42,10 +34,7 @@ contract ERC20 is InterfaceERC20 {
         address _to,
         uint256 _value
     ) external override returns (bool) {
-        if (
-            msg.sender != _from &&
-            allowance[_from][msg.sender] != type(uint256).max
-        ) {
+        if (msg.sender != _from && allowance[_from][msg.sender] != type(uint256).max) {
             allowance[_from][msg.sender] -= _value;
 
             emit Approval(_from, msg.sender, allowance[_from][msg.sender]);
@@ -63,7 +52,7 @@ contract ERC20 is InterfaceERC20 {
         if (_to != ZERO)
             require(
                 balanceOf[_to] <= MAXIMUM_BALANCE,
-                "ERC20 :: _mint : Address cannot have more than maximum balance"
+                'ERC20 :: _mint : Address cannot have more than maximum balance'
             );
         emit Transfer(ZERO, _to, _value);
     }
@@ -94,7 +83,7 @@ contract ERC20 is InterfaceERC20 {
         if (_to != ZERO)
             require(
                 balanceOf[_to] <= MAXIMUM_BALANCE,
-                "ERC20 :: _transfer : Address cannot have more than maximum balance"
+                'ERC20 :: _transfer : Address cannot have more than maximum balance'
             );
         emit Transfer(_from, _to, _value);
     }

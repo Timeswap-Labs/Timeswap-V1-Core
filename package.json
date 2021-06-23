@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
+    "@typechain/web3-v1": "^3.0.0",
     "bn-chai": "^1.0.1",
     "dotenv": "^10.0.0",
     "eslint": "^7.29.0",

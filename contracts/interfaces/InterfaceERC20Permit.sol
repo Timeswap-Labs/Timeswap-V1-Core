@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from "./InterfaceERC20.sol";
+import {InterfaceERC20} from './InterfaceERC20.sol';
 
 interface InterfaceERC20Permit is InterfaceERC20 {
     // MODEL
