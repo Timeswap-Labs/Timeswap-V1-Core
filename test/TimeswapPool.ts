@@ -258,6 +258,7 @@ describe('initialize', () => {
 const mint = async (
   to: string,
   assetIn: bigint,
+
   collateralIn: bigint,
   bondIncrease: bigint,
   insuranceIncrease: bigint
