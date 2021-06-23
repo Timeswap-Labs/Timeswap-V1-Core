@@ -1693,7 +1693,8 @@ describe('withdraw', () => {
 
 const pay = async (tokenId: bigint, assetIn: bigint) => {
   await testToken1.mint(pool.address, assetIn)
-  await pool.pay(tokenId)
+
+  await pool.connect(receiver).pay(receiver.address, tokenId)
 }
 
 describe('pay', () => {
