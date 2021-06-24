@@ -56,7 +56,7 @@ abstract contract TimeswapERC721 is ERC721Permit, InterfaceTimeswapERC721 {
         uint256 _collateral,
         uint256 _debt
     ) external override {
-        require(InterfaceTimeswapPool(msg.sender) == pool, 'TimeswapERC721 :: mint : Forbidden');
+        require(InterfaceTimeswapPool(msg.sender) == pool, 'TimeswapERC721 :: burn : Forbidden');
 
         collateralizedDebtOf[_tokenId].collateral -= uint128(_collateral);
         collateralizedDebtOf[_tokenId].debt -= uint128(_debt);

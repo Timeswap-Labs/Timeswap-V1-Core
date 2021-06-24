@@ -829,7 +829,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
         _collateralLocked += _bondMaxUp;
 
-        require(_collateralLocked <= MAXIMUM_BALANCE, 'Timeswap :: _updateBondForBorrow : Collateral Overflow');
+        require(_collateralLocked <= MAXIMUM_BALANCE, 'Timeswap :: _calculateCollateralLocked : Collateral Overflow');
     }
 
     /// @dev Calculate the debt required for the collateralized debt ERC721
@@ -849,7 +849,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _debtRequired = (_debtRequired * _duration).divUp(YEAR);
         _debtRequired += _assetReceived;
 
-        require(_debtRequired <= MAXIMUM_BALANCE, 'Timeswap :: _updateInsuranceForBorrow : Debt Overflow');
+        require(_debtRequired <= MAXIMUM_BALANCE, 'Timeswap :: _calculateDebtRequired : Debt Overflow');
     }
 
     /* ===== WITHDRAW ===== */

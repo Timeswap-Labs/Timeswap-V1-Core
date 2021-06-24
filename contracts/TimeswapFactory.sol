@@ -80,7 +80,7 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
 
         require(_bond != InterfaceTimeswapERC20(ZERO), 'TimeswapFactory :: constructor : Cannot be Zero Address');
         require(_insurance != InterfaceTimeswapERC20(ZERO), 'TimeswapFactory :: constructor : Cannot be Zero Address');
-        require(_bond != _insurance, 'TimeswapPool :: initialize : Cannot be the same address');
+        require(_bond != _insurance, 'TimeswapPool :: constructor : Cannot be the same address');
         require(
             _collateralizedDebt != InterfaceTimeswapERC721(ZERO),
             'TimeswapFactory :: constructor : Cannot be Zero Address'
