@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
+import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 
 /// @title ERC20
 /// @author Ricsson W. Ngo
 /// @dev This contract follows the ERC20 standard
 contract ERC20 is InterfaceERC20 {
-
     /* ===== MODEL ===== */
 
     // Balances of each address is capped at uint128
     uint256 internal constant MAXIMUM_BALANCE = type(uint128).max;
-    address private constant ZERO = address(type(uint160).min);
+    address internal constant ZERO = address(type(uint160).min);
 
     uint256 public override totalSupply;
     mapping(address => uint256) public override balanceOf;
@@ -30,7 +29,11 @@ contract ERC20 is InterfaceERC20 {
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) external override returns (bool) {
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) external override returns (bool) {
         if (msg.sender != _from && allowance[_from][msg.sender] != type(uint256).max) {
             allowance[_from][msg.sender] -= _value;
 
@@ -46,7 +49,11 @@ contract ERC20 is InterfaceERC20 {
         totalSupply += _value;
         balanceOf[_to] += _value;
         // Check if uint128 cap is followed
-        if (_to != ZERO) require(balanceOf[_to] <= MAXIMUM_BALANCE, "ERC20 :: _mint : Address cannot have more than maximum balance");
+        if (_to != ZERO)
+            require(
+                balanceOf[_to] <= MAXIMUM_BALANCE,
+                'ERC20 :: _mint : Address cannot have more than maximum balance'
+            );
         emit Transfer(ZERO, _to, _value);
     }
 
@@ -56,16 +63,28 @@ contract ERC20 is InterfaceERC20 {
         emit Transfer(_from, ZERO, _value);
     }
 
-    function _approve(address _owner, address _spender, uint256 _value) private {
+    function _approve(
+        address _owner,
+        address _spender,
+        uint256 _value
+    ) private {
         allowance[_owner][_spender] = _value;
         emit Approval(_owner, _spender, _value);
     }
 
-    function _transfer(address _from, address _to, uint256 _value) private {
+    function _transfer(
+        address _from,
+        address _to,
+        uint256 _value
+    ) private {
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
         // Check if uint128 cap is followed
-        if (_to != ZERO) require(balanceOf[_to] <= MAXIMUM_BALANCE, "ERC20 :: _transfer : Address cannot have more than maximum balance");
+        if (_to != ZERO)
+            require(
+                balanceOf[_to] <= MAXIMUM_BALANCE,
+                'ERC20 :: _transfer : Address cannot have more than maximum balance'
+            );
         emit Transfer(_from, _to, _value);
     }
 }

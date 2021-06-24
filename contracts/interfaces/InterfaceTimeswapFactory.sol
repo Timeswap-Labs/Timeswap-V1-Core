@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapPool} from "./InterfaceTimeswapPool.sol";
-import {InterfaceERC20} from "./InterfaceERC20.sol";
-import {InterfaceTimeswapERC20} from "./InterfaceTimeswapERC20.sol";
-import {InterfaceTimeswapERC721} from "./InterfaceTimeswapERC721.sol";
+import {InterfaceTimeswapPool} from './InterfaceTimeswapPool.sol';
+import {InterfaceERC20} from './InterfaceERC20.sol';
+import {InterfaceTimeswapERC20} from './InterfaceTimeswapERC20.sol';
+import {InterfaceTimeswapERC721} from './InterfaceTimeswapERC721.sol';
 
 interface InterfaceTimeswapFactory {
     // EVENT

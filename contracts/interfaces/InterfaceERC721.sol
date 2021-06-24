@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC165} from "./InterfaceERC165.sol";
+import {InterfaceERC165} from './InterfaceERC165.sol';
 
 interface InterfaceERC721 is InterfaceERC165 {
     // EVENT
@@ -24,11 +24,24 @@ interface InterfaceERC721 is InterfaceERC165 {
 
     // UPDATE
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata data) external;
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId,
+        bytes calldata data
+    ) external;
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external;
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external;
 
-    function transferFrom(address _from, address _to, uint256 _tokenId) external;
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external;
 
     function approve(address _to, uint256 _tokenId) external;
 

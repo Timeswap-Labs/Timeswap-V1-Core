@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC721Permit} from "./InterfaceERC721Permit.sol";
-import {InterfaceTimeswapPool} from "./InterfaceTimeswapPool.sol";
+import {InterfaceERC721Permit} from './InterfaceERC721Permit.sol';
+import {InterfaceTimeswapPool} from './InterfaceTimeswapPool.sol';
 
 interface InterfaceTimeswapERC721 is InterfaceERC721Permit {
     // VIEW
@@ -23,9 +23,21 @@ interface InterfaceTimeswapERC721 is InterfaceERC721Permit {
 
     // UPDATE
 
-    function initialize(string memory _string, uint8 _debtDecimals, uint8 _collateralDecimals) external;
+    function initialize(
+        string memory _string,
+        uint8 _debtDecimals,
+        uint8 _collateralDecimals
+    ) external;
 
-    function mint(address _to, uint256 _debt, uint256 _collateral) external;
+    function mint(
+        address _to,
+        uint256 _debt,
+        uint256 _collateral
+    ) external;
 
-    function burn(uint256 _tokenId, uint256 _debt, uint256 _collateral) external;
+    function burn(
+        uint256 _tokenId,
+        uint256 _debt,
+        uint256 _collateral
+    ) external;
 }

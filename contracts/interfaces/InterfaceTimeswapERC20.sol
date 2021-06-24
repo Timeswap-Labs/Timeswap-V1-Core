@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20Permit} from "./InterfaceERC20Permit.sol";
-import {InterfaceTimeswapPool} from "./InterfaceTimeswapPool.sol";
+import {InterfaceERC20Permit} from './InterfaceERC20Permit.sol';
+import {InterfaceTimeswapPool} from './InterfaceTimeswapPool.sol';
 
 interface InterfaceTimeswapERC20 is InterfaceERC20Permit {
     // VIEW

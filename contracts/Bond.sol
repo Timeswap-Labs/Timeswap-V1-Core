@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {TimeswapERC20} from "./TimeswapERC20.sol";
+import {TimeswapERC20} from './TimeswapERC20.sol';
 
 /// @title Timeswap Bond
 /// @author Ricsson W. Ngo
@@ -10,7 +10,7 @@ import {TimeswapERC20} from "./TimeswapERC20.sol";
 contract Bond is TimeswapERC20 {
     /* ===== MODEL ===== */
 
-    string public constant override name = "Timeswap Bond";
+    string public constant override name = 'Timeswap Bond';
     string public override symbol;
 
     /* ===== INIT ===== */
@@ -25,7 +25,7 @@ contract Bond is TimeswapERC20 {
         // BD-DAI-WETH-1750000000
         // Example for another pair DAI as the asset but the collateral ERC20 has no symbol ticker with the same maturity as above
         // BD-DAI--1750000000
-        symbol = string(abi.encodePacked("BD", _symbol));
+        symbol = string(abi.encodePacked('BD', _symbol));
         // The decimal place of the bond ERC20 is the same as the decimal place of the collateral ERC20
         _initialize(name, _decimals);
     }
