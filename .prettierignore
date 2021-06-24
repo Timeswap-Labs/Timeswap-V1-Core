@@ -115,3 +115,5 @@ typechain/
 
 # Code
 .vscode
+
+.github/
