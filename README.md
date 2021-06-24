@@ -1,5 +1,8 @@
 # Timeswap-V1
 
+[![Lint](https://github.com/Timeswap-Labs/Timeswap-V1-Core/actions/workflows/lint.yaml/badge.svg)](https://github.com/Timeswap-Labs/Timeswap-V1-Core/actions/workflows/lint.yaml)
+[![Build](https://github.com/Timeswap-Labs/Timeswap-V1-Core/actions/workflows/build.yaml/badge.svg)](https://github.com/Timeswap-Labs/Timeswap-V1-Core/actions/workflows/build.yaml)
+
 This repository contains the core smart contracts of the Timeswap-V1 protocol.
 
 # Initial Setup
