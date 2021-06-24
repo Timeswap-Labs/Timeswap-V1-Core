@@ -1022,8 +1022,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve,
         uint256 _duration
     ) private pure returns (uint256 _collateralLocked) {
-        uint256 _bondMax = (_assetReceived * _bondReserve) / _assetBalance;
-        uint256 _bondMaxUp = (_assetReceived * _bondReserve).divUp(
+        (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(
             _assetBalance
         );
 
@@ -1051,11 +1050,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve,
         uint256 _duration
     ) private pure returns (uint256 _debtRequired) {
-        uint256 _rateMax = (_assetReceived * _rateReserve) / _assetBalance;
-        uint256 _rateMaxUp = (_assetReceived * _rateReserve).divUp(
+        (uint256 _rateMax, uint256 _rateMaxUp) = (_assetReceived * _rateReserve).divDownAndUp(
             _assetBalance
         );
-
+        
         // Use round down and round up in division to maximize the return to the pool contract
         _debtRequired = (_rateMaxUp * _rateIncrease).divUp(
             _rateMax - _rateIncrease
