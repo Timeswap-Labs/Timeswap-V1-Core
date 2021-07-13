@@ -159,7 +159,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Initialize the liquidity ERC20 contract with the correct decimal places
         decimals = _assetDecimal;
 
-        _setDomainSeparator(name);
+        _setDomainName(name);
     }
 
     /* ===== HELPER ===== */

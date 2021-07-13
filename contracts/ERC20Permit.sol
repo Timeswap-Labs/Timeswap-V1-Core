@@ -20,6 +20,7 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
         keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
     bytes32 public override DOMAIN_SEPARATOR; // immutable
+    string public DOMAIN_NAME;
 
     mapping(address => uint256) public override nonces;
 
@@ -37,7 +38,7 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
         bytes32 _structHash = keccak256(
             abi.encode(PERMIT_TYPEHASH, _owner, _spender, _value, nonces[_owner]++, _deadline)
         );
-        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, _structHash));
+        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', _getDomainSeparator(), _structHash));
         address _signatory = _digest.recover(_v, _r, _s);
         require(_signatory == _owner, 'ERC20Permit :: permit : Unauthorized');
         require(block.timestamp <= _deadline, 'ERC20Permit :: permit : Signature Expired');
@@ -49,12 +50,18 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
 
     /* ===== HELPER ===== */
 
-    function _setDomainSeparator(string memory _name) internal {
+    function _setDomainName(string memory _name) internal {
+        DOMAIN_NAME = _name;
+    }
+
+    function _getDomainSeparator() private returns (bytes32) {
         uint256 chainId;
         assembly {
             chainId := chainid()
         }
 
-        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(_name)), chainId, address(this)));
+        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(DOMAIN_NAME)), chainId, address(this)));
+
+        return DOMAIN_SEPARATOR;
     }
 }

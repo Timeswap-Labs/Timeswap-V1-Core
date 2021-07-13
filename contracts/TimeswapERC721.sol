@@ -74,6 +74,6 @@ abstract contract TimeswapERC721 is ERC721Permit, InterfaceTimeswapERC721 {
         collateralDecimals = _collateralDecimals;
         debtDecimals = _assetDecimals;
 
-        _setDomainSeparator(_name);
+        _setDomainName(_name);
     }
 }

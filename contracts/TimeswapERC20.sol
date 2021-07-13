@@ -35,6 +35,6 @@ abstract contract TimeswapERC20 is InterfaceTimeswapERC20, ERC20Permit {
         pool = InterfaceTimeswapPool(msg.sender);
         decimals = _decimals;
 
-        _setDomainSeparator(_name);
+        _setDomainName(_name);
     }
 }
