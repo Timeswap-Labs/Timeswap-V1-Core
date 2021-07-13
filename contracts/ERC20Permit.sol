@@ -38,7 +38,8 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
         bytes32 _structHash = keccak256(
             abi.encode(PERMIT_TYPEHASH, _owner, _spender, _value, nonces[_owner]++, _deadline)
         );
-        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', _getDomainSeparator(), _structHash));
+        _setDomainSeparator();
+        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, _structHash));
         address _signatory = _digest.recover(_v, _r, _s);
         require(_signatory == _owner, 'ERC20Permit :: permit : Unauthorized');
         require(block.timestamp <= _deadline, 'ERC20Permit :: permit : Signature Expired');
@@ -52,16 +53,15 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
 
     function _setDomainName(string memory _name) internal {
         DOMAIN_NAME = _name;
+        _setDomainSeparator();
     }
 
-    function _getDomainSeparator() private returns (bytes32) {
+    function _setDomainSeparator() private {
         uint256 chainId;
         assembly {
             chainId := chainid()
         }
 
         DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(DOMAIN_NAME)), chainId, address(this)));
-
-        return DOMAIN_SEPARATOR;
     }
 }
