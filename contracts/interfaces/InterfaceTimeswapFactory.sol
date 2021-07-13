@@ -16,6 +16,15 @@ interface InterfaceTimeswapFactory {
         InterfaceTimeswapPool _pool
     );
 
+    event FeeAddressSet(
+        address indexed _feeTo
+    );
+
+    event FeeAddressSetterSet(
+        address indexed oldFeeToSetter,
+        address indexed newFeeToSetter
+    );
+
     // VIEW
 
     function pool() external view returns (InterfaceTimeswapPool);

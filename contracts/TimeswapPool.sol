@@ -965,5 +965,6 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Transfer the excess ERC20 to the receiver
         if (_assetOut > 0) _safeTransfer(_asset, _to, _assetOut);
         if (_collateralOut > 0) _safeTransfer(_collateral, _to, _collateralOut);
+        emit Skim(_to, _assetOut, _collateralOut);
     }
 }

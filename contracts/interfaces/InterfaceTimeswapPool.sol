@@ -74,6 +74,12 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
         uint256 _insuranceBalancee
     );
 
+    event Skim(
+        address indexed _to,
+        uint256 assetOut,
+        uint256 collateralOut
+    );
+
     // VIEW
 
     function name() external view returns (string memory);
