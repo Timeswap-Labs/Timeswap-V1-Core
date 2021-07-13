@@ -2,9 +2,9 @@
 pragma solidity =0.8.1;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
 import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
-import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 import {InterfaceTimeswapERC20} from './interfaces/InterfaceTimeswapERC20.sol';
 import {InterfaceTimeswapERC721} from './interfaces/InterfaceTimeswapERC721.sol';
 import {Math} from './libraries/Math.sol';
@@ -42,7 +42,7 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     uint256 private constant BASE = 10000;
 
     /// @dev Stores all the address of the deployed pools in a mapping
-    mapping(InterfaceERC20 => mapping(InterfaceERC20 => mapping(uint256 => InterfaceTimeswapPool)))
+    mapping(IERC20Metadata => mapping(IERC20Metadata => mapping(uint256 => InterfaceTimeswapPool)))
         public
         override getPool;
 
@@ -105,14 +105,14 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     /// @param _maturity The future maturity time in unix timestamp
     /// @return _pool The address of the newly deployed cloned Timeswap pool
     function createPool(
-        InterfaceERC20 _asset,
-        InterfaceERC20 _collateral,
+        IERC20Metadata _asset,
+        IERC20Metadata _collateral,
         uint256 _maturity
     ) external override returns (InterfaceTimeswapPool _pool) {
         // Sanity checks
         require(_asset != _collateral, 'TimeswapFactory :: createPool : Identical Address');
         require(
-            _asset != InterfaceERC20(ZERO) && _collateral != InterfaceERC20(ZERO),
+            _asset != IERC20Metadata(ZERO) && _collateral != IERC20Metadata(ZERO),
             'TimeswapFactory :: createPool : Zero Address'
         );
         require(block.timestamp < _maturity, 'TimeswapFactory :: createPool : Invalid Maturity');

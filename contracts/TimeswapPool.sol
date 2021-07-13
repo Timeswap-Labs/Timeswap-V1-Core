@@ -2,9 +2,9 @@
 pragma solidity =0.8.1;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
 import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
-import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 import {InterfaceTimeswapERC20} from './interfaces/InterfaceTimeswapERC20.sol';
 import {InterfaceTimeswapERC721} from './interfaces/InterfaceTimeswapERC721.sol';
 import {Math} from './libraries/Math.sol';
@@ -52,9 +52,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     InterfaceTimeswapFactory public override factory; //immutable
 
     /// @dev The address of the ERC20 being lent and borrowed
-    InterfaceERC20 public override asset; //immutable
+    IERC20Metadata public override asset; //immutable
     /// @dev The address of the ERC20 used as collateral
-    InterfaceERC20 public override collateral; //immutable
+    IERC20Metadata public override collateral; //immutable
 
     /// @dev The address of the native bond ERC20 token contract
     /// @dev Get the Y pool or the Collateral Required pool by getting the bond ERC20 balance of the pool contract
@@ -103,8 +103,8 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @param _transactionFee The fee for the revenue of liquidity providers
     /// @param _protocolFee The fee for the revenue of feeTo address
     function initialize(
-        InterfaceERC20 _asset,
-        InterfaceERC20 _collateral,
+        IERC20Metadata _asset,
+        IERC20Metadata _collateral,
         uint256 _maturity,
         InterfaceTimeswapERC20 _bond,
         InterfaceTimeswapERC20 _insurance,
@@ -133,16 +133,16 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         protocolFee = _protocolFee;
 
         // Safely get the symbol tickers of the pair ERC20 token contracts
-        string memory _assetSymbol = _safeSymbol(_asset);
-        string memory _collateralSymbol = _safeSymbol(_collateral);
+        string memory _assetSymbol = IERC20Metadata(_asset).symbol();
+        string memory _collateralSymbol = IERC20Metadata(_collateral).symbol();
         // The symbol tickers of all native tokens end with this format
         // -{asset symbol}-{collateral symbol}-{maturity time in unix timestamp}
         string memory _symbol = string(
             abi.encodePacked('-', _assetSymbol, '-', _collateralSymbol, '-', _maturity.toString())
         );
         // Safely get the decimal places of the pair ERC20 token contracts
-        uint8 _assetDecimal = _safeDecimals(_asset);
-        uint8 _collateralDecimal = _safeDecimals(_collateral);
+        uint8 _assetDecimal = IERC20Metadata(_asset).decimals();
+        uint8 _collateralDecimal = IERC20Metadata(_collateral).decimals();
 
         // Initializes the three native tokens with the correct decimal places
         bond.initialize(_symbol, _collateralDecimal);
@@ -164,27 +164,24 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
     /* ===== HELPER ===== */
 
-    /// @dev Safely gets the symbol ticker of an ERC20 token contract
-    /// @dev Returns an empty string if failed at calling the symbol function
-    function _safeSymbol(InterfaceERC20 _token) private returns (string memory _symbol) {
-        (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(SYMBOL));
-        _symbol = _success ? abi.decode(_data, (string)) : '';
-
-        bytes memory _bt = bytes(_symbol);
-        if (_bt.length > 5) _symbol = string(abi.encodePacked(_bt[0], _bt[1], _bt[2], _bt[3], _bt[4], '...'));
-    }
-
-    /// @dev Safely gets the decimal place of an ERC20 token contract
-    /// @dev Returns zero if failed at calling the decimals function
-    function _safeDecimals(InterfaceERC20 _token) private returns (uint8 _decimals) {
-        (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(DECIMALS));
-        _decimals = _success ? abi.decode(_data, (uint8)) : 0;
-    }
-
     /// @dev Safely transfer the tokens of an ERC20 token contract
     /// @dev Will revert if failed at calling the transfer function
     function _safeTransfer(
-        InterfaceERC20 _token,
+        IERC20Metadata _token,
+        address _to,
+        uint256 _value
+    ) private {
+        (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(TRANSFER, _to, _value));
+        require(
+            _success && (_data.length == 0 || abi.decode(_data, (bool))),
+            'TimeswapPool :: _safeTransfer : Transfer Failed'
+        );
+    }
+
+    /// @dev Safely transfer the tokens of a Timeswap ERC20 token contract
+    /// @dev Will revert if failed at calling the transfer function
+    function _safeTransferTimeswapERC20(
+        InterfaceTimeswapERC20 _token,
         address _to,
         uint256 _value
     ) private {
@@ -198,7 +195,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Safely transfer the tokens of an ERC20 token contract and return the new balance of the pool contract
     /// @dev will revert if failed at calling the transfer function
     function _transferAndBalanceOf(
-        InterfaceERC20 _token,
+        IERC20Metadata _token,
         address _to,
         uint256 _tokenOut
     ) private returns (uint256 _tokenBalance) {
@@ -456,8 +453,8 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _insuranceReceived = (_liquidityIn * insurance.balanceOf(address(this))) / _totalSupply;
 
         // Safely transfer the bond ERC20 and insurance ERC20 to the receiver
-        _safeTransfer(bond, _to, _bondReceived);
-        _safeTransfer(insurance, _to, _insuranceReceived);
+        _safeTransferTimeswapERC20(bond, _to, _bondReceived);
+        _safeTransferTimeswapERC20(insurance, _to, _insuranceReceived);
 
         // Call the _burnBeforeMaturity for all burn functions before maturity of the pool
         // When burn function is called before the maturity of the pool, receiver can borrow asset ERC20 based on how much collateral ERC20 is locked
@@ -636,7 +633,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _bondReceived = _bondDecrease + _bondMint;
 
         // Safely transfer and mint bond ERC20 to the receiver
-        _safeTransfer(_bond, _to, _bondDecrease);
+        _safeTransferTimeswapERC20(_bond, _to, _bondDecrease);
         if (_bondMint > 0) _bond.mint(_to, _bondMint);
     }
 
@@ -658,7 +655,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _insuranceReceived = _insuranceDecrease + _insuranceMint;
 
         // Safely transfer and mint insurance ERC20 to the receiver
-        _safeTransfer(_insurance, _to, _insuranceDecrease);
+        _safeTransferTimeswapERC20(_insurance, _to, _insuranceDecrease);
         if (_insuranceMint > 0) _insurance.mint(_to, _insuranceMint);
     }
 
@@ -875,7 +872,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Calculate ERC20 received based on the proportion of native ERC20 burnt to the total supply
     function _swapProportional(
         InterfaceTimeswapERC20 _timeswapToken,
-        InterfaceERC20 _token,
+        IERC20Metadata _token,
         address _to,
         uint256 _timeswapTokenIn
     ) private returns (uint256 _tokenOut) {
@@ -955,8 +952,8 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev The solution to withdraw excess asset ERC20 and collateral ERC20
     /// @param _to The receiver of the skim function
     function skim(address _to) external override reentrancyLock() {
-        InterfaceERC20 _asset = asset; // gas saving
-        InterfaceERC20 _collateral = collateral; // gas saving
+        IERC20Metadata _asset = asset; // gas saving
+        IERC20Metadata _collateral = collateral; // gas saving
 
         // Get the difference to the stored pools amount to get the excess ERC20
         uint256 _assetOut = _asset.balanceOf(address(this)).subOrZero(assetReserve);

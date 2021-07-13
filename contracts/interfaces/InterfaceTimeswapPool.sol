@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from './InterfaceERC20.sol';
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import {InterfaceERC20Permit} from './InterfaceERC20Permit.sol';
 import {InterfaceTimeswapERC20} from './InterfaceTimeswapERC20.sol';
 import {InterfaceTimeswapERC721} from './InterfaceTimeswapERC721.sol';
@@ -86,9 +86,9 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
 
     function factory() external view returns (InterfaceTimeswapFactory);
 
-    function asset() external view returns (InterfaceERC20);
+    function asset() external view returns (IERC20Metadata);
 
-    function collateral() external view returns (InterfaceERC20);
+    function collateral() external view returns (IERC20Metadata);
 
     function bond() external view returns (InterfaceTimeswapERC20);
 
@@ -109,8 +109,8 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
     // UPDATE
 
     function initialize(
-        InterfaceERC20 _asset,
-        InterfaceERC20 _collateral,
+        IERC20Metadata _asset,
+        IERC20Metadata _collateral,
         uint256 _maturity,
         InterfaceTimeswapERC20 _bond,
         InterfaceTimeswapERC20 _insurance,
