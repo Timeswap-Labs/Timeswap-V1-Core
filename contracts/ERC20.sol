@@ -34,13 +34,15 @@ contract ERC20 is InterfaceERC20 {
         address _to,
         uint256 _value
     ) external override returns (bool) {
-        if (msg.sender != _from && allowance[_from][msg.sender] != type(uint256).max) {
+        if (allowance[_from][msg.sender] >= _value) {
             allowance[_from][msg.sender] -= _value;
 
             emit Approval(_from, msg.sender, allowance[_from][msg.sender]);
+            _transfer(_from, _to, _value);
+            return true;
         }
-        _transfer(_from, _to, _value);
-        return true;
+        
+        return false;
     }
 
     /* ===== HELPER ===== */
