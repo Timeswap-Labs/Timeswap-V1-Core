@@ -28,6 +28,12 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     /// @dev The address that can change the feeTo address
     address public override feeToSetter;
 
+    /// @dev The feeTo address which needs to be accepted by the recipient
+    address public pendingFeeTo;
+
+    /// @dev The pendingFeeToSetter address which needs to be accepted by the recipient
+    address public pendingFeeToSetter;
+
     /// @dev The address of the original TimeswapPool contract to clone from
     InterfaceTimeswapPool public immutable override pool;
 
@@ -151,7 +157,7 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     function setFeeTo(address _feeTo) external override {
         require(msg.sender == feeToSetter, 'TimeswapFactory :: setFeeTo : Forbidden');
         require(_feeTo != ZERO, 'TimeswapFactory :: setFeeTo : Zero Address');
-        feeTo = _feeTo;
+        pendingFeeTo = _feeTo;
     }
 
     /// @dev Change the feeToSetter address
@@ -159,6 +165,19 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     function setFeeToSetter(address _feeToSetter) external override {
         require(msg.sender == feeToSetter, 'TimeswapFactory :: setFeeToSetter : Forbidden');
         require(_feeToSetter != ZERO, 'TimeswapFactory :: setFeeToSetter : Zero Address');
-        feeToSetter = _feeToSetter;
+        pendingFeeToSetter = _feeToSetter;
+    }
+    
+    
+    /// @notice `setFeeTo()` should be called by the existing feeToSetter address prior to calling this function.
+    function acceptFeeTo() external {
+        require(msg.sender == pendingFeeTo, "pendingFeeTo");
+        feeTo = msg.sender;
+    }
+
+    /// @notice `setFeeToSetter()` should be called by the existing feeToSetter address prior to calling this function.
+    function acceptFeeToSetter() external {
+        require(msg.sender == pendingFeeToSetter, "pendingFeeToSetter");
+        feeToSetter = msg.sender;
     }
 }
