@@ -188,6 +188,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         address _to,
         uint256 _value
     ) private {
+        require(_isContract(address(_token)), 'TimeswapPool :: _safeTransfer : call to non-contract');
         (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(TRANSFER, _to, _value));
         require(
             _success && (_data.length == 0 || abi.decode(_data, (bool))),
@@ -251,6 +252,17 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         collateralReserve = _collateralBalance;
 
         emit Sync(_assetBalance, _collateralBalance, _rateBalance, _bondBalance, _insuranceBalance);
+    }
+
+    /// @dev Checks an address if it has any data stored on it.
+    /// @dev If datasize > 0, the address is a contract otherwise EOA
+    /// @dev NOTICE: This method will not work if contract is still in constructor
+    /// @param _addr Address of contract which needs to be checked
+    /// @return _result boolean representing wether address is contract or not
+    function _isContract(address _addr) internal returns (bool _result) {
+        uint size;
+        assembly { size := extcodesize(_addr) }
+        return size > 0;
     }
 
     /* ====== MINT ===== */
