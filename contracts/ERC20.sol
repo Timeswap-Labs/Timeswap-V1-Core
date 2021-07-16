@@ -46,18 +46,18 @@ contract ERC20 is InterfaceERC20 {
     /* ===== HELPER ===== */
 
     function _mint(address _to, uint256 _value) internal {
+        require(_to != ZERO, "ERC20 :: _mint : Zero Address");
         totalSupply += _value;
         balanceOf[_to] += _value;
-        // Check if uint128 cap is followed
-        if (_to != ZERO)
-            require(
-                balanceOf[_to] <= MAXIMUM_BALANCE,
-                'ERC20 :: _mint : Address cannot have more than maximum balance'
-            );
+        require(
+            balanceOf[_to] <= MAXIMUM_BALANCE,
+            'ERC20 :: _mint : Address cannot have more than maximum balance'
+        );
         emit Transfer(ZERO, _to, _value);
     }
 
     function _burn(address _from, uint256 _value) internal {
+        require(_from != ZERO, "ERC20 :: _burn : Zero Address");
         balanceOf[_from] -= _value;
         totalSupply -= _value;
         emit Transfer(_from, ZERO, _value);
@@ -68,6 +68,7 @@ contract ERC20 is InterfaceERC20 {
         address _spender,
         uint256 _value
     ) private {
+        require(_spender != ZERO, "ERC20 :: _approve : Zero Address");
         allowance[_owner][_spender] = _value;
         emit Approval(_owner, _spender, _value);
     }
@@ -77,14 +78,13 @@ contract ERC20 is InterfaceERC20 {
         address _to,
         uint256 _value
     ) private {
+        require(_to != ZERO, "ERC20 :: _transfer : Zero Address");
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
-        // Check if uint128 cap is followed
-        if (_to != ZERO)
-            require(
-                balanceOf[_to] <= MAXIMUM_BALANCE,
-                'ERC20 :: _transfer : Address cannot have more than maximum balance'
-            );
+        require(
+            balanceOf[_to] <= MAXIMUM_BALANCE,
+            'ERC20 :: _transfer : Address cannot have more than maximum balance'
+        );
         emit Transfer(_from, _to, _value);
     }
 }
