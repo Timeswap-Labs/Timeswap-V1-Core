@@ -195,6 +195,15 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         );
     }
 
+    /// @dev Safe cast uint256 to uint128
+    /// @param _value input 256 bit uint needed to cast to 128 bit
+    /// @return _result safely casted 128bit output
+    function _safeCastUint256Uint128(uint256 _value) internal pure returns (uint128 _result) {
+        require(_value < 2**128, "TimeswapPool :: _safeCastUint256Uint128 : value doesn\'t fit in 128 bits");
+        _result = uint128(_value);
+        return _result;
+    }
+
     /// @dev Safely transfer the tokens of an ERC20 token contract and return the new balance of the pool contract
     /// @dev will revert if failed at calling the transfer function
     function _transferAndBalanceOf(
@@ -246,8 +255,8 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
             _assetBalance <= MAXIMUM_BALANCE && _rateBalance <= MAXIMUM_BALANCE,
             'TimeswapPool :: _updateReserves : Reserve Overflow'
         );
-        assetReserve = uint128(_assetBalance);
-        rateReserve = uint128(_rateBalance);
+        assetReserve = _safeCastUint256Uint128(_assetBalance);
+        rateReserve = _safeCastUint256Uint128(_rateBalance);
         collateralReserve = _collateralBalance;
 
         emit Sync(_assetBalance, _collateralBalance, _rateBalance, _bondBalance, _insuranceBalance);
