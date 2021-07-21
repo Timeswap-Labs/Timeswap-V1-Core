@@ -57,11 +57,6 @@ contract ERC20Permit is InterfaceERC20Permit, ERC20 {
     }
 
     function _setDomainSeparator() private {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-
-        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(DOMAIN_NAME)), chainId, address(this)));
+        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(DOMAIN_NAME)), block.chainid, address(this)));
     }
 }
