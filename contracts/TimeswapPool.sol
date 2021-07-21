@@ -189,8 +189,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _value
     ) private {
         (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(TRANSFER, _to, _value));
-        require(
-            _success && (_data.length == 0 || abi.decode(_data, (bool))),
+        require(_success,
             'TimeswapPool :: _safeTransfer : Transfer Failed'
         );
     }
