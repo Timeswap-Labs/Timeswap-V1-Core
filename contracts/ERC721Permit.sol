@@ -19,7 +19,10 @@ contract ERC721Permit is InterfaceERC721Permit, ERC721 {
     bytes32 public constant override PERMIT_TYPEHASH =
         keccak256('Permit(address approved,uint256 tokenId,uint256 nonce,uint256 deadline)');
 
-    bytes32 public override DOMAIN_SEPARATOR; // immutable
+    function DOMAIN_SEPARATOR() public view override returns (bytes32) {
+        return keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(DOMAIN_NAME)), block.chainid, address(this)));
+    }
+
     string public DOMAIN_NAME;
 
     mapping(address => uint256) public override nonces;
@@ -36,8 +39,7 @@ contract ERC721Permit is InterfaceERC721Permit, ERC721 {
     ) external override {
         address _owner = _ownerOf[_tokenId];
         bytes32 _structHash = keccak256(abi.encode(PERMIT_TYPEHASH, _approved, _tokenId, nonces[_owner]++, _deadline));
-        _setDomainSeparator();
-        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, _structHash));
+        bytes32 _digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR(), _structHash));
         address _signatory = _digest.recover(_v, _r, _s);
         require(_signatory == _owner, 'ERC721Permit :: permit : Unauthorized');
         require(block.timestamp <= _deadline, 'ERC721Permit :: permit : Signature Expired');
@@ -53,10 +55,7 @@ contract ERC721Permit is InterfaceERC721Permit, ERC721 {
 
     function _setDomainName(string memory _name) internal {
         DOMAIN_NAME = _name;
-        _setDomainSeparator();
     }
 
-    function _setDomainSeparator() private {
-        DOMAIN_SEPARATOR = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(DOMAIN_NAME)), block.chainid, address(this)));
-    }
+
 }
