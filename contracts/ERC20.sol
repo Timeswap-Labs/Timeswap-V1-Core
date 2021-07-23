@@ -34,8 +34,7 @@ contract ERC20 is InterfaceERC20 {
         address _to,
         uint256 _value
     ) external override returns (bool) {
-        allowance[_from][msg.sender] -= _value;
-        emit Approval(_from, msg.sender, allowance[_from][msg.sender]);
+        _approve(_from, msg.sender, allowance[_from][msg.sender] - _value);
         _transfer(_from, _to, _value);
         return true;
     }
