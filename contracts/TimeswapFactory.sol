@@ -152,7 +152,7 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
         require(msg.sender == feeToSetter, 'TimeswapFactory :: setFeeTo : Forbidden');
         require(_feeTo != ZERO, 'TimeswapFactory :: setFeeTo : Zero Address');
         feeTo = _feeTo;
-        emit FeeAddressSet(_feeTo);
+        emit SetFeeTo(_feeTo);
     }
 
     /// @dev Change the feeToSetter address
@@ -162,6 +162,6 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
         require(_feeToSetter != ZERO, 'TimeswapFactory :: setFeeToSetter : Zero Address');
         address oldFeeToSetter = feeToSetter;
         feeToSetter = _feeToSetter;
-        emit FeeAddressSetterSet(oldFeeToSetter,_feeToSetter);
+        emit setFeeToSetter(oldFeeToSetter, _feeToSetter);
     }
 }

@@ -16,11 +16,11 @@ interface InterfaceTimeswapFactory {
         InterfaceTimeswapPool _pool
     );
 
-    event FeeAddressSet(
+    event SetFeeTo(
         address indexed _feeTo
     );
 
-    event FeeAddressSetterSet(
+    event SetFeeToSetter(
         address indexed oldFeeToSetter,
         address indexed newFeeToSetter
     );
