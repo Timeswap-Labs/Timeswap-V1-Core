@@ -34,6 +34,10 @@ interface InterfaceTimeswapFactory {
 
     function protocolFee() external view returns (uint128);
 
+    function pendingFeeTo() external view returns (address);
+
+    function pendingFeeToSetter() external view returns (address);
+
     function getPool(
         InterfaceERC20 _asset,
         InterfaceERC20 _collateral,
@@ -51,4 +55,8 @@ interface InterfaceTimeswapFactory {
     function setFeeTo(address _feeTo) external;
 
     function setFeeToSetter(address _feeToSetter) external;
+
+    function acceptFeeTo() external;
+
+    function acceptFeeToSetter() external;
 }

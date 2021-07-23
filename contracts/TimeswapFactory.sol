@@ -29,10 +29,10 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     address public override feeToSetter;
 
     /// @dev The feeTo address which needs to be accepted by the recipient
-    address public pendingFeeTo;
+    address public override pendingFeeTo;
 
     /// @dev The pendingFeeToSetter address which needs to be accepted by the recipient
-    address public pendingFeeToSetter;
+    address public override pendingFeeToSetter;
 
     /// @dev The address of the original TimeswapPool contract to clone from
     InterfaceTimeswapPool public immutable override pool;
@@ -170,13 +170,13 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
     
     
     /// @notice `setFeeTo()` should be called by the existing feeToSetter address prior to calling this function.
-    function acceptFeeTo() external {
+    function acceptFeeTo() external override {
         require(msg.sender == pendingFeeTo, "pendingFeeTo");
         feeTo = msg.sender;
     }
 
     /// @notice `setFeeToSetter()` should be called by the existing feeToSetter address prior to calling this function.
-    function acceptFeeToSetter() external {
+    function acceptFeeToSetter() external override {
         require(msg.sender == pendingFeeToSetter, "pendingFeeToSetter");
         feeToSetter = msg.sender;
     }
