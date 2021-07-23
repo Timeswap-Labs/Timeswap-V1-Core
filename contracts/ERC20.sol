@@ -43,15 +43,13 @@ contract ERC20 is InterfaceERC20 {
         return true;
     }
 
-    function increaseAllowance(address _spender, uint256 _addedValue) external returns (bool) {
-        _approve(msg.sender, _spender, allowance[msg.sender][_spender] + _addedValue);
+    function increaseAllowance(address _spender, uint256 _value) external returns (bool) {
+        _approve(msg.sender, _spender, allowance[msg.sender][_spender] + _value);
         return true;
     }
 
-    function decreaseAllowance(address _spender, uint256 _subtractedValue) external returns (bool) {
-        uint256 currentAllowance = allowance[msg.sender][_spender];
-        require(currentAllowance >= _subtractedValue, "ERC20 :: decreaseAllowance : Decreased allowance below zero");
-        _approve(msg.sender, _spender, currentAllowance - _subtractedValue);
+    function decreaseAllowance(address _spender, uint256 _value) external returns (bool) {
+        _approve(msg.sender, _spender, allowance[msg.sender][_spender] - _value);
         return true;
     }
     
