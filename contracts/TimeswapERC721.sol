@@ -81,7 +81,7 @@ abstract contract TimeswapERC721 is ERC721Permit, InterfaceTimeswapERC721 {
     /// @param _value input 256 bit uint needed to cast to 128 bit
     /// @return _result safely casted 128bit output
     function _safeCastUint256Uint128(uint256 _value) internal pure returns (uint128 _result) {
-        require(_value < 2**128, "TimeswapERC721 :: _safeCastUint256Uint128 : value doesn\'t fit in 128 bits");
+        require(_value <= type(uint128).max, "TimeswapERC721 :: _safeCastUint256Uint128 : value doesn\'t fit in 128 bits");
         _result = uint128(_value);
         return _result;
     }
