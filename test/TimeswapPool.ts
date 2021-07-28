@@ -362,7 +362,7 @@ describe('mint', () => {
         })
 
         it('Should burn 1000 liquidity tokens', async () => {
-          const zero = '0x0000000000000000000000000000000000000000'
+          const zero = '0x000000000000000000000000000000000000dEaD'
           const result = (await pool.balanceOf(zero)).toBigInt()
 
           checkBigIntEquality(result, liquidityBurn)

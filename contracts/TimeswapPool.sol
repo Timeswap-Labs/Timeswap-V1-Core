@@ -26,8 +26,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
     /// @dev The base precision when dealing with transaction fee and protocol fee
     uint256 private constant BASE = 10000;
-    /// @dev The minimum liquidity minted and sent to the zero address for the first mint
+    /// @dev The minimum liquidity minted and sent to the dead address for the first mint
     uint256 private constant MINIMUM_LIQUIDITY = 1000;
+    /// @dev The dead address where the tokens need to be burned
+    address private constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
     /// @dev The number of seconds in a year
     uint256 private constant YEAR = 31556926;
 
@@ -371,7 +373,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // Burn MINIMUM_LIQUIDITY amount of liquidity ERC20 to avoid DOS attack to other liquidity providers
         // Enforce protocol fee minted to the feeTo address
-        _mint(ZERO, MINIMUM_LIQUIDITY); // burn minimum liquidity
+        _mint(BURN_ADDRESS, MINIMUM_LIQUIDITY); // burn minimum liquidity
         _mint(_to, _liquidityReceived);
         _mint(factory.feeTo(), _insuranceIncreaseAndDebtRequired - _liquidityReceived - MINIMUM_LIQUIDITY);
 
