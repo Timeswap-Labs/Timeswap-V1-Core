@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-interface InterfaceERC20 {
+interface IERC20 {
     // EVENT
 
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
@@ -18,9 +18,15 @@ interface InterfaceERC20 {
 
     // UPDATE
 
-    function approve(address _spender, uint256 _value) external returns (bool);
+    function approve(
+        address _spender
+        , uint256 _value
+    ) external returns (bool);
 
-    function transfer(address _to, uint256 _value) external returns (bool);
+    function transfer(
+        address _to,
+        uint256 _value)
+     external returns (bool);
 
     function transferFrom(
         address _from,
