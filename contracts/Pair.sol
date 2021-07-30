@@ -91,7 +91,6 @@ contract Pair is IPair {
         receiver.collateral += amount.collateral;
 
         totalReserves.asset = assetBalance;
-
         pool.parameter = parameter;
 
         emit Sync(maturity, parameter);
