@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from "../interfaces/IPair.sol";
-import {SafeCast} from "./SafeCast.sol";
+import {IPair} from '../interfaces/IPair.sol';
+import {SafeCast} from './SafeCast.sol';
 
 library WithdrawMath {
     using SafeCast for uint256;
@@ -13,9 +13,9 @@ library WithdrawMath {
         uint128 supply
     ) internal pure returns (uint128 amount) {
         if (reserve >= supply) return amount = bondIn;
-        uint256 _amount = uint256(reserve);
-        _amount *= uint256(bondIn);
-        _amount /= uint256(supply);
+        uint256 _amount = reserve;
+        _amount *= bondIn;
+        _amount /= supply;
         amount = _amount.toUint128();
     }
 
@@ -25,13 +25,13 @@ library WithdrawMath {
         IPair.Tokens memory supplies
     ) internal pure returns (uint128 amount) {
         if (reserves.asset >= supplies.asset) return amount = 0;
-        uint256 _amount = uint256(supplies.asset);
-        _amount -= uint256(reserves.asset);
-        _amount *= uint256(supplies.collateral);
-        _amount /= uint256(supplies.asset);
+        uint256 _amount = supplies.asset;
+        _amount -= reserves.asset;
+        _amount *= supplies.collateral;
+        _amount /= supplies.asset;
         if (reserves.collateral >= _amount) return amount = insuranceIn;
-        _amount *= uint256(insuranceIn);
-        _amount /= uint256(supplies.collateral);
+        _amount *= insuranceIn;
+        _amount /= supplies.collateral;
         amount = _amount.toUint128();
     }
 }
