@@ -15,6 +15,19 @@ library ConstantProduct {
         if (newProd1 == prod1) require(newProd0 >= prod0, 'Invariance');
     }
 
+    function check(
+        IPair.Parameter memory parameter,
+        uint128 _assetReserve,
+        uint128 interestAdjusted,
+        uint128 cdpAdjusted
+    ) internal pure {
+        (uint256 newProd0, uint256 newProd1) = mul512(_assetReserve, uint256(interestAdjusted) * cdpAdjusted);
+        (uint256 prod0, uint256 prod1) = mul512(parameter.reserves.asset, uint256(parameter.interest) * parameter.cdp);
+
+        require(newProd1 >= prod1, 'Invariance');
+        if (newProd1 == prod1) require(newProd0 >= prod0, 'Invariance');
+    }
+
     function mul512(uint256 a, uint256 b) private pure returns (uint256 prod0, uint256 prod1) {
         // 512-bit multiply [prod1 prod0] = a * b
         // Compute the product mod 2**256 and mod 2**256 - 1

@@ -71,8 +71,7 @@ contract Pair is IPair {
 
         Parameter memory parameter = LendMath.getParameter(pool.parameter, assetIn, interestDecrease, cdpDecrease);
 
-        ConstantProduct.check(parameter, pool.parameter);
-        LendMath.checkInterest(assetIn, interestDecrease, parameter.reserves.asset, pool.parameter.interest);
+        LendMath.check(pool.parameter, parameter.reserves.asset, assetIn, interestDecrease, cdpDecrease, fee);
 
         amount.asset = LendMath.getBond(assetIn, interestDecrease, block.timestamp - maturity);
         amount.collateral = LendMath.getInsurance(
