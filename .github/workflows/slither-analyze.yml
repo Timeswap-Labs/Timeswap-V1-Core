@@ -1,0 +1,34 @@
+name: Slither-Analyzer
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Use python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+
+      - name: Install Dependecies
+        run: |
+            python -m pip install --upgrade pip
+            pip3 install slither-analyzer solc-select
+            solc-select install 0.8.1
+            solc-select use 0.8.1
+
+      - name: Runs Slither
+        run: |
+            slither . --ignore-compile  > slither-audit.txt 2>&1
+            export LError=$(grep 'low issues' slither-audit.txt | sed 's/[a-zA-Z:0 ]//g')
+            export MError=$(grep 'medium issues' slither-audit.txt | sed 's/[a-zA-Z:0 ]//g')
+            export HError=$(grep 'high issues' slither-audit.txt | sed 's/[a-zA-Z:0 ]//g')
+            echo -en '-------------------------------\n\n\n# Details:\n##############################\n\n' >> slither-audit.txt
+            if [ ! -z "${LError}" ] || [ ! -z "${MError}" ] || [ ! -z "${HError}" ] ; then 
+            exit 1
+            fi
+    
