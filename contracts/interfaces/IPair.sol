@@ -36,19 +36,20 @@ interface IPair {
 
     event Sync(uint256 maturity, Parameter parameter);
 
-    event Lend(
+    event Lend(uint256 maturity, address indexed sender, address indexed to, uint128 assetIn, Tokens amount);
+
+    event Borrow(
         uint256 maturity,
         address indexed sender,
         address indexed to,
-        uint256 assetIn,
+        uint128 assetOut,
+        uint256 id,
         Tokens amount
     );
 
-    event Withdraw(
-        uint256 maturity,
-        address indexed sender,
-        address indexed to,
-        Tokens tokensIn,
-        Tokens amount
-    );
+    event Withdraw(uint256 maturity, address indexed sender, address indexed to, Tokens tokensIn, Tokens amount);
+
+    event Pay(uint256 maturity, address indexed sender, address indexed owner, uint128 assetIn, uint256[] ids);
+
+    event Unlock(uint256 maturity, address indexed sender, address indexed to, uint256[] ids, uint128 amount);
 }
