@@ -47,7 +47,11 @@ contract Pair is IPair {
         protocolFee = _protocolFee;
     }
 
-    function mint(uint256 maturity) external lock {
+    function mint(
+        uint256 maturity,
+        uint128 interestIncrease,
+        uint128 cdpIncrease
+    ) external lock {
         require(block.timestamp < maturity, 'Expired');
 
         Pool storage pool = pools[maturity];
@@ -64,8 +68,8 @@ contract Pair is IPair {
 
         Pool storage pool = pools[maturity];
 
-        uint128 assetBalance = asset.balanceOf(address(this)).toUint128();
-        uint128 assetIn = assetBalance - totalReserves.asset;
+        uint128 assetReserve = asset.balanceOf(address(this)).toUint128();
+        uint128 assetIn = assetReserve - totalReserves.asset;
         require(assetIn > 0, 'Invalid');
 
         Parameter memory parameter = LendMath.getParameter(pool.parameter, assetIn, interestDecrease, cdpDecrease);
@@ -88,62 +92,12 @@ contract Pair is IPair {
         receiver.asset += amount.asset;
         receiver.collateral += amount.collateral;
 
-        totalReserves.asset = assetBalance;
+        totalReserves.asset = assetReserve;
 
         pool.parameter = parameter;
 
         emit Sync(maturity, parameter);
         emit Lend(maturity, msg.sender, to, assetIn, amount);
-    }
-
-    function borrow(
-        uint256 maturity,
-        address to,
-        uint128 assetOut,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
-    ) external lock returns (uint256 id, Tokens memory amount) {
-        require(block.timestamp < maturity, 'Expired');
-        require(assetOut > 0, 'Invalid');
-        require(interestIncrease > 0 || cdpIncrease > 0, 'Invalid');
-
-        Pool storage pool = pools[maturity];
-
-        uint128 collateralBalance = collateral.balanceOf(address(this)).toUint128();
-        uint128 collateralIn = collateralBalance - totalReserves.collateral;
-
-        Parameter memory parameter = BorrowMath.getParameter(
-            pool.parameter,
-            assetOut,
-            collateralIn,
-            interestIncrease,
-            cdpIncrease
-        );
-
-        BorrowMath.check(parameter, parameter.reserves.asset, assetOut, interestIncrease, cdpIncrease, fee);
-
-        amount.asset = BorrowMath.getDebt(assetOut, interestIncrease, block.timestamp - maturity);
-        amount.collateral = BorrowMath.getCollateral(
-            amount.asset,
-            cdpIncrease,
-            parameter.reserves.asset,
-            pool.parameter.cdp
-        );
-
-        require(collateralIn >= amount.collateral, 'Insufficient');
-
-        Tokens[] storage balances = pool.debt.balances[to];
-
-        id = balances.length;
-        balances.push(amount);
-
-        totalReserves.asset -= assetOut;
-        totalReserves.collateral = collateralBalance;
-
-        pool.parameter = parameter;
-
-        emit Sync(maturity, parameter);
-        emit Borrow(maturity, msg.sender, to, assetOut, id, amount);
     }
 
     function withdraw(
@@ -183,6 +137,56 @@ contract Pair is IPair {
 
         emit Sync(maturity, pool.parameter);
         emit Withdraw(maturity, msg.sender, to, tokensIn, amount);
+    }
+
+    function borrow(
+        uint256 maturity,
+        address to,
+        uint128 assetOut,
+        uint128 interestIncrease,
+        uint128 cdpIncrease
+    ) external lock returns (uint256 id, Tokens memory amount) {
+        require(block.timestamp < maturity, 'Expired');
+        require(assetOut > 0, 'Invalid');
+        require(interestIncrease > 0 || cdpIncrease > 0, 'Invalid');
+
+        Pool storage pool = pools[maturity];
+
+        uint128 collateralReserve = collateral.balanceOf(address(this)).toUint128();
+        uint128 collateralIn = collateralReserve - totalReserves.collateral;
+
+        Parameter memory parameter = BorrowMath.getParameter(
+            pool.parameter,
+            assetOut,
+            collateralIn,
+            interestIncrease,
+            cdpIncrease
+        );
+
+        BorrowMath.check(parameter, parameter.reserves.asset, assetOut, interestIncrease, cdpIncrease, fee);
+
+        amount.asset = BorrowMath.getDebt(assetOut, interestIncrease, block.timestamp - maturity);
+        amount.collateral = BorrowMath.getCollateral(
+            amount.asset,
+            cdpIncrease,
+            parameter.reserves.asset,
+            pool.parameter.cdp
+        );
+
+        require(collateralIn >= amount.collateral, 'Insufficient');
+
+        Tokens[] storage balances = pool.debt.balances[to];
+
+        id = balances.length;
+        balances.push(amount);
+
+        totalReserves.asset -= assetOut;
+        totalReserves.collateral = collateralReserve;
+
+        pool.parameter = parameter;
+
+        emit Sync(maturity, parameter);
+        emit Borrow(maturity, msg.sender, to, assetOut, id, amount);
     }
 
     function pay(
