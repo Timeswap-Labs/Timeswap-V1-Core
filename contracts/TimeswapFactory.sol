@@ -162,6 +162,6 @@ contract TimeswapFactory is InterfaceTimeswapFactory {
         require(_feeToSetter != ZERO, 'TimeswapFactory :: setFeeToSetter : Zero Address');
         address oldFeeToSetter = feeToSetter;
         feeToSetter = _feeToSetter;
-        emit setFeeToSetter(oldFeeToSetter, _feeToSetter);
+        emit SetFeeToSetter(oldFeeToSetter, _feeToSetter);
     }
 }
