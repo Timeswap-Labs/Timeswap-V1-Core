@@ -5,7 +5,6 @@ import {IPair} from './interfaces/IPair.sol';
 import {IFactory} from './interfaces/IFactory.sol';
 import {IERC20} from './interfaces/IERC20.sol';
 import {Math} from './libraries/Math.sol';
-import {ConstantProduct} from './libraries/ConstantProduct.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
@@ -121,8 +120,7 @@ contract Pair is IPair {
             cdpIncrease
         );
 
-        ConstantProduct.check(parameter, pool.parameter);
-        BorrowMath.checkInterest(assetOut, interestIncrease, parameter.reserves.asset, pool.parameter.interest);
+        BorrowMath.check(parameter, parameter.reserves.asset, assetOut, interestIncrease, cdpIncrease, fee);
 
         amount.asset = BorrowMath.getDebt(assetOut, interestIncrease, block.timestamp - maturity);
         amount.collateral = BorrowMath.getCollateral(
