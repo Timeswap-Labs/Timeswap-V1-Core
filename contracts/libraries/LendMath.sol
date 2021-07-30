@@ -3,6 +3,8 @@ pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
 import {SafeCast} from './SafeCast.sol';
+import {FixedPoint16} from './FixedPoint16.sol';
+import {ConstantProduct} from './ConstantProduct.sol';
 
 library LendMath {
     using SafeCast for uint256;
@@ -18,17 +20,35 @@ library LendMath {
         parameter.cdp = _parameter.cdp - cdpDecrease;
     }
 
-    function checkInterest(
+    function check(
+        IPair.Parameter memory parameter,
+        uint128 _assetReserve,
         uint128 assetIn,
         uint128 interestDecrease,
-        uint128 newAssetReserve,
-        uint128 interest
+        uint128 cdpDecrease,
+        uint16 fee
     ) internal pure {
+        uint256 feeBase = 0x10000 + fee;
+        uint128 interestAdjusted = adjust(interestDecrease, parameter.interest, feeBase);
+        uint128 cdpAdjusted = adjust(cdpDecrease, parameter.cdp, feeBase);
+        ConstantProduct.check(parameter, _assetReserve, interestAdjusted, cdpAdjusted);
+
         uint256 minimum = assetIn;
-        minimum *= interest;
-        minimum /= newAssetReserve;
+        minimum *= parameter.interest;
+        minimum /= _assetReserve;
         minimum >>= 4;
         require(interestDecrease >= minimum, 'Invalid');
+    }
+
+    function adjust(
+        uint128 decrease,
+        uint128 reserve,
+        uint256 feeBase
+    ) private pure returns (uint128 adjusted) {
+        uint256 _adjusted = reserve << 16;
+        _adjusted -= uint256(decrease) * feeBase;
+        _adjusted >>= 16;
+        adjusted = _adjusted.toUint128();
     }
 
     function getBond(
