@@ -11,20 +11,20 @@ library BorrowMath {
     using SafeCast for uint256;
 
     function check(
-        IPair.Parameter memory parameter,
+        IPair.State memory state,
         uint128 assetOut,
         uint128 interestIncrease,
         uint128 cdpIncrease,
         uint16 fee
     ) internal pure {
         uint256 feeBase = 0x10000 - fee;
-        uint128 assetReserve = parameter.reserves.asset - assetOut;
-        uint128 interestAdjusted = adjust(interestIncrease, parameter.interest, feeBase);
-        uint128 cdpAdjusted = adjust(cdpIncrease, parameter.cdp, feeBase);
-        ConstantProduct.check(parameter, assetReserve, interestAdjusted, cdpAdjusted);
+        uint128 assetReserve = state.reserves.asset - assetOut;
+        uint128 interestAdjusted = adjust(interestIncrease, state.interest, feeBase);
+        uint128 cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase);
+        ConstantProduct.check(state, assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetOut;
-        minimum *= parameter.interest;
+        minimum *= state.interest;
         minimum = minimum.divUp(assetReserve);
         minimum = minimum.shiftUp(4);
         require(interestIncrease >= minimum, 'Invalid');
@@ -54,14 +54,14 @@ library BorrowMath {
     }
 
     function getCollateral(
-        IPair.Parameter memory parameter,
+        IPair.State memory state,
         uint128 assetOut,
         uint128 debtOut,
         uint128 cdpIncrease
     ) internal pure returns (uint112 collateralOut) {
         uint256 _collateralOut = debtOut;
-        _collateralOut *= parameter.cdp;
-        _collateralOut = _collateralOut.divUp(parameter.reserves.asset - assetOut);
+        _collateralOut *= state.cdp;
+        _collateralOut = _collateralOut.divUp(state.reserves.asset - assetOut);
         _collateralOut += cdpIncrease;
         collateralOut = _collateralOut.toUint112();
     }

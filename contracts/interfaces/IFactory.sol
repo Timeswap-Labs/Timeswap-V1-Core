@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
+
 import {IPair} from './IPair.sol';
 import {IERC20} from './IERC20.sol';
 
@@ -12,6 +13,14 @@ interface IFactory {
 
     event AcceptOwner(address indexed owner);
 
+    // UPDATE
+
+    function createPair(IERC20 asset, IERC20 collateral) external returns (IPair pair);
+
+    function setOwner(address _pendingOwner) external;
+
+    function acceptOwner() external;
+
     // VIEW
 
     function owner() external view returns (address);
@@ -23,12 +32,4 @@ interface IFactory {
     function protocolFee() external view returns (uint16);
 
     function getPair(IERC20 asset, IERC20 collateral) external view returns (IPair pair);
-
-    // UPDATE
-
-    function createPair(IERC20 asset, IERC20 collateral) external returns (IPair pair);
-
-    function setOwner(address _pendingOwner) external;
-
-    function acceptOwner() external;
 }

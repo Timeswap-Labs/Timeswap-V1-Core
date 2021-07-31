@@ -8,18 +8,18 @@ import {SafeCast} from './SafeCast.sol';
 library Receive {
     using SafeCast for uint256;
 
-    function getAssetIn(IERC20 asset, IPair.Tokens storage totalReserves) internal returns (uint128 assetIn) {
+    function getAssetIn(IERC20 asset, IPair.Tokens storage reserves) internal returns (uint128 assetIn) {
         uint128 assetReserve = asset.balanceOf(address(this)).toUint128();
-        assetIn = assetReserve - totalReserves.asset;
-        totalReserves.asset = assetReserve;
+        assetIn = assetReserve - reserves.asset;
+        reserves.asset = assetReserve;
     }
 
-    function getCollateralIn(IERC20 collateral, IPair.Tokens storage totalReserves)
+    function getCollateralIn(IERC20 collateral, IPair.Tokens storage reserves)
         internal
         returns (uint128 collateralIn)
     {
         uint128 collateralReserve = collateral.balanceOf(address(this)).toUint128();
-        collateralIn = collateralReserve - totalReserves.collateral;
-        totalReserves.collateral = collateralReserve;
+        collateralIn = collateralReserve - reserves.collateral;
+        reserves.collateral = collateralReserve;
     }
 }
