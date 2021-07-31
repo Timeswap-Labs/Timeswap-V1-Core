@@ -46,6 +46,15 @@ interface IPair {
         Debt debtOut
     );
 
+    event Burn(
+        uint256 maturity,
+        address indexed sender,
+        address indexed assetTo,
+        address indexed debtTo,
+        uint256 liquidityIn,
+        Tokens tokensOut
+    );
+
     event Lend(
         uint256 maturity,
         address indexed sender,
@@ -74,7 +83,16 @@ interface IPair {
         Debt debtOut
     );
 
-    event Pay(uint256 maturity, address indexed sender, address indexed owner, uint128 assetIn, uint256[] ids);
+    event Pay(
+        uint256 maturity,
+        address indexed sender,
+        address indexed to,
+        address indexed owner,
+        uint128 assetIn,
+        uint128 collateralOut,
+        uint256[] ids,
+        Debt[] debtsIn
+    );
 
-    event Unlock(uint256 maturity, address indexed sender, address indexed to, uint256[] ids, uint128 collateralOut);
+    event Skim(address indexed sender, address indexed assetTo, address indexed collateralTo, Tokens tokensOut);
 }
