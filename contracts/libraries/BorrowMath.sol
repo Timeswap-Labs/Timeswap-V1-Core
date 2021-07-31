@@ -55,13 +55,13 @@ library BorrowMath {
 
     function getCollateral(
         IPair.Parameter memory parameter,
-        uint128 assetIn,
+        uint128 assetOut,
         uint128 debtOut,
         uint128 cdpIncrease
     ) internal pure returns (uint112 collateralOut) {
         uint256 _collateralOut = debtOut;
         _collateralOut *= parameter.cdp;
-        _collateralOut = _collateralOut.divUp(parameter.reserves.asset - assetIn);
+        _collateralOut = _collateralOut.divUp(parameter.reserves.asset - assetOut);
         _collateralOut += cdpIncrease;
         collateralOut = _collateralOut.toUint112();
     }

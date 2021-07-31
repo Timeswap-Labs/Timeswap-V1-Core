@@ -35,6 +35,17 @@ interface IPair {
 
     event Sync(uint256 maturity, Parameter parameter);
 
+    event Mint(
+        uint256 maturity,
+        address indexed sender,
+        address indexed liquidityTo,
+        address indexed debtTo,
+        uint128 assetIn,
+        uint256 liquidityOut,
+        uint256 id,
+        Debt debtOut
+    );
+
     event Lend(
         uint256 maturity,
         address indexed sender,
