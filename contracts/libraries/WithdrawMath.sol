@@ -28,7 +28,7 @@ library WithdrawMath {
         uint256 _collateralOut = supplies.bond;
         _collateralOut -= reserves.asset;
         _collateralOut *= supplies.insurance;
-        _collateralOut /= supplies.bond;
+        _collateralOut /= supplies.bond; // problem mulDiv
         if (reserves.collateral >= _collateralOut) return collateralOut = insuranceIn;
         _collateralOut *= insuranceIn;
         _collateralOut /= supplies.insurance;

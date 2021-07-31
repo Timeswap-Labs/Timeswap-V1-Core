@@ -80,11 +80,11 @@ contract Pair is IPair {
             liquidityOut = assetIn - 1000;
             pool.totalLiquidity = assetIn;
         } else {
-            uint256 totalLiquidity = pool.totalLiquidity;
+            uint256 total = pool.totalLiquidity;
             liquidityOut = Math.min(
-                (totalLiquidity * assetIn) / pool.parameter.reserves.asset,
-                (totalLiquidity * interestIncrease) / pool.parameter.interest,
-                (totalLiquidity * cdpIncrease) / pool.parameter.cdp
+                (total * assetIn) / pool.parameter.reserves.asset,
+                (total * interestIncrease) / pool.parameter.interest,
+                (total * cdpIncrease) / pool.parameter.cdp
             );
             pool.totalLiquidity += liquidityOut;
         }
@@ -124,10 +124,10 @@ contract Pair is IPair {
 
         Pool storage pool = pools[maturity];
 
-        uint256 totalLiquidity = pool.totalLiquidity;
+        uint256 total = pool.totalLiquidity;
 
-        tokensOut.asset = BurnMath.getToken(liquidityIn, pool.parameter.reserves.asset, totalLiquidity);
-        tokensOut.collateral = BurnMath.getToken(liquidityIn, pool.parameter.reserves.collateral, totalLiquidity);
+        tokensOut.asset = BurnMath.getToken(liquidityIn, pool.parameter.reserves.asset, total);
+        tokensOut.collateral = BurnMath.getToken(liquidityIn, pool.parameter.reserves.collateral, total);
 
         pool.totalLiquidity -= liquidityIn;
 
@@ -247,8 +247,6 @@ contract Pair is IPair {
         uint128 collateralIn = collateral.getCollateralIn(totalReserves);
         require(collateralIn >= debtOut.collateral, 'Insufficient');
 
-        if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
-
         Debt[] storage debts = pool.debtsOf[debtTo];
 
         id = debts.length;
@@ -260,6 +258,8 @@ contract Pair is IPair {
         pool.parameter.cdp += cdpIncrease;
 
         totalReserves.asset -= assetOut;
+
+        if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
 
         emit Sync(maturity, pool.parameter);
         emit Borrow(maturity, msg.sender, assetTo, debtTo, assetOut, id, debtOut);
