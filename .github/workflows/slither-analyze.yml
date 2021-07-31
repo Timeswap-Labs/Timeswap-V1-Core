@@ -7,6 +7,12 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
+      
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
 
       - name: Use python
         uses: actions/setup-python@v2
@@ -20,15 +26,19 @@ jobs:
             pip3 install slither-analyzer solc-select
             solc-select install 0.8.1
             solc-select use 0.8.1
+            npm ci --ignore-scripts
 
       - name: Runs Slither
         run: |
-            slither . --ignore-compile  > slither-audit.txt 2>&1
-            export LError=$(grep 'low issues' slither-audit.txt | sed 's/[a-zA-Z:0 ]//g')
-            export MError=$(grep 'medium issues' slither-audit.txt | sed 's/[a-zA-Z:0 ]//g')
-            export HError=$(grep 'high issues' slither-audit.txt | sed 's/[a-zA-Z:0 ]//g')
-            echo -en '-------------------------------\n\n\n# Details:\n##############################\n\n' >> slither-audit.txt
-            if [ ! -z "${LError}" ] || [ ! -z "${MError}" ] || [ ! -z "${HError}" ] ; then 
-            exit 1
-            fi
-    
+            slither . > slither-audit.txt 2>&1
+            for SEVERITY in low medium high
+              do
+                  ISSUE=$(grep ${SEVERITY}' issues' slither-audit.txt | grep -o -E '[0-9]+' | bc)
+                  if [[ $ISSUE > 0 ]]
+                  then
+                    echo 'Slither has reported issues'
+                    exit 1
+                  fi
+              done
+              echo 'Slither has reported no issues'
+              exit 0

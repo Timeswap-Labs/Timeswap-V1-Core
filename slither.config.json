@@ -4,6 +4,6 @@
     "exclude_low": false,
     "exclude_medium": false,
     "exclude_high": false,
-    "disable_color": false,
+    "disable_color": true,
     "filter_paths": "node_modules"
 }
