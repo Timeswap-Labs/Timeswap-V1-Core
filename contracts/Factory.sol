@@ -4,6 +4,7 @@ pragma solidity =0.8.1;
 import {IFactory} from './interfaces/IFactory.sol';
 import {IPair} from './interfaces/IPair.sol';
 import {IERC20} from './interfaces/IERC20.sol';
+
 import {Pair} from './Pair.sol';
 
 contract Factory is IFactory {
@@ -12,6 +13,9 @@ contract Factory is IFactory {
     uint16 public immutable override fee;
     uint16 public immutable override protocolFee;
 
+    mapping(IERC20 => mapping(IERC20 =>  IPair))
+        public
+        override getPool;
     mapping(IERC20 => mapping(IERC20 => IPair)) public override getPair;
 
     constructor(
@@ -24,6 +28,7 @@ contract Factory is IFactory {
         fee = _fee;
         protocolFee = _protocolFee;
     }
+
 
     function createPair(IERC20 asset, IERC20 collateral) external override returns (IPair pair) {
         require(asset != collateral, 'Identical');

@@ -16,7 +16,7 @@ interface IFactory {
 
     function owner() external view returns (address);
 
-    function pendingOwner() external view returns (address);
+   function pendingOwner() external view returns (address);
 
     function fee() external view returns (uint16);
 
