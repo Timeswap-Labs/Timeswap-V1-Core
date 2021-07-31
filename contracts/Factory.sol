@@ -4,7 +4,6 @@ pragma solidity =0.8.1;
 import {IFactory} from './interfaces/IFactory.sol';
 import {IPair} from './interfaces/IPair.sol';
 import {IERC20} from './interfaces/IERC20.sol';
-
 import {Pair} from './Pair.sol';
 
 contract Factory is IFactory {
