@@ -10,35 +10,22 @@ library BorrowMath {
     using Math for uint256;
     using SafeCast for uint256;
 
-    function getParameter(
-        IPair.Parameter memory _parameter,
-        uint128 assetOut,
-        uint128 collateralIn,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
-    ) internal pure returns (IPair.Parameter memory parameter) {
-        parameter.reserves.asset = _parameter.reserves.asset - assetOut;
-        parameter.reserves.collateral = _parameter.reserves.collateral + collateralIn;
-        parameter.interest = _parameter.interest + interestIncrease;
-        parameter.cdp = _parameter.cdp + cdpIncrease;
-    }
-
     function check(
         IPair.Parameter memory parameter,
-        uint128 _assetReserve,
         uint128 assetOut,
         uint128 interestIncrease,
         uint128 cdpIncrease,
         uint16 fee
     ) internal pure {
         uint256 feeBase = 0x10000 - fee;
+        uint128 assetReserve = parameter.reserves.asset - assetOut;
         uint128 interestAdjusted = adjust(interestIncrease, parameter.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpIncrease, parameter.cdp, feeBase);
-        ConstantProduct.check(parameter, _assetReserve, interestAdjusted, cdpAdjusted);
+        ConstantProduct.check(parameter, assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetOut;
         minimum *= parameter.interest;
-        minimum = minimum.divUp(_assetReserve);
+        minimum = minimum.divUp(assetReserve);
         minimum = minimum.shiftUp(4);
         require(interestIncrease >= minimum, 'Invalid');
     }
@@ -58,24 +45,24 @@ library BorrowMath {
         uint128 assetOut,
         uint128 interestIncrease,
         uint256 duration
-    ) internal pure returns (uint128 amount) {
-        uint256 _amount = duration;
-        _amount *= interestIncrease;
-        _amount = _amount.shiftUp(32);
-        _amount += assetOut;
-        amount = _amount.toUint128();
+    ) internal pure returns (uint112 debtOut) {
+        uint256 _debtOut = duration;
+        _debtOut *= interestIncrease;
+        _debtOut = _debtOut.shiftUp(32);
+        _debtOut += assetOut;
+        debtOut = _debtOut.toUint112();
     }
 
     function getCollateral(
+        IPair.Parameter memory parameter,
+        uint128 assetOut,
         uint128 debtOut,
-        uint128 cdpIncrease,
-        uint128 newAssetReserve,
-        uint128 cdp
-    ) internal pure returns (uint128 amount) {
-        uint256 _amount = debtOut;
-        _amount *= cdp;
-        _amount = _amount.divUp(newAssetReserve);
-        _amount += cdpIncrease;
-        amount = _amount.toUint128();
+        uint128 cdpIncrease
+    ) internal pure returns (uint112 collateralOut) {
+        uint256 _collateralOut = debtOut;
+        _collateralOut *= parameter.cdp;
+        _collateralOut = _collateralOut.divUp(parameter.reserves.asset - assetOut);
+        _collateralOut += cdpIncrease;
+        collateralOut = _collateralOut.toUint112();
     }
 }

@@ -4,37 +4,31 @@ import {IPair} from './IPair.sol';
 import {IERC20} from './IERC20.sol';
 
 interface IFactory {
- // EVENT
+    // EVENT
 
-    event PoolCreated(
-        IERC20 indexed _asset,
-        IERC20 indexed _collateral,
-        IPair _pair
-    );
+    event CreatePair(IERC20 indexed asset, IERC20 indexed collateral, IPair pair);
+
+    event SetOwner(address indexed pendingOwner);
+
+    event AcceptOwner(address indexed owner);
 
     // VIEW
 
-
     function owner() external view returns (address);
-    function pendingOwner() external view returns (address);
+
+   function pendingOwner() external view returns (address);
 
     function fee() external view returns (uint16);
 
     function protocolFee() external view returns (uint16);
 
-    function getPool(
-        IERC20 _asset,
-        IERC20 _collateral
-    ) external view returns (IPair);
+    function getPair(IERC20 asset, IERC20 collateral) external view returns (IPair pair);
 
     // UPDATE
 
-    function createPool(
-        IERC20 _asset,
-        IERC20 _collateral
-    ) external returns (IPair _pair);
+    function createPair(IERC20 asset, IERC20 collateral) external returns (IPair pair);
 
-    function setOwner(address _feeTo) external;
+    function setOwner(address _pendingOwner) external;
 
     function acceptOwner() external;
 }
