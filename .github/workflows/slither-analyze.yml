@@ -32,19 +32,13 @@ jobs:
         run: |
             slither . > slither-audit.txt 2>&1
             for SEVERITY in low medium high
-                do
-                grep ${SEVERITY}' issues' slither-audit.txt | grep -o -E '[0-9]+'
-                grep ${SEVERITY}' issues' slither-audit.txt | grep -o -E '[0-9]+' | bc | read ${SEVERITY}_count
+              do
+                  ISSUE=$(grep ${SEVERITY}' issues' slither-audit.txt | grep -o -E '[0-9]+' | bc)
+                  if [[ $ISSUE > 0 ]]
+                  then
+                    echo 'Slither has reported issues'
+                    exit 1
+                  fi
               done
-            
-            echo ${low_count} ${high_count} ${medium_count}
-            echo $((low_count+medium_count+high_count))
-            if [[ $((low_count+medium_count+high_count)) == 0 ]]
-            then
               echo 'Slither has reported no issues'
               exit 0
-            else
-              echo 'Slither has reported issues'
-              exit 1
-            fi
-
