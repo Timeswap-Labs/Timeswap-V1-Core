@@ -5,16 +5,19 @@ import {IPair} from './interfaces/IPair.sol';
 import {IFactory} from './interfaces/IFactory.sol';
 import {IERC20} from './interfaces/IERC20.sol';
 import {Math} from './libraries/Math.sol';
+import {MintMath} from './libraries/MintMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
 import {SafeCast} from './libraries/SafeCast.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import {Receive} from './libraries/Receive.sol';
 
 contract Pair is IPair {
     using Math for uint256;
     using SafeCast for uint256;
     using SafeTransfer for IERC20;
+    using Receive for IERC20;
 
     IFactory public immutable factory;
     IERC20 public immutable asset;
@@ -49,20 +52,60 @@ contract Pair is IPair {
 
     function mint(
         uint256 maturity,
-        address to,
+        address liquidityTo,
+        address debtTo,
         uint128 interestIncrease,
         uint128 cdpIncrease
-    ) external lock {
+    )
+        external
+        lock
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            Debt memory debtOut
+        )
+    {
         require(block.timestamp < maturity, 'Expired');
 
         Pool storage pool = pools[maturity];
 
-        uint128 assetReserve = asset.balanceOf(address(this)).toUint128();
-        uint128 assetIn = assetReserve - totalReserves.asset;
+        uint128 assetIn = asset.getAssetIn(totalReserves);
         require(assetIn > 0, 'Invalid');
 
-        uint128 collateralReserve = collateral.balanceOf(address(this)).toUint128();
-        uint128 collateralIn = collateralReserve - totalReserves.collateral;
+        if (pool.totalLiquidity == 0) {
+            pool.totalLiquidity = assetIn;
+            liquidityOut = assetIn - 1000;
+        } else {
+            uint256 totalLiquidity = pool.totalLiquidity;
+            liquidityOut = Math.min(
+                (totalLiquidity * assetIn) / pool.parameter.reserves.asset,
+                (totalLiquidity * interestIncrease) / pool.parameter.interest,
+                (totalLiquidity * cdpIncrease) / pool.parameter.cdp
+            );
+            pool.totalLiquidity += liquidityOut;
+        }
+
+        pool.liquidityOf[liquidityTo] += liquidityOut;
+
+        debtOut.debt = MintMath.getDebt(assetIn, interestIncrease, block.timestamp - maturity);
+        debtOut.collateral = MintMath.getCollateral(assetIn, debtOut.debt, cdpIncrease);
+        debtOut.startBlock = uint32(block.number);
+
+        uint128 collateralIn = collateral.getCollateralIn(totalReserves);
+        require(collateralIn >= debtOut.collateral, 'Insufficient');
+
+        Debt[] storage debts = pool.debtsOf[debtTo];
+
+        id = debts.length;
+        debts.push(debtOut);
+
+        pool.parameter.reserves.asset += assetIn;
+        pool.parameter.reserves.collateral += collateralIn;
+        pool.parameter.interest += interestIncrease;
+        pool.parameter.cdp += cdpIncrease;
+
+        emit Sync(maturity, pool.parameter);
+        emit Mint(maturity, msg.sender, liquidityTo, debtTo, assetIn, liquidityOut, id, debtOut);
     }
 
     function lend(
@@ -78,8 +121,7 @@ contract Pair is IPair {
 
         Pool storage pool = pools[maturity];
 
-        uint128 assetReserve = asset.balanceOf(address(this)).toUint128();
-        uint128 assetIn = assetReserve - totalReserves.asset;
+        uint128 assetIn = asset.getAssetIn(totalReserves);
         require(assetIn > 0, 'Invalid');
 
         LendMath.check(pool.parameter, assetIn, interestDecrease, cdpDecrease, fee);
@@ -96,8 +138,6 @@ contract Pair is IPair {
         pool.parameter.reserves.asset += assetIn;
         pool.parameter.interest -= interestDecrease;
         pool.parameter.cdp -= cdpDecrease;
-
-        totalReserves.asset = assetReserve;
 
         emit Sync(maturity, pool.parameter);
         emit Lend(maturity, msg.sender, bondTo, insuranceTo, assetIn, claimsOut);
@@ -119,7 +159,7 @@ contract Pair is IPair {
         tokensOut.collateral = WithdrawMath.getCollateral(
             claimsIn.insurance,
             pool.parameter.reserves,
-            pool.totalClaims // fix it
+            pool.totalClaims
         );
 
         pool.totalClaims.bond -= claimsIn.bond;
@@ -136,8 +176,9 @@ contract Pair is IPair {
         totalReserves.asset -= tokensOut.asset;
         totalReserves.collateral -= tokensOut.collateral;
 
-        if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
-        if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
+        if (tokensOut.asset > 0 && assetTo != address(this)) asset.safeTransfer(assetTo, tokensOut.asset);
+        if (tokensOut.collateral > 0 && collateralTo != address(this))
+            collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
         emit Sync(maturity, pool.parameter);
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
@@ -158,18 +199,16 @@ contract Pair is IPair {
 
         Pool storage pool = pools[maturity];
 
-        uint128 collateralReserve = collateral.balanceOf(address(this)).toUint128();
-        uint128 collateralIn = collateralReserve - totalReserves.collateral;
-
         BorrowMath.check(pool.parameter, assetOut, interestIncrease, cdpIncrease, fee);
 
         debtOut.debt = BorrowMath.getDebt(assetOut, interestIncrease, block.timestamp - maturity);
         debtOut.collateral = BorrowMath.getCollateral(pool.parameter, assetOut, debtOut.debt, cdpIncrease);
         debtOut.startBlock = uint32(block.number);
 
+        uint128 collateralIn = collateral.getCollateralIn(totalReserves);
         require(collateralIn >= debtOut.collateral, 'Insufficient');
 
-        asset.safeTransfer(assetTo, assetOut);
+        if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
 
         Debt[] storage debts = pool.debtsOf[debtTo];
 
@@ -182,7 +221,6 @@ contract Pair is IPair {
         pool.parameter.cdp += cdpIncrease;
 
         totalReserves.asset -= assetOut;
-        totalReserves.collateral = collateralReserve;
 
         emit Sync(maturity, pool.parameter);
         emit Borrow(maturity, msg.sender, assetTo, debtTo, assetOut, id, debtOut);
@@ -197,15 +235,12 @@ contract Pair is IPair {
 
         Pool storage pool = pools[maturity];
 
-        uint128 assetReserve = asset.balanceOf(address(this)).toUint128();
-        uint128 assetIn = assetReserve - totalReserves.asset;
+        uint128 assetIn = asset.getAssetIn(totalReserves);
         require(assetIn > 0, 'Invalid');
 
         Debt[] storage debts = pool.debtsOf[owner];
 
         pool.parameter.reserves.asset += assetIn;
-
-        totalReserves.asset = assetReserve;
 
         for (uint256 i = 0; i < ids.length; i++) {
             Debt storage debt = debts[i];
@@ -238,20 +273,20 @@ contract Pair is IPair {
 
         totalReserves.collateral -= collateralOut;
 
-        collateral.safeTransfer(to, collateralOut);
+        if (to != address(this)) collateral.safeTransfer(to, collateralOut);
 
         emit Sync(maturity, pool.parameter);
         emit Unlock(maturity, msg.sender, to, ids, collateralOut);
     }
 
-    function skim(address to) external lock returns (Tokens memory tokensOut) {
+    function skim(address assetTo, address collateralTo) external lock returns (Tokens memory tokensOut) {
         IERC20 _asset = asset;
         IERC20 _collateral = collateral;
 
         tokensOut.asset = _asset.balanceOf(address(this)).subOrZero(totalReserves.asset).toUint128();
         tokensOut.collateral = _collateral.balanceOf(address(this)).subOrZero(totalReserves.collateral).toUint128();
 
-        if (tokensOut.asset > 0) _asset.safeTransfer(to, tokensOut.asset);
-        if (tokensOut.collateral > 0) _collateral.safeTransfer(to, tokensOut.collateral);
+        if (tokensOut.asset > 0) _asset.safeTransfer(assetTo, tokensOut.asset);
+        if (tokensOut.collateral > 0) _collateral.safeTransfer(collateralTo, tokensOut.collateral);
     }
 }
