@@ -16,6 +16,14 @@ library Math {
         if (x != z << y) z++;
     }
 
+    function min(uint112 x, uint112 y) internal pure returns (uint112 z) {
+        if (x <= y) {
+            z = x;
+        } else {
+            z = y;
+        }
+    }
+
     function min(
         uint256 w,
         uint256 x,
