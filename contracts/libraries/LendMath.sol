@@ -9,20 +9,20 @@ library LendMath {
     using SafeCast for uint256;
 
     function check(
-        IPair.Parameter memory parameter,
+        IPair.State memory state,
         uint128 assetIn,
         uint128 interestDecrease,
         uint128 cdpDecrease,
         uint16 fee
     ) internal pure {
         uint256 feeBase = 0x10000 + fee;
-        uint128 assetReserve = parameter.reserves.asset + assetIn;
-        uint128 interestAdjusted = adjust(interestDecrease, parameter.interest, feeBase);
-        uint128 cdpAdjusted = adjust(cdpDecrease, parameter.cdp, feeBase);
-        ConstantProduct.check(parameter, assetReserve, interestAdjusted, cdpAdjusted);
+        uint128 assetReserve = state.reserves.asset + assetIn;
+        uint128 interestAdjusted = adjust(interestDecrease, state.interest, feeBase);
+        uint128 cdpAdjusted = adjust(cdpDecrease, state.cdp, feeBase);
+        ConstantProduct.check(state, assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetIn;
-        minimum *= parameter.interest;
+        minimum *= state.interest;
         minimum /= assetReserve;
         minimum >>= 4;
         require(interestDecrease >= minimum, 'Invalid');
@@ -52,14 +52,14 @@ library LendMath {
     }
 
     function getInsurance(
-        IPair.Parameter memory parameter,
+        IPair.State memory state,
         uint128 assetIn,
         uint128 bondOut,
         uint128 cdpDecrease
     ) internal pure returns (uint128 insuranceOut) {
         uint256 _insuranceOut = bondOut;
-        _insuranceOut *= parameter.cdp;
-        _insuranceOut /= parameter.reserves.asset + assetIn;
+        _insuranceOut *= state.cdp;
+        _insuranceOut /= state.reserves.asset + assetIn;
         _insuranceOut += cdpDecrease;
         insuranceOut = _insuranceOut.toUint128();
     }

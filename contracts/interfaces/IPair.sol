@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
+import {IFactory} from './IFactory.sol';
+import {IERC20} from './IERC20.sol';
+
 interface IPair {
+    // STRUCT
+    
     struct Tokens {
         uint128 asset;
         uint128 collateral;
@@ -18,14 +23,14 @@ interface IPair {
         uint32 startBlock;
     }
 
-    struct Parameter {
+    struct State {
         Tokens reserves;
         uint128 interest;
         uint128 cdp;
     }
 
     struct Pool {
-        Parameter parameter;
+        State state;
         uint256 totalLiquidity;
         mapping(address => uint256) liquidityOf;
         Claims totalClaims;
@@ -33,7 +38,9 @@ interface IPair {
         mapping(address => Debt[]) debtsOf;
     }
 
-    event Sync(uint256 maturity, Parameter parameter);
+    // EVENT
+
+    event Sync(uint256 maturity, State state);
 
     event Mint(
         uint256 maturity,
@@ -95,4 +102,87 @@ interface IPair {
     );
 
     event Skim(address indexed sender, address indexed assetTo, address indexed collateralTo, Tokens tokensOut);
+
+    // UPDATE
+
+    function mint(
+        uint256 maturity,
+        address liquidityTo,
+        address debtTo,
+        uint128 interestIncrease,
+        uint128 cdpIncrease
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            Debt memory debtOut
+        );
+
+    function burn(
+        uint256 maturity,
+        address assetTo,
+        address collateralTo,
+        uint256 liquidityIn
+    ) external returns (Tokens memory tokensOut);
+
+    function lend(
+        uint256 maturity,
+        address bondTo,
+        address insuranceTo,
+        uint128 interestDecrease,
+        uint128 cdpDecrease
+    ) external returns (Claims memory claimsOut);
+
+    function withdraw(
+        uint256 maturity,
+        address assetTo,
+        address collateralTo,
+        Claims memory claimsIn
+    ) external returns (Tokens memory tokensOut);
+
+    function borrow(
+        uint256 maturity,
+        address assetTo,
+        address debtTo,
+        uint128 assetOut,
+        uint128 interestIncrease,
+        uint128 cdpIncrease
+    ) external returns (uint256 id, Debt memory debtOut);
+
+    function pay(
+        uint256 maturity,
+        address to,
+        address owner,
+        uint256[] memory ids,
+        uint112[] memory assetsPay
+    ) external returns (uint128 collateralOut);
+
+    function skim(address assetTo, address collateralTo) external returns (Tokens memory tokensOut);
+
+    // VIEW
+
+    function factory() external view returns (IFactory);
+
+    function asset() external view returns (IERC20);
+
+    function collateral() external view returns (IERC20);
+
+    function fee() external view returns (uint16);
+
+    function protocolFee() external view returns (uint16);
+
+    function totalReserves() external view returns (Tokens memory);
+
+    function state(uint256 maturity) external view returns (State memory);
+
+    function totalLiquidity(uint256 maturity) external view returns (uint256);
+
+    function liquidityOf(uint256 maturity, address owner) external view returns (uint256);
+
+    function totalClaims(uint256 maturity) external view returns (Claims memory);
+
+    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
+
+    function debtsOf(uint256 maturity, address owner) external view returns (Debt[] memory);
 }

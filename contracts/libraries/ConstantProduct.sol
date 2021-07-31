@@ -4,25 +4,14 @@ pragma solidity =0.8.1;
 import {IPair} from '../interfaces/IPair.sol';
 
 library ConstantProduct {
-    function check(IPair.Parameter memory newParameter, IPair.Parameter memory parameter) internal pure {
-        (uint256 newProd0, uint256 newProd1) = mul512(
-            newParameter.reserves.asset,
-            uint256(newParameter.interest) * newParameter.cdp
-        );
-        (uint256 prod0, uint256 prod1) = mul512(parameter.reserves.asset, uint256(parameter.interest) * parameter.cdp);
-
-        require(newProd1 >= prod1, 'Invariance');
-        if (newProd1 == prod1) require(newProd0 >= prod0, 'Invariance');
-    }
-
     function check(
-        IPair.Parameter memory parameter,
+        IPair.State memory state,
         uint128 _assetReserve,
         uint128 interestAdjusted,
         uint128 cdpAdjusted
     ) internal pure {
         (uint256 newProd0, uint256 newProd1) = mul512(_assetReserve, uint256(interestAdjusted) * cdpAdjusted);
-        (uint256 prod0, uint256 prod1) = mul512(parameter.reserves.asset, uint256(parameter.interest) * parameter.cdp);
+        (uint256 prod0, uint256 prod1) = mul512(state.reserves.asset, uint256(state.interest) * state.cdp);
 
         require(newProd1 >= prod1, 'Invariance');
         if (newProd1 == prod1) require(newProd0 >= prod0, 'Invariance');
