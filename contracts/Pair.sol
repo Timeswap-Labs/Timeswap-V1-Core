@@ -28,7 +28,7 @@ contract Pair is IPair {
     uint16 public immutable protocolFee;
 
     Tokens public totalReserves;
-    mapping(uint256 => Pool) public pools;
+    mapping(uint256 => Pool) private pools;
 
     uint256 private locked;
 
@@ -330,5 +330,29 @@ contract Pair is IPair {
         if (tokensOut.collateral > 0) _collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
         emit Skim(msg.sender, assetTo, collateralTo, tokensOut);
+    }
+
+    function parameter(uint256 maturity) external view returns (Parameter memory) {
+        return pools[maturity].parameter;
+    }
+
+    function totalLiquidity(uint256 maturity) external view returns (uint256) {
+        return pools[maturity].totalLiquidity;
+    }
+
+    function liquidityOf(uint256 maturity, address owner) external view returns (uint256) {
+        return pools[maturity].liquidityOf[owner];
+    }
+
+    function totalClaims(uint256 maturity) external view returns (Claims memory) {
+        return pools[maturity].totalClaims;
+    }
+
+    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory) {
+        return pools[maturity].claimsOf[owner];
+    }
+
+    function debtsOf(uint256 maturity, address owner) external view returns (Debt[] memory) {
+        return pools[maturity].debtsOf[owner];
     }
 }
