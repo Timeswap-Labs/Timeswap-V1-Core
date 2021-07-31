@@ -3,39 +3,27 @@ pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
 import {SafeCast} from './SafeCast.sol';
-import {FixedPoint16} from './FixedPoint16.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 
 library LendMath {
     using SafeCast for uint256;
 
-    function getParameter(
-        IPair.Parameter memory _parameter,
-        uint128 assetIn,
-        uint128 interestDecrease,
-        uint128 cdpDecrease
-    ) internal pure returns (IPair.Parameter memory parameter) {
-        parameter.reserves.asset = _parameter.reserves.asset + assetIn;
-        parameter.interest = _parameter.interest - interestDecrease;
-        parameter.cdp = _parameter.cdp - cdpDecrease;
-    }
-
     function check(
         IPair.Parameter memory parameter,
-        uint128 _assetReserve,
         uint128 assetIn,
         uint128 interestDecrease,
         uint128 cdpDecrease,
         uint16 fee
     ) internal pure {
         uint256 feeBase = 0x10000 + fee;
+        uint128 assetReserve = parameter.reserves.asset + assetIn;
         uint128 interestAdjusted = adjust(interestDecrease, parameter.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpDecrease, parameter.cdp, feeBase);
-        ConstantProduct.check(parameter, _assetReserve, interestAdjusted, cdpAdjusted);
+        ConstantProduct.check(parameter, assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetIn;
         minimum *= parameter.interest;
-        minimum /= _assetReserve;
+        minimum /= assetReserve;
         minimum >>= 4;
         require(interestDecrease >= minimum, 'Invalid');
     }
@@ -55,24 +43,24 @@ library LendMath {
         uint128 assetIn,
         uint128 interestDecrease,
         uint256 duration
-    ) internal pure returns (uint128 amount) {
-        uint256 _amount = duration;
-        _amount *= interestDecrease;
-        _amount >>= 32;
-        _amount += assetIn;
-        amount = _amount.toUint128();
+    ) internal pure returns (uint128 bondOut) {
+        uint256 _bondOut = duration;
+        _bondOut *= interestDecrease;
+        _bondOut >>= 32;
+        _bondOut += assetIn;
+        bondOut = _bondOut.toUint128();
     }
 
     function getInsurance(
+        IPair.Parameter memory parameter,
+        uint128 assetIn,
         uint128 bondOut,
-        uint128 cdpDecrease,
-        uint128 newAssetReserve,
-        uint128 cdp
-    ) internal pure returns (uint128 amount) {
-        uint256 _amount = bondOut;
-        _amount *= cdp;
-        _amount /= newAssetReserve;
-        _amount += cdpDecrease;
-        amount = _amount.toUint128();
+        uint128 cdpDecrease
+    ) internal pure returns (uint128 insuranceOut) {
+        uint256 _insuranceOut = bondOut;
+        _insuranceOut *= parameter.cdp;
+        _insuranceOut /= parameter.reserves.asset + assetIn;
+        _insuranceOut += cdpDecrease;
+        insuranceOut = _insuranceOut.toUint128();
     }
 }
