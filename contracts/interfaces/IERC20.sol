@@ -19,14 +19,14 @@ interface IERC20 {
     // UPDATE
 
     function approve(
-        address _spender
-        , uint256 _value
+        address _spender,
+        uint256 _value
     ) external returns (bool);
 
     function transfer(
         address _to,
-        uint256 _value)
-     external returns (bool);
+        uint256 _value
+    ) external returns (bool);
 
     function transferFrom(
         address _from,

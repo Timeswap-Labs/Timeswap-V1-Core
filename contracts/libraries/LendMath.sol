@@ -33,7 +33,8 @@ library LendMath {
         uint128 reserve,
         uint256 feeBase
     ) private pure returns (uint128 adjusted) {
-        uint256 _adjusted = reserve << 16;
+        uint256 _adjusted = reserve;
+        _adjusted <<= 16;
         _adjusted -= uint256(decrease) * feeBase;
         _adjusted >>= 16;
         adjusted = _adjusted.toUint128();

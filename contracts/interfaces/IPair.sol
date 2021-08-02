@@ -103,6 +103,32 @@ interface IPair {
 
     event Skim(address indexed sender, address indexed assetTo, address indexed collateralTo, Tokens tokensOut);
 
+    // VIEW
+
+    function factory() external view returns (IFactory);
+
+    function asset() external view returns (IERC20);
+
+    function collateral() external view returns (IERC20);
+
+    function fee() external view returns (uint16);
+
+    function protocolFee() external view returns (uint16);
+
+    function totalReserves() external view returns (Tokens memory);
+
+    function state(uint256 maturity) external view returns (State memory);
+
+    function totalLiquidity(uint256 maturity) external view returns (uint256);
+
+    function liquidityOf(uint256 maturity, address owner) external view returns (uint256);
+
+    function totalClaims(uint256 maturity) external view returns (Claims memory);
+
+    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
+
+    function debtsOf(uint256 maturity, address owner) external view returns (Debt[] memory);
+
     // UPDATE
 
     function mint(
@@ -159,30 +185,4 @@ interface IPair {
     ) external returns (uint128 collateralOut);
 
     function skim(address assetTo, address collateralTo) external returns (Tokens memory tokensOut);
-
-    // VIEW
-
-    function factory() external view returns (IFactory);
-
-    function asset() external view returns (IERC20);
-
-    function collateral() external view returns (IERC20);
-
-    function fee() external view returns (uint16);
-
-    function protocolFee() external view returns (uint16);
-
-    function totalReserves() external view returns (Tokens memory);
-
-    function state(uint256 maturity) external view returns (State memory);
-
-    function totalLiquidity(uint256 maturity) external view returns (uint256);
-
-    function liquidityOf(uint256 maturity, address owner) external view returns (uint256);
-
-    function totalClaims(uint256 maturity) external view returns (Claims memory);
-
-    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
-
-    function debtsOf(uint256 maturity, address owner) external view returns (Debt[] memory);
 }
