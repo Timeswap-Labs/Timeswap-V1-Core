@@ -2,12 +2,14 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
-import {SafeCast} from './SafeCast.sol';
 import {Math} from './Math.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
+import {SafeCast} from './SafeCast.sol';
+
 
 library BorrowMath {
     using Math for uint256;
+    using ConstantProduct for IPair.State;
     using SafeCast for uint256;
 
     function check(
@@ -21,12 +23,11 @@ library BorrowMath {
         uint128 assetReserve = state.reserves.asset - assetOut;
         uint128 interestAdjusted = adjust(interestIncrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase);
-        ConstantProduct.check(state, assetReserve, interestAdjusted, cdpAdjusted);
+        state.check(assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetOut;
         minimum *= state.interest;
-        minimum = minimum.divUp(assetReserve);
-        minimum = minimum.shiftUp(4);
+        minimum = minimum.divUp(assetReserve << 4);
         require(interestIncrease >= minimum, 'Invalid');
     }
 
@@ -35,8 +36,9 @@ library BorrowMath {
         uint128 reserve,
         uint256 feeBase
     ) private pure returns (uint128 adjusted) {
-        uint256 _adjusted = reserve << 16;
-        _adjusted += uint256(increase) * feeBase;
+        uint256 _adjusted = reserve;
+        _adjusted <<= 16;
+        _adjusted += feeBase * increase ;
         _adjusted >>= 16;
         adjusted = _adjusted.toUint128();
     }

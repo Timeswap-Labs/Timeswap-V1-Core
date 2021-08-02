@@ -2,9 +2,11 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
+import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
 library WithdrawMath {
+    using FullMath for uint256;
     using SafeCast for uint256;
 
     function getAsset(
@@ -13,8 +15,8 @@ library WithdrawMath {
         uint128 supply
     ) internal pure returns (uint128 assetOut) {
         if (reserve >= supply) return assetOut = bondIn;
-        uint256 _assetOut = reserve;
-        _assetOut *= bondIn;
+        uint256 _assetOut = bondIn;
+        _assetOut *= reserve;
         _assetOut /= supply;
         assetOut = _assetOut.toUint128();
     }
@@ -28,10 +30,8 @@ library WithdrawMath {
         uint256 _collateralOut = supplies.bond;
         _collateralOut -= reserves.asset;
         _collateralOut *= supplies.insurance;
-        _collateralOut /= supplies.bond; // problem mulDiv
-        if (reserves.collateral >= _collateralOut) return collateralOut = insuranceIn;
-        _collateralOut *= insuranceIn;
-        _collateralOut /= supplies.insurance;
+        if (reserves.collateral * supplies.bond >= _collateralOut) return collateralOut = insuranceIn;
+        _collateralOut = _collateralOut.mulDiv(insuranceIn, supplies.bond * supplies.insurance);
         collateralOut = _collateralOut.toUint128();
     }
 }
