@@ -2,10 +2,12 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
+import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
 library LendMath {
+    using FullMath for uint256;
     using ConstantProduct for IPair.State;
     using SafeCast for uint256;
 
@@ -43,9 +45,10 @@ library LendMath {
     function getBond(
         uint128 assetIn,
         uint128 interestDecrease,
-        uint256 duration
-    ) internal pure returns (uint128 bondOut) {
-        uint256 _bondOut = duration;
+        uint256 maturity
+    ) internal view returns (uint128 bondOut) {
+        uint256 _bondOut = maturity;
+        _bondOut -= block.timestamp;
         _bondOut *= interestDecrease;
         _bondOut >>= 32;
         _bondOut += assetIn;
@@ -55,12 +58,18 @@ library LendMath {
     function getInsurance(
         IPair.State memory state,
         uint128 assetIn,
-        uint128 bondOut,
-        uint128 cdpDecrease
-    ) internal pure returns (uint128 insuranceOut) {
-        uint256 _insuranceOut = bondOut;
-        _insuranceOut *= state.cdp;
-        _insuranceOut /= state.reserves.asset + assetIn;
+        uint128 cdpDecrease,
+        uint256 maturity
+    ) internal view returns (uint128 insuranceOut) {
+        uint256 _insuranceOut = maturity;
+        _insuranceOut -= block.timestamp;
+        _insuranceOut *= state.interest;
+        _insuranceOut >>= 32;
+        _insuranceOut += state.reserves.asset;
+        uint256 denominator = state.reserves.asset;
+        denominator += assetIn;
+        denominator *= state.reserves.asset;
+        _insuranceOut = _insuranceOut.mulDiv(uint256(assetIn) * state.cdp, denominator);
         _insuranceOut += cdpDecrease;
         insuranceOut = _insuranceOut.toUint128();
     }

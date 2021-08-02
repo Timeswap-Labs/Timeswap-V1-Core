@@ -48,9 +48,10 @@ library MintMath {
     function getDebt(
         uint128 assetIn,
         uint128 interestIncrease,
-        uint256 duration
-    ) internal pure returns (uint112 debtOut) {
-        uint256 _debtOut = duration;
+        uint256 maturity
+    ) internal view returns (uint112 debtOut) {
+        uint256 _debtOut = maturity;
+        _debtOut -= block.timestamp;
         _debtOut *= interestIncrease;
         _debtOut = _debtOut.shiftUp(32);
         _debtOut += assetIn;

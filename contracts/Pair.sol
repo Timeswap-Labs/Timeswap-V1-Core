@@ -117,7 +117,7 @@ contract Pair is IPair {
 
         pool.liquidityOf[liquidityTo] += liquidityOut;
 
-        debtOut.debt = MintMath.getDebt(assetIn, interestIncrease, block.timestamp - maturity);
+        debtOut.debt = MintMath.getDebt(assetIn, interestIncrease, maturity - block.timestamp);
         debtOut.collateral = MintMath.getCollateral(assetIn, debtOut.debt, cdpIncrease);
         debtOut.startBlock = uint32(block.number);
 
@@ -192,8 +192,8 @@ contract Pair is IPair {
 
         LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, fee);
 
-        claimsOut.bond = LendMath.getBond(assetIn, interestDecrease, block.timestamp - maturity);
-        claimsOut.insurance = LendMath.getInsurance(pool.state, assetIn, claimsOut.bond, cdpDecrease);
+        claimsOut.bond = LendMath.getBond(assetIn, interestDecrease, maturity);
+        claimsOut.insurance = LendMath.getInsurance(pool.state, assetIn, cdpDecrease, maturity);
 
         pool.totalClaims.bond += claimsOut.bond;
         pool.totalClaims.insurance += claimsOut.insurance;
@@ -268,8 +268,8 @@ contract Pair is IPair {
 
         BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease, fee);
 
-        debtOut.debt = BorrowMath.getDebt(assetOut, interestIncrease, block.timestamp - maturity);
-        debtOut.collateral = BorrowMath.getCollateral(pool.state, assetOut, debtOut.debt, cdpIncrease);
+        debtOut.debt = BorrowMath.getDebt(assetOut, interestIncrease, maturity);
+        debtOut.collateral = BorrowMath.getCollateral(pool.state, assetOut, cdpIncrease, maturity);
         debtOut.startBlock = uint32(block.number);
 
         uint128 collateralIn = collateral.getCollateralIn(reserves);
