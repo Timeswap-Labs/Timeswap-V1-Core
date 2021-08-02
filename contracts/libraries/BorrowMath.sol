@@ -3,12 +3,14 @@ pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
 import {Math} from './Math.sol';
+import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
 
 library BorrowMath {
     using Math for uint256;
+    using FullMath for uint256;
     using ConstantProduct for IPair.State;
     using SafeCast for uint256;
 
@@ -46,9 +48,10 @@ library BorrowMath {
     function getDebt(
         uint128 assetOut,
         uint128 interestIncrease,
-        uint256 duration
-    ) internal pure returns (uint112 debtOut) {
-        uint256 _debtOut = duration;
+        uint256 maturity
+    ) internal view returns (uint112 debtOut) {
+        uint256 _debtOut = maturity;
+        _debtOut -= block.timestamp;
         _debtOut *= interestIncrease;
         _debtOut = _debtOut.shiftUp(32);
         _debtOut += assetOut;
@@ -58,12 +61,18 @@ library BorrowMath {
     function getCollateral(
         IPair.State memory state,
         uint128 assetOut,
-        uint128 debtOut,
-        uint128 cdpIncrease
-    ) internal pure returns (uint112 collateralOut) {
-        uint256 _collateralOut = debtOut;
-        _collateralOut *= state.cdp;
-        _collateralOut = _collateralOut.divUp(state.reserves.asset - assetOut);
+        uint128 cdpIncrease,
+        uint256 maturity
+    ) internal view returns (uint112 collateralOut) {
+        uint256 _collateralOut = maturity;
+        _collateralOut -= block.timestamp;
+        _collateralOut *= state.interest;
+        _collateralOut = _collateralOut.shiftUp(32);
+        _collateralOut += state.reserves.asset;
+        uint256 denominator = state.reserves.asset;
+        denominator -= assetOut;
+        denominator *= state.reserves.asset;
+        _collateralOut = _collateralOut.mulDiv(uint256(assetOut) * state.cdp, denominator);
         _collateralOut += cdpIncrease;
         collateralOut = _collateralOut.toUint112();
     }
