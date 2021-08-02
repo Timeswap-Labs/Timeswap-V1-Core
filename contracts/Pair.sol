@@ -32,11 +32,32 @@ contract Pair is IPair {
 
     uint256 private locked;
 
-    modifier lock() {
-        require(locked == 0, 'Reentrancy');
-        locked = 1;
-        _;
-        locked = 0;
+    function totalReserves() external view override returns (Tokens memory) {
+        return reserves;
+    }
+
+    function state(uint256 maturity) external view override returns (State memory) {
+        return pools[maturity].state;
+    }
+
+    function totalLiquidity(uint256 maturity) external view override returns (uint256) {
+        return pools[maturity].totalLiquidity;
+    }
+
+    function liquidityOf(uint256 maturity, address owner) external view override returns (uint256) {
+        return pools[maturity].liquidityOf[owner];
+    }
+
+    function totalClaims(uint256 maturity) external view override returns (Claims memory) {
+        return pools[maturity].totalClaims;
+    }
+
+    function claimsOf(uint256 maturity, address owner) external view override returns (Claims memory) {
+        return pools[maturity].claimsOf[owner];
+    }
+
+    function debtsOf(uint256 maturity, address owner) external view override returns (Debt[] memory) {
+        return pools[maturity].debtsOf[owner];
     }
 
     constructor(
@@ -50,6 +71,13 @@ contract Pair is IPair {
         collateral = _collateral;
         fee = _fee;
         protocolFee = _protocolFee;
+    }
+
+    modifier lock() {
+        require(locked == 0, 'Reentrancy');
+        locked = 1;
+        _;
+        locked = 0;
     }
 
     function mint(
@@ -78,14 +106,15 @@ contract Pair is IPair {
         require(assetIn > 0, 'Invalid');
 
         if (pool.totalLiquidity == 0) {
-            liquidityOut = assetIn - 1000;
+            liquidityOut = MintMath.getLiquidity(assetIn);
             pool.totalLiquidity = assetIn;
         } else {
-            uint256 total = pool.totalLiquidity;
-            liquidityOut = Math.min(
-                (total * assetIn) / pool.state.reserves.asset,
-                (total * interestIncrease) / pool.state.interest,
-                (total * cdpIncrease) / pool.state.cdp
+            liquidityOut = MintMath.getLiquidity(
+                pool.state,
+                assetIn,
+                interestIncrease,
+                cdpIncrease,
+                pool.totalLiquidity
             );
             pool.totalLiquidity += liquidityOut;
         }
@@ -160,6 +189,7 @@ contract Pair is IPair {
         require(interestDecrease > 0 || cdpDecrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
+        require(pool.totalLiquidity > 0, 'Invalid');
 
         uint128 assetIn = asset.getAssetIn(reserves);
         require(assetIn > 0, 'Invalid');
@@ -238,6 +268,7 @@ contract Pair is IPair {
         require(interestIncrease > 0 || cdpIncrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
+        require(pool.totalLiquidity > 0, 'Invalid');
 
         BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease, fee);
 
@@ -331,33 +362,5 @@ contract Pair is IPair {
         if (tokensOut.collateral > 0) _collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
         emit Skim(msg.sender, assetTo, collateralTo, tokensOut);
-    }
-
-    function totalReserves() external view override returns (Tokens memory) {
-        return reserves;
-    }
-
-    function state(uint256 maturity) external view override returns (State memory) {
-        return pools[maturity].state;
-    }
-
-    function totalLiquidity(uint256 maturity) external view override returns (uint256) {
-        return pools[maturity].totalLiquidity;
-    }
-
-    function liquidityOf(uint256 maturity, address owner) external view override returns (uint256) {
-        return pools[maturity].liquidityOf[owner];
-    }
-
-    function totalClaims(uint256 maturity) external view override returns (Claims memory) {
-        return pools[maturity].totalClaims;
-    }
-
-    function claimsOf(uint256 maturity, address owner) external view override returns (Claims memory) {
-        return pools[maturity].claimsOf[owner];
-    }
-
-    function debtsOf(uint256 maturity, address owner) external view override returns (Debt[] memory) {
-        return pools[maturity].debtsOf[owner];
     }
 }
