@@ -4,22 +4,18 @@ pragma solidity =0.8.1;
 import {IPair} from './interfaces/IPair.sol';
 import {IFactory} from './interfaces/IFactory.sol';
 import {IERC20} from './interfaces/IERC20.sol';
-import {Math} from './libraries/Math.sol';
 import {MintMath} from './libraries/MintMath.sol';
 import {BurnMath} from './libraries/BurnMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {PayMath} from './libraries/PayMath.sol';
-import {SafeCast} from './libraries/SafeCast.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
-import {Receive} from './libraries/Receive.sol';
+import {Reserve} from './libraries/Reserve.sol';
 
 contract Pair is IPair {
-    using Math for uint256;
-    using SafeCast for uint256;
     using SafeTransfer for IERC20;
-    using Receive for IERC20;
+    using Reserve for IERC20;
 
     IFactory public immutable override factory;
     IERC20 public immutable override asset;
@@ -320,7 +316,7 @@ contract Pair is IPair {
             require(debt.startBlock != block.number, 'Invalid');
 
             Debt memory debtIn;
-            debtIn.debt = Math.min(debt.debt, assetsPay[i]);
+            debtIn.debt = PayMath.getDebt(assetsPay[i], debt.debt);
 
             if (owner == msg.sender) {
                 uint112 collateralUnlock = PayMath.getCollateral(debtIn.debt, debt.collateral, debt.debt);
@@ -351,16 +347,19 @@ contract Pair is IPair {
         emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, debtsIn);
     }
 
-    function skim(address assetTo, address collateralTo) external override lock returns (Tokens memory tokensOut) {
+    function skim(
+        address assetTo,
+        address collateralTo
+    ) external override lock returns (uint256 assetOut, uint256 collateralOut) {
         IERC20 _asset = asset;
         IERC20 _collateral = collateral;
 
-        tokensOut.asset = _asset.balanceOf(address(this)).subOrZero(reserves.asset).toUint128();
-        tokensOut.collateral = _collateral.balanceOf(address(this)).subOrZero(reserves.collateral).toUint128();
+        assetOut = _asset.getExcess(reserves.asset);
+        collateralOut = _collateral.getExcess(reserves.collateral);
 
-        if (tokensOut.asset > 0) _asset.safeTransfer(assetTo, tokensOut.asset);
-        if (tokensOut.collateral > 0) _collateral.safeTransfer(collateralTo, tokensOut.collateral);
+        if (assetOut > 0) _asset.safeTransfer(assetTo, assetOut);
+        if (collateralOut > 0) _collateral.safeTransfer(collateralTo, collateralOut);
 
-        emit Skim(msg.sender, assetTo, collateralTo, tokensOut);
+        emit Skim(msg.sender, assetTo, collateralTo, assetOut, collateralOut);
     }
 }

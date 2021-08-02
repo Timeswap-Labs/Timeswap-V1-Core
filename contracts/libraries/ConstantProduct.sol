@@ -2,19 +2,22 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
+import {FullMath} from './FullMath.sol';
 
 library ConstantProduct {
+    using FullMath for uint256;
+
     function check(
         IPair.State memory state,
-        uint128 _assetReserve,
+        uint128 assetReserve,
         uint128 interestAdjusted,
         uint128 cdpAdjusted
     ) internal pure {
-        (uint256 newProd0, uint256 newProd1) = mul512(_assetReserve, uint256(interestAdjusted) * cdpAdjusted);
-        (uint256 prod0, uint256 prod1) = mul512(state.reserves.asset, uint256(state.interest) * state.cdp);
+        (uint256 prod0, uint256 prod1) = (uint256(interestAdjusted) * cdpAdjusted).mul512(assetReserve);
+        (uint256 _prod0, uint256 _prod1) = (uint256(state.interest) * state.cdp).mul512(state.reserves.asset);
 
-        require(newProd1 >= prod1, 'Invariance');
-        if (newProd1 == prod1) require(newProd0 >= prod0, 'Invariance');
+        require(prod1 >= _prod1, 'Invariance');
+        if (prod1 == _prod1) require(prod0 >= _prod0, 'Invariance');
     }
 
     function mul512(uint256 a, uint256 b) private pure returns (uint256 prod0, uint256 prod1) {

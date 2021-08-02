@@ -101,7 +101,13 @@ interface IPair {
         Debt[] debtsIn
     );
 
-    event Skim(address indexed sender, address indexed assetTo, address indexed collateralTo, Tokens tokensOut);
+    event Skim(
+        address indexed sender,
+        address indexed assetTo,
+        address indexed collateralTo,
+        uint256 assetOut,
+        uint256 collateralOut
+    );
 
     // VIEW
 
@@ -184,5 +190,8 @@ interface IPair {
         uint112[] memory assetsPay
     ) external returns (uint128 collateralOut);
 
-    function skim(address assetTo, address collateralTo) external returns (Tokens memory tokensOut);
+    function skim(
+        address assetTo,
+        address collateralTo
+    ) external returns (uint256 assetOut, uint256 collateralOut);
 }

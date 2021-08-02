@@ -2,11 +2,13 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
-import {SafeCast} from './SafeCast.sol';
 import {Math} from './Math.sol';
+import {FullMath} from './FullMath.sol';
+import {SafeCast} from './SafeCast.sol';
 
 library MintMath {
     using Math for uint256;
+    using FullMath for uint256;
     using SafeCast for uint256;
 
     function getLiquidity(
@@ -22,11 +24,25 @@ library MintMath {
         uint128 cdpIncrease,
         uint256 total
     ) internal pure returns (uint256 liquidityOut) {
-        liquidityOut = Math.min(
-            (total * assetIn) / state.reserves.asset,
-            (total * interestIncrease) / state.interest,
-            (total * cdpIncrease) / state.cdp
+        liquidityOut = min(
+            total.mulDiv(assetIn, state.reserves.asset),
+            total.mulDiv(interestIncrease, state.interest),
+            total.mulDiv(cdpIncrease, state.cdp)
         );
+    }
+
+    function min(
+        uint256 w,
+        uint256 x,
+        uint256 y
+    ) private pure returns (uint256 z) {
+        if (w <= x && w <= y) {
+            z = w;
+        } else if (x <= w && x <= y) {
+            z = x;
+        } else {
+            z = y;
+        }
     }
 
     function getDebt(
