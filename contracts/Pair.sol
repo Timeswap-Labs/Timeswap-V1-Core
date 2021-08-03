@@ -13,49 +13,96 @@ import {PayMath} from './libraries/PayMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Reserve} from './libraries/Reserve.sol';
 
+/// @title Timeswap Pair
+/// @author Timeswap Labs
+/// @notice It is recommnded to use Timeswap Convenience to interact with this contract.
+/// @notice All error messages are abbreviated and can be found in the documentation.
 contract Pair is IPair {
     using SafeTransfer for IERC20;
     using Reserve for IERC20;
 
+    /* ===== MODEL ===== */
+
+    /// @dev The address of the factory contract that deployed this contract.
     IFactory public immutable override factory;
+    /// @dev The address of the ERC20 being lent and borrowed.
     IERC20 public immutable override asset;
+    /// @dev The address of the ERC20 as collateral.
     IERC20 public immutable override collateral;
+    //// @dev The fee earned by liquidity providers. Follows UQ0.16 format.
     uint16 public immutable override fee;
+    /// @dev The protocol fee earned by the owner. Follows UQ0.16 format.
     uint16 public immutable override protocolFee;
 
+    /// @dev Stores the asset and collateral reserves of the Pair contract.
     Tokens private reserves;
+    /// @dev Stores the individual states of each Pool.
     mapping(uint256 => Pool) private pools;
 
+    /// @dev Stores the access state for reentramcy guard.
     uint256 private locked;
 
+    /* ===== VIEW =====*/
+
+    /// @dev Returns the asset and collateral reserves of the Pair contract.
+    /// @return The total asset and collateral reserves.
     function totalReserves() external view override returns (Tokens memory) {
         return reserves;
     }
 
+    /// @dev Returns the Constant Product state of a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @return The W, X, Y, and Z state which calculates the price.
     function state(uint256 maturity) external view override returns (State memory) {
         return pools[maturity].state;
     }
 
+    /// @dev Returns the total liquidity supply of a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @return The total liquidity supply.
     function totalLiquidity(uint256 maturity) external view override returns (uint256) {
         return pools[maturity].totalLiquidity;
     }
 
+    /// @dev Returns the liquidity balance of a user in a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param owner The address of the user.
+    /// @return The liquidity balance.
     function liquidityOf(uint256 maturity, address owner) external view override returns (uint256) {
         return pools[maturity].liquidityOf[owner];
     }
 
+    /// @dev Returns the total claims of a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @return The total claims.
     function totalClaims(uint256 maturity) external view override returns (Claims memory) {
         return pools[maturity].totalClaims;
     }
 
+    /// @dev Returms the claims of a user in a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param owner The address of the user.
+    /// @return The claims balance.
     function claimsOf(uint256 maturity, address owner) external view override returns (Claims memory) {
         return pools[maturity].claimsOf[owner];
     }
 
+    /// @dev Returns the collateralized debts of a user in a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param owner The address of the user.
+    /// @return The collateralized debts balance listed in an array.
     function debtsOf(uint256 maturity, address owner) external view override returns (Debt[] memory) {
         return pools[maturity].debtsOf[owner];
     }
 
+    /* ===== INIT ===== */
+
+    /// @dev Initializes the Pair contract.
+    /// @dev Called by the Timeswap factory contract.
+    /// @param _asset The address of the ERC20 being lent and borrowed.
+    /// @param _collateral The address of the ERC20 as the collateral.
+    /// @param _fee The chosen fee rate.
+    /// @param _protocolFee The chosen protocol fee rate.
     constructor(
         IERC20 _asset,
         IERC20 _collateral,
@@ -69,6 +116,9 @@ contract Pair is IPair {
         protocolFee = _protocolFee;
     }
 
+    /* ===== MODIFIER ===== */
+
+    /// @dev The modifier for reentrancy guard.
     modifier lock() {
         require(locked == 0, 'Reentrancy');
         locked = 1;
@@ -76,6 +126,20 @@ contract Pair is IPair {
         locked = 0;
     }
 
+    /* ===== UPDATE ===== */
+
+    /// @dev Add liquidity into a Pool by a liquidity provider.
+    /// @dev Liquidity providers can be thought as making both lending and borrowing positions.
+    /// @dev Must atomically increase the asset ERC20 balance of the Pair contract, before calling.
+    /// @dev Must atomically increase the collateral ERC20 balance of the Pair contract, before calling.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param liquidityTo The address of the receiver of liquidity balance.
+    /// @param debtTo The addres of the receiver of collateralized debt balance.
+    /// @param interestIncrease The increase in the Y state.
+    /// @param cdpIncrease The increase in the Z state.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by debtTo.
+    /// @return debtOut The collateralized debt received by debtTo.
     function mint(
         uint256 maturity,
         address liquidityTo,
@@ -138,6 +202,13 @@ contract Pair is IPair {
         emit Mint(maturity, msg.sender, liquidityTo, debtTo, assetIn, liquidityOut, id, debtOut);
     }
 
+    /// @dev Remove liquidity from a Pool by a liquidity provider.
+    /// @dev Can only be called after the maturity of the Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param assetTo The address of the receiver of asset ERC20.
+    /// @param collateralTo The addres of the receiver of collateral ERC20.
+    /// @param liquidityIn The amount of liquidity balance burnt by the msg.sender.
+    /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received.
     function burn(
         uint256 maturity,
         address assetTo,
@@ -173,6 +244,14 @@ contract Pair is IPair {
         emit Burn(maturity, msg.sender, assetTo, collateralTo, liquidityIn, tokensOut);
     }
 
+    /// @dev Lend asset ERC20 into the Pool.
+    /// @dev Must atomically increase the asset ERC20 balance of the Pair contract, before calling.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param bondTo The address of the receiver of bond balance.
+    /// @param insuranceTo The addres of the receiver of insurance balance.
+    /// @param interestDecrease The decrease in Y state.
+    /// @param cdpDecrease The decrease in Z state.
+    /// @return claimsOut The amount of bond balance and insurance balance received.
     function lend(
         uint256 maturity,
         address bondTo,
@@ -209,6 +288,13 @@ contract Pair is IPair {
         emit Lend(maturity, msg.sender, bondTo, insuranceTo, assetIn, claimsOut);
     }
 
+    /// @dev Withdraw asset ERC20 and/or collateral ERC20 for lenders.
+    /// @dev Can only be called after the maturity of the Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param assetTo The address of the receiver of asset ERC20.
+    /// @param collateralTo The addres of the receiver of collateral ERC20.
+    /// @param claimsIn The amount of bond balance and insurance balance burnt by the msg.sender.
+    /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received.
     function withdraw(
         uint256 maturity,
         address assetTo,
@@ -250,6 +336,16 @@ contract Pair is IPair {
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
     }
 
+    /// @dev Borrow asset ERC20 from the Pool.
+    /// @dev Must atomically increase the collateral ERC20 balance of the Pair contract, before calling.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param assetTo The address of the receiver of asset ERC20.
+    /// @param debtTo The addres of the receiver of collateralized debt.
+    /// @param assetOut The amount of asset ERC20 received by assetTo.
+    /// @param interestIncrease The increase in Y state.
+    /// @param cdpIncrease The increase in Z state.
+    /// @return id The array index of the collateralized debt received by debtTo.
+    /// @return debtOut The collateralized debt received by debtTo.
     function borrow(
         uint256 maturity,
         address assetTo,
@@ -293,6 +389,14 @@ contract Pair is IPair {
         emit Borrow(maturity, msg.sender, assetTo, debtTo, assetOut, id, debtOut);
     }
 
+    /// @dev Pay asset ERC20 into the Pool to repay debt for borrowers.
+    /// @dev Must atomically increase the asset ERC20 balance of the Pair contract, before calling.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param to The address of the receiver of collateral ERC20.
+    /// @param owner The addres of the owner of collateralized debt.
+    /// @param ids The array indexes of collateralized debts.
+    /// @param assetsPay The amount of asset ERC20 per collateralized debts.
+    /// @return collateralOut The amount of collateral ERC20 received.
     function pay(
         uint256 maturity,
         address to,
@@ -347,6 +451,11 @@ contract Pair is IPair {
         emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, debtsIn);
     }
 
+    /// @dev Withdraw any excess asset ERC20 and collateral ERC20 from the Pair.
+    /// @param assetTo The address of the receiver of asset ERC20.
+    /// @param collateralTo The addres of the receiver of collateral ERC20.
+    /// @return assetOut The amount of asset ERC20 received.
+    /// @return collateralOut The amount of collateral ERC20 received.
     function skim(
         address assetTo,
         address collateralTo
