@@ -225,8 +225,8 @@ contract Pair is IPair {
 
         uint256 total = pool.totalLiquidity;
 
-        tokensOut.asset = BurnMath.getToken(liquidityIn, pool.state.reserves.asset, total);
-        tokensOut.collateral = BurnMath.getToken(liquidityIn, pool.state.reserves.collateral, total);
+        tokensOut.asset = BurnMath.getAsset(liquidityIn, pool.state.reserves.asset, pool.totalClaims.bond, total);
+        tokensOut.collateral = BurnMath.getCollateral(liquidityIn, pool.state.reserves, pool.totalClaims, total);
 
         pool.totalLiquidity -= liquidityIn;
 

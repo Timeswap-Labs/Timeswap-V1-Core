@@ -26,7 +26,7 @@ library WithdrawMath {
         IPair.Tokens memory reserves,
         IPair.Claims memory supplies
     ) internal pure returns (uint128 collateralOut) {
-        if (reserves.asset >= supplies.bond) return collateralOut = 0;
+        if (reserves.asset >= supplies.bond) return collateralOut;
         uint256 _collateralOut = supplies.bond;
         _collateralOut -= reserves.asset;
         _collateralOut *= supplies.insurance;
