@@ -29,7 +29,7 @@ library BorrowMath {
 
         uint256 minimum = assetOut;
         minimum *= state.interest;
-        minimum = minimum.divUp(assetReserve << 4);
+        minimum = minimum.divUp(uint256(assetReserve) << 4);
         require(interestIncrease >= minimum, 'Invalid');
     }
 
@@ -46,9 +46,9 @@ library BorrowMath {
     }
 
     function getDebt(
+        uint256 maturity,
         uint128 assetOut,
-        uint128 interestIncrease,
-        uint256 maturity
+        uint128 interestIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
         _debtOut -= block.timestamp;
@@ -59,21 +59,21 @@ library BorrowMath {
     }
 
     function getCollateral(
+        uint256 maturity,
         IPair.State memory state,
         uint128 assetOut,
-        uint128 cdpIncrease,
-        uint256 maturity
-    ) internal view returns (uint112 collateralOut) {
-        uint256 _collateralOut = maturity;
-        _collateralOut -= block.timestamp;
-        _collateralOut *= state.interest;
-        _collateralOut = _collateralOut.shiftUp(32);
-        _collateralOut += state.reserves.asset;
+        uint128 cdpIncrease
+    ) internal view returns (uint112 collateralIn) {
+        uint256 _collateralIn = maturity;
+        _collateralIn -= block.timestamp;
+        _collateralIn *= state.interest;
+        _collateralIn = _collateralIn.shiftUp(32);
+        _collateralIn += state.reserves.asset;
         uint256 denominator = state.reserves.asset;
         denominator -= assetOut;
         denominator *= state.reserves.asset;
-        _collateralOut = _collateralOut.mulDiv(uint256(assetOut) * state.cdp, denominator);
-        _collateralOut += cdpIncrease;
-        collateralOut = _collateralOut.toUint112();
+        _collateralIn = _collateralIn.mulDiv(uint256(assetOut) * state.cdp, denominator);
+        _collateralIn += cdpIncrease;
+        collateralIn = _collateralIn.toUint112();
     }
 }

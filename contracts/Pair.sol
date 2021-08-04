@@ -12,6 +12,7 @@ import {BorrowMath} from './libraries/BorrowMath.sol';
 import {PayMath} from './libraries/PayMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Reserve} from './libraries/Reserve.sol';
+import {BlockNumber} from './libraries/BlockNumber.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -51,6 +52,7 @@ contract Pair is IPair {
     }
 
     /// @dev Returns the Constant Product state of a Pool.
+    /// @dev The Y state follows the UQ96.32 format.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @return The W, X, Y, and Z state which calculates the price.
     function state(uint256 maturity) external view override returns (State memory) {
@@ -181,9 +183,9 @@ contract Pair is IPair {
 
         pool.liquidityOf[liquidityTo] += liquidityOut;
 
-        debtOut.debt = MintMath.getDebt(assetIn, interestIncrease, maturity - block.timestamp);
+        debtOut.debt = MintMath.getDebt(maturity, assetIn, interestIncrease);
         debtOut.collateral = MintMath.getCollateral(assetIn, debtOut.debt, cdpIncrease);
-        debtOut.startBlock = uint32(block.number);
+        debtOut.startBlock = BlockNumber.get();
 
         uint128 collateralIn = collateral.getCollateralIn(reserves);
         require(collateralIn >= debtOut.collateral, 'Insufficient');
@@ -271,8 +273,8 @@ contract Pair is IPair {
 
         LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, fee);
 
-        claimsOut.bond = LendMath.getBond(assetIn, interestDecrease, maturity);
-        claimsOut.insurance = LendMath.getInsurance(pool.state, assetIn, cdpDecrease, maturity);
+        claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease);
+        claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease);
 
         pool.totalClaims.bond += claimsOut.bond;
         pool.totalClaims.insurance += claimsOut.insurance;
@@ -364,9 +366,9 @@ contract Pair is IPair {
 
         BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease, fee);
 
-        debtOut.debt = BorrowMath.getDebt(assetOut, interestIncrease, maturity);
-        debtOut.collateral = BorrowMath.getCollateral(pool.state, assetOut, cdpIncrease, maturity);
-        debtOut.startBlock = uint32(block.number);
+        debtOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease);
+        debtOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
+        debtOut.startBlock = BlockNumber.get();
 
         uint128 collateralIn = collateral.getCollateralIn(reserves);
         require(collateralIn >= debtOut.collateral, 'Insufficient');

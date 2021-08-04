@@ -26,7 +26,7 @@ library LendMath {
 
         uint256 minimum = assetIn;
         minimum *= state.interest;
-        minimum /= assetReserve << 4;
+        minimum /= uint256(assetReserve) << 4;
         require(interestDecrease >= minimum, 'Invalid');
     }
 
@@ -43,9 +43,9 @@ library LendMath {
     }
 
     function getBond(
+        uint256 maturity,
         uint128 assetIn,
-        uint128 interestDecrease,
-        uint256 maturity
+        uint128 interestDecrease
     ) internal view returns (uint128 bondOut) {
         uint256 _bondOut = maturity;
         _bondOut -= block.timestamp;
@@ -56,10 +56,10 @@ library LendMath {
     }
 
     function getInsurance(
+        uint256 maturity,
         IPair.State memory state,
         uint128 assetIn,
-        uint128 cdpDecrease,
-        uint256 maturity
+        uint128 cdpDecrease
     ) internal view returns (uint128 insuranceOut) {
         uint256 _insuranceOut = maturity;
         _insuranceOut -= block.timestamp;
@@ -68,7 +68,7 @@ library LendMath {
         _insuranceOut += state.reserves.asset;
         uint256 denominator = state.reserves.asset;
         denominator += assetIn;
-        denominator *= state.reserves.asset;
+        denominator *= state.reserves.asset << 32;
         _insuranceOut = _insuranceOut.mulDiv(uint256(assetIn) * state.cdp, denominator);
         _insuranceOut += cdpDecrease;
         insuranceOut = _insuranceOut.toUint128();
