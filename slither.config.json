@@ -5,5 +5,6 @@
     "exclude_medium": false,
     "exclude_high": false,
     "disable_color": false,
+    "detectors_to_exclude": "divide-before-multiply,reentrancy-events,timestamp",
     "filter_paths": "node_modules"
 }
