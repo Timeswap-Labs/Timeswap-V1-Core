@@ -71,7 +71,7 @@ contract Pair is IPair {
     /// @param owner The address of the user.
     /// @return The liquidity balance.
     function liquidityOf(uint256 maturity, address owner) external view override returns (uint256) {
-        return pools[maturity].liquidityOf[owner];
+        return pools[maturity].liquidities[owner];
     }
 
     /// @dev Returns the total claims of a Pool.
@@ -86,15 +86,15 @@ contract Pair is IPair {
     /// @param owner The address of the user.
     /// @return The claims balance.
     function claimsOf(uint256 maturity, address owner) external view override returns (Claims memory) {
-        return pools[maturity].claimsOf[owner];
+        return pools[maturity].claims[owner];
     }
 
     /// @dev Returns the collateralized debts of a user in a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param owner The address of the user.
     /// @return The collateralized debts balance listed in an array.
-    function debtsOf(uint256 maturity, address owner) external view override returns (Debt[] memory) {
-        return pools[maturity].debtsOf[owner];
+    function duesOf(uint256 maturity, address owner) external view override returns (Due[] memory) {
+        return pools[maturity].dues[owner];
     }
 
     /* ===== INIT ===== */
@@ -136,16 +136,16 @@ contract Pair is IPair {
     /// @dev Must atomically increase the collateral ERC20 balance of the Pair contract, before calling.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param liquidityTo The address of the receiver of liquidity balance.
-    /// @param debtTo The addres of the receiver of collateralized debt balance.
+    /// @param dueTo The addres of the receiver of collateralized debt balance.
     /// @param interestIncrease The increase in the Y state.
     /// @param cdpIncrease The increase in the Z state.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by debtTo.
-    /// @return debtOut The collateralized debt received by debtTo.
+    /// @return dueOut The collateralized debt received by debtTo.
     function mint(
         uint256 maturity,
         address liquidityTo,
-        address debtTo,
+        address dueTo,
         uint128 interestIncrease,
         uint128 cdpIncrease
     )
@@ -155,11 +155,11 @@ contract Pair is IPair {
         returns (
             uint256 liquidityOut,
             uint256 id,
-            Debt memory debtOut
+            Due memory dueOut
         )
     {
         require(block.timestamp < maturity, 'Expired');
-        require(liquidityTo != address(0) && debtTo != address(0), 'Zero');
+        require(liquidityTo != address(0) && dueTo != address(0), 'Zero');
         require(interestIncrease > 0 && cdpIncrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
@@ -181,19 +181,19 @@ contract Pair is IPair {
             pool.totalLiquidity += liquidityOut;
         }
 
-        pool.liquidityOf[liquidityTo] += liquidityOut;
+        pool.liquidities[liquidityTo] += liquidityOut;
 
-        debtOut.debt = MintMath.getDebt(maturity, assetIn, interestIncrease);
-        debtOut.collateral = MintMath.getCollateral(assetIn, debtOut.debt, cdpIncrease);
-        debtOut.startBlock = BlockNumber.get();
+        dueOut.debt = MintMath.getDebt(maturity, assetIn, interestIncrease);
+        dueOut.collateral = MintMath.getCollateral(assetIn, dueOut.debt, cdpIncrease);
+        dueOut.startBlock = BlockNumber.get();
 
         uint128 collateralIn = collateral.getCollateralIn(reserves);
-        require(collateralIn >= debtOut.collateral, 'Insufficient');
+        require(collateralIn >= dueOut.collateral, 'Insufficient');
 
-        Debt[] storage debts = pool.debtsOf[debtTo];
+        Due[] storage dues = pool.dues[dueTo];
 
-        id = debts.length;
-        debts.push(debtOut);
+        id = dues.length;
+        dues.push(dueOut);
 
         pool.state.reserves.asset += assetIn;
         pool.state.reserves.collateral += collateralIn;
@@ -201,7 +201,7 @@ contract Pair is IPair {
         pool.state.cdp += cdpIncrease;
 
         emit Sync(maturity, pool.state);
-        emit Mint(maturity, msg.sender, liquidityTo, debtTo, assetIn, liquidityOut, id, debtOut);
+        emit Mint(maturity, msg.sender, liquidityTo, dueTo, assetIn, liquidityOut, id, dueOut);
     }
 
     /// @dev Remove liquidity from a Pool by a liquidity provider.
@@ -230,7 +230,7 @@ contract Pair is IPair {
 
         pool.totalLiquidity -= liquidityIn;
 
-        pool.liquidityOf[msg.sender] -= liquidityIn;
+        pool.liquidities[msg.sender] -= liquidityIn;
 
         pool.state.reserves.asset -= tokensOut.asset;
         pool.state.reserves.collateral -= tokensOut.collateral;
@@ -279,8 +279,8 @@ contract Pair is IPair {
         pool.totalClaims.bond += claimsOut.bond;
         pool.totalClaims.insurance += claimsOut.insurance;
 
-        pool.claimsOf[bondTo].bond += claimsOut.bond;
-        pool.claimsOf[insuranceTo].insurance += claimsOut.insurance;
+        pool. claims[bondTo].bond += claimsOut.bond;
+        pool. claims[insuranceTo].insurance += claimsOut.insurance;
 
         pool.state.reserves.asset += assetIn;
         pool.state.interest -= interestDecrease;
@@ -319,7 +319,7 @@ contract Pair is IPair {
         pool.totalClaims.bond -= claimsIn.bond;
         pool.totalClaims.insurance -= claimsIn.insurance;
 
-        Claims storage sender = pool.claimsOf[msg.sender];
+        Claims storage sender = pool.claims[msg.sender];
 
         sender.bond -= claimsIn.bond;
         sender.insurance -= claimsIn.insurance;
@@ -342,22 +342,22 @@ contract Pair is IPair {
     /// @dev Must atomically increase the collateral ERC20 balance of the Pair contract, before calling.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param assetTo The address of the receiver of asset ERC20.
-    /// @param debtTo The addres of the receiver of collateralized debt.
+    /// @param dueTo The addres of the receiver of collateralized debt.
     /// @param assetOut The amount of asset ERC20 received by assetTo.
     /// @param interestIncrease The increase in Y state.
     /// @param cdpIncrease The increase in Z state.
     /// @return id The array index of the collateralized debt received by debtTo.
-    /// @return debtOut The collateralized debt received by debtTo.
+    /// @return dueOut The collateralized debt received by debtTo.
     function borrow(
         uint256 maturity,
         address assetTo,
-        address debtTo,
+        address dueTo,
         uint128 assetOut,
         uint128 interestIncrease,
         uint128 cdpIncrease
-    ) external override lock returns (uint256 id, Debt memory debtOut) {
+    ) external override lock returns (uint256 id, Due memory dueOut) {
         require(block.timestamp < maturity, 'Expired');
-        require(assetTo != address(0) && debtTo != address(0), 'Zero');
+        require(assetTo != address(0) && dueTo != address(0), 'Zero');
         require(assetOut > 0, 'Invalid');
         require(interestIncrease > 0 || cdpIncrease > 0, 'Invalid');
 
@@ -366,17 +366,17 @@ contract Pair is IPair {
 
         BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease, fee);
 
-        debtOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease);
-        debtOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
-        debtOut.startBlock = BlockNumber.get();
+        dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease);
+        dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
+        dueOut.startBlock = BlockNumber.get();
 
         uint128 collateralIn = collateral.getCollateralIn(reserves);
-        require(collateralIn >= debtOut.collateral, 'Insufficient');
+        require(collateralIn >= dueOut.collateral, 'Insufficient');
 
-        Debt[] storage debts = pool.debtsOf[debtTo];
+        Due[] storage dues = pool.dues[dueTo];
 
-        id = debts.length;
-        debts.push(debtOut);
+        id = dues.length;
+        dues.push(dueOut);
 
         pool.state.reserves.asset -= assetOut;
         pool.state.reserves.collateral += collateralIn;
@@ -388,7 +388,7 @@ contract Pair is IPair {
         if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
 
         emit Sync(maturity, pool.state);
-        emit Borrow(maturity, msg.sender, assetTo, debtTo, assetOut, id, debtOut);
+        emit Borrow(maturity, msg.sender, assetTo, dueTo, assetOut, id, dueOut);
     }
 
     /// @dev Pay asset ERC20 into the Pool to repay debt for borrowers.
@@ -414,29 +414,29 @@ contract Pair is IPair {
 
         uint128 assetPay;
 
-        Debt[] storage debts = pool.debtsOf[owner];
-        Debt[] memory debtsIn = new Debt[](ids.length);
+        Due[] storage dues = pool.dues[owner];
+        Due[] memory duesIn = new Due[](ids.length);
 
         for (uint256 i = 0; i < ids.length; i++) {
-            Debt storage debt = debts[i];
-            require(debt.startBlock != block.number, 'Invalid');
+            Due storage due = dues[i];
+            require(due.startBlock != block.number, 'Invalid');
 
-            Debt memory debtIn;
-            debtIn.debt = PayMath.getDebt(assetsPay[i], debt.debt);
+            Due memory dueIn;
+            dueIn.debt = PayMath.getDebt(assetsPay[i], due.debt);
 
             if (owner == msg.sender) {
-                uint112 collateralUnlock = PayMath.getCollateral(debtIn.debt, debt.collateral, debt.debt);
-                debt.collateral -= collateralUnlock;
-                debtIn.collateral = collateralUnlock;
+                uint112 collateralUnlock = PayMath.getCollateral(dueIn.debt, due.collateral, due.debt);
+                due.collateral -= collateralUnlock;
+                dueIn.collateral = collateralUnlock;
                 collateralOut += collateralUnlock;
             }
 
-            debtIn.startBlock = debt.startBlock;
+            dueIn.startBlock = due.startBlock;
 
-            assetPay += debtIn.debt;
-            debt.debt -= debtIn.debt;
+            assetPay += dueIn.debt;
+            due.debt -= dueIn.debt;
 
-            debtsIn[i] = debtIn;
+            duesIn[i] = dueIn;
         }
 
         uint128 assetIn = asset.getAssetIn(reserves);
@@ -450,7 +450,7 @@ contract Pair is IPair {
         if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut);
 
         emit Sync(maturity, pool.state);
-        emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, debtsIn);
+        emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, duesIn);
     }
 
     /// @dev Withdraw any excess asset ERC20 and collateral ERC20 from the Pair.

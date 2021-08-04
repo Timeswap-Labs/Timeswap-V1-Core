@@ -17,7 +17,7 @@ interface IPair {
         uint128 insurance;
     }
 
-    struct Debt {
+    struct Due {
         uint112 debt;
         uint112 collateral;
         uint32 startBlock;
@@ -32,10 +32,10 @@ interface IPair {
     struct Pool {
         State state;
         uint256 totalLiquidity;
-        mapping(address => uint256) liquidityOf;
+        mapping(address => uint256) liquidities;
         Claims totalClaims;
-        mapping(address => Claims) claimsOf;
-        mapping(address => Debt[]) debtsOf;
+        mapping(address => Claims) claims;
+        mapping(address => Due[]) dues;
     }
 
     // EVENT
@@ -50,7 +50,7 @@ interface IPair {
         uint128 assetIn,
         uint256 liquidityOut,
         uint256 id,
-        Debt debtOut
+        Due dueOut
     );
 
     event Burn(
@@ -87,7 +87,7 @@ interface IPair {
         address indexed debtTo,
         uint128 assetOut,
         uint256 id,
-        Debt debtOut
+        Due dueOut
     );
 
     event Pay(
@@ -98,7 +98,7 @@ interface IPair {
         uint128 assetIn,
         uint128 collateralOut,
         uint256[] ids,
-        Debt[] debtsIn
+        Due[] duesIn
     );
 
     event Skim(
@@ -133,14 +133,14 @@ interface IPair {
 
     function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 
-    function debtsOf(uint256 maturity, address owner) external view returns (Debt[] memory);
+    function duesOf(uint256 maturity, address owner) external view returns (Due[] memory);
 
     // UPDATE
 
     function mint(
         uint256 maturity,
         address liquidityTo,
-        address debtTo,
+        address dueTo,
         uint128 interestIncrease,
         uint128 cdpIncrease
     )
@@ -148,7 +148,7 @@ interface IPair {
         returns (
             uint256 liquidityOut,
             uint256 id,
-            Debt memory debtOut
+            Due memory dueOut
         );
 
     function burn(
@@ -176,11 +176,11 @@ interface IPair {
     function borrow(
         uint256 maturity,
         address assetTo,
-        address debtTo,
+        address dueTo,
         uint128 assetOut,
         uint128 interestIncrease,
         uint128 cdpIncrease
-    ) external returns (uint256 id, Debt memory debtOut);
+    ) external returns (uint256 id, Due memory dueOut);
 
     function pay(
         uint256 maturity,
