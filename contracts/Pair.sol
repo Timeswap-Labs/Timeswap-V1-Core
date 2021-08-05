@@ -187,8 +187,9 @@ contract Pair is IPair {
         dueOut.collateral = MintMath.getCollateral(assetIn, dueOut.debt, cdpIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        uint128 collateralIn = collateral.getCollateralIn(reserves);
+        uint112 collateralIn = collateral.getCollateralIn(reserves);
         require(collateralIn >= dueOut.collateral, 'Insufficient');
+        dueOut.collateral = collateralIn;
 
         Due[] storage dues = pool.dues[dueTo];
 
@@ -370,8 +371,9 @@ contract Pair is IPair {
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        uint128 collateralIn = collateral.getCollateralIn(reserves);
+        uint112 collateralIn = collateral.getCollateralIn(reserves);
         require(collateralIn >= dueOut.collateral, 'Insufficient');
+        dueOut.collateral = collateralIn;
 
         Due[] storage dues = pool.dues[dueTo];
 
