@@ -146,8 +146,8 @@ contract Pair is IPair {
         uint256 maturity,
         address liquidityTo,
         address dueTo,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
+        uint112 interestIncrease,
+        uint112 cdpIncrease
     )
         external
         override
@@ -259,8 +259,8 @@ contract Pair is IPair {
         uint256 maturity,
         address bondTo,
         address insuranceTo,
-        uint128 interestDecrease,
-        uint128 cdpDecrease
+        uint112 interestDecrease,
+        uint112 cdpDecrease
     ) external override lock returns (Claims memory claimsOut) {
         require(block.timestamp < maturity, 'Expired');
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
@@ -280,8 +280,8 @@ contract Pair is IPair {
         pool.totalClaims.bond += claimsOut.bond;
         pool.totalClaims.insurance += claimsOut.insurance;
 
-        pool. claims[bondTo].bond += claimsOut.bond;
-        pool. claims[insuranceTo].insurance += claimsOut.insurance;
+        pool.claims[bondTo].bond += claimsOut.bond;
+        pool.claims[insuranceTo].insurance += claimsOut.insurance;
 
         pool.state.reserves.asset += assetIn;
         pool.state.interest -= interestDecrease;
@@ -354,8 +354,8 @@ contract Pair is IPair {
         address assetTo,
         address dueTo,
         uint128 assetOut,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
+        uint112 interestIncrease,
+        uint112 cdpIncrease
     ) external override lock returns (uint256 id, Due memory dueOut) {
         require(block.timestamp < maturity, 'Expired');
         require(assetTo != address(0) && dueTo != address(0), 'Zero');

@@ -17,15 +17,15 @@ library BorrowMath {
     function check(
         IPair.State memory state,
         uint128 assetOut,
-        uint128 interestIncrease,
-        uint128 cdpIncrease,
+        uint112 interestIncrease,
+        uint112 cdpIncrease,
         uint16 fee
     ) internal pure {
-        uint256 feeBase = 0x10000 - fee;
+        uint128 feeBase = 0x10000 - fee;
         uint128 assetReserve = state.reserves.asset - assetOut;
         uint128 interestAdjusted = adjust(interestIncrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase);
-        state.check(assetReserve, interestAdjusted, cdpAdjusted);
+        state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetOut;
         minimum *= state.interest;
@@ -34,21 +34,19 @@ library BorrowMath {
     }
 
     function adjust(
-        uint128 increase,
-        uint128 reserve,
-        uint256 feeBase
+        uint112 increase,
+        uint112 reserve,
+        uint128 feeBase
     ) private pure returns (uint128 adjusted) {
-        uint256 _adjusted = reserve;
-        _adjusted <<= 16;
-        _adjusted += feeBase * increase ;
-        _adjusted >>= 16;
-        adjusted = _adjusted.toUint128();
+        adjusted = reserve;
+        adjusted <<= 16;
+        adjusted += feeBase * increase;
     }
 
     function getDebt(
         uint256 maturity,
         uint128 assetOut,
-        uint128 interestIncrease
+        uint112 interestIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
         _debtOut -= block.timestamp;
@@ -67,12 +65,11 @@ library BorrowMath {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
         _collateralIn *= state.interest;
-        _collateralIn = _collateralIn.shiftUp(32);
-        _collateralIn += state.reserves.asset;
+        _collateralIn += uint256(state.reserves.asset) << 32;
         uint256 denominator = state.reserves.asset;
         denominator -= assetOut;
-        denominator *= state.reserves.asset;
-        _collateralIn = _collateralIn.mulDiv(uint256(assetOut) * state.cdp, denominator);
+        denominator *= uint256(state.reserves.asset) << 32;
+        _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * state.cdp, denominator);
         _collateralIn += cdpIncrease;
         collateralIn = _collateralIn.toUint112();
     }
