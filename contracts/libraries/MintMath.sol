@@ -11,24 +11,36 @@ library MintMath {
     using FullMath for uint256;
     using SafeCast for uint256;
 
-    function getLiquidity(
+    function getLiquidityTotal(
         uint128 assetIn
-    ) internal pure returns (uint256 liquidityOut) {
-        liquidityOut = assetIn - 1000;
+    ) internal pure returns (uint256 liquidityTotal) {
+        liquidityTotal = uint256(assetIn) * 0x100000000000000000000000000000000 ;
     }
 
-    function getLiquidity(
+    function getLiquidityTotal(
         IPair.State memory state,
         uint128 assetIn,
         uint112 interestIncrease,
         uint112 cdpIncrease,
         uint256 total
-    ) internal pure returns (uint256 liquidityOut) {
-        liquidityOut = min(
+    ) internal pure returns (uint256 liquidityTotal) {
+        liquidityTotal = min(
             total.mulDiv(assetIn, state.reserves.asset),
             total.mulDiv(interestIncrease, state.interest),
             total.mulDiv(cdpIncrease, state.cdp)
         );
+    }
+
+    function getLiquidity(
+        uint256 maturity,
+        uint256 liquidityTotal,
+        uint16 protocolFee
+    ) internal view returns (uint256 liquidityOut) {
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= protocolFee;
+        denominator += 0x10000000000;
+        liquidityOut = liquidityTotal.mulDiv(0x10000000000, denominator);
     }
 
     function min(
@@ -59,13 +71,16 @@ library MintMath {
     }
 
     function getCollateral(
+        uint256 maturity,
         uint128 assetIn,
-        uint112 debtOut,
+        uint112 interestIncrease,
         uint112 cdpIncrease
-    ) internal pure returns (uint112 collateralOut) {
-        uint256 _collateralOut = debtOut;
-        _collateralOut *= cdpIncrease;
-        _collateralOut = _collateralOut.divUp(assetIn);
+    ) internal view returns (uint112 collateralOut) {
+        uint256 _collateralOut = maturity;
+        _collateralOut -= block.timestamp;
+        _collateralOut *= interestIncrease;
+        _collateralOut += uint256(assetIn) << 32;
+        _collateralOut = _collateralOut.mulDiv(cdpIncrease, uint256(assetIn) << 32);
         _collateralOut += cdpIncrease;
         collateralOut = _collateralOut.toUint112();
     }

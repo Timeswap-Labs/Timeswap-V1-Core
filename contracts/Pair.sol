@@ -32,7 +32,7 @@ contract Pair is IPair {
     IERC20 public immutable override collateral;
     //// @dev The fee earned by liquidity providers. Follows UQ0.16 format.
     uint16 public immutable override fee;
-    /// @dev The protocol fee earned by the owner. Follows UQ0.16 format.
+    /// @dev The protocol fee per second earned by the owner. Follows UQ0.40 format.
     uint16 public immutable override protocolFee;
 
     /// @dev Stores the asset and collateral reserves of the Pair contract.
@@ -167,24 +167,32 @@ contract Pair is IPair {
         uint128 assetIn = asset.getAssetIn(reserves);
         require(assetIn > 0, 'Invalid');
 
+        // uint256 liquidityTotal;
         if (pool.totalLiquidity == 0) {
-            liquidityOut = MintMath.getLiquidity(assetIn);
-            pool.totalLiquidity = assetIn;
+            uint256 liquidityTotal = MintMath.getLiquidityTotal(assetIn);
+            liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
+
+            pool.totalLiquidity += liquidityTotal;
+            pool.liquidities[factory.owner()] += liquidityTotal;
         } else {
-            liquidityOut = MintMath.getLiquidity(
+            uint256 liquidityTotal = MintMath.getLiquidityTotal(
                 pool.state,
                 assetIn,
                 interestIncrease,
                 cdpIncrease,
                 pool.totalLiquidity
             );
-            pool.totalLiquidity += liquidityOut;
-        }
+            liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
+            pool.totalLiquidity += liquidityTotal;
+            pool.liquidities[factory.owner()] += liquidityTotal;
+        }
+        
         pool.liquidities[liquidityTo] += liquidityOut;
+        pool.liquidities[factory.owner()] -= liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, assetIn, interestIncrease);
-        dueOut.collateral = MintMath.getCollateral(assetIn, dueOut.debt, cdpIncrease);
+        dueOut.collateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease);
         dueOut.startBlock = BlockNumber.get();
 
         uint112 collateralIn = collateral.getCollateralIn(reserves);
