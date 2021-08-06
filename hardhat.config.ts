@@ -1,24 +1,24 @@
-
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import 'hardhat-deploy'
-import {config} from 'dotenv'
+import { config } from 'dotenv'
 
-const env:any=config()['parsed']
+const env: any = config()['parsed']
 
-module.exports = {
+export default {
   solidity: {
-    version: "0.8.1",
+    version: '0.8.1',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   namedAccounts: {
-    factoryDeployer:0, factoryOwner:0
+    factoryDeployer: 0,
+    factoryOwner: 0,
   },
   networks: {
     rinkeby: {
@@ -31,5 +31,4 @@ module.exports = {
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
   },
-};
-
+}

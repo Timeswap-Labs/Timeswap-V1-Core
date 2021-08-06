@@ -397,7 +397,7 @@ contract Pair is IPair {
     /// @dev Must atomically increase the asset ERC20 balance of the Pair contract, before calling.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param to The address of the receiver of collateral ERC20.
-    /// @param owner The addres of the owner of collateralized debt.
+    /// @param owner The address of the owner of collateralized debt.
     /// @param ids The array indexes of collateralized debts.
     /// @param assetsPay The amount of asset ERC20 per collateralized debts.
     /// @return collateralOut The amount of collateral ERC20 received.
