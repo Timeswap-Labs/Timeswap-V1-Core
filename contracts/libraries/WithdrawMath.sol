@@ -11,13 +11,13 @@ library WithdrawMath {
 
     function getAsset(
         uint128 bondIn,
-        uint128 reserve,
-        uint128 supply
+        uint128 assetReserve,
+        uint128 totalBonds
     ) internal pure returns (uint128 assetOut) {
-        if (reserve >= supply) return assetOut = bondIn;
+        if (assetReserve >= totalBonds) return assetOut = bondIn;
         uint256 _assetOut = bondIn;
-        _assetOut *= reserve;
-        _assetOut /= supply;
+        _assetOut *= assetReserve;
+        _assetOut /= totalBonds;
         assetOut = _assetOut.toUint128();
     }
 

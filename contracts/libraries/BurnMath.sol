@@ -11,15 +11,14 @@ library BurnMath {
 
     function getAsset(
         uint256 liquidityIn,
-        uint128 reserve,
-        uint128 totalBond,
+        uint128 assetReserve,
+        uint128 totalBonds,
         uint256 totalLiquidity
     ) internal pure returns (uint128 assetOut) {
-        if (reserve <= totalBond) return assetOut;
-        uint256 _assetOut = reserve;
-        _assetOut -= totalBond;
-        _assetOut *= liquidityIn;
-        _assetOut /= totalLiquidity;
+        if (assetReserve <= totalBonds) return assetOut;
+        uint256 _assetOut = assetReserve;
+        _assetOut -= totalBonds;
+        _assetOut = _assetOut.mulDiv(liquidityIn, totalLiquidity);
         assetOut = _assetOut.toUint128();
     }
 
@@ -30,16 +29,17 @@ library BurnMath {
         uint256 totalLiquidity
     ) internal pure returns (uint128 collateralOut) {
         uint256 _collateralOut = reserves.collateral;
-        if (reserves.asset <= supplies.bond) {
-            uint256 _reduce = supplies.bond;
-            _reduce -= reserves.asset;
-            _reduce *= supplies.insurance;
-            if (reserves.collateral * supplies.bond <= _reduce) return collateralOut;
-            _collateralOut *= supplies.bond;
-            _collateralOut -= _reduce;
-            _collateralOut /= supplies.bond;
+        if (reserves.asset >= supplies.bond) {
+            _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity);
+            return collateralOut = _collateralOut.toUint128();
         }
-        _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity);
+        uint256 _reduce = supplies.bond;
+        _reduce -= reserves.asset;
+        _reduce *= supplies.insurance;
+        if (reserves.collateral * supplies.bond <= _reduce) return collateralOut;
+        _collateralOut *= supplies.bond;
+        _collateralOut -= _reduce;
+        _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity * supplies.bond);
         collateralOut = _collateralOut.toUint128();
     }
 }
