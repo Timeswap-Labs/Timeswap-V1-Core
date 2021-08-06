@@ -7,6 +7,6 @@ library BlockNumber {
     using SafeCast for uint256;
 
     function get() internal view returns (uint32 blockNumber) {
-        blockNumber = block.number.toUint32();
+        blockNumber = block.number.modUint32();
     }
 }

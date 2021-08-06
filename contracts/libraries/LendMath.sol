@@ -14,15 +14,15 @@ library LendMath {
     function check(
         IPair.State memory state,
         uint128 assetIn,
-        uint128 interestDecrease,
-        uint128 cdpDecrease,
+        uint112 interestDecrease,
+        uint112 cdpDecrease,
         uint16 fee
     ) internal pure {
-        uint256 feeBase = 0x10000 + fee;
+        uint128 feeBase = 0x10000 + fee;
         uint128 assetReserve = state.reserves.asset + assetIn;
         uint128 interestAdjusted = adjust(interestDecrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpDecrease, state.cdp, feeBase);
-        state.check(assetReserve, interestAdjusted, cdpAdjusted);
+        state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
 
         uint256 minimum = assetIn;
         minimum *= state.interest;
@@ -31,21 +31,19 @@ library LendMath {
     }
 
     function adjust(
-        uint128 decrease,
-        uint128 reserve,
-        uint256 feeBase
+        uint112 decrease,
+        uint112 reserve,
+        uint128 feeBase
     ) private pure returns (uint128 adjusted) {
-        uint256 _adjusted = reserve;
-        _adjusted <<= 16;
-        _adjusted -= feeBase * decrease;
-        _adjusted >>= 16;
-        adjusted = _adjusted.toUint128();
+        adjusted = reserve;
+        adjusted <<= 16;
+        adjusted -= feeBase * decrease;
     }
 
     function getBond(
         uint256 maturity,
         uint128 assetIn,
-        uint128 interestDecrease
+        uint112 interestDecrease
     ) internal view returns (uint128 bondOut) {
         uint256 _bondOut = maturity;
         _bondOut -= block.timestamp;
@@ -59,16 +57,15 @@ library LendMath {
         uint256 maturity,
         IPair.State memory state,
         uint128 assetIn,
-        uint128 cdpDecrease
+        uint112 cdpDecrease
     ) internal view returns (uint128 insuranceOut) {
         uint256 _insuranceOut = maturity;
         _insuranceOut -= block.timestamp;
         _insuranceOut *= state.interest;
-        _insuranceOut >>= 32;
-        _insuranceOut += state.reserves.asset;
+        _insuranceOut += uint256(state.reserves.asset) << 32;
         uint256 denominator = state.reserves.asset;
         denominator += assetIn;
-        denominator *= state.reserves.asset << 32;
+        denominator *= uint256(state.reserves.asset) << 32;
         _insuranceOut = _insuranceOut.mulDiv(uint256(assetIn) * state.cdp, denominator);
         _insuranceOut += cdpDecrease;
         insuranceOut = _insuranceOut.toUint128();

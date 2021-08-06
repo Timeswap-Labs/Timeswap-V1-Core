@@ -20,8 +20,8 @@ library MintMath {
     function getLiquidity(
         IPair.State memory state,
         uint128 assetIn,
-        uint128 interestIncrease,
-        uint128 cdpIncrease,
+        uint112 interestIncrease,
+        uint112 cdpIncrease,
         uint256 total
     ) internal pure returns (uint256 liquidityOut) {
         liquidityOut = min(
@@ -48,7 +48,7 @@ library MintMath {
     function getDebt(
         uint256 maturity,
         uint128 assetIn,
-        uint128 interestIncrease
+        uint112 interestIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
         _debtOut -= block.timestamp;
@@ -60,8 +60,8 @@ library MintMath {
 
     function getCollateral(
         uint128 assetIn,
-        uint128 debtOut,
-        uint128 cdpIncrease
+        uint112 debtOut,
+        uint112 cdpIncrease
     ) internal pure returns (uint112 collateralOut) {
         uint256 _collateralOut = debtOut;
         _collateralOut *= cdpIncrease;

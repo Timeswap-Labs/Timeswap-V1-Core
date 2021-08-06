@@ -2,8 +2,8 @@
 pragma solidity =0.8.1;
 
 library SafeCast {
-    function toUint32(uint256 x) internal pure returns (uint32 y) {
-        require((y = uint32(x)) == x);
+    function modUint32(uint256 x) internal pure returns (uint32 y) {
+        y = uint32(x % 0x100000000);
     }
     
     function toUint112(uint256 x) internal pure returns (uint112 y) {
