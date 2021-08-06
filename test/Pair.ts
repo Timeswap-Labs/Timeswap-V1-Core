@@ -5,9 +5,10 @@ import { factoryInit } from './Factory'
 
 import type { Pair as PairContract } from '../typechain/Pair'
 import type { TestToken } from '../typechain/TestToken'
+import { BigNumberish } from 'ethers'
 
 export class Pair {
-  constructor(public pairContract: PairContract, public maturity: bigint) {}
+  constructor(public pairContract: PairContract, public maturity: bigint) { }
 
   upgrade(signerWithAddress: SignerWithAddress): PairSigner {
     return new PairSigner(signerWithAddress, this)
@@ -30,13 +31,76 @@ export class PairSigner extends Pair {
   }
 
   async mint(interestIncrease: number, cdpIncrease: number) {
-    await this.pairContract.mint(
+    let txn = await this.pairContract.connect(this.signerWithAddress).mint(
       this.maturity,
       this.signerWithAddress.address,
       this.signerWithAddress.address,
       interestIncrease,
       cdpIncrease
     )
+    await txn.wait()
+  }
+
+  async burn(liquidityIn: number) {
+    let txn = await this.pairContract.connect(this.signerWithAddress).burn(
+      this.maturity,
+      this.signerWithAddress.address,
+      this.signerWithAddress.address,
+      liquidityIn
+    )
+    await txn.wait()
+  }
+
+  async lend(interestDecrease: number, cdpDecrease: number) {
+    let txn = await this.pairContract.connect(this.signerWithAddress).lend(
+      this.maturity,
+      this.signerWithAddress.address,
+      this.signerWithAddress.address,
+      interestDecrease,
+      cdpDecrease
+    )
+    await txn.wait()
+  }
+
+  async withdraw(bond: number, insurance: number) {
+    let txn = await this.pairContract.connect(this.signerWithAddress).withdraw(
+      this.maturity,
+      this.signerWithAddress.address,
+      this.signerWithAddress.address,
+      { bond: bond, insurance: insurance }
+    )
+    await txn.wait()
+  }
+
+  async borrow(assetOut: number, interestIncrease: number, cdpIncrease: number) {
+    let txn = await this.pairContract.connect(this.signerWithAddress).borrow(
+      this.maturity,
+      this.signerWithAddress.address,
+      this.signerWithAddress.address,
+      assetOut,
+      interestIncrease,
+      cdpIncrease
+    )
+    await txn.wait()
+  }
+
+  async pay(ids: BigNumberish[], assetsPay: BigNumberish[]) {
+    let txn = await this.pairContract.connect(this.signerWithAddress).pay(
+      this.maturity,
+      this.signerWithAddress.address,
+      this.signerWithAddress.address,
+      ids,
+      assetsPay
+    )
+    await txn.wait()
+  }
+
+  async skim() {
+    let txn = await this.pairContract.connect(this.signerWithAddress).skim(
+      this.signerWithAddress.address,
+      this.signerWithAddress.address
+    )
+    await txn.wait()
   }
 }
 
