@@ -14,7 +14,8 @@ library MintMath {
     function getLiquidityTotal(
         uint128 assetIn
     ) internal pure returns (uint256 liquidityTotal) {
-        liquidityTotal = uint256(assetIn) * 0x100000000000000000000000000000000 ;
+        liquidityTotal = assetIn;
+        liquidityTotal <<= 40;
     }
 
     function getLiquidityTotal(
