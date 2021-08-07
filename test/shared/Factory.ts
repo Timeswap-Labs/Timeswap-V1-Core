@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat'
 import constants from './Constants'
 
-import type { Factory } from '../typechain/Factory'
+import type { Factory } from '../../typechain/Factory'
 
 export async function factoryInit(): Promise<Factory> {
   const signers = await ethers.getSigners()
