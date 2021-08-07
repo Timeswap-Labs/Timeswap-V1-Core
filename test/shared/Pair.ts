@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/providers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { factoryInit } from './Factory'
@@ -103,6 +102,8 @@ export class PairSigner extends Pair {
 
 export async function pairInit(asset: TestToken, collateral: TestToken, maturity: bigint) {
   const factory = await factoryInit()
+
+  await factory.createPair(asset.address, collateral.address)
 
   const pairContractFactory = await ethers.getContractFactory('Pair')
   const pairContract = pairContractFactory.attach(
