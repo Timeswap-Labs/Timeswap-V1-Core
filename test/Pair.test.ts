@@ -1,27 +1,36 @@
 import chai from 'chai'
 import { solidity } from 'ethereum-waffle'
 import { ethers } from 'hardhat'
+import { now } from './shared/Helper'
 import { Pair, pairInit } from './shared/Pair'
 import { testTokenNew } from './shared/TestToken'
+
+import type { TestToken } from '../typechain/TestToken'
 
 chai.use(solidity)
 const { expect } = chai
 
 describe('Test Cases', () => {
   let pair: Pair
+  let assetToken: TestToken
+  let collateralToken : TestToken
 
   before(async () => {
-    const asset = await testTokenNew(10000n)
-    const collateral = await testTokenNew(10000n)
-    const maturity = 31536000n
+     assetToken = await testTokenNew('Ether', 'WETH', 10000n)
+     collateralToken = await testTokenNew('Matic', 'MATIC', 10000n)
+    const maturity = (await now()) + 31536000n
 
-    pair = await pairInit(asset, collateral, maturity)
+    pair = await pairInit(assetToken, collateralToken, maturity)
   })
 
   it('Test Case 1', async () => {
     console.log('Liquidity ', await pair.totalLiquidity())
 
     const signers = await ethers.getSigners()
+
+    await assetToken.transfer(pair.pairContract.address, 2000n)
+    await collateralToken.transfer(pair.pairContract.address, 2000n)
+
     await pair.upgrade(signers[0]).mint(10n, 10n)
 
     expect(2).to.equal(2)
