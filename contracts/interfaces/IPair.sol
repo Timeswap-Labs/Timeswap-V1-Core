@@ -2,42 +2,10 @@
 pragma solidity =0.8.1;
 
 import {IFactory} from './IFactory.sol';
+import {IData} from './IData.sol';
 import {IERC20} from './IERC20.sol';
 
-interface IPair {
-    // STRUCT
-    
-    struct Tokens {
-        uint128 asset;
-        uint128 collateral;
-    }
-
-    struct Claims {
-        uint128 bond;
-        uint128 insurance;
-    }
-
-    struct Due {
-        uint112 debt;
-        uint112 collateral;
-        uint32 startBlock;
-    }
-
-    struct State {
-        Tokens reserves;
-        uint112 interest;
-        uint112 cdp;
-    }
-
-    struct Pool {
-        State state;
-        uint256 totalLiquidity;
-        mapping(address => uint256) liquidities;
-        Claims totalClaims;
-        mapping(address => Claims) claims;
-        mapping(address => Due[]) dues;
-    }
-
+interface IPair is IData {
     // EVENT
 
     event Sync(uint256 maturity, State state);
@@ -124,6 +92,8 @@ interface IPair {
     function totalReserves() external view returns (Tokens memory);
 
     function state(uint256 maturity) external view returns (State memory);
+
+    function lock(uint256 maturity) external view returns (Tokens memory);
 
     function totalLiquidity(uint256 maturity) external view returns (uint256);
 
