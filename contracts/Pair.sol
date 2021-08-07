@@ -13,6 +13,7 @@ import {PayMath} from './libraries/PayMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Reserve} from './libraries/Reserve.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import 'hardhat/console.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -165,10 +166,12 @@ contract Pair is IPair {
         Pool storage pool = pools[maturity];
 
         uint128 assetIn = asset.getAssetIn(reserves);
-        require(assetIn > 0, 'Invalid');
+        // require(assetIn > 0, 'Invalid');
+        console.log("Working");
 
         if (pool.totalLiquidity == 0) {
             liquidityOut = MintMath.getLiquidity(assetIn);
+            console.log("Lets see");
             pool.totalLiquidity = assetIn;
         } else {
             liquidityOut = MintMath.getLiquidity(
