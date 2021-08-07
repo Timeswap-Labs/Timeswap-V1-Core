@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
+import {IData} from '../interfaces/IData.sol';
 import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
@@ -11,18 +11,18 @@ import {SafeCast} from './SafeCast.sol';
 library BorrowMath {
     using Math for uint256;
     using FullMath for uint256;
-    using ConstantProduct for IPair.State;
+    using ConstantProduct for IData.State;
     using SafeCast for uint256;
 
     function check(
-        IPair.State memory state,
+        IData.State memory state,
         uint128 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease,
         uint16 fee
     ) internal pure {
         uint128 feeBase = 0x10000 - fee;
-        uint128 assetReserve = state.reserves.asset - assetOut;
+        uint128 assetReserve = state.asset - assetOut;
         uint128 interestAdjusted = adjust(interestIncrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase);
         state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
@@ -58,17 +58,17 @@ library BorrowMath {
 
     function getCollateral(
         uint256 maturity,
-        IPair.State memory state,
+        IData.State memory state,
         uint128 assetOut,
         uint128 cdpIncrease
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
         _collateralIn *= state.interest;
-        _collateralIn += uint256(state.reserves.asset) << 32;
-        uint256 denominator = state.reserves.asset;
+        _collateralIn += uint256(state.asset) << 32;
+        uint256 denominator = state.asset;
         denominator -= assetOut;
-        denominator *= uint256(state.reserves.asset) << 32;
+        denominator *= uint256(state.asset) << 32;
         _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * state.cdp, denominator);
         _collateralIn += cdpIncrease;
         collateralIn = _collateralIn.toUint112();

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
+import {IData} from '../interfaces/IData.sol';
 import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
@@ -19,14 +19,14 @@ library MintMath {
     }
 
     function getLiquidityTotal(
-        IPair.State memory state,
+        IData.State memory state,
         uint128 assetIn,
         uint112 interestIncrease,
         uint112 cdpIncrease,
         uint256 total
     ) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = min(
-            total.mulDiv(assetIn, state.reserves.asset),
+            total.mulDiv(assetIn, state.asset),
             total.mulDiv(interestIncrease, state.interest),
             total.mulDiv(cdpIncrease, state.cdp)
         );

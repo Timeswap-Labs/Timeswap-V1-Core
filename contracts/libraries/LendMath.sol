@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
+import {IData} from '../interfaces/IData.sol';
 import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
 library LendMath {
     using FullMath for uint256;
-    using ConstantProduct for IPair.State;
+    using ConstantProduct for IData.State;
     using SafeCast for uint256;
 
     function check(
-        IPair.State memory state,
+        IData.State memory state,
         uint128 assetIn,
         uint112 interestDecrease,
         uint112 cdpDecrease,
         uint16 fee
     ) internal pure {
         uint128 feeBase = 0x10000 + fee;
-        uint128 assetReserve = state.reserves.asset + assetIn;
+        uint128 assetReserve = state.asset + assetIn;
         uint128 interestAdjusted = adjust(interestDecrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpDecrease, state.cdp, feeBase);
         state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
@@ -55,17 +55,17 @@ library LendMath {
 
     function getInsurance(
         uint256 maturity,
-        IPair.State memory state,
+        IData.State memory state,
         uint128 assetIn,
         uint112 cdpDecrease
     ) internal view returns (uint128 insuranceOut) {
         uint256 _insuranceOut = maturity;
         _insuranceOut -= block.timestamp;
         _insuranceOut *= state.interest;
-        _insuranceOut += uint256(state.reserves.asset) << 32;
-        uint256 denominator = state.reserves.asset;
+        _insuranceOut += uint256(state.asset) << 32;
+        uint256 denominator = state.asset;
         denominator += assetIn;
-        denominator *= uint256(state.reserves.asset) << 32;
+        denominator *= uint256(state.asset) << 32;
         _insuranceOut = _insuranceOut.mulDiv(uint256(assetIn) * state.cdp, denominator);
         _insuranceOut += cdpDecrease;
         insuranceOut = _insuranceOut.toUint128();

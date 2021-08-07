@@ -41,7 +41,7 @@ contract Pair is IPair {
     mapping(uint256 => Pool) private pools;
 
     /// @dev Stores the access state for reentramcy guard.
-    uint256 private locked;
+    uint256 private reentrancyLocked;
 
     /* ===== VIEW =====*/
 
@@ -57,6 +57,13 @@ contract Pair is IPair {
     /// @return The W, X, Y, and Z state which calculates the price.
     function state(uint256 maturity) external view override returns (State memory) {
         return pools[maturity].state;
+    }
+
+    /// @dev Returns the asset ERC20 and collateral ERC20 locked in a Pool.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @return The asset ERC20 and collateral ERC20 locked.
+    function lock(uint256 maturity) external view override returns (Tokens memory) {
+        return pools[maturity].lock;
     }
 
     /// @dev Returns the total liquidity supply of a Pool.
@@ -121,11 +128,11 @@ contract Pair is IPair {
     /* ===== MODIFIER ===== */
 
     /// @dev The modifier for reentrancy guard.
-    modifier lock() {
-        require(locked == 0, 'Reentrancy');
-        locked = 1;
+    modifier reentrancyLock() {
+        require(reentrancyLocked == 0, 'Reentrancy');
+        reentrancyLocked = 1;
         _;
-        locked = 0;
+        reentrancyLocked = 0;
     }
 
     /* ===== UPDATE ===== */
@@ -151,7 +158,7 @@ contract Pair is IPair {
     )
         external
         override
-        lock
+        reentrancyLock
         returns (
             uint256 liquidityOut,
             uint256 id,
@@ -167,13 +174,13 @@ contract Pair is IPair {
         uint128 assetIn = asset.getAssetIn(reserves);
         require(assetIn > 0, 'Invalid');
 
-        // uint256 liquidityTotal;
         if (pool.totalLiquidity == 0) {
             uint256 liquidityTotal = MintMath.getLiquidityTotal(assetIn);
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.totalLiquidity += liquidityTotal;
-            pool.liquidities[factory.owner()] += liquidityTotal;
+            pool.liquidities[liquidityTo] += liquidityOut;
+            pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         } else {
             uint256 liquidityTotal = MintMath.getLiquidityTotal(
                 pool.state,
@@ -185,11 +192,9 @@ contract Pair is IPair {
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.totalLiquidity += liquidityTotal;
-            pool.liquidities[factory.owner()] += liquidityTotal;
+            pool.liquidities[liquidityTo] += liquidityOut;
+            pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         }
-        
-        pool.liquidities[liquidityTo] += liquidityOut;
-        pool.liquidities[factory.owner()] -= liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, assetIn, interestIncrease);
         dueOut.collateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease);
@@ -204,10 +209,10 @@ contract Pair is IPair {
         id = dues.length;
         dues.push(dueOut);
 
-        pool.state.reserves.asset += assetIn;
-        pool.state.reserves.collateral += collateralIn;
+        pool.state.asset += assetIn;
         pool.state.interest += interestIncrease;
         pool.state.cdp += cdpIncrease;
+        pool.lock.collateral += collateralIn;
 
         emit Sync(maturity, pool.state);
         emit Mint(maturity, msg.sender, liquidityTo, dueTo, assetIn, liquidityOut, id, dueOut);
@@ -225,7 +230,7 @@ contract Pair is IPair {
         address assetTo,
         address collateralTo,
         uint256 liquidityIn
-    ) external override lock returns (Tokens memory tokensOut) {
+    ) external override reentrancyLock returns (Tokens memory tokensOut) {
         require(block.timestamp >= maturity, 'Active');
         require(assetTo != address(0) && collateralTo != address(0), 'Zero');
         require(liquidityIn > 0, 'Invalid');
@@ -234,15 +239,20 @@ contract Pair is IPair {
 
         uint256 total = pool.totalLiquidity;
 
-        tokensOut.asset = BurnMath.getAsset(liquidityIn, pool.state.reserves.asset, pool.totalClaims.bond, total);
-        tokensOut.collateral = BurnMath.getCollateral(liquidityIn, pool.state.reserves, pool.totalClaims, total);
+        tokensOut.asset = BurnMath.getAsset(liquidityIn, pool.state.asset, pool.lock.asset, pool.totalClaims.bond, total);
+        tokensOut.collateral = BurnMath.getCollateral(liquidityIn, pool.state.asset, pool.lock, pool.totalClaims, total);
 
         pool.totalLiquidity -= liquidityIn;
 
         pool.liquidities[msg.sender] -= liquidityIn;
 
-        pool.state.reserves.asset -= tokensOut.asset;
-        pool.state.reserves.collateral -= tokensOut.collateral;
+        if (pool.lock.asset >= tokensOut.asset) pool.lock.asset -= tokensOut.asset;
+        else if (pool.lock.asset == 0) pool.state.asset -= tokensOut.asset;
+        else {
+            pool.state.asset -= tokensOut.asset - pool.lock.asset;
+            pool.lock.asset = 0;
+        }
+        pool.lock.collateral -= tokensOut.collateral;
 
         reserves.asset -= tokensOut.asset;
         reserves.collateral -= tokensOut.collateral;
@@ -269,7 +279,7 @@ contract Pair is IPair {
         address insuranceTo,
         uint112 interestDecrease,
         uint112 cdpDecrease
-    ) external override lock returns (Claims memory claimsOut) {
+    ) external override reentrancyLock returns (Claims memory claimsOut) {
         require(block.timestamp < maturity, 'Expired');
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
         require(interestDecrease > 0 || cdpDecrease > 0, 'Invalid');
@@ -291,7 +301,7 @@ contract Pair is IPair {
         pool.claims[bondTo].bond += claimsOut.bond;
         pool.claims[insuranceTo].insurance += claimsOut.insurance;
 
-        pool.state.reserves.asset += assetIn;
+        pool.state.asset += assetIn;
         pool.state.interest -= interestDecrease;
         pool.state.cdp -= cdpDecrease;
 
@@ -311,17 +321,18 @@ contract Pair is IPair {
         address assetTo,
         address collateralTo,
         Claims memory claimsIn
-    ) external override lock returns (Tokens memory tokensOut) {
+    ) external override reentrancyLock returns (Tokens memory tokensOut) {
         require(block.timestamp >= maturity, 'Active');
         require(assetTo != address(0) && collateralTo != address(0), 'Zero');
         require(claimsIn.bond > 0 || claimsIn.insurance > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
 
-        tokensOut.asset = WithdrawMath.getAsset(claimsIn.bond, pool.state.reserves.asset, pool.totalClaims.bond);
+        tokensOut.asset = WithdrawMath.getAsset(claimsIn.bond, pool.state.asset, pool.lock.asset, pool.totalClaims.bond);
         tokensOut.collateral = WithdrawMath.getCollateral(
             claimsIn.insurance,
-            pool.state.reserves,
+            pool.state.asset,
+            pool.lock,
             pool.totalClaims
         );
 
@@ -333,8 +344,13 @@ contract Pair is IPair {
         sender.bond -= claimsIn.bond;
         sender.insurance -= claimsIn.insurance;
 
-        pool.state.reserves.asset -= tokensOut.asset;
-        pool.state.reserves.collateral -= tokensOut.collateral;
+        if (pool.lock.asset >= tokensOut.asset) pool.lock.asset -= tokensOut.asset;
+        else if (pool.lock.asset == 0) pool.state.asset -= tokensOut.asset;
+        else {
+            pool.state.asset -= tokensOut.asset - pool.lock.asset;
+            pool.lock.asset = 0;
+        }
+        pool.lock.collateral -= tokensOut.collateral;
 
         reserves.asset -= tokensOut.asset;
         reserves.collateral -= tokensOut.collateral;
@@ -364,7 +380,7 @@ contract Pair is IPair {
         uint128 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease
-    ) external override lock returns (uint256 id, Due memory dueOut) {
+    ) external override reentrancyLock returns (uint256 id, Due memory dueOut) {
         require(block.timestamp < maturity, 'Expired');
         require(assetTo != address(0) && dueTo != address(0), 'Zero');
         require(assetOut > 0, 'Invalid');
@@ -388,10 +404,10 @@ contract Pair is IPair {
         id = dues.length;
         dues.push(dueOut);
 
-        pool.state.reserves.asset -= assetOut;
-        pool.state.reserves.collateral += collateralIn;
+        pool.state.asset -= assetOut;
         pool.state.interest += interestIncrease;
         pool.state.cdp += cdpIncrease;
+        pool.lock.collateral += collateralIn;
 
         reserves.asset -= assetOut;
 
@@ -415,7 +431,7 @@ contract Pair is IPair {
         address owner,
         uint256[] memory ids,
         uint112[] memory assetsPay
-    ) external override lock returns (uint128 collateralOut) {
+    ) external override reentrancyLock returns (uint128 collateralOut) {
         require(block.timestamp < maturity, 'Expired');
         require(ids.length == assetsPay.length, 'Invalid');
         require(to != address(0), 'Zero');
@@ -452,8 +468,8 @@ contract Pair is IPair {
         uint128 assetIn = asset.getAssetIn(reserves);
         require(assetIn >= assetPay, 'Invalid');
 
-        pool.state.reserves.asset += assetIn;
-        pool.state.reserves.collateral -= collateralOut;
+        pool.lock.asset += assetIn;
+        pool.lock.collateral -= collateralOut;
 
         reserves.collateral -= collateralOut;
 
@@ -471,7 +487,7 @@ contract Pair is IPair {
     function skim(
         address assetTo,
         address collateralTo
-    ) external override lock returns (uint256 assetOut, uint256 collateralOut) {
+    ) external override reentrancyLock returns (uint256 assetOut, uint256 collateralOut) {
         IERC20 _asset = asset;
         IERC20 _collateral = collateral;
 
