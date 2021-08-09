@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
 library LendMath {
     using FullMath for uint256;
-    using ConstantProduct for IData.State;
+    using ConstantProduct for IPair.State;
     using SafeCast for uint256;
 
     function check(
-        IData.State memory state,
+        IPair.State memory state,
         uint128 assetIn,
         uint112 interestDecrease,
         uint112 cdpDecrease,
@@ -55,7 +55,7 @@ library LendMath {
 
     function getInsurance(
         uint256 maturity,
-        IData.State memory state,
+        IPair.State memory state,
         uint128 assetIn,
         uint112 cdpDecrease
     ) internal view returns (uint128 insuranceOut) {

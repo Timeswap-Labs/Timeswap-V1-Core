@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
 
 library ConstantProduct {
     using FullMath for uint256;
 
     function checkConstantProduct(
-        IData.State memory state,
+        IPair.State memory state,
         uint128 assetReserve,
         uint128 interestAdjusted,
         uint128 cdpAdjusted

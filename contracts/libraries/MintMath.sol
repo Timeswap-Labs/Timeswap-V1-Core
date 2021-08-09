@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
@@ -19,7 +19,7 @@ library MintMath {
     }
 
     function getLiquidityTotal(
-        IData.State memory state,
+        IPair.State memory state,
         uint128 assetIn,
         uint112 interestIncrease,
         uint112 cdpIncrease,

@@ -2,7 +2,7 @@
 pragma solidity =0.8.1;
 
 import {IERC20} from '../interfaces/IERC20.sol';
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {SafeBalance} from './SafeBalance.sol';
 import {SafeCast} from './SafeCast.sol';
 
@@ -10,13 +10,13 @@ library Reserve {
     using SafeBalance for IERC20;
     using SafeCast for uint256;
 
-    function getAssetIn(IERC20 asset, IData.Tokens storage reserves) internal returns (uint128 assetIn) {
+    function getAssetIn(IERC20 asset, IPair.Tokens storage reserves) internal returns (uint128 assetIn) {
         uint128 assetReserve = asset.safeBalance().truncateUint128();
         assetIn = assetReserve - reserves.asset;
         reserves.asset = assetReserve;
     }
 
-    function getCollateralIn(IERC20 collateral, IData.Tokens storage reserves)
+    function getCollateralIn(IERC20 collateral, IPair.Tokens storage reserves)
         internal
         returns (uint112 collateralIn)
     {
