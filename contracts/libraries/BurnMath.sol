@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
@@ -26,8 +26,8 @@ library BurnMath {
 
     function getCollateral(
         uint256 liquidityIn,
-        IData.Tokens memory reserves,
-        IData.Claims memory supplies,
+        IPair.Tokens memory reserves,
+        IPair.Claims memory supplies,
         uint256 totalLiquidity
     ) internal pure returns (uint128 collateralOut) {
         uint256 _collateralOut = reserves.collateral;
@@ -48,8 +48,8 @@ library BurnMath {
     function getCollateral(
         uint256 liquidityIn,
         uint128 assetState,
-        IData.Tokens memory lock,
-        IData.Claims memory supplies,
+        IPair.Tokens memory lock,
+        IPair.Claims memory supplies,
         uint256 totalLiquidity
     ) internal pure returns (uint128 collateralOut) {
         uint256 assetReserve = assetState + lock.asset;

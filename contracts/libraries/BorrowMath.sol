@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
@@ -11,11 +11,11 @@ import {SafeCast} from './SafeCast.sol';
 library BorrowMath {
     using Math for uint256;
     using FullMath for uint256;
-    using ConstantProduct for IData.State;
+    using ConstantProduct for IPair.State;
     using SafeCast for uint256;
 
     function check(
-        IData.State memory state,
+        IPair.State memory state,
         uint128 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease,
@@ -58,7 +58,7 @@ library BorrowMath {
 
     function getCollateral(
         uint256 maturity,
-        IData.State memory state,
+        IPair.State memory state,
         uint128 assetOut,
         uint128 cdpIncrease
     ) internal view returns (uint112 collateralIn) {

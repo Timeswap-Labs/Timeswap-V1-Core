@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from '../interfaces/IData.sol';
+import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
@@ -26,8 +26,8 @@ library WithdrawMath {
     function getCollateral(
         uint128 insuranceIn,
         uint128 assetState,
-        IData.Tokens memory lock,
-        IData.Claims memory supplies
+        IPair.Tokens memory lock,
+        IPair.Claims memory supplies
     ) internal pure returns (uint128 collateralOut) {
         uint256 assetReserve = assetState + lock.asset;
         if (assetReserve >= supplies.bond) return collateralOut;
