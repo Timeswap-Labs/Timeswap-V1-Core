@@ -179,7 +179,6 @@ contract Pair is IPair {
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.totalLiquidity += liquidityTotal;
-            pool.liquidities[liquidityTo] += liquidityOut;
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         } else {
             uint256 liquidityTotal = MintMath.getLiquidityTotal(
@@ -192,9 +191,10 @@ contract Pair is IPair {
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.totalLiquidity += liquidityTotal;
-            pool.liquidities[liquidityTo] += liquidityOut;
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         }
+        require(liquidityOut > 0, 'Invalid');
+        pool.liquidities[liquidityTo] += liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, assetIn, interestIncrease);
         dueOut.collateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease);
@@ -246,9 +246,11 @@ contract Pair is IPair {
 
         pool.liquidities[msg.sender] -= liquidityIn;
 
-        if (pool.lock.asset >= tokensOut.asset) pool.lock.asset -= tokensOut.asset;
-        else if (pool.lock.asset == 0) pool.state.asset -= tokensOut.asset;
-        else {
+        if (pool.lock.asset >= tokensOut.asset) {
+            pool.lock.asset -= tokensOut.asset;
+        } else if (pool.lock.asset == 0) {
+            pool.state.asset -= tokensOut.asset;
+        } else {
             pool.state.asset -= tokensOut.asset - pool.lock.asset;
             pool.lock.asset = 0;
         }
@@ -261,7 +263,6 @@ contract Pair is IPair {
         if (tokensOut.collateral > 0 && collateralTo != address(this))
             collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
-        emit Sync(maturity, pool.state);
         emit Burn(maturity, msg.sender, assetTo, collateralTo, liquidityIn, tokensOut);
     }
 
@@ -344,9 +345,11 @@ contract Pair is IPair {
         sender.bond -= claimsIn.bond;
         sender.insurance -= claimsIn.insurance;
 
-        if (pool.lock.asset >= tokensOut.asset) pool.lock.asset -= tokensOut.asset;
-        else if (pool.lock.asset == 0) pool.state.asset -= tokensOut.asset;
-        else {
+        if (pool.lock.asset >= tokensOut.asset) { 
+            pool.lock.asset -= tokensOut.asset;
+        } else if (pool.lock.asset == 0) {
+            pool.state.asset -= tokensOut.asset;
+        } else {
             pool.state.asset -= tokensOut.asset - pool.lock.asset;
             pool.lock.asset = 0;
         }
@@ -359,7 +362,6 @@ contract Pair is IPair {
         if (tokensOut.collateral > 0 && collateralTo != address(this))
             collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
-        emit Sync(maturity, pool.state);
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
     }
 
@@ -423,50 +425,50 @@ contract Pair is IPair {
     /// @param to The address of the receiver of collateral ERC20.
     /// @param owner The addres of the owner of collateralized debt.
     /// @param ids The array indexes of collateralized debts.
-    /// @param assetsPay The amount of asset ERC20 per collateralized debts.
+    /// @param debtsIn The amount of asset ERC20 paid per collateralized debts.
     /// @return collateralOut The amount of collateral ERC20 received.
     function pay(
         uint256 maturity,
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory assetsPay
+        uint112[] memory debtsIn
     ) external override reentrancyLock returns (uint128 collateralOut) {
         require(block.timestamp < maturity, 'Expired');
-        require(ids.length == assetsPay.length, 'Invalid');
+        require(ids.length == debtsIn.length, 'Invalid');
         require(to != address(0), 'Zero');
 
         Pool storage pool = pools[maturity];
 
-        uint128 assetPay;
+        uint128 debtIn;
 
         Due[] storage dues = pool.dues[owner];
         Due[] memory duesIn = new Due[](ids.length);
 
         for (uint256 i = 0; i < ids.length; i++) {
             Due storage due = dues[i];
-            require(due.startBlock != block.number, 'Invalid');
+            require(due.startBlock != BlockNumber.get(), 'Invalid');
 
             Due memory dueIn;
-            dueIn.debt = PayMath.getDebt(assetsPay[i], due.debt);
+            dueIn.debt = PayMath.getDebt(debtsIn[i], due.debt);
 
             if (owner == msg.sender) {
-                uint112 collateralUnlock = PayMath.getCollateral(dueIn.debt, due.collateral, due.debt);
-                due.collateral -= collateralUnlock;
-                dueIn.collateral = collateralUnlock;
-                collateralOut += collateralUnlock;
+                uint112 _collateralOut = PayMath.getCollateral(dueIn.debt, due.collateral, due.debt);
+                due.collateral -= _collateralOut;
+                dueIn.collateral = _collateralOut;
+                collateralOut += _collateralOut;
             }
 
             dueIn.startBlock = due.startBlock;
 
-            assetPay += dueIn.debt;
+            debtIn += dueIn.debt;
             due.debt -= dueIn.debt;
 
             duesIn[i] = dueIn;
         }
 
         uint128 assetIn = asset.getAssetIn(reserves);
-        require(assetIn >= assetPay, 'Invalid');
+        require(assetIn >= debtIn, 'Invalid');
 
         pool.lock.asset += assetIn;
         pool.lock.collateral -= collateralOut;
@@ -475,7 +477,6 @@ contract Pair is IPair {
 
         if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut);
 
-        emit Sync(maturity, pool.state);
         emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, duesIn);
     }
 
