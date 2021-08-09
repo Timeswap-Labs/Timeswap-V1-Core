@@ -10,6 +10,7 @@ import {LendMath} from './libraries/LendMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {PayMath} from './libraries/PayMath.sol';
+import {SafeCast} from './libraries/SafeCast.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Reserve} from './libraries/Reserve.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
@@ -171,7 +172,7 @@ contract Pair is IPair {
 
         Pool storage pool = pools[maturity];
 
-        uint128 assetIn = asset.getAssetIn(reserves);
+        uint112 assetIn = asset.getAssetIn(reserves);
         require(assetIn > 0, 'Invalid');
 
         if (pool.totalLiquidity == 0) {
@@ -249,9 +250,9 @@ contract Pair is IPair {
         if (pool.lock.asset >= tokensOut.asset) {
             pool.lock.asset -= tokensOut.asset;
         } else if (pool.lock.asset == 0) {
-            pool.state.asset -= tokensOut.asset;
+            pool.state.asset -= BurnMath.getUint112(tokensOut.asset);
         } else {
-            pool.state.asset -= tokensOut.asset - pool.lock.asset;
+            pool.state.asset -= BurnMath.getUint112(tokensOut.asset - pool.lock.asset);
             pool.lock.asset = 0;
         }
         pool.lock.collateral -= tokensOut.collateral;
@@ -288,7 +289,7 @@ contract Pair is IPair {
         Pool storage pool = pools[maturity];
         require(pool.totalLiquidity > 0, 'Invalid');
 
-        uint128 assetIn = asset.getAssetIn(reserves);
+        uint112 assetIn = asset.getAssetIn(reserves);
         require(assetIn > 0, 'Invalid');
 
         LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, fee);
@@ -348,9 +349,9 @@ contract Pair is IPair {
         if (pool.lock.asset >= tokensOut.asset) { 
             pool.lock.asset -= tokensOut.asset;
         } else if (pool.lock.asset == 0) {
-            pool.state.asset -= tokensOut.asset;
+            pool.state.asset -= WithdrawMath.getUint112(tokensOut.asset);
         } else {
-            pool.state.asset -= tokensOut.asset - pool.lock.asset;
+            pool.state.asset -= WithdrawMath.getUint112(tokensOut.asset - pool.lock.asset);
             pool.lock.asset = 0;
         }
         pool.lock.collateral -= tokensOut.collateral;
@@ -379,7 +380,7 @@ contract Pair is IPair {
         uint256 maturity,
         address assetTo,
         address dueTo,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease
     ) external override reentrancyLock returns (uint256 id, Due memory dueOut) {
@@ -467,7 +468,7 @@ contract Pair is IPair {
             duesIn[i] = dueIn;
         }
 
-        uint128 assetIn = asset.getAssetIn(reserves);
+        uint128 assetIn = asset.getAssetInUint128(reserves);
         require(assetIn >= debtIn, 'Invalid');
 
         pool.lock.asset += assetIn;

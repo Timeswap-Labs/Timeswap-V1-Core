@@ -12,7 +12,7 @@ library MintMath {
     using SafeCast for uint256;
 
     function getLiquidityTotal(
-        uint128 assetIn
+        uint112 assetIn
     ) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = assetIn;
         liquidityTotal <<= 40;
@@ -20,7 +20,7 @@ library MintMath {
 
     function getLiquidityTotal(
         IPair.State memory state,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 interestIncrease,
         uint112 cdpIncrease,
         uint256 total
@@ -60,7 +60,7 @@ library MintMath {
 
     function getDebt(
         uint256 maturity,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 interestIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
@@ -73,7 +73,7 @@ library MintMath {
 
     function getCollateral(
         uint256 maturity,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 interestIncrease,
         uint112 cdpIncrease
     ) internal view returns (uint112 collateralOut) {

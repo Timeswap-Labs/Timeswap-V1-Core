@@ -13,13 +13,13 @@ library LendMath {
 
     function check(
         IPair.State memory state,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 interestDecrease,
         uint112 cdpDecrease,
         uint16 fee
     ) internal pure {
         uint128 feeBase = 0x10000 + fee;
-        uint128 assetReserve = state.asset + assetIn;
+        uint112 assetReserve = state.asset + assetIn;
         uint128 interestAdjusted = adjust(interestDecrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpDecrease, state.cdp, feeBase);
         state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
@@ -42,7 +42,7 @@ library LendMath {
 
     function getBond(
         uint256 maturity,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 interestDecrease
     ) internal view returns (uint128 bondOut) {
         uint256 _bondOut = maturity;
@@ -56,7 +56,7 @@ library LendMath {
     function getInsurance(
         uint256 maturity,
         IPair.State memory state,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 cdpDecrease
     ) internal view returns (uint128 insuranceOut) {
         uint256 _insuranceOut = maturity;
