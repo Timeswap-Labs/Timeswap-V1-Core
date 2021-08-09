@@ -24,7 +24,7 @@ interface IPair {
     }
 
     struct State {
-        uint128 asset;
+        uint112 asset;
         uint112 interest;
         uint112 cdp;
     }
@@ -48,7 +48,7 @@ interface IPair {
         address indexed sender,
         address indexed liquidityTo,
         address indexed debtTo,
-        uint128 assetIn,
+        uint112 assetIn,
         uint256 liquidityOut,
         uint256 id,
         Due dueOut
@@ -68,7 +68,7 @@ interface IPair {
         address indexed sender,
         address indexed bondTo,
         address indexed insuranceTo,
-        uint128 assetIn,
+        uint112 assetIn,
         Claims claimsOut
     );
 
@@ -86,7 +86,7 @@ interface IPair {
         address indexed sender,
         address indexed assetTo,
         address indexed debtTo,
-        uint128 assetOut,
+        uint112 assetOut,
         uint256 id,
         Due dueOut
     );
@@ -180,7 +180,7 @@ interface IPair {
         uint256 maturity,
         address assetTo,
         address dueTo,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease
     ) external returns (uint256 id, Due memory dueOut);

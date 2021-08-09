@@ -9,7 +9,7 @@ library ConstantProduct {
 
     function checkConstantProduct(
         IPair.State memory state,
-        uint128 assetReserve,
+        uint112 assetReserve,
         uint128 interestAdjusted,
         uint128 cdpAdjusted
     ) internal pure {

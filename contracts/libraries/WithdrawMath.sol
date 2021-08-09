@@ -11,7 +11,7 @@ library WithdrawMath {
 
     function getAsset(
         uint128 bondIn,
-        uint128 assetState,
+        uint112 assetState,
         uint128 assetLock,
         uint128 totalBonds
     ) internal pure returns (uint128 assetOut) {
@@ -23,9 +23,13 @@ library WithdrawMath {
         assetOut = _assetOut.toUint128();
     }
 
+    function getUint112(uint128 assetOut) internal pure returns (uint112 _assetOut) {
+        _assetOut = uint256(assetOut).truncateUint112();
+    }
+
     function getCollateral(
         uint128 insuranceIn,
-        uint128 assetState,
+        uint112 assetState,
         IPair.Tokens memory lock,
         IPair.Claims memory supplies
     ) internal pure returns (uint128 collateralOut) {

@@ -10,7 +10,14 @@ library Reserve {
     using SafeBalance for IERC20;
     using SafeCast for uint256;
 
-    function getAssetIn(IERC20 asset, IPair.Tokens storage reserves) internal returns (uint128 assetIn) {
+    function getAssetIn(IERC20 asset, IPair.Tokens storage reserves) internal returns (uint112 assetIn) {
+        uint128 assetReserve = asset.safeBalance().truncateUint128();
+        uint256 _assetIn = assetReserve - reserves.asset;
+        assetIn = _assetIn.toUint112();
+        reserves.asset = assetReserve;
+    }
+
+    function getAssetInUint128(IERC20 asset, IPair.Tokens storage reserves) internal returns (uint128 assetIn) {
         uint128 assetReserve = asset.safeBalance().truncateUint128();
         assetIn = assetReserve - reserves.asset;
         reserves.asset = assetReserve;

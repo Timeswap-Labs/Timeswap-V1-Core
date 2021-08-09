@@ -16,13 +16,13 @@ library BorrowMath {
 
     function check(
         IPair.State memory state,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease,
         uint16 fee
     ) internal pure {
         uint128 feeBase = 0x10000 - fee;
-        uint128 assetReserve = state.asset - assetOut;
+        uint112 assetReserve = state.asset - assetOut;
         uint128 interestAdjusted = adjust(interestIncrease, state.interest, feeBase);
         uint128 cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase);
         state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
@@ -45,7 +45,7 @@ library BorrowMath {
 
     function getDebt(
         uint256 maturity,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 interestIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
@@ -59,8 +59,8 @@ library BorrowMath {
     function getCollateral(
         uint256 maturity,
         IPair.State memory state,
-        uint128 assetOut,
-        uint128 cdpIncrease
+        uint112 assetOut,
+        uint112 cdpIncrease
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
