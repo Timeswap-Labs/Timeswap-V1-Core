@@ -61,13 +61,26 @@ describe('Mint', () => {
         const { pair, assetToken, collateralToken } = await loadFixture(fixture)
 
         const signers = await ethers.getSigners()
-        pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
+        // pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease) //this will revert
 
         return { pair, assetToken, collateralToken }
       }
 
       it('Sample test', async () => {
         const { pair } = await loadFixture(fixture)
+
+        const signers = await ethers.getSigners()
+
+        // This is passing, but won't fail for a wrong error message
+        // Think it is due to the `await txn.wait()`
+        // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
+        // await expect(result).to.be.revertedWith(test.errorMessage)
+
+        await expect(
+          pair.pairContract
+            .connect(signers[0])
+            .mint(pair.maturity, signers[0].address, signers[0].address, test.interestIncrease, test.cdpIncrease)
+        ).to.be.revertedWith(test.errorMessage)
 
         const totalLiquidity = await pair.totalLiquidity()
       })
