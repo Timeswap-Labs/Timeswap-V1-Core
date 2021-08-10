@@ -41,7 +41,7 @@ interface IPair {
     
     // EVENT
 
-    event Sync(uint256 maturity, State state);
+    event Sync(uint256 indexed maturity, State state);
 
     event Mint(
         uint256 maturity,
@@ -126,7 +126,7 @@ interface IPair {
 
     function state(uint256 maturity) external view returns (State memory);
 
-    function lock(uint256 maturity) external view returns (Tokens memory);
+    function totalLocked(uint256 maturity) external view returns (Tokens memory);
 
     function totalLiquidity(uint256 maturity) external view returns (uint256);
 

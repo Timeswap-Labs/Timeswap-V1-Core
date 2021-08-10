@@ -42,7 +42,7 @@ contract Pair is IPair {
     mapping(uint256 => Pool) private pools;
 
     /// @dev Stores the access state for reentramcy guard.
-    uint256 private reentrancyLocked;
+    uint256 private locked;
 
     /* ===== VIEW =====*/
 
@@ -63,7 +63,7 @@ contract Pair is IPair {
     /// @dev Returns the asset ERC20 and collateral ERC20 locked in a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @return The asset ERC20 and collateral ERC20 locked.
-    function lock(uint256 maturity) external view override returns (Tokens memory) {
+    function totalLocked(uint256 maturity) external view override returns (Tokens memory) {
         return pools[maturity].lock;
     }
 
@@ -129,11 +129,11 @@ contract Pair is IPair {
     /* ===== MODIFIER ===== */
 
     /// @dev The modifier for reentrancy guard.
-    modifier reentrancyLock() {
-        require(reentrancyLocked == 0, 'Reentrancy');
-        reentrancyLocked = 1;
+    modifier lock() {
+        require(locked == 0, 'Reentrancy');
+        locked = 1;
         _;
-        reentrancyLocked = 0;
+        locked = 0;
     }
 
     /* ===== UPDATE ===== */
@@ -159,7 +159,7 @@ contract Pair is IPair {
     )
         external
         override
-        reentrancyLock
+        lock
         returns (
             uint256 liquidityOut,
             uint256 id,
@@ -231,7 +231,7 @@ contract Pair is IPair {
         address assetTo,
         address collateralTo,
         uint256 liquidityIn
-    ) external override reentrancyLock returns (Tokens memory tokensOut) {
+    ) external override lock returns (Tokens memory tokensOut) {
         require(block.timestamp >= maturity, 'Active');
         require(assetTo != address(0) && collateralTo != address(0), 'Zero');
         require(liquidityIn > 0, 'Invalid');
@@ -281,7 +281,7 @@ contract Pair is IPair {
         address insuranceTo,
         uint112 interestDecrease,
         uint112 cdpDecrease
-    ) external override reentrancyLock returns (Claims memory claimsOut) {
+    ) external override lock returns (Claims memory claimsOut) {
         require(block.timestamp < maturity, 'Expired');
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
         require(interestDecrease > 0 || cdpDecrease > 0, 'Invalid');
@@ -323,7 +323,7 @@ contract Pair is IPair {
         address assetTo,
         address collateralTo,
         Claims memory claimsIn
-    ) external override reentrancyLock returns (Tokens memory tokensOut) {
+    ) external override lock returns (Tokens memory tokensOut) {
         require(block.timestamp >= maturity, 'Active');
         require(assetTo != address(0) && collateralTo != address(0), 'Zero');
         require(claimsIn.bond > 0 || claimsIn.insurance > 0, 'Invalid');
@@ -383,7 +383,7 @@ contract Pair is IPair {
         uint112 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease
-    ) external override reentrancyLock returns (uint256 id, Due memory dueOut) {
+    ) external override lock returns (uint256 id, Due memory dueOut) {
         require(block.timestamp < maturity, 'Expired');
         require(assetTo != address(0) && dueTo != address(0), 'Zero');
         require(assetOut > 0, 'Invalid');
@@ -434,7 +434,7 @@ contract Pair is IPair {
         address owner,
         uint256[] memory ids,
         uint112[] memory debtsIn
-    ) external override reentrancyLock returns (uint128 collateralOut) {
+    ) external override lock returns (uint128 collateralOut) {
         require(block.timestamp < maturity, 'Expired');
         require(ids.length == debtsIn.length, 'Invalid');
         require(to != address(0), 'Zero');
@@ -489,7 +489,7 @@ contract Pair is IPair {
     function skim(
         address assetTo,
         address collateralTo
-    ) external override reentrancyLock returns (uint256 assetOut, uint256 collateralOut) {
+    ) external override lock returns (uint256 assetOut, uint256 collateralOut) {
         IERC20 _asset = asset;
         IERC20 _collateral = collateral;
 
