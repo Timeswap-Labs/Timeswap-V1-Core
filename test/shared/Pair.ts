@@ -39,6 +39,7 @@ export class PairSigner extends Pair {
         cdpIncrease
       )
     await txn.wait()
+    return txn
   }
 
   async burn(liquidityIn: bigint) {
