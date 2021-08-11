@@ -6,6 +6,7 @@ import { testTokenNew } from '../shared/TestToken'
 import testCases from './TestCases'
 
 import type { TestToken } from '../../typechain/TestToken'
+import { getLiquidityTotal1 } from '../libraries/MintMath'
 
 const { loadFixture, solidity } = waffle
 chai.use(solidity)
@@ -45,6 +46,8 @@ describe('Mint', () => {
 
       it('Sample test', async () => {
         const { pair } = await loadFixture(fixture)
+
+        // getLiquidityTotal1()
 
         const totalLiquidity = await pair.totalLiquidity()
       })
