@@ -11,35 +11,43 @@ library BurnMath {
 
     function getAsset(
         uint256 liquidityIn,
-        uint128 reserve,
-        uint128 totalBond,
+        uint112 assetState,
+        uint128 assetLock,
+        uint128 totalBonds,
         uint256 totalLiquidity
     ) internal pure returns (uint128 assetOut) {
-        if (reserve <= totalBond) return assetOut;
-        uint256 _assetOut = reserve;
-        _assetOut -= totalBond;
-        _assetOut *= liquidityIn;
-        _assetOut /= totalLiquidity;
+        uint256 assetReserve = assetState + assetLock;
+        if (assetReserve <= totalBonds) return assetOut;
+        uint256 _assetOut = assetReserve;
+        _assetOut -= totalBonds;
+        _assetOut = _assetOut.mulDiv(liquidityIn, totalLiquidity);
         assetOut = _assetOut.toUint128();
+    }
+
+    function getUint112(uint128 assetOut) internal pure returns (uint112 _assetOut) {
+        _assetOut = uint256(assetOut).truncateUint112();
     }
 
     function getCollateral(
         uint256 liquidityIn,
-        IPair.Tokens memory reserves,
+        uint112 assetState,
+        IPair.Tokens memory lock,
         IPair.Claims memory supplies,
         uint256 totalLiquidity
     ) internal pure returns (uint128 collateralOut) {
-        uint256 _collateralOut = reserves.collateral;
-        if (reserves.asset <= supplies.bond) {
-            uint256 _reduce = supplies.bond;
-            _reduce -= reserves.asset;
-            _reduce *= supplies.insurance;
-            if (reserves.collateral * supplies.bond <= _reduce) return collateralOut;
-            _collateralOut *= supplies.bond;
-            _collateralOut -= _reduce;
-            _collateralOut /= supplies.bond;
+        uint256 assetReserve = assetState + lock.asset;
+        uint256 _collateralOut = lock.collateral;
+        if (assetReserve >= supplies.bond) {
+            _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity);
+            return collateralOut = _collateralOut.toUint128();
         }
-        _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity);
+        uint256 _reduce = supplies.bond;
+        _reduce -= assetReserve;
+        _reduce *= supplies.insurance;
+        if (lock.collateral * supplies.bond <= _reduce) return collateralOut;
+        _collateralOut *= supplies.bond;
+        _collateralOut -= _reduce;
+        _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity * supplies.bond);
         collateralOut = _collateralOut.toUint128();
     }
 }

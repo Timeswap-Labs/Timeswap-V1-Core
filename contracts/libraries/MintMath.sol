@@ -11,24 +11,37 @@ library MintMath {
     using FullMath for uint256;
     using SafeCast for uint256;
 
-    function getLiquidity(
-        uint128 assetIn
-    ) internal pure returns (uint256 liquidityOut) {
-        liquidityOut = assetIn - 1000;
+    function getLiquidityTotal(
+        uint112 assetIn
+    ) internal pure returns (uint256 liquidityTotal) {
+        liquidityTotal = assetIn;
+        liquidityTotal <<= 40;
     }
 
-    function getLiquidity(
+    function getLiquidityTotal(
         IPair.State memory state,
-        uint128 assetIn,
-        uint128 interestIncrease,
-        uint128 cdpIncrease,
+        uint112 assetIn,
+        uint112 interestIncrease,
+        uint112 cdpIncrease,
         uint256 total
-    ) internal pure returns (uint256 liquidityOut) {
-        liquidityOut = min(
-            total.mulDiv(assetIn, state.reserves.asset),
+    ) internal pure returns (uint256 liquidityTotal) {
+        liquidityTotal = min(
+            total.mulDiv(assetIn, state.asset),
             total.mulDiv(interestIncrease, state.interest),
             total.mulDiv(cdpIncrease, state.cdp)
         );
+    }
+
+    function getLiquidity(
+        uint256 maturity,
+        uint256 liquidityTotal,
+        uint16 protocolFee
+    ) internal view returns (uint256 liquidityOut) {
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= protocolFee;
+        denominator += 0x10000000000;
+        liquidityOut = liquidityTotal.mulDiv(0x10000000000, denominator);
     }
 
     function min(
@@ -47,8 +60,8 @@ library MintMath {
 
     function getDebt(
         uint256 maturity,
-        uint128 assetIn,
-        uint128 interestIncrease
+        uint112 assetIn,
+        uint112 interestIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
         _debtOut -= block.timestamp;
@@ -59,13 +72,16 @@ library MintMath {
     }
 
     function getCollateral(
-        uint128 assetIn,
-        uint128 debtOut,
-        uint128 cdpIncrease
-    ) internal pure returns (uint112 collateralOut) {
-        uint256 _collateralOut = debtOut;
-        _collateralOut *= cdpIncrease;
-        _collateralOut = _collateralOut.divUp(assetIn);
+        uint256 maturity,
+        uint112 assetIn,
+        uint112 interestIncrease,
+        uint112 cdpIncrease
+    ) internal view returns (uint112 collateralOut) {
+        uint256 _collateralOut = maturity;
+        _collateralOut -= block.timestamp;
+        _collateralOut *= interestIncrease;
+        _collateralOut += uint256(assetIn) << 32;
+        _collateralOut = _collateralOut.mulDiv(cdpIncrease, uint256(assetIn) << 32);
         _collateralOut += cdpIncrease;
         collateralOut = _collateralOut.toUint112();
     }

@@ -6,7 +6,7 @@ import {IERC20} from './IERC20.sol';
 
 interface IPair {
     // STRUCT
-    
+
     struct Tokens {
         uint128 asset;
         uint128 collateral;
@@ -24,30 +24,31 @@ interface IPair {
     }
 
     struct State {
-        Tokens reserves;
-        uint128 interest;
-        uint128 cdp;
+        uint112 asset;
+        uint112 interest;
+        uint112 cdp;
     }
 
     struct Pool {
         State state;
+        Tokens lock;
         uint256 totalLiquidity;
         mapping(address => uint256) liquidities;
         Claims totalClaims;
         mapping(address => Claims) claims;
         mapping(address => Due[]) dues;
     }
-
+    
     // EVENT
 
-    event Sync(uint256 maturity, State state);
+    event Sync(uint256 indexed maturity, State state);
 
     event Mint(
         uint256 maturity,
         address indexed sender,
         address indexed liquidityTo,
         address indexed debtTo,
-        uint128 assetIn,
+        uint112 assetIn,
         uint256 liquidityOut,
         uint256 id,
         Due dueOut
@@ -67,7 +68,7 @@ interface IPair {
         address indexed sender,
         address indexed bondTo,
         address indexed insuranceTo,
-        uint128 assetIn,
+        uint112 assetIn,
         Claims claimsOut
     );
 
@@ -85,7 +86,7 @@ interface IPair {
         address indexed sender,
         address indexed assetTo,
         address indexed debtTo,
-        uint128 assetOut,
+        uint112 assetOut,
         uint256 id,
         Due dueOut
     );
@@ -98,7 +99,8 @@ interface IPair {
         uint128 assetIn,
         uint128 collateralOut,
         uint256[] ids,
-        Due[] duesIn
+        uint112[] debtsIn,
+        uint112[] collateralsOut
     );
 
     event Skim(
@@ -125,6 +127,8 @@ interface IPair {
 
     function state(uint256 maturity) external view returns (State memory);
 
+    function totalLocked(uint256 maturity) external view returns (Tokens memory);
+
     function totalLiquidity(uint256 maturity) external view returns (uint256);
 
     function liquidityOf(uint256 maturity, address owner) external view returns (uint256);
@@ -141,8 +145,8 @@ interface IPair {
         uint256 maturity,
         address liquidityTo,
         address dueTo,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
+        uint112 interestIncrease,
+        uint112 cdpIncrease
     )
         external
         returns (
@@ -162,8 +166,8 @@ interface IPair {
         uint256 maturity,
         address bondTo,
         address insuranceTo,
-        uint128 interestDecrease,
-        uint128 cdpDecrease
+        uint112 interestDecrease,
+        uint112 cdpDecrease
     ) external returns (Claims memory claimsOut);
 
     function withdraw(
@@ -177,9 +181,9 @@ interface IPair {
         uint256 maturity,
         address assetTo,
         address dueTo,
-        uint128 assetOut,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
+        uint112 assetOut,
+        uint112 interestIncrease,
+        uint112 cdpIncrease
     ) external returns (uint256 id, Due memory dueOut);
 
     function pay(
@@ -187,7 +191,8 @@ interface IPair {
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory assetsPay
+        uint112[] memory debtsIn,
+        uint112[] memory collateralsOut
     ) external returns (uint128 collateralOut);
 
     function skim(

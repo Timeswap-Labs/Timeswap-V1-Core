@@ -11,26 +11,34 @@ library WithdrawMath {
 
     function getAsset(
         uint128 bondIn,
-        uint128 reserve,
-        uint128 supply
+        uint112 assetState,
+        uint128 assetLock,
+        uint128 totalBonds
     ) internal pure returns (uint128 assetOut) {
-        if (reserve >= supply) return assetOut = bondIn;
+        uint256 assetReserve = assetState + assetLock;
+        if (assetReserve >= totalBonds) return assetOut = bondIn;
         uint256 _assetOut = bondIn;
-        _assetOut *= reserve;
-        _assetOut /= supply;
+        _assetOut *= assetReserve;
+        _assetOut /= totalBonds;
         assetOut = _assetOut.toUint128();
+    }
+
+    function getUint112(uint128 assetOut) internal pure returns (uint112 _assetOut) {
+        _assetOut = uint256(assetOut).truncateUint112();
     }
 
     function getCollateral(
         uint128 insuranceIn,
-        IPair.Tokens memory reserves,
+        uint112 assetState,
+        IPair.Tokens memory lock,
         IPair.Claims memory supplies
     ) internal pure returns (uint128 collateralOut) {
-        if (reserves.asset >= supplies.bond) return collateralOut;
+        uint256 assetReserve = assetState + lock.asset;
+        if (assetReserve >= supplies.bond) return collateralOut;
         uint256 _collateralOut = supplies.bond;
-        _collateralOut -= reserves.asset;
+        _collateralOut -= assetReserve;
         _collateralOut *= supplies.insurance;
-        if (reserves.collateral * supplies.bond >= _collateralOut) return collateralOut = insuranceIn;
+        if (lock.collateral * supplies.bond >= _collateralOut) return collateralOut = insuranceIn;
         _collateralOut = _collateralOut.mulDiv(insuranceIn, supplies.bond * supplies.insurance);
         collateralOut = _collateralOut.toUint128();
     }
