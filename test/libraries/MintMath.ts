@@ -1,5 +1,6 @@
 import { now } from '../shared/Helper'
-import helper from '../shared/Helper'
+import { shiftUp } from '../libraries/Math'
+import { mulDiv } from '../libraries/FullMath'
 
 export function getLiquidityTotal1(assetIn: bigint): bigint {
   let liquidityTotal = assetIn
@@ -19,9 +20,9 @@ export function getLiquidityTotal2(
   total: bigint
 ): bigint {
   const liquidityTotal = min(
-    (total * assetIn) / state.asset,
-    (total * interestIncrease) / state.interest,
-    (total * cdpIncrease) / state.cdp
+    mulDiv(total, assetIn, state.asset),
+    mulDiv(total, interestIncrease, state.interest),
+    mulDiv(total, cdpIncrease, state.cdp)
   )
   return liquidityTotal
 }
@@ -31,7 +32,7 @@ export async function getLiquidity(maturity: bigint, liquidityTotal: bigint, pro
   denominator -= await now()
   denominator *= BigInt(protocolFee)
   denominator += 0x10000000000n
-  const liquidityOut = (liquidityTotal * 0x10000000000n) / denominator
+  const liquidityOut = mulDiv(liquidityTotal, 0x10000000000n, denominator)
   return liquidityOut
 }
 
@@ -49,7 +50,7 @@ export async function getDebt(maturity: bigint, assetIn: bigint, interestIncreas
   let _debtOut = maturity
   _debtOut -= await now()
   _debtOut *= interestIncrease
-  //   _debtOut = _debtOut.shiftUp(32) // TODO!!!
+  _debtOut = shiftUp(_debtOut, 32n)
   _debtOut += assetIn
   const debtOut = _debtOut
   return debtOut
@@ -65,7 +66,7 @@ export async function getCollateral(
   _collateralOut -= await now()
   _collateralOut *= interestIncrease
   _collateralOut += assetIn << 32n
-  _collateralOut = (_collateralOut * cdpIncrease) / (assetIn << 32n)
+  _collateralOut = mulDiv(_collateralOut, cdpIncrease, (assetIn << 32n))
   _collateralOut += cdpIncrease
   const collateralOut = _collateralOut
   return collateralOut
@@ -74,4 +75,7 @@ export async function getCollateral(
 export default {
   getLiquidityTotal1,
   getLiquidityTotal2,
+  getLiquidity,
+  getDebt,
+  getCollateral
 }
