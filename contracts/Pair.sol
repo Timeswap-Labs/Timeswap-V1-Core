@@ -433,39 +433,35 @@ contract Pair is IPair {
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory debtsIn
+        uint112[] memory debtsIn,
+        uint112[] memory collateralsOut
     ) external override lock returns (uint128 collateralOut) {
         require(block.timestamp < maturity, 'Expired');
         require(ids.length == debtsIn.length, 'Invalid');
+        require(ids.length == collateralsOut.length, 'Invalid');
         require(to != address(0), 'Zero');
 
         Pool storage pool = pools[maturity];
 
-        uint128 debtIn;
-
         Due[] storage dues = pool.dues[owner];
-        Due[] memory duesIn = new Due[](ids.length);
+        uint128 debtIn;
 
         for (uint256 i = 0; i < ids.length; i++) {
             Due storage due = dues[i];
             require(due.startBlock != BlockNumber.get(), 'Invalid');
 
-            Due memory dueIn;
-            dueIn.debt = PayMath.getDebt(debtsIn[i], due.debt);
+            require(debtsIn[i] > 0, 'Invalid');
+            debtsIn[i] = PayMath.getDebt(debtsIn[i], due.debt);
 
-            if (owner == msg.sender) {
-                uint112 _collateralOut = PayMath.getCollateral(dueIn.debt, due.collateral, due.debt);
-                due.collateral -= _collateralOut;
-                dueIn.collateral = _collateralOut;
-                collateralOut += _collateralOut;
-            }
+            if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
+            collateralsOut[i] = PayMath.getCollateral(collateralsOut[i], debtsIn[i], due.collateral, due.debt);
+            
+            due.debt -= debtsIn[i];
+            due.collateral -= collateralsOut[i];
 
-            dueIn.startBlock = due.startBlock;
+            debtIn += debtsIn[i];
+            collateralOut += collateralsOut[i];
 
-            debtIn += dueIn.debt;
-            due.debt -= dueIn.debt;
-
-            duesIn[i] = dueIn;
         }
 
         uint128 assetIn = asset.getAssetInUint128(reserves);
@@ -478,7 +474,7 @@ contract Pair is IPair {
 
         if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut);
 
-        emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, duesIn);
+        emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, debtsIn, collateralsOut);
     }
 
     /// @dev Withdraw any excess asset ERC20 and collateral ERC20 from the Pair.

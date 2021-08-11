@@ -99,7 +99,8 @@ interface IPair {
         uint128 assetIn,
         uint128 collateralOut,
         uint256[] ids,
-        Due[] duesIn
+        uint112[] debtsIn,
+        uint112[] collateralsOut
     );
 
     event Skim(
@@ -190,7 +191,8 @@ interface IPair {
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory assetsPay
+        uint112[] memory debtsIn,
+        uint112[] memory collateralsOut
     ) external returns (uint128 collateralOut);
 
     function skim(
