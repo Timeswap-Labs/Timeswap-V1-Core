@@ -27,9 +27,9 @@ export function getLiquidityTotal2(
   return liquidityTotal
 }
 
-export async function getLiquidity(maturity: bigint, liquidityTotal: bigint, protocolFee: number): Promise<bigint> {
+export function getLiquidity(maturity: bigint, liquidityTotal: bigint, protocolFee: number, now: bigint): bigint {
   let denominator = maturity
-  denominator -= await now()
+  denominator -= now
   denominator *= BigInt(protocolFee)
   denominator += 0x10000000000n
   const liquidityOut = mulDiv(liquidityTotal, 0x10000000000n, denominator)
@@ -46,9 +46,9 @@ export function min(w: bigint, x: bigint, y: bigint): bigint {
   }
 }
 
-export async function getDebt(maturity: bigint, assetIn: bigint, interestIncrease: bigint): Promise<bigint> {
+export function getDebt(maturity: bigint, assetIn: bigint, interestIncrease: bigint, now: bigint): bigint {
   let _debtOut = maturity
-  _debtOut -= await now()
+  _debtOut -= now
   _debtOut *= interestIncrease
   _debtOut = shiftUp(_debtOut, 32n)
   _debtOut += assetIn
@@ -56,17 +56,18 @@ export async function getDebt(maturity: bigint, assetIn: bigint, interestIncreas
   return debtOut
 }
 
-export async function getCollateral(
+export function getCollateral(
   maturity: bigint,
   assetIn: bigint,
   interestIncrease: bigint,
-  cdpIncrease: bigint
-): Promise<bigint> {
+  cdpIncrease: bigint,
+  now: bigint
+): bigint {
   let _collateralOut = maturity
-  _collateralOut -= await now()
+  _collateralOut -= now
   _collateralOut *= interestIncrease
   _collateralOut += assetIn << 32n
-  _collateralOut = mulDiv(_collateralOut, cdpIncrease, (assetIn << 32n))
+  _collateralOut = mulDiv(_collateralOut, cdpIncrease, assetIn << 32n)
   _collateralOut += cdpIncrease
   const collateralOut = _collateralOut
   return collateralOut
@@ -77,5 +78,5 @@ export default {
   getLiquidityTotal2,
   getLiquidity,
   getDebt,
-  getCollateral
+  getCollateral,
 }
