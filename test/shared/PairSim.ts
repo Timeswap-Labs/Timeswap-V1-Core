@@ -1,18 +1,26 @@
 import MintMath from '../libraries/MintMath'
-import { PROTOCOL_FEE as protocolFee } from './Constants'
+import BurnMath from '../libraries/BurnMath'
+import LendMath from '../libraries/LendMath'
+import WithdrawMath from '../libraries/WithdrawMath'
+import BorrowMath from '../libraries/BorrowMath'
+import { PROTOCOL_FEE as protocolFee, FEE as fee } from './Constants'
 
 export class PairSim {
   public asset: bigint
   public collateral: bigint
 
   pool: Pool
+  claims: Claims
   dues: Due[]
+  reserves: Tokens
 
   constructor(public maturity: bigint) {
     this.asset = 0n
     this.collateral = 0n
     this.dues = []
     this.pool = poolDefault()
+    this.claims = claimsDefault()
+    this.reserves = tokensDefault()
   }
 
   mint(
@@ -24,10 +32,10 @@ export class PairSim {
     blockNumber: bigint
   ):
     | {
-        liquidityOut: bigint
-        id: bigint
-        dueOut: Due
-      }
+      liquidityOut: bigint
+      id: bigint
+      dueOut: Due
+    }
     | string {
     if (!(now < this.maturity)) {
       return 'Expired'
@@ -93,6 +101,148 @@ export class PairSim {
       id: id,
       dueOut: dueOut,
     }
+  }
+
+  burn(
+    liquidityIn: bigint,
+    now: bigint
+  ): Tokens | string {
+    if (now < this.maturity) return 'Active'
+    if (liquidityIn <= 0) return 'Invalid'
+
+
+    const total = this.pool.totalLiquidity;
+
+    let tokensOut = tokensDefault()
+    tokensOut.asset = BurnMath.getAsset(liquidityIn, this.pool.state.asset, this.pool.lock.asset, this.pool.totalClaims.bond, total)
+    tokensOut.collateral = BurnMath.getCollateral(liquidityIn, this.pool.state.asset, this.pool.lock, this.pool.totalClaims, total)
+
+    this.pool.totalLiquidity -= liquidityIn
+
+    // pool.liquidities[msg.sender] -= liquidityIn;
+
+    if (this.pool.lock.asset >= tokensOut.asset) {
+      this.pool.lock.asset -= tokensOut.asset
+    } else if (this.pool.lock.asset == 0n) {
+      this.pool.state.asset -= tokensOut.asset
+    } else {
+      this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
+      this.pool.lock.asset = 0n
+    }
+    this.pool.lock.collateral -= tokensOut.collateral
+
+    this.reserves.asset -= tokensOut.asset
+    this.reserves.collateral -= tokensOut.collateral
+
+    return tokensOut
+  }
+
+  lend(
+    assetIn: bigint,
+    interestDecrease: bigint,
+    cdpDecrease: bigint,
+    now: bigint,
+  ) : Claims | string {
+    if (now >= this.maturity) return 'Expired'
+    if (interestDecrease <= 0 || cdpDecrease <= 0) return 'Invalid'
+
+    if (this.pool.totalLiquidity <= 0) return 'Invalid'
+
+    if (assetIn <= 0) return 'Invalid'
+
+    if (!LendMath.check(this.pool.state, assetIn, interestDecrease, cdpDecrease, fee)) return 'lend math check fail'
+
+    let claimsOut = claimsDefault()
+
+    claimsOut.bond = LendMath.getBond(this.maturity, assetIn, interestDecrease, now)
+    claimsOut.insurance = LendMath.getInsurance(this.maturity, this.pool.state, assetIn, cdpDecrease, now)
+
+    this.pool.totalClaims.bond += claimsOut.bond
+    this.pool.totalClaims.insurance += claimsOut.insurance
+
+    this.claims.bond += claimsOut.bond
+    this.claims.insurance += claimsOut.insurance
+
+    this.pool.state.asset += assetIn
+    this.pool.state.interest -= interestDecrease
+    this.pool.state.cdp -= cdpDecrease
+
+    return claimsOut
+  }
+
+  withdraw(
+    claimsIn : Claims,
+    now: bigint
+  ) : Tokens | string {
+    if (now < this.maturity) return 'Active'
+    if (claimsIn.bond <= 0 || claimsIn.insurance <= 0) return 'Invalid'
+
+    let tokensOut = tokensDefault()
+    tokensOut.asset = WithdrawMath.getAsset(claimsIn.bond, this.pool.state.asset, this.pool.lock.asset, this.pool.totalClaims.bond)
+    tokensOut.collateral = WithdrawMath.getCollateral(
+        claimsIn.insurance,
+        this.pool.state.asset,
+        this.pool.lock,
+        this.pool.totalClaims
+    );
+
+    this.pool.totalClaims.bond -= claimsIn.bond;
+    this.pool.totalClaims.insurance -= claimsIn.insurance;
+
+    this.claims.bond -= claimsIn.bond;
+    this.claims.insurance -= claimsIn.insurance;
+
+    if (this.pool.lock.asset >= tokensOut.asset) { 
+      this.pool.lock.asset -= tokensOut.asset;
+    } else if (this.pool.lock.asset == 0n) {
+      this.pool.state.asset -= tokensOut.asset
+    } else {
+      this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
+      this.pool.lock.asset = 0n;
+    }
+    this.pool.lock.collateral -= tokensOut.collateral;
+
+    this.reserves.asset -= tokensOut.asset;
+    this.reserves.collateral -= tokensOut.collateral;
+
+    return tokensOut
+  }
+
+  borrow(
+    assetOut: bigint,
+    interestIncrease: bigint,
+    cdpIncrease: bigint,
+    now: bigint,
+  ) : { bigint, Due } | string {        
+    if (now >= this.maturity) return 'Expired'
+    if (assetOut <= 0) return 'Invalid'
+    if(interestIncrease <= 0 || cdpIncrease <= 0) return 'Invalid'
+
+    if (this.pool.totalLiquidity <= 0) return 'Invalid'
+
+    if (!BorrowMath.check(this.pool.state, assetOut, interestIncrease, cdpIncrease, fee)) return 'constant product check'
+    let dueOut = dueDefault()
+    dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease);
+    dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
+    dueOut.startBlock = BlockNumber.get();
+
+    uint112 collateralIn = collateral.getCollateralIn(reserves);
+    require(collateralIn >= dueOut.collateral, 'Insufficient');
+    dueOut.collateral = collateralIn;
+
+    Due[] storage dues = pool.dues[dueTo];
+
+    id = dues.length;
+    dues.push(dueOut);
+
+    pool.state.asset -= assetOut;
+    pool.state.interest += interestIncrease;
+    pool.state.cdp += cdpIncrease;
+    pool.lock.collateral += collateralIn;
+
+    reserves.asset -= assetOut;
+
+    if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
   }
 }
 

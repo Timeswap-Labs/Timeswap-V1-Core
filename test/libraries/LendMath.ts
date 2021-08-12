@@ -1,6 +1,5 @@
 import { mulDiv } from '../libraries/FullMath'
 import { checkConstantProduct  } from "../libraries/ConstantProduct"
-import { now } from "../shared/Helper"
 
 export function check(
     state: {
@@ -37,20 +36,21 @@ export function adjust(
     return adjusted
 }
 
-export async function getBond(
+export function getBond(
     maturity: bigint,
     assetIn: bigint,
-    interestDecrease: bigint
-) : Promise<bigint> {
+    interestDecrease: bigint,
+    now: bigint
+) : bigint {
     let _bondOut = maturity
-    _bondOut -= await now()
+    _bondOut -= now
     _bondOut *= interestDecrease
     _bondOut >>= 32n
     _bondOut += assetIn
     return _bondOut
 }
 
-export async function getInsurance(
+export function getInsurance(
     maturity: bigint,
     state: {
         asset: bigint
@@ -58,10 +58,11 @@ export async function getInsurance(
         cdp: bigint
       },
     assetIn: bigint,
-    cdpDecrease: bigint
-) : Promise<bigint> {
+    cdpDecrease: bigint,
+    now: bigint
+) : bigint {
     let _insuranceOut = maturity
-    _insuranceOut -= await now()
+    _insuranceOut -= now
     _insuranceOut *= state.interest
     _insuranceOut += (state.asset << 32n)
     let denominator = state.asset

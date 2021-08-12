@@ -1,4 +1,3 @@
-import { now } from '../shared/Helper'
 import { shiftUp } from '../libraries/Math'
 import { mulDiv } from '../libraries/FullMath'
 
@@ -27,7 +26,7 @@ export function getLiquidityTotal2(
   return liquidityTotal
 }
 
-export function getLiquidity(maturity: bigint, liquidityTotal: bigint, protocolFee: number, now: bigint): bigint {
+export function getLiquidity(maturity: bigint, liquidityTotal: bigint, protocolFee: bigint, now: bigint): bigint {
   let denominator = maturity
   denominator -= now
   denominator *= BigInt(protocolFee)
