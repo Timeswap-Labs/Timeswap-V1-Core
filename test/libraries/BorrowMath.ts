@@ -1,7 +1,6 @@
 import { divUp, shiftUp } from "../libraries/Math"
 import { mulDivUp } from "../libraries/FullMath"
 import { checkConstantProduct  } from "../libraries/ConstantProduct"
-import { now } from "../shared/Helper"
 
 export function check(
     state: {
@@ -40,20 +39,21 @@ export function adjust (
     return adjusted
 }
 
-export async function getDebt(
+export function getDebt(
     maturity: bigint,
     assetOut: bigint,
-    interestIncrease: bigint
-) : Promise<bigint> {
+    interestIncrease: bigint,
+    now: bigint
+) : bigint {
     let _debtOut = maturity
-    _debtOut -= await now()
+    _debtOut -= now
     _debtOut *= interestIncrease
     _debtOut = shiftUp(_debtOut, 32n)
     _debtOut += assetOut
     return _debtOut
 }
 
-export async function getCollateral(
+export function getCollateral(
     maturity: bigint,
     state: {
         asset: bigint
@@ -61,10 +61,11 @@ export async function getCollateral(
         cdp: bigint        
     },
     assetOut: bigint,
-    cdpIncrease: bigint
-) : Promise<bigint> {
+    cdpIncrease: bigint,
+    now: bigint
+) : bigint {
     let _collateralIn = maturity
-    _collateralIn -= await now()
+    _collateralIn -= now
     _collateralIn *= state.interest
     _collateralIn += (state.asset << 32n)
     let denominator = state.asset
