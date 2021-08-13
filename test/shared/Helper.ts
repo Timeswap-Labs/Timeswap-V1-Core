@@ -23,7 +23,7 @@ export async function now(): Promise<bigint> {
   return BigInt(block.timestamp)
 }
 
-async function getBlock(blockHashOrBlockTag: string) {
+export async function getBlock(blockHashOrBlockTag: string) {
   const block = await ethers.provider.getBlock(blockHashOrBlockTag)
   return block
 }
@@ -36,6 +36,7 @@ export async function getTimestamp(blockHash: string): Promise<bigint> {
 export default {
   now,
   advanceTimeAndBlock,
+  getBlock,
   getTimestamp,
   setTime,
 }

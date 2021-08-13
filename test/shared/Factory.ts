@@ -8,7 +8,7 @@ export async function factoryInit(): Promise<Factory> {
 
   const factoryContractFactory = await ethers.getContractFactory('Factory')
   const factory = (await factoryContractFactory.deploy(
-    signers[0].address,
+    signers[10].address,
     constants.FEE,
     constants.PROTOCOL_FEE
   )) as Factory
