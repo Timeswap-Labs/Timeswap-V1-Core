@@ -1,36 +1,36 @@
 import { ethers } from 'hardhat'
 
-const advanceTime = async (time: number) => {
+async function advanceTime(time: number) {
   await ethers.provider.send('evm_increaseTime', [time])
 }
 
-export const setTime = async (time: number) => {
+export async function setTime(time: number) {
   await ethers.provider.send('evm_setNextBlockTimestamp', [time])
 }
 
-const advanceBlock = async () => {
+async function advanceBlock() {
   const block = await getBlock('latest')
   return block.hash
 }
 
-export const advanceTimeAndBlock = async (time: number) => {
+export async function advanceTimeAndBlock(time: number) {
   await advanceTime(time)
   await advanceBlock()
 }
 
-export const now = async () => {
+export async function now(): Promise<bigint> {
   const block = await getBlock('latest')
   return BigInt(block.timestamp)
 }
 
-const getBlock = async (blockHashOrBlockTag: string) => {
+async function getBlock(blockHashOrBlockTag: string) {
   const block = await ethers.provider.getBlock(blockHashOrBlockTag)
   return block
 }
 
-export const getTimestamp = async (blockHash: string) => {
+export async function getTimestamp(blockHash: string): Promise<bigint> {
   const block = await getBlock(blockHash)
-  return block.timestamp
+  return BigInt(block.timestamp)
 }
 
 export default {

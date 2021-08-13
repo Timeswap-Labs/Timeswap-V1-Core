@@ -89,7 +89,7 @@ export class PairSigner extends Pair {
   async pay(ids: bigint[], assetsPay: bigint[]) {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, assetsPay)
+      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, assetsPay, [0n]) //FIXME
     await txn.wait()
   }
 
