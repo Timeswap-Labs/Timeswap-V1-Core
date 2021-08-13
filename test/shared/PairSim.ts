@@ -4,6 +4,8 @@ import LendMath from '../libraries/LendMath'
 import WithdrawMath from '../libraries/WithdrawMath'
 import BorrowMath from '../libraries/BorrowMath'
 import { PROTOCOL_FEE as protocolFee, FEE as fee } from './Constants'
+import ethers from 'ethers'
+import PayMath from '../libraries/PayMath'
 
 export class PairSim {
   public asset: bigint
@@ -28,26 +30,20 @@ export class PairSim {
     collateralIn: bigint,
     interestIncrease: bigint,
     cdpIncrease: bigint,
-    now: bigint,
-    blockNumber: bigint
+    block: ethers.providers.Block
   ):
     | {
-      liquidityOut: bigint
-      id: bigint
-      dueOut: Due
-    }
+        liquidityOut: bigint
+        id: bigint
+        dueOut: Due
+      }
     | string {
-    if (!(now < this.maturity)) {
-      return 'Expired'
-    }
+    const now = BigInt(block.timestamp)
+    const blockNumber = BigInt(block.number)
 
-    if (!(interestIncrease > 0 && cdpIncrease > 0)) {
-      return 'Invalid'
-    }
-
-    if (!(assetIn > 0)) {
-      return 'Invalid'
-    }
+    if (!(now < this.maturity)) return 'Expired'
+    if (!(interestIncrease > 0 && cdpIncrease > 0)) return 'Invalid'
+    if (!(assetIn > 0)) return 'Invalid'
 
     let liquidityOut: bigint
 
@@ -69,9 +65,7 @@ export class PairSim {
       //     pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
     }
 
-    if (!(liquidityOut > 0)) {
-      return 'Invalid'
-    }
+    if (!(liquidityOut > 0)) return 'Invalid'
 
     // pool.liquidities[liquidityTo] += liquidityOut;
 
@@ -81,9 +75,7 @@ export class PairSim {
     dueOut.collateral = MintMath.getCollateral(this.maturity, assetIn, interestIncrease, cdpIncrease, now)
     dueOut.startBlock = blockNumber
 
-    if (!(collateralIn >= dueOut.collateral)) {
-      return 'Insufficient'
-    }
+    if (!(collateralIn >= dueOut.collateral)) return 'Insufficient'
 
     dueOut.collateral = collateralIn
 
@@ -103,19 +95,29 @@ export class PairSim {
     }
   }
 
-  burn(
-    liquidityIn: bigint,
-    now: bigint
-  ): Tokens | string {
+  burn(liquidityIn: bigint, block: ethers.providers.Block): Tokens | string {
+    const now = BigInt(block.timestamp)
+
     if (now < this.maturity) return 'Active'
     if (liquidityIn <= 0) return 'Invalid'
 
-
-    const total = this.pool.totalLiquidity;
+    const total = this.pool.totalLiquidity
 
     let tokensOut = tokensDefault()
-    tokensOut.asset = BurnMath.getAsset(liquidityIn, this.pool.state.asset, this.pool.lock.asset, this.pool.totalClaims.bond, total)
-    tokensOut.collateral = BurnMath.getCollateral(liquidityIn, this.pool.state.asset, this.pool.lock, this.pool.totalClaims, total)
+    tokensOut.asset = BurnMath.getAsset(
+      liquidityIn,
+      this.pool.state.asset,
+      this.pool.lock.asset,
+      this.pool.totalClaims.bond,
+      total
+    )
+    tokensOut.collateral = BurnMath.getCollateral(
+      liquidityIn,
+      this.pool.state.asset,
+      this.pool.lock,
+      this.pool.totalClaims,
+      total
+    )
 
     this.pool.totalLiquidity -= liquidityIn
 
@@ -137,12 +139,9 @@ export class PairSim {
     return tokensOut
   }
 
-  lend(
-    assetIn: bigint,
-    interestDecrease: bigint,
-    cdpDecrease: bigint,
-    now: bigint,
-  ) : Claims | string {
+  lend(assetIn: bigint, interestDecrease: bigint, cdpDecrease: bigint, block: ethers.providers.Block): Claims | string {
+    const now = BigInt(block.timestamp)
+
     if (now >= this.maturity) return 'Expired'
     if (interestDecrease <= 0 || cdpDecrease <= 0) return 'Invalid'
 
@@ -170,79 +169,138 @@ export class PairSim {
     return claimsOut
   }
 
-  withdraw(
-    claimsIn : Claims,
-    now: bigint
-  ) : Tokens | string {
+  withdraw(claimsIn: Claims, block: ethers.providers.Block): Tokens | string {
+    const now = BigInt(block.timestamp)
+
     if (now < this.maturity) return 'Active'
     if (claimsIn.bond <= 0 || claimsIn.insurance <= 0) return 'Invalid'
 
     let tokensOut = tokensDefault()
-    tokensOut.asset = WithdrawMath.getAsset(claimsIn.bond, this.pool.state.asset, this.pool.lock.asset, this.pool.totalClaims.bond)
+    tokensOut.asset = WithdrawMath.getAsset(
+      claimsIn.bond,
+      this.pool.state.asset,
+      this.pool.lock.asset,
+      this.pool.totalClaims.bond
+    )
     tokensOut.collateral = WithdrawMath.getCollateral(
-        claimsIn.insurance,
-        this.pool.state.asset,
-        this.pool.lock,
-        this.pool.totalClaims
-    );
+      claimsIn.insurance,
+      this.pool.state.asset,
+      this.pool.lock,
+      this.pool.totalClaims
+    )
 
-    this.pool.totalClaims.bond -= claimsIn.bond;
-    this.pool.totalClaims.insurance -= claimsIn.insurance;
+    this.pool.totalClaims.bond -= claimsIn.bond
+    this.pool.totalClaims.insurance -= claimsIn.insurance
 
-    this.claims.bond -= claimsIn.bond;
-    this.claims.insurance -= claimsIn.insurance;
+    this.claims.bond -= claimsIn.bond
+    this.claims.insurance -= claimsIn.insurance
 
-    if (this.pool.lock.asset >= tokensOut.asset) { 
-      this.pool.lock.asset -= tokensOut.asset;
+    if (this.pool.lock.asset >= tokensOut.asset) {
+      this.pool.lock.asset -= tokensOut.asset
     } else if (this.pool.lock.asset == 0n) {
       this.pool.state.asset -= tokensOut.asset
     } else {
       this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
-      this.pool.lock.asset = 0n;
+      this.pool.lock.asset = 0n
     }
-    this.pool.lock.collateral -= tokensOut.collateral;
+    this.pool.lock.collateral -= tokensOut.collateral
 
-    this.reserves.asset -= tokensOut.asset;
-    this.reserves.collateral -= tokensOut.collateral;
+    this.reserves.asset -= tokensOut.asset
+    this.reserves.collateral -= tokensOut.collateral
 
     return tokensOut
   }
 
   borrow(
     assetOut: bigint,
+    collateralIn: bigint,
     interestIncrease: bigint,
     cdpIncrease: bigint,
-    now: bigint,
-  ) : { bigint, Due } | string {        
+    block: ethers.providers.Block
+  ): { id: bigint; dueOut: Due } | string {
+    const now = BigInt(block.timestamp)
+    const blockNumber = BigInt(block.number)
+
     if (now >= this.maturity) return 'Expired'
     if (assetOut <= 0) return 'Invalid'
-    if(interestIncrease <= 0 || cdpIncrease <= 0) return 'Invalid'
+    if (interestIncrease <= 0 || cdpIncrease <= 0) return 'Invalid'
 
     if (this.pool.totalLiquidity <= 0) return 'Invalid'
 
-    if (!BorrowMath.check(this.pool.state, assetOut, interestIncrease, cdpIncrease, fee)) return 'constant product check'
+    if (!BorrowMath.check(this.pool.state, assetOut, interestIncrease, cdpIncrease, fee))
+      return 'constant product check'
     let dueOut = dueDefault()
-    dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease);
-    dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
-    dueOut.startBlock = BlockNumber.get();
+    dueOut.debt = BorrowMath.getDebt(this.maturity, assetOut, interestIncrease, now)
+    dueOut.collateral = BorrowMath.getCollateral(this.maturity, this.pool.state, assetOut, cdpIncrease, now)
+    dueOut.startBlock = blockNumber
 
-    uint112 collateralIn = collateral.getCollateralIn(reserves);
-    require(collateralIn >= dueOut.collateral, 'Insufficient');
-    dueOut.collateral = collateralIn;
+    if (!(collateralIn >= dueOut.collateral)) return 'Insufficient'
+    dueOut.collateral = collateralIn
 
-    Due[] storage dues = pool.dues[dueTo];
+    // Due[] storage dues = this.dues[dueTo];
 
-    id = dues.length;
-    dues.push(dueOut);
+    const id = BigInt(this.dues.length)
+    this.dues.push(dueOut)
 
-    pool.state.asset -= assetOut;
-    pool.state.interest += interestIncrease;
-    pool.state.cdp += cdpIncrease;
-    pool.lock.collateral += collateralIn;
+    this.pool.state.asset -= assetOut
+    this.pool.state.interest += interestIncrease
+    this.pool.state.cdp += cdpIncrease
+    this.pool.lock.collateral += collateralIn
 
-    reserves.asset -= assetOut;
+    this.reserves.asset -= assetOut
 
-    if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
+    // if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
+
+    return { id: id, dueOut: dueOut }
+  }
+
+  pay(
+    assetIn: bigint,
+    ids: bigint[],
+    debtsIn: bigint[],
+    collateralsOut: bigint[],
+    block: ethers.providers.Block
+  ): bigint | string {
+    const now = BigInt(block.timestamp)
+    const blockNumber = BigInt(block.number)
+
+    if (!(now < this.maturity)) return 'Expired'
+    if (!(ids.length == debtsIn.length)) return 'Invalid'
+    if (!(ids.length == collateralsOut.length)) return 'Invalid'
+
+    // Due[] storage dues = pool.dues[owner];
+    let debtIn = 0n
+    let collateralOut = 0n
+
+    for (let i = 0; i < ids.length; i++) {
+      const due = this.dues[i]
+
+      if (!(due.startBlock != blockNumber)) return 'Invalid'
+      if (!(debtsIn[i] > 0)) return 'Invalid'
+
+      debtsIn[i] = PayMath.getDebt(debtsIn[i], due.debt)
+
+      const collateral = PayMath.getCollateral(collateralsOut[i], debtsIn[i], due.collateral, due.debt)
+      if (collateral === null) return 'Collateral Null'
+      else collateralsOut[i] = collateral
+
+      due.debt -= debtsIn[i]
+      due.collateral -= collateralsOut[i]
+
+      debtIn += debtsIn[i]
+      collateralOut += collateralsOut[i]
+    }
+
+    if (!(assetIn >= debtIn)) return 'Invalid'
+
+    this.pool.lock.asset += assetIn
+    this.pool.lock.collateral -= collateralOut
+
+    this.reserves.collateral -= collateralOut
+
+    // if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut)
+
+    return collateralOut
   }
 }
 
