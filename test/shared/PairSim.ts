@@ -3,9 +3,9 @@ import BurnMath from '../libraries/BurnMath'
 import LendMath from '../libraries/LendMath'
 import WithdrawMath from '../libraries/WithdrawMath'
 import BorrowMath from '../libraries/BorrowMath'
+import PayMath from '../libraries/PayMath'
 import { PROTOCOL_FEE as protocolFee, FEE as fee } from './Constants'
 import ethers from 'ethers'
-import PayMath from '../libraries/PayMath'
 
 export class PairSim {
   public asset: bigint
@@ -51,6 +51,8 @@ export class PairSim {
       const liquidityTotal = MintMath.getLiquidityTotal1(assetIn)
       liquidityOut = MintMath.getLiquidity(this.maturity, liquidityTotal, protocolFee, now)
       this.pool.totalLiquidity += liquidityTotal
+      this.pool.ownerLiquidity += liquidityTotal - liquidityOut
+
       //   this.pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut
     } else {
       const liquidityTotal = MintMath.getLiquidityTotal2(
@@ -62,12 +64,16 @@ export class PairSim {
       )
       liquidityOut = MintMath.getLiquidity(this.maturity, liquidityTotal, protocolFee, now)
       this.pool.totalLiquidity += liquidityTotal
+      this.pool.ownerLiquidity += liquidityTotal - liquidityOut
+
       //     pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
     }
 
     if (!(liquidityOut > 0)) return 'Invalid'
 
     // pool.liquidities[liquidityTo] += liquidityOut;
+    // Implemented below
+    this.pool.senderLiquidity += liquidityOut
 
     let dueOut = dueDefault()
 
@@ -80,6 +86,7 @@ export class PairSim {
     dueOut.collateral = collateralIn
 
     // Due[] storage dues = pool.dues[dueTo];
+    // implemented
     const id = BigInt(this.dues.length)
     this.dues.push(dueOut)
 
@@ -122,6 +129,8 @@ export class PairSim {
     this.pool.totalLiquidity -= liquidityIn
 
     // pool.liquidities[msg.sender] -= liquidityIn;
+    // Implemented below
+    this.pool.senderLiquidity -= liquidityIn
 
     if (this.pool.lock.asset >= tokensOut.asset) {
       this.pool.lock.asset -= tokensOut.asset
@@ -238,6 +247,7 @@ export class PairSim {
     dueOut.collateral = collateralIn
 
     // Due[] storage dues = this.dues[dueTo];
+    // Implemented
 
     const id = BigInt(this.dues.length)
     this.dues.push(dueOut)
@@ -248,8 +258,6 @@ export class PairSim {
     this.pool.lock.collateral += collateralIn
 
     this.reserves.asset -= assetOut
-
-    // if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
 
     return { id: id, dueOut: dueOut }
   }
@@ -269,6 +277,8 @@ export class PairSim {
     if (!(ids.length == collateralsOut.length)) return 'Invalid'
 
     // Due[] storage dues = pool.dues[owner];
+    // Implemented
+
     let debtIn = 0n
     let collateralOut = 0n
 
@@ -297,8 +307,6 @@ export class PairSim {
     this.pool.lock.collateral -= collateralOut
 
     this.reserves.collateral -= collateralOut
-
-    // if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut)
 
     return collateralOut
   }
@@ -345,10 +353,19 @@ function stateDefault(): State {
 interface Pool {
   state: State
   lock: Tokens
+  ownerLiquidity: bigint
+  senderLiquidity: bigint
   totalLiquidity: bigint
   totalClaims: Claims
 }
 
 function poolDefault(): Pool {
-  return { state: stateDefault(), lock: tokensDefault(), totalLiquidity: 0n, totalClaims: claimsDefault() }
+  return {
+    state: stateDefault(),
+    lock: tokensDefault(),
+    ownerLiquidity: 0n,
+    senderLiquidity: 0n,
+    totalLiquidity: 0n,
+    totalClaims: claimsDefault(),
+  }
 }

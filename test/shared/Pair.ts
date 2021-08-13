@@ -18,6 +18,13 @@ export class Pair {
 
     return result
   }
+
+  async liquidityOf(signerWithAddress: SignerWithAddress): Promise<bigint> {
+    const resultBN = await this.pairContract.liquidityOf(this.maturity, signerWithAddress.address)
+    const result = BigInt(resultBN.toString())
+
+    return result
+  }
 }
 
 export class PairSigner extends Pair {

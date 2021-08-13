@@ -1,17 +1,7 @@
-export function mint(): {
-  Success: {
-    interestIncrease: bigint
-    cdpIncrease: bigint
-  }[]
-  Failure: {
-    interestIncrease: bigint
-    cdpIncrease: bigint
-    errorMessage: string
-  }[]
-} {
+export function mint(): Mint {
   const testCases = [
-    { interestIncrease: 1n, cdpIncrease: 4n },
-    { interestIncrease: 0n, cdpIncrease: 0n },
+    { assetIn: 2000n, collateralIn: 2000n, interestIncrease: 1n, cdpIncrease: 4n },
+    { assetIn: 2000n, collateralIn: 2000n, interestIncrease: 0n, cdpIncrease: 0n },
   ]
 
   const success = testCases.filter(mintSuccessCheck)
@@ -24,33 +14,41 @@ export function mint(): {
   // pass inputs array and fail inputs array
 }
 
-function mintSuccessCheck({
-  interestIncrease,
-  cdpIncrease,
-}: {
+interface Mint {
+  Success: MintParams[]
+  Failure: {
+    params: MintParams
+    errorMessage: string
+  }[]
+}
+
+interface MintParams {
+  assetIn: bigint
+  collateralIn: bigint
   interestIncrease: bigint
   cdpIncrease: bigint
-}): boolean {
-  if (interestIncrease > 0n && cdpIncrease > 0n) {
+}
+
+function mintSuccessCheck({ interestIncrease, cdpIncrease }: MintParams): boolean {
+  if (!(interestIncrease > 0n && cdpIncrease > 0n)) {
     return false
   } else {
     return true
   }
 }
 
-function mintFailureCheck(value: { interestIncrease: bigint; cdpIncrease: bigint }): boolean {
+function mintFailureCheck(value: MintParams): boolean {
   return !mintSuccessCheck(value)
 }
 
-function mintMessage({ interestIncrease, cdpIncrease }: { interestIncrease: bigint; cdpIncrease: bigint }): {
-  interestIncrease: bigint
-  cdpIncrease: bigint
+function mintMessage(params: MintParams): {
+  params: MintParams
   errorMessage: string
 } {
-  if (interestIncrease > 0n && cdpIncrease > 0n) {
-    return { interestIncrease, cdpIncrease, errorMessage: 'Invalid' }
+  if (!(params.interestIncrease > 0n && params.cdpIncrease > 0n)) {
+    return { params, errorMessage: 'Invalid' }
   } else {
-    return { interestIncrease, cdpIncrease, errorMessage: '' }
+    return { params, errorMessage: '' }
   }
 }
 
