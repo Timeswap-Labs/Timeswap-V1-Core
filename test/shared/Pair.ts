@@ -1,6 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { factoryInit } from './Factory'
+import { Claims, Due, State, Tokens } from './PairInterface'
 
 import type { Pair as PairContract } from '../../typechain/Pair'
 import type { TestToken } from '../../typechain/TestToken'
@@ -10,6 +11,21 @@ export class Pair {
 
   upgrade(signerWithAddress: SignerWithAddress): PairSigner {
     return new PairSigner(signerWithAddress, this)
+  }
+
+  async totalReserves(): Promise<Tokens> {
+    const { asset, collateral } = await this.pairContract.totalReserves()
+    return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
+  }
+
+  async state(): Promise<State> {
+    const { asset, interest, cdp } = await this.pairContract.state(this.maturity)
+    return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }
+  }
+
+  async totalLocked(): Promise<Tokens> {
+    const { asset, collateral } = await this.pairContract.totalLocked(this.maturity)
+    return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
   }
 
   async totalLiquidity(): Promise<bigint> {
@@ -24,6 +40,28 @@ export class Pair {
     const result = BigInt(resultBN.toString())
 
     return result
+  }
+
+  async totalClaims(): Promise<Claims> {
+    const { bond, insurance } = await this.pairContract.totalClaims(this.maturity)
+    return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
+  }
+
+  async claimsOf(signerWithAddress: SignerWithAddress): Promise<Claims> {
+    const { bond, insurance } = await this.pairContract.claimsOf(this.maturity, signerWithAddress.address)
+    return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
+  }
+
+  async duesOf(signerWithAddress: SignerWithAddress): Promise<Due[]> {
+    const dues = await this.pairContract.duesOf(this.maturity, signerWithAddress.address)
+
+    return dues.map((value) => {
+      return {
+        debt: BigInt(value.debt.toString()),
+        collateral: BigInt(value.collateral.toString()),
+        startBlock: BigInt(value.startBlock),
+      }
+    })
   }
 }
 

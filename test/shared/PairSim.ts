@@ -6,6 +6,7 @@ import BorrowMath from '../libraries/BorrowMath'
 import PayMath from '../libraries/PayMath'
 import { PROTOCOL_FEE as protocolFee, FEE as fee } from './Constants'
 import ethers from 'ethers'
+import { Claims, claimsDefault, Due, dueDefault, Pool, poolDefault, Tokens, tokensDefault } from './PairInterface'
 
 export class PairSim {
   public asset: bigint
@@ -309,63 +310,5 @@ export class PairSim {
     this.reserves.collateral -= collateralOut
 
     return collateralOut
-  }
-}
-
-interface Tokens {
-  asset: bigint
-  collateral: bigint
-}
-
-function tokensDefault(): Tokens {
-  return { asset: 0n, collateral: 0n }
-}
-
-interface Claims {
-  bond: bigint
-  insurance: bigint
-}
-
-function claimsDefault(): Claims {
-  return { bond: 0n, insurance: 0n }
-}
-
-interface Due {
-  debt: bigint
-  collateral: bigint
-  startBlock: bigint
-}
-
-function dueDefault(): Due {
-  return { debt: 0n, collateral: 0n, startBlock: 0n }
-}
-
-interface State {
-  asset: bigint
-  interest: bigint
-  cdp: bigint
-}
-
-function stateDefault(): State {
-  return { asset: 0n, interest: 0n, cdp: 0n }
-}
-
-interface Pool {
-  state: State
-  lock: Tokens
-  ownerLiquidity: bigint
-  senderLiquidity: bigint
-  totalLiquidity: bigint
-  totalClaims: Claims
-}
-
-function poolDefault(): Pool {
-  return {
-    state: stateDefault(),
-    lock: tokensDefault(),
-    ownerLiquidity: 0n,
-    senderLiquidity: 0n,
-    totalLiquidity: 0n,
-    totalClaims: claimsDefault(),
   }
 }
