@@ -19,7 +19,7 @@ import {BlockNumber} from './libraries/BlockNumber.sol';
 /// @author Timeswap Labs
 /// @notice It is recommnded to use Timeswap Convenience to interact with this contract.
 /// @notice All error messages are abbreviated and can be found in the documentation.
-contract Pair is IPair {
+contract TimeswapPair is IPair {
     using SafeTransfer for IERC20;
     using Reserve for IERC20;
 
@@ -427,7 +427,7 @@ contract Pair is IPair {
     /// @param owner The addres of the owner of collateralized debt.
     /// @param ids The array indexes of collateralized debts.
     /// @param debtsIn The amount of asset ERC20 paid per collateralized debts.
-    /// @return collateralOut The amount of collateral ERC20 received.
+    /// @return collateralOut The total amount of collateral ERC20 received.
     function pay(
         uint256 maturity,
         address to,
@@ -444,24 +444,20 @@ contract Pair is IPair {
         Pool storage pool = pools[maturity];
 
         Due[] storage dues = pool.dues[owner];
-        uint128 debtIn;
 
+        uint128 debtIn;
         for (uint256 i = 0; i < ids.length; i++) {
             Due storage due = dues[i];
             require(due.startBlock != BlockNumber.get(), 'Invalid');
 
-            require(debtsIn[i] > 0, 'Invalid');
-            debtsIn[i] = PayMath.getDebt(debtsIn[i], due.debt);
-
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
-            collateralsOut[i] = PayMath.getCollateral(collateralsOut[i], debtsIn[i], due.collateral, due.debt);
+            PayMath.checkProportional(debtsIn[i], collateralsOut[i], due);
             
             due.debt -= debtsIn[i];
             due.collateral -= collateralsOut[i];
 
             debtIn += debtsIn[i];
             collateralOut += collateralsOut[i];
-
         }
 
         uint128 assetIn = asset.getAssetInUint128(reserves);
@@ -474,7 +470,7 @@ contract Pair is IPair {
 
         if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut);
 
-        emit Pay(maturity, msg.sender, to, owner, assetIn, collateralOut, ids, debtsIn, collateralsOut);
+        emit Pay(maturity, msg.sender, to, owner, ids, debtsIn, collateralsOut, assetIn, collateralOut);
     }
 
     /// @dev Withdraw any excess asset ERC20 and collateral ERC20 from the Pair.

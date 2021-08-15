@@ -96,11 +96,11 @@ interface IPair {
         address indexed sender,
         address indexed to,
         address indexed owner,
-        uint128 assetIn,
-        uint128 collateralOut,
         uint256[] ids,
         uint112[] debtsIn,
-        uint112[] collateralsOut
+        uint112[] collateralsOut,
+        uint128 assetIn,
+        uint128 collateralOut
     );
 
     event Skim(

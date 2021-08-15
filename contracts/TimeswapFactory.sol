@@ -4,13 +4,13 @@ pragma solidity =0.8.1;
 import {IFactory} from './interfaces/IFactory.sol';
 import {IPair} from './interfaces/IPair.sol';
 import {IERC20} from './interfaces/IERC20.sol';
-import {Pair} from './Pair.sol';
+import {TimeswapPair} from './TimeswapPair.sol';
 
 /// @title Timeswap Factory
 /// @author Timeswap Labs
 /// @notice It is recommnded to use Timeswap Convenience to interact with this contract.
 /// @notice All error messages are abbreviated and can be found in the documentation.
-contract Factory is IFactory {
+contract TimeswapFactory is IFactory {
     /* ===== MODEL ===== */
     
     /// @dev The address that receives the protocol fee.
@@ -52,7 +52,7 @@ contract Factory is IFactory {
         require(asset != IERC20(address(0)) && collateral != IERC20(address(0)), 'Zero');
         require(getPair[asset][collateral] == IPair(address(0)), 'Exist');
 
-        pair = new Pair{salt: keccak256(abi.encode(asset, collateral))}(asset, collateral, fee, protocolFee);
+        pair = new TimeswapPair{salt: keccak256(abi.encode(asset, collateral))}(asset, collateral, fee, protocolFee);
 
         getPair[asset][collateral] = pair;
 
