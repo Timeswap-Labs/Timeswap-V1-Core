@@ -2,6 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { factoryInit } from './Factory'
 import { Claims, Due, State, Tokens } from './PairInterface'
+import { ContractTransaction } from 'ethers'
 
 import type { Pair as PairContract } from '../../typechain/Pair'
 import type { TestToken } from '../../typechain/TestToken'
@@ -73,7 +74,7 @@ export class PairSigner extends Pair {
     this.signerWithAddress = signerWithAddress
   }
 
-  async mint(interestIncrease: bigint, cdpIncrease: bigint) {
+  async mint(interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .mint(
@@ -94,7 +95,7 @@ export class PairSigner extends Pair {
     await txn.wait()
   }
 
-  async lend(interestDecrease: bigint, cdpDecrease: bigint) {
+  async lend(interestDecrease: bigint, cdpDecrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .lend(
@@ -105,6 +106,7 @@ export class PairSigner extends Pair {
         cdpDecrease
       )
     await txn.wait()
+    return txn
   }
 
   async withdraw(bond: bigint, insurance: bigint) {
