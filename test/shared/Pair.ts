@@ -92,6 +92,7 @@ export class PairSigner extends Pair {
       .connect(this.signerWithAddress)
       .burn(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, liquidityIn)
     await txn.wait()
+    return txn
   }
 
   async lend(interestDecrease: bigint, cdpDecrease: bigint) {

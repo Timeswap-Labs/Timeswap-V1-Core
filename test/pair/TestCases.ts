@@ -51,5 +51,49 @@ function mintMessage(params: MintParams): {
     return { params, errorMessage: '' }
   }
 }
+export function burn(): {
+  Success: {
+    liquidityIn: bigint
+  }[]
+  Failure: {
+    liquidityIn: bigint
+    errorMessage: string
+  }[]
+} {
+  const testCases = [{ liquidityIn: 1n }, { liquidityIn: 0n }]
 
-export default { mint }
+  const success = testCases.filter(burnSuccessCheck)
+  const failure = testCases.filter(burnFailureCheck).map(burnMessage)
+
+  return { Success: success, Failure: failure }
+  // generate random inputs based on some rule
+  // check which inputs will pass
+  // check which inputs will fail with which error
+  // pass inputs array and fail inputs array
+}
+
+function burnSuccessCheck({ liquidityIn }: { liquidityIn: bigint }): boolean {
+  if (liquidityIn > 0n) {
+    return true
+  } else {
+    return false
+  }
+}
+
+function burnFailureCheck(value: { liquidityIn: bigint }): boolean {
+  return burnSuccessCheck(value)
+}
+
+function burnMessage({ liquidityIn }: { liquidityIn: bigint }): {
+  liquidityIn: bigint
+  errorMessage: string
+} {
+  if (liquidityIn > 0n) {
+    return { liquidityIn, errorMessage: 'Invalid' }
+  } else {
+    return { liquidityIn, errorMessage: '' }
+  }
+}
+
+export default { mint, burn }
+
