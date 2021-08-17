@@ -1,33 +1,27 @@
 import chai from 'chai'
-import { solidity } from 'ethereum-waffle'
+import { waffle } from 'hardhat'
 import { now } from '../shared/Helper'
-import { Pair, pairInit } from '../shared/Pair'
-import { testTokenNew } from '../shared/TestToken'
+import { constructorFixture, Fixture } from '../shared/Fixtures'
 
-import type { TestToken } from '../../typechain/TestToken'
-
+const { loadFixture, solidity } = waffle
 chai.use(solidity)
 const { expect } = chai
 
 describe('Constructor', () => {
-  let pair: Pair
-  let assetToken: TestToken
-  let collateralToken: TestToken
+  async function fixture(): Promise<Fixture> {
+    const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
+    return constructor
+  }
 
-  before(async () => {
-    assetToken = await testTokenNew('Ether', 'WETH', 10000n)
-    collateralToken = await testTokenNew('Matic', 'MATIC', 10000n)
-    const maturity = (await now()) + 31536000n
-
-    pair = await pairInit(assetToken, collateralToken, maturity)
-  })
-
-  it('Should be a proper address', () => {
+  it('Should be a proper address', async () => {
+    const { pair } = await loadFixture(fixture)
     expect(pair.pairContract.address).to.be.properAddress
   })
 
   it('Should have proper factory address', async () => {
+    const { pair } = await loadFixture(fixture)
     const result = await pair.pairContract.factory()
+
     expect(result).to.be.properAddress
   })
 })

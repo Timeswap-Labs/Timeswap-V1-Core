@@ -18,19 +18,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
+          cache: 'yarn'
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-
-      - name: Install Dependecies
-        run: npm ci
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
 
       - name: Run prettier
-        run: npx prettier --write .
+        run: yarn prettier --write .
       
       - name: Auto commit lint errors
         uses: stefanzweifel/git-auto-commit-action@v4
