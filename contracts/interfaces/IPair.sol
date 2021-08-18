@@ -166,8 +166,10 @@ interface IPair {
         uint256 maturity,
         address bondTo,
         address insuranceTo,
+        uint112 assetIn,
         uint112 interestDecrease,
-        uint112 cdpDecrease
+        uint112 cdpDecrease,
+        bytes calldata data
     ) external returns (Claims memory claimsOut);
 
     function withdraw(

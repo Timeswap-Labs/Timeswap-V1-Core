@@ -279,8 +279,10 @@ contract TimeswapPair is IPair {
         uint256 maturity,
         address bondTo,
         address insuranceTo,
+        uint112 assetIn,
         uint112 interestDecrease,
-        uint112 cdpDecrease
+        uint112 cdpDecrease,
+        bytes calldata data
     ) external override lock returns (Claims memory claimsOut) {
         require(block.timestamp < maturity, 'Expired');
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
@@ -289,8 +291,8 @@ contract TimeswapPair is IPair {
         Pool storage pool = pools[maturity];
         require(pool.totalLiquidity > 0, 'Invalid');
 
-        uint112 assetIn = asset.getAssetIn(reserves);
         require(assetIn > 0, 'Invalid');
+        asset.getAssetInCallback(assetIn, reserves, data);
 
         LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, fee);
 

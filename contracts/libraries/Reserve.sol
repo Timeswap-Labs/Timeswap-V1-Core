@@ -3,12 +3,21 @@ pragma solidity =0.8.1;
 
 import {IERC20} from '../interfaces/IERC20.sol';
 import {IPair} from '../interfaces/IPair.sol';
+import { ITimeswapLendCallback } from '../interfaces/callback/ITimeswapLendCallback.sol';
 import {SafeBalance} from './SafeBalance.sol';
 import {SafeCast} from './SafeCast.sol';
 
 library Reserve {
     using SafeBalance for IERC20;
     using SafeCast for uint256;
+
+    function getAssetInCallback(IERC20 asset, uint128 assetIn, IPair.Tokens storage reserves, bytes calldata data) internal {
+        uint128 assetReserve = asset.safeBalance().truncateUint128();
+        ITimeswapLendCallback(msg.sender).timeswapLendCallback(assetIn, data);
+        uint128 newAssetReserve = asset.safeBalance().truncateUint128();
+        require(newAssetReserve <= assetReserve + assetIn, 'M0');
+        reserves.asset = newAssetReserve;
+    }
 
     function getAssetIn(IERC20 asset, IPair.Tokens storage reserves) internal returns (uint112 assetIn) {
         uint128 assetReserve = asset.safeBalance().truncateUint128();
