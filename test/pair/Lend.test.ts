@@ -1,28 +1,37 @@
+import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
-import { now } from '../shared/Helper'
-import { expect } from '../shared/Expect'
+import { getBlock, now } from '../shared/Helper'
+import { Pair } from '../shared/Pair'
+import { PairSim } from '../shared/PairSim'
+import { constructorFixture, Fixture, lendFixture, mintFixture } from '../shared/Fixtures'
 import testCases from './TestCases'
-import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 
-const { loadFixture } = waffle
+import type { TestToken } from '../../typechain/TestToken'
 
-describe('Mint', () => {
-  const tests = testCases.mint()
+const { loadFixture, solidity } = waffle
+chai.use(solidity)
+const { expect } = chai
+
+describe('Lend', () => {
+  const tests = testCases.lend()
 
   async function fixture(): Promise<Fixture> {
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
     return constructor
   }
 
-  tests.Success.forEach((mintParams, idx) => {
+  tests.Success.forEach((test, idx) => {
     describe(`Success case ${idx + 1}`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
+        const { mintParams, lendParams } = test
+
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
+        const lend = await lendFixture(mint, signers[0], lendParams)
 
-        return mint
+        return lend
       }
 
       it('Should have correct total reserves', async () => {
@@ -85,61 +94,9 @@ describe('Mint', () => {
         expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
       })
 
-      it('Should have correct claims of', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        const signers = await ethers.getSigners()
-
-        const claimsOf = await pair.claimsOf(signers[0])
-        const claimsOfSim = pairSim.claims
-
-        // expect(liquidityOf).to.equalBigInt(liquidityOfSim)
-      })
-
-      it('Sample test', async () => {
-        const signers = await ethers.getSigners()
-
-        const { pair } = await loadFixture(fixtureSuccess)
-
-        // console.log('', pair.pairContract.)
-
-        const totalLiquidity = await pair.totalLiquidity()
-      })
+      // it('Sample test', async () => {
+      //   const { pair } = await loadFixture(fixtureSuccess)
+      // })
     })
   })
-
-  // tests.Failure.forEach((test, idx) => {
-  //   describe(`Failure case ${idx + 1}`, () => {
-  //     async function fixtureFailure(): Promise<{
-  //       pair: Pair
-  //       assetToken: TestToken
-  //       collateralToken: TestToken
-  //     }> {
-  //       const { pair, assetToken, collateralToken } = await loadFixture(fixture)
-
-  //       const signers = await ethers.getSigners()
-  //       // pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease) //this will revert
-
-  //       return { pair, assetToken, collateralToken }
-  //     }
-
-  //     it('Sample test', async () => {
-  //       const { pair } = await loadFixture(fixture)
-
-  //       const signers = await ethers.getSigners()
-
-  //       // This is passing, but won't fail for a wrong error message
-  //       // Think it is due to the `await txn.wait()`
-  //       // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
-  //       // await expect(result).to.be.revertedWith(test.errorMessage)
-
-  //       await expect(
-  //         pair.pairContract
-  //           .connect(signers[0])
-  //           .mint(pair.maturity, signers[0].address, signers[0].address, test.interestIncrease, test.cdpIncrease)
-  //       ).to.be.revertedWith(test.errorMessage)
-
-  //       const totalLiquidity = await pair.totalLiquidity()
-  //     })
-  //   })
-  // })
 })

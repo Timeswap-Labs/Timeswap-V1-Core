@@ -42,6 +42,9 @@ export class PairSim {
     const now = BigInt(block.timestamp)
     const blockNumber = BigInt(block.number)
 
+    this.reserves.asset += assetIn
+    this.reserves.collateral += collateralIn
+
     if (!(now < this.maturity)) return 'Expired'
     if (!(interestIncrease > 0 && cdpIncrease > 0)) return 'Invalid'
     if (!(assetIn > 0)) return 'Invalid'
@@ -157,6 +160,7 @@ export class PairSim {
 
     if (this.pool.totalLiquidity <= 0) return 'Invalid'
 
+    this.reserves.asset += assetIn
     if (assetIn <= 0) return 'Invalid'
 
     if (!LendMath.check(this.pool.state, assetIn, interestDecrease, cdpDecrease, fee)) return 'lend math check fail'
