@@ -160,6 +160,7 @@ export class PairSim {
 
     if (this.pool.totalLiquidity <= 0) return 'Invalid'
 
+    this.reserves.asset += assetIn
     if (assetIn <= 0) return 'Invalid'
 
     if (!LendMath.check(this.pool.state, assetIn, interestDecrease, cdpDecrease, fee)) return 'lend math check fail'

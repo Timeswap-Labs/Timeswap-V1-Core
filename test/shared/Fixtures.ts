@@ -1,8 +1,8 @@
-import { getBlock } from './Helper'
+import { advanceTimeAndBlock, getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
 import { PairSim } from './PairSim'
 import { testTokenNew } from './TestToken'
-import { LendParams, MintParams } from '../pair/TestCases'
+import { LendParams, MintParams, BurnParams } from '../pair/TestCases'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 import type { TestToken } from '../../typechain/TestToken'
@@ -41,6 +41,33 @@ export async function mintFixture(
   return { pair, pairSim, assetToken, collateralToken }
 }
 
+export async function burnFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  mintParams: MintParams,
+  burnParams: BurnParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+
+  await assetToken.transfer(pair.pairContract.address, mintParams.assetIn)
+  await collateralToken.transfer(pair.pairContract.address, mintParams.collateralIn)
+
+  const txnMint = await pair.upgrade(signer).mint(mintParams.interestIncrease, mintParams.cdpIncrease)
+  pairSim.mint(
+    mintParams.assetIn,
+    mintParams.collateralIn,
+    mintParams.interestIncrease,
+    mintParams.cdpIncrease,
+    await getBlock(txnMint.blockHash!)
+  )
+  advanceTimeAndBlock(31536000)
+
+  const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
+  const block = await getBlock(txnBurn.blockHash!)
+  pairSim.burn(burnParams.liquidityIn, block)
+
+  return { pair, pairSim, assetToken, collateralToken }
+}
 export async function lendFixture(
   fixture: Fixture,
   signer: SignerWithAddress,

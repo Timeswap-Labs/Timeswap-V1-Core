@@ -1,37 +1,32 @@
-import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
-import { getBlock, now } from '../shared/Helper'
-import { Pair } from '../shared/Pair'
-import { PairSim } from '../shared/PairSim'
-import { constructorFixture, Fixture, lendFixture, mintFixture } from '../shared/Fixtures'
+import { advanceTimeAndBlock, getBlock, now } from '../shared/Helper'
+import { Pair, pairInit } from '../shared/Pair'
 import testCases from './TestCases'
-
 import type { TestToken } from '../../typechain/TestToken'
+import { PairSim } from '../shared/PairSim'
+import { expect } from '../shared/Expect'
+import { burnFixture, constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 
-const { loadFixture, solidity } = waffle
-chai.use(solidity)
-const { expect } = chai
+const { loadFixture } = waffle
 
-describe('Lend', () => {
-  const tests = testCases.lend()
-
+describe('Burn', () => {
+  const tests = testCases.burn()
+  const mintTest = testCases.mint()
   async function fixture(): Promise<Fixture> {
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
     return constructor
   }
 
-  tests.Success.forEach((test, idx) => {
-    describe(`Success case ${idx + 1}`, () => {
+  tests.Success.forEach((burnParams, idx) => {
+    describe(`Success case ${idx + 1} for burn`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
-        const { mintParams, lendParams } = test
+        await loadFixture(fixture)
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
 
-        const mint = await mintFixture(constructor, signers[0], mintParams)
-        const lend = await lendFixture(mint, signers[0], lendParams)
-
-        return lend
+        const burn = await burnFixture(constructor, signers[0], mintTest.Success[0], burnParams)
+        return burn
       }
 
       it('Should have correct total reserves', async () => {
@@ -44,15 +39,13 @@ describe('Lend', () => {
         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
       })
 
-      it('Should have correct state', async () => {
+      it('Should have correct state asset', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
         const state = await pair.state()
         const stateSim = pairSim.pool.state
 
         expect(state.asset).to.equalBigInt(stateSim.asset)
-        expect(state.interest).to.equalBigInt(stateSim.interest)
-        expect(state.cdp).to.equalBigInt(stateSim.cdp)
       })
 
       it('Should have correct total locked', async () => {
@@ -93,10 +86,39 @@ describe('Lend', () => {
         expect(claims.bond).to.equalBigInt(claimsSim.bond)
         expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
       })
-
-      // it('Sample test', async () => {
-      //   const { pair } = await loadFixture(fixtureSuccess)
-      // })
     })
+  })
+
+  tests.Failure.forEach((burnParams, idx) => {
+    describe(`Failure case ${idx + 1}`, () => {
+      async function fixtureFailure(): Promise<Fixture> {
+        await loadFixture(fixture)
+
+        const signers = await ethers.getSigners()
+        const constructor = await loadFixture(fixture)
+
+        const burn = await burnFixture(constructor, signers[0], mintTest.Success[0], burnParams.params)
+        return burn
+      }
+
+      it('Should revert when liquidityIn is less than or equal to 0', async () => {
+        const { pair } = await loadFixture(fixtureFailure)
+        const signers = await ethers.getSigners()
+        const result = pair.upgrade(signers[0]).burn(0n)
+        await expect(result).to.be.revertedWith(burnParams.errorMessage)
+      })
+    })
+  })
+
+  it('Should be a proper address', async () => {
+    const { pair } = await loadFixture(fixture)
+    expect(pair.pairContract.address).to.be.properAddress
+  })
+
+  it('Should have proper factory address', async () => {
+    const { pair } = await loadFixture(fixture)
+
+    const result = await pair.pairContract.factory()
+    expect(result).to.be.properAddress
   })
 })
