@@ -20,7 +20,7 @@ describe('Burn', () => {
   tests.Success.forEach((burnParams, idx) => {
     describe(`Success case ${idx + 1} for burn`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
-        const { pair, pairSim, assetToken, collateralToken } = await loadFixture(fixture)
+        await loadFixture(fixture)
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
@@ -92,7 +92,7 @@ describe('Burn', () => {
   tests.Failure.forEach((burnParams, idx) => {
     describe(`Failure case ${idx + 1}`, () => {
       async function fixtureFailure(): Promise<Fixture> {
-        const { pair, pairSim, assetToken, collateralToken } = await loadFixture(fixture)
+        await loadFixture(fixture)
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
