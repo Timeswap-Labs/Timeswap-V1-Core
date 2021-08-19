@@ -35,8 +35,8 @@ interface IFactory {
     /// @return The fee following UQ.16 format.
     function fee() external view returns (uint16);
 
-    /// @dev Return the protocol fee earned by the owner.
-    /// @return The protocol fee following UQ0.40 format.
+    /// @dev Return the protocol fee per second earned by the owner.
+    /// @return The protocol fee per seconde following UQ0.40 format.
     function protocolFee() external view returns (uint16);
 
     /// @dev Returns the address of a deployed pair.
