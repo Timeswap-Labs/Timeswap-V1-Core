@@ -148,8 +148,8 @@ contract TimeswapPair is IPair {
     /// @param interestIncrease The increase in the Y state.
     /// @param cdpIncrease The increase in the Z state.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return id The array index of the collateralized debt received by debtTo.
-    /// @return dueOut The collateralized debt received by debtTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function mint(
         uint256 maturity,
         address liquidityTo,
