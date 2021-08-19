@@ -10,9 +10,9 @@ import {LendMath} from './libraries/LendMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {PayMath} from './libraries/PayMath.sol';
-import {SafeCast} from './libraries/SafeCast.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
-import {Reserve} from './libraries/Reserve.sol';
+import {Array} from './libraries/Array.sol';
+import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
 
 /// @title Timeswap Pair
@@ -21,7 +21,7 @@ import {BlockNumber} from './libraries/BlockNumber.sol';
 /// @notice All error messages are abbreviated and can be found in the documentation.
 contract TimeswapPair is IPair {
     using SafeTransfer for IERC20;
-    using Reserve for IERC20;
+    using Array for Due[];
 
     /* ===== MODEL ===== */
 
@@ -36,8 +36,6 @@ contract TimeswapPair is IPair {
     /// @dev The protocol fee per second earned by the owner. Follows UQ0.40 format.
     uint16 public immutable override protocolFee;
 
-    /// @dev Stores the asset and collateral reserves of the Pair contract.
-    Tokens private reserves;
     /// @dev Stores the individual states of each Pool.
     mapping(uint256 => Pool) private pools;
 
@@ -45,12 +43,6 @@ contract TimeswapPair is IPair {
     uint256 private locked;
 
     /* ===== VIEW =====*/
-
-    /// @dev Returns the asset and collateral reserves of the Pair contract.
-    /// @return The total asset and collateral reserves.
-    function totalReserves() external view override returns (Tokens memory) {
-        return reserves;
-    }
 
     /// @dev Returns the Constant Product state of a Pool.
     /// @dev The Y state follows the UQ96.32 format.
@@ -145,8 +137,10 @@ contract TimeswapPair is IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param liquidityTo The address of the receiver of liquidity balance.
     /// @param dueTo The addres of the receiver of collateralized debt balance.
+    /// @param assetIn The increase in the X state.
     /// @param interestIncrease The increase in the Y state.
     /// @param cdpIncrease The increase in the Z state.
+    /// @param data The data for callback.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
@@ -154,8 +148,10 @@ contract TimeswapPair is IPair {
         uint256 maturity,
         address liquidityTo,
         address dueTo,
+        uint112 assetIn,
         uint112 interestIncrease,
-        uint112 cdpIncrease
+        uint112 cdpIncrease,
+        bytes calldata data
     )
         external
         override
@@ -168,12 +164,10 @@ contract TimeswapPair is IPair {
     {
         require(block.timestamp < maturity, 'Expired');
         require(liquidityTo != address(0) && dueTo != address(0), 'Zero');
+        require(assetIn > 0, 'Invalid');
         require(interestIncrease > 0 && cdpIncrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
-
-        uint112 assetIn = asset.getAssetIn(reserves);
-        require(assetIn > 0, 'Invalid');
 
         if (pool.totalLiquidity == 0) {
             uint256 liquidityTotal = MintMath.getLiquidityTotal(assetIn);
@@ -201,19 +195,15 @@ contract TimeswapPair is IPair {
         dueOut.collateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        uint112 collateralIn = collateral.getCollateralIn(reserves);
-        require(collateralIn >= dueOut.collateral, 'Insufficient');
-        dueOut.collateral = collateralIn;
+        Callback.mint(asset, collateral, assetIn, dueOut.collateral, data);
 
-        Due[] storage dues = pool.dues[dueTo];
-
-        id = dues.length;
-        dues.push(dueOut);
+        id = pool.dues[dueTo].insert(dueOut);
 
         pool.state.asset += assetIn;
         pool.state.interest += interestIncrease;
         pool.state.cdp += cdpIncrease;
-        pool.lock.collateral += collateralIn;
+
+        pool.lock.collateral += dueOut.collateral;
 
         emit Sync(maturity, pool.state);
         emit Mint(maturity, msg.sender, liquidityTo, dueTo, assetIn, liquidityOut, id, dueOut);
@@ -257,9 +247,6 @@ contract TimeswapPair is IPair {
         }
         pool.lock.collateral -= tokensOut.collateral;
 
-        reserves.asset -= tokensOut.asset;
-        reserves.collateral -= tokensOut.collateral;
-
         if (tokensOut.asset > 0 && assetTo != address(this)) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0 && collateralTo != address(this))
             collateral.safeTransfer(collateralTo, tokensOut.collateral);
@@ -268,12 +255,14 @@ contract TimeswapPair is IPair {
     }
 
     /// @dev Lend asset ERC20 into the Pool.
-    /// @dev Must atomically increase the asset ERC20 balance of the Pair contract, before calling.
+    /// @dev Must atomically increase the asset ERC20 balance of the Pair contract, using the callback.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param bondTo The address of the receiver of bond balance.
     /// @param insuranceTo The addres of the receiver of insurance balance.
+    /// @param assetIn The increase in X state.
     /// @param interestDecrease The decrease in Y state.
     /// @param cdpDecrease The decrease in Z state.
+    /// @param data The data for callback.
     /// @return claimsOut The amount of bond balance and insurance balance received.
     function lend(
         uint256 maturity,
@@ -286,18 +275,18 @@ contract TimeswapPair is IPair {
     ) external override lock returns (Claims memory claimsOut) {
         require(block.timestamp < maturity, 'Expired');
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
+        require(assetIn > 0, 'Invalid');
         require(interestDecrease > 0 || cdpDecrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
         require(pool.totalLiquidity > 0, 'Invalid');
 
-        require(assetIn > 0, 'Invalid');
-        asset.getAssetInCallback(assetIn, reserves, data);
-
         LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, fee);
 
         claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease);
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease);
+
+        Callback.lend(asset, assetIn, data);
 
         pool.totalClaims.bond += claimsOut.bond;
         pool.totalClaims.insurance += claimsOut.insurance;
@@ -358,9 +347,6 @@ contract TimeswapPair is IPair {
         }
         pool.lock.collateral -= tokensOut.collateral;
 
-        reserves.asset -= tokensOut.asset;
-        reserves.collateral -= tokensOut.collateral;
-
         if (tokensOut.asset > 0 && assetTo != address(this)) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0 && collateralTo != address(this))
             collateral.safeTransfer(collateralTo, tokensOut.collateral);
@@ -376,6 +362,7 @@ contract TimeswapPair is IPair {
     /// @param assetOut The amount of asset ERC20 received by assetTo.
     /// @param interestIncrease The increase in Y state.
     /// @param cdpIncrease The increase in Z state.
+    /// @param data The data for callback.
     /// @return id The array index of the collateralized debt received by debtTo.
     /// @return dueOut The collateralized debt received by debtTo.
     function borrow(
@@ -384,7 +371,8 @@ contract TimeswapPair is IPair {
         address dueTo,
         uint112 assetOut,
         uint112 interestIncrease,
-        uint112 cdpIncrease
+        uint112 cdpIncrease,
+        bytes calldata data
     ) external override lock returns (uint256 id, Due memory dueOut) {
         require(block.timestamp < maturity, 'Expired');
         require(assetTo != address(0) && dueTo != address(0), 'Zero');
@@ -400,21 +388,15 @@ contract TimeswapPair is IPair {
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        uint112 collateralIn = collateral.getCollateralIn(reserves);
-        require(collateralIn >= dueOut.collateral, 'Insufficient');
-        dueOut.collateral = collateralIn;
+        Callback.borrow(collateral, dueOut.collateral, data);
 
-        Due[] storage dues = pool.dues[dueTo];
-
-        id = dues.length;
-        dues.push(dueOut);
+        id = pool.dues[dueTo].insert(dueOut);
 
         pool.state.asset -= assetOut;
         pool.state.interest += interestIncrease;
         pool.state.cdp += cdpIncrease;
-        pool.lock.collateral += collateralIn;
 
-        reserves.asset -= assetOut;
+        pool.lock.collateral += dueOut.collateral;
 
         if (assetTo != address(this)) asset.safeTransfer(assetTo, assetOut);
 
@@ -428,18 +410,22 @@ contract TimeswapPair is IPair {
     /// @param to The address of the receiver of collateral ERC20.
     /// @param owner The addres of the owner of collateralized debt.
     /// @param ids The array indexes of collateralized debts.
-    /// @param debtsIn The amount of asset ERC20 paid per collateralized debts.
+    /// @param assetsIn The amount of asset ERC20 paid per collateralized debts.
+    /// @param collateralsOut The amount of collateral ERC20 withdrawn per collaterlaized debts.
+    /// @param data The data for callback.
+    /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 received.
     function pay(
         uint256 maturity,
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory debtsIn,
-        uint112[] memory collateralsOut
-    ) external override lock returns (uint128 collateralOut) {
+        uint112[] memory assetsIn,
+        uint112[] memory collateralsOut,
+        bytes calldata data
+    ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
         require(block.timestamp < maturity, 'Expired');
-        require(ids.length == debtsIn.length, 'Invalid');
+        require(ids.length == assetsIn.length, 'Invalid');
         require(ids.length == collateralsOut.length, 'Invalid');
         require(to != address(0), 'Zero');
 
@@ -447,52 +433,27 @@ contract TimeswapPair is IPair {
 
         Due[] storage dues = pool.dues[owner];
 
-        uint128 debtIn;
         for (uint256 i = 0; i < ids.length; i++) {
             Due storage due = dues[i];
             require(due.startBlock != BlockNumber.get(), 'Invalid');
 
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
-            PayMath.checkProportional(debtsIn[i], collateralsOut[i], due);
+            PayMath.checkProportional(assetsIn[i], collateralsOut[i], due);
             
-            due.debt -= debtsIn[i];
+            due.debt -= assetsIn[i];
             due.collateral -= collateralsOut[i];
 
-            debtIn += debtsIn[i];
+            assetIn += assetsIn[i];
             collateralOut += collateralsOut[i];
         }
 
-        uint128 assetIn = asset.getAssetInUint128(reserves);
-        require(assetIn >= debtIn, 'Invalid');
+        Callback.pay(asset, assetIn, data);
 
         pool.lock.asset += assetIn;
         pool.lock.collateral -= collateralOut;
 
-        reserves.collateral -= collateralOut;
-
         if (collateralOut > 0 && to != address(this)) collateral.safeTransfer(to, collateralOut);
 
-        emit Pay(maturity, msg.sender, to, owner, ids, debtsIn, collateralsOut, assetIn, collateralOut);
-    }
-
-    /// @dev Withdraw any excess asset ERC20 and collateral ERC20 from the Pair.
-    /// @param assetTo The address of the receiver of asset ERC20.
-    /// @param collateralTo The addres of the receiver of collateral ERC20.
-    /// @return assetOut The amount of asset ERC20 received.
-    /// @return collateralOut The amount of collateral ERC20 received.
-    function skim(
-        address assetTo,
-        address collateralTo
-    ) external override lock returns (uint256 assetOut, uint256 collateralOut) {
-        IERC20 _asset = asset;
-        IERC20 _collateral = collateral;
-
-        assetOut = _asset.getExcess(reserves.asset);
-        collateralOut = _collateral.getExcess(reserves.collateral);
-
-        if (assetOut > 0) _asset.safeTransfer(assetTo, assetOut);
-        if (collateralOut > 0) _collateral.safeTransfer(collateralTo, collateralOut);
-
-        emit Skim(msg.sender, assetTo, collateralTo, assetOut, collateralOut);
+        emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }
 }
