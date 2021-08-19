@@ -2,6 +2,7 @@
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
+import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
 import {config} from 'dotenv'
 
@@ -30,6 +31,11 @@ module.exports = {
     outDir: 'typechain',
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
 };
 
