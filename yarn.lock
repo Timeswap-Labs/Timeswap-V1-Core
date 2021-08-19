@@ -1128,6 +1128,11 @@
   "resolved" "https://registry.npmjs.org/ansi-regex/-/ansi-regex-4.1.0.tgz"
   "version" "4.1.0"
 
+"ansi-regex@^5.0.0":
+  "integrity" "sha512-bY6fj56OUQ0hU1KjFNDQuJFezqKdrAyFdIevADiqrWHwSlbmBNMHp5ak2f40Pm8JTFyM2mqxkG6ngkHO11f/lg=="
+  "resolved" "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.0.tgz"
+  "version" "5.0.0"
+
 "ansi-styles@^2.2.1":
   "integrity" "sha1-tDLdM1i2NM914eRmQ2gkBTPB3b4="
   "resolved" "https://registry.npmjs.org/ansi-styles/-/ansi-styles-2.2.1.tgz"
@@ -2331,6 +2336,16 @@
     "isobject" "^3.0.0"
     "static-extend" "^0.1.1"
 
+"cli-table3@^0.6.0":
+  "integrity" "sha512-gnB85c3MGC7Nm9I/FkiasNBOKjOiO1RNuXXarQms37q4QMpWdlbBgD/VnOStA2faG1dpXMv31RFApjX1/QdgWQ=="
+  "resolved" "https://registry.npmjs.org/cli-table3/-/cli-table3-0.6.0.tgz"
+  "version" "0.6.0"
+  dependencies:
+    "object-assign" "^4.1.0"
+    "string-width" "^4.2.0"
+  optionalDependencies:
+    "colors" "^1.1.2"
+
 "cliui@^3.2.0":
   "integrity" "sha1-EgYBU3qRbSmUD5NNo7SNWFo5IT0="
   "resolved" "https://registry.npmjs.org/cliui/-/cliui-3.2.0.tgz"
@@ -2397,6 +2412,11 @@
   "integrity" "sha1-p9BVi9icQveV3UIyj3QIMcpTvCU="
   "resolved" "https://registry.npmjs.org/color-name/-/color-name-1.1.3.tgz"
   "version" "1.1.3"
+
+"colors@^1.1.2", "colors@^1.4.0":
+  "integrity" "sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA=="
+  "resolved" "https://registry.npmjs.org/colors/-/colors-1.4.0.tgz"
+  "version" "1.4.0"
 
 "combined-stream@^1.0.6", "combined-stream@^1.0.8", "combined-stream@~1.0.6":
   "integrity" "sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg=="
@@ -2895,6 +2915,11 @@
   "integrity" "sha512-CwBLREIQ7LvYFB0WyRvwhq5N5qPhc6PMjD6bYggFlI5YyDgl+0vxq5VHbMOFqLg7hfWzmu8T5Z1QofhmTIhItA=="
   "resolved" "https://registry.npmjs.org/emoji-regex/-/emoji-regex-7.0.3.tgz"
   "version" "7.0.3"
+
+"emoji-regex@^8.0.0":
+  "integrity" "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="
+  "resolved" "https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz"
+  "version" "8.0.0"
 
 "encode-utf8@^1.0.2":
   "integrity" "sha512-ucAnuBEhUK4boH2HjVYG5Q2mQyPorvv0u/ocS+zhdw0S8AlHYY+GOFhP1Gio5z4icpP2ivFSvhtFjQi8+T9ppw=="
@@ -4237,6 +4262,14 @@
     "ajv" "^6.12.3"
     "har-schema" "^2.0.0"
 
+"hardhat-contract-sizer@^2.0.3":
+  "integrity" "sha512-iaixOzWxwOSIIE76cl2uk4m9VXI1hKU3bFt+gl7jDhyb2/JB2xOp5wECkfWqAoc4V5lD4JtjldZlpSTbzX+nPQ=="
+  "resolved" "https://registry.npmjs.org/hardhat-contract-sizer/-/hardhat-contract-sizer-2.0.3.tgz"
+  "version" "2.0.3"
+  dependencies:
+    "cli-table3" "^0.6.0"
+    "colors" "^1.4.0"
+
 "hardhat-deploy@^0.8.11":
   "integrity" "sha512-PJIYckR9lYvGMHxaIb8esvZw9k+gW2xPCUYf4XJTQ3f1fLTXhA86AOhPQsfyBr+MY11/D+UUerIP88tl+PW2+g=="
   "resolved" "https://registry.npmjs.org/hardhat-deploy/-/hardhat-deploy-0.8.11.tgz"
@@ -4264,7 +4297,7 @@
     "murmur-128" "^0.2.1"
     "qs" "^6.9.4"
 
-"hardhat@^2.5.0":
+"hardhat@^2.0.0", "hardhat@^2.5.0":
   "integrity" "sha512-S5CWcmiFZlFF2qFGyf5LlgVnJDXwTs5UBKU3GPQCjsUD3NAIWzXr/4xDSij3YWdg751axgLiKAJM01cHcxGb7A=="
   "resolved" "https://registry.npmjs.org/hardhat/-/hardhat-2.5.0.tgz"
   "version" "2.5.0"
@@ -4746,6 +4779,11 @@
   "integrity" "sha1-o7MKXE8ZkYMWeqq5O+764937ZU8="
   "resolved" "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-2.0.0.tgz"
   "version" "2.0.0"
+
+"is-fullwidth-code-point@^3.0.0":
+  "integrity" "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg=="
+  "resolved" "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz"
+  "version" "3.0.0"
 
 "is-function@^1.0.1":
   "integrity" "sha512-lw7DUp0aWXYg+CBCN+JKkcE0Q2RayZnSvnZBlwgxHBQhqt5pZNVy4Ri7H9GmmXkdu7LUthszM+Tor1u/2iBcpQ=="
@@ -7315,6 +7353,15 @@
     "is-fullwidth-code-point" "^2.0.0"
     "strip-ansi" "^5.1.0"
 
+"string-width@^4.2.0":
+  "integrity" "sha512-XBJbT3N4JhVumXE0eoLU9DCjcaF92KLNqTmFCnG1pf8duUxFGwtP6AD6nkjw9a3IdiRtL3E2w3JDiE/xi3vOeA=="
+  "resolved" "https://registry.npmjs.org/string-width/-/string-width-4.2.2.tgz"
+  "version" "4.2.2"
+  dependencies:
+    "emoji-regex" "^8.0.0"
+    "is-fullwidth-code-point" "^3.0.0"
+    "strip-ansi" "^6.0.0"
+
 "string.prototype.trim@~1.2.1":
   "integrity" "sha512-16IL9pIBA5asNOSukPfxX2W68BaBvxyiRK16H3RA/lWW9BDosh+w7f+LhomPHpXJ82QEe7w7/rY/S1CV97raLg=="
   "resolved" "https://registry.npmjs.org/string.prototype.trim/-/string.prototype.trim-1.2.3.tgz"
@@ -7376,6 +7423,13 @@
   "version" "5.2.0"
   dependencies:
     "ansi-regex" "^4.1.0"
+
+"strip-ansi@^6.0.0":
+  "integrity" "sha512-AuvKTrTfQNYNIctbR1K/YGTR1756GycPsg7b9bdV9Duqur4gv6aKqHXah67Z8ImS7WEz5QVcOtlfW2rZEugt6w=="
+  "resolved" "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.0.tgz"
+  "version" "6.0.0"
+  dependencies:
+    "ansi-regex" "^5.0.0"
 
 "strip-bom@^2.0.0":
   "integrity" "sha1-YhmoVhZSBJHzV4i9vxRHqZx+aw4="

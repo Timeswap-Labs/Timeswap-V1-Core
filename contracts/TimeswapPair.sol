@@ -447,7 +447,7 @@ contract TimeswapPair is IPair {
             collateralOut += collateralsOut[i];
         }
 
-        Callback.pay(asset, assetIn, data);
+        if (assetIn > 0) Callback.pay(asset, assetIn, data);
 
         pool.lock.asset += assetIn;
         pool.lock.collateral -= collateralOut;
