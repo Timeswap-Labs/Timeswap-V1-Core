@@ -9,20 +9,20 @@ import {TimeswapPair} from './TimeswapPair.sol';
 /// @title Timeswap Factory
 /// @author Timeswap Labs
 /// @notice It is recommnded to use Timeswap Convenience to interact with this contract.
-/// @notice All error messages are abbreviated and can be found in the documentation.
+/// @notice All error messages are coded and can be found in the documentation.
 contract TimeswapFactory is IFactory {
     /* ===== MODEL ===== */
     
-    /// @dev The address that receives the protocol fee.
+    /// @inheritdoc IFactory
     address public override owner;
-    /// @dev The new pending address to replace the owner.
+    /// @inheritdoc IFactory
     address public override pendingOwner;
-    /// @dev The fee earned by liquidity providers. Follows UQ0.16 format.
+    /// @inheritdoc IFactory
     uint16 public immutable override fee;
-    /// @dev The protocol fee earned by the owner. Follows UQ0.16 format.
+    /// @inheritdoc IFactory
     uint16 public immutable override protocolFee;
 
-    /// @dev Stores all the address of deployed pairs in a mapping.
+    /// @inheritdoc IFactory
     mapping(IERC20 => mapping(IERC20 => IPair)) public override getPair;
 
     /* ===== INIT ===== */
@@ -43,10 +43,7 @@ contract TimeswapFactory is IFactory {
 
     /* ===== UPDATE ===== */
 
-    /// @dev Creates a Timeswap Pool based on ERC20 pair parameters.
-    /// @dev Cannot create a Timeswap Pool with the same pair parameters.
-    /// @param asset The address of the ERC20 being lent and borrowed.
-    /// @param collateral The address of the ERC20 as the collateral.
+    /// @inheritdoc IFactory
     function createPair(IERC20 asset, IERC20 collateral) external override returns (IPair pair) {
         require(asset != collateral, 'Identical');
         require(asset != IERC20(address(0)) && collateral != IERC20(address(0)), 'Zero');
@@ -59,9 +56,7 @@ contract TimeswapFactory is IFactory {
         emit CreatePair(asset, collateral, pair);
     }
 
-    /// @dev Set the pending owner of the factory.
-    /// @dev Can only be called by the current owner.
-    /// @param _pendingOwner the chosen pending owner.
+    /// @inheritdoc IFactory
     function setOwner(address _pendingOwner) external override {
         require(msg.sender == owner, 'Forbidden');
         require(_pendingOwner != address(0), 'Zero');
@@ -70,8 +65,7 @@ contract TimeswapFactory is IFactory {
         emit SetOwner(_pendingOwner);
     }
 
-    /// @dev Set the pending owner as the owner of the factory.
-    /// @dev Can only be called by the pending owner.
+    /// @inheritdoc IFactory
     function acceptOwner() external override {
         require(msg.sender == pendingOwner, 'Forbidden');
         owner = msg.sender;

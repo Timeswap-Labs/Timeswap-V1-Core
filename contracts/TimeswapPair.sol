@@ -18,7 +18,7 @@ import {BlockNumber} from './libraries/BlockNumber.sol';
 /// @title Timeswap Pair
 /// @author Timeswap Labs
 /// @notice It is recommnded to use Timeswap Convenience to interact with this contract.
-/// @notice All error messages are abbreviated and can be found in the documentation.
+/// @notice All error messages are coded and can be found in the documentation.
 contract TimeswapPair is IPair {
     using SafeTransfer for IERC20;
     using Array for Due[];
