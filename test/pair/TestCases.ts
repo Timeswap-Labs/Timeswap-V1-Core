@@ -1,3 +1,5 @@
+import { Claims } from '../shared/PairInterface'
+
 export function mint(): Mint {
   const testCases = mintTestCases()
 
@@ -58,6 +60,7 @@ function mintMessage(params: MintParams): {
   }
 }
 
+//burn
 export function burn(): Burn {
   const testCases = burnTestCases()
 
@@ -110,6 +113,7 @@ function burnMessage(params: BurnParams): {
   }
 }
 
+//lend
 export function lend(): Lend {
   const mintTests = mintTestCases()
   const lendTests = lendTestCases()
@@ -182,4 +186,71 @@ function lendMessage({ mintParams, lendParams }: { mintParams: MintParams; lendP
   }
 }
 
-export default { mint, lend, burn }
+//withdraw
+
+export function withdraw(): Withdraw {
+  const testCases = withdrawTestCases()
+  // const lendTests = lendTestCases()
+
+  // const testCases = mintTests.flatMap((mintParams) => {
+  //   return lendTests.map((lendParams) => {
+  //     return { mintParams, lendParams }
+  //   })
+  // })
+
+  const success = testCases.filter(withdrawSuccessCheck)
+  const failure = testCases.filter(withdrawFailureCheck).map(withdrawMessage)
+
+  return { Success: success, Failure: failure }
+  // generate random inputs based on some rule
+  // check which inputs will pass
+  // check which inputs will fail with which error
+  // pass inputs array and fail inputs array
+}
+
+function withdrawTestCases(): WithdrawParams[] {
+  const testCases = [
+    // { claimsIn: { bond: 100n, insurance: 1n } },
+    { claimsIn: { bond: 80n, insurance: 1n } },
+    // { claimsIn: 1000n },
+  ]
+
+  return testCases
+}
+
+export interface Withdraw {
+  Success: WithdrawParams[]
+  Failure: {
+    params: WithdrawParams
+    errorMessage: string
+  }[]
+}
+
+export interface WithdrawParams {
+  claimsIn: Claims
+}
+
+function withdrawSuccessCheck(withdrawParams: WithdrawParams): boolean {
+  if (withdrawParams.claimsIn.bond > 0n || withdrawParams.claimsIn.insurance > 0n) {
+    return true
+  } else {
+    return false
+  }
+}
+
+function withdrawFailureCheck(withdrawParams: WithdrawParams): boolean {
+  return !withdrawSuccessCheck(withdrawParams)
+}
+
+function withdrawMessage(params: WithdrawParams): {
+  params: WithdrawParams
+  errorMessage: string
+} {
+  if (!(params.claimsIn.bond > 0n || params.claimsIn.insurance > 0n)) {
+    return { params, errorMessage: 'Invalid' }
+  } else {
+    return { params, errorMessage: '' }
+  }
+}
+
+export default { mint, lend, burn, withdraw }
