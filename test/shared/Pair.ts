@@ -118,6 +118,7 @@ export class PairSigner extends Pair {
         insurance: insurance,
       })
     await txn.wait()
+    return txn
   }
 
   async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
