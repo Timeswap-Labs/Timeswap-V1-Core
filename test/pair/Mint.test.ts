@@ -92,54 +92,53 @@ describe('Mint', () => {
         const claimsOf = await pair.claimsOf(signers[0])
         const claimsOfSim = pairSim.claims
 
-        // expect(liquidityOf).to.equalBigInt(liquidityOfSim)
+        expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
+        expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
       })
 
-      it('Sample test', async () => {
+      it('Should have correct dues of', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
         const signers = await ethers.getSigners()
 
-        const { pair } = await loadFixture(fixtureSuccess)
+        const duesOf = await pair.duesOf(signers[0])
+        const duesOfSim = pairSim.dues
 
-        // console.log('', pair.pairContract.)
+        expect(duesOf.length).to.equal(duesOfSim.length)
 
-        const totalLiquidity = await pair.totalLiquidity()
+        for (let i = 0; i < duesOf.length; i++) {
+          expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
+          expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
+          expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
+        }
       })
     })
   })
 
-  // tests.Failure.forEach((test, idx) => {
-  //   describe(`Failure case ${idx + 1}`, () => {
-  //     async function fixtureFailure(): Promise<{
-  //       pair: Pair
-  //       assetToken: TestToken
-  //       collateralToken: TestToken
-  //     }> {
-  //       const { pair, assetToken, collateralToken } = await loadFixture(fixture)
+  tests.Failure.forEach((test, idx) => {
+    describe(`Failure case ${idx + 1}`, () => {
+      it('Should fail with correct error', async () => {
+        const mintParams = test.params
 
-  //       const signers = await ethers.getSigners()
-  //       // pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease) //this will revert
+        const { pair } = await loadFixture(fixture)
+        const signers = await ethers.getSigners()
 
-  //       return { pair, assetToken, collateralToken }
-  //     }
+        // This is passing, but won't fail for a wrong error message
+        // Think it is due to the `await txn.wait()`
+        // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
+        // await expect(result).to.be.revertedWith(test.errorMessage)
 
-  //     it('Sample test', async () => {
-  //       const { pair } = await loadFixture(fixture)
-
-  //       const signers = await ethers.getSigners()
-
-  //       // This is passing, but won't fail for a wrong error message
-  //       // Think it is due to the `await txn.wait()`
-  //       // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
-  //       // await expect(result).to.be.revertedWith(test.errorMessage)
-
-  //       await expect(
-  //         pair.pairContract
-  //           .connect(signers[0])
-  //           .mint(pair.maturity, signers[0].address, signers[0].address, test.interestIncrease, test.cdpIncrease)
-  //       ).to.be.revertedWith(test.errorMessage)
-
-  //       const totalLiquidity = await pair.totalLiquidity()
-  //     })
-  //   })
-  // })
+        await expect(
+          pair.pairContract
+            .connect(signers[0])
+            .mint(
+              pair.maturity,
+              signers[0].address,
+              signers[0].address,
+              mintParams.interestIncrease,
+              mintParams.cdpIncrease
+            )
+        ).to.be.revertedWith('')
+      })
+    })
+  })
 })
