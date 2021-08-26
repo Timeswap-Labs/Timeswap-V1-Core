@@ -74,6 +74,8 @@ export function getInsurance(
 
 export default {
   check,
+  adjust,
+  readjust,
   getBond,
   getInsurance,
 }

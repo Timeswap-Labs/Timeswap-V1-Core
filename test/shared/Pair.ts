@@ -119,7 +119,7 @@ export class PairSigner extends Pair {
     await txn.wait()
   }
 
-  async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint) {
+  async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .borrow(
@@ -131,13 +131,15 @@ export class PairSigner extends Pair {
         cdpIncrease
       )
     await txn.wait()
+    return txn
   }
 
-  async pay(ids: bigint[], assetsPay: bigint[]) {
+  async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, assetsPay, [0n]) //FIXME
+      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut) //FIXME
     await txn.wait()
+    return txn
   }
 
   async skim() {
