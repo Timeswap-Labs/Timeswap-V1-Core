@@ -1,5 +1,6 @@
 {
-  "name": "hardhat-project",
+  "version": "1.0.0",
+  "name": "v1-core",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.10",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -16,5 +17,6 @@
   },
   "dependencies": {
     "dotenv": "^10.0.0"
-  }
+  },
+  "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git"
 }
