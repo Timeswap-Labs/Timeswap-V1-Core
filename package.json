@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "v1-core",
+  "name": "@timeswap-labs/timeswap-v1-core",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.10",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -13,10 +13,14 @@
     "hardhat-contract-sizer": "^2.0.3",
     "hardhat-deploy": "^0.8.11",
     "ts-node": "^10.1.0",
-    "typechain": "^5.1.2"
+    "typechain": "^5.1.2",
+    "timeswap-v1-core": "^1.0.0"
   },
   "dependencies": {
     "dotenv": "^10.0.0"
   },
-  "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git"
+  "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git",
+  "publishConfig": {
+		"registry":"https://npm.pkg.github.com"
+ }
 }
