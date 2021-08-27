@@ -1,9 +1,11 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
     "contracts/libraries",
+    "contracts/TimeswapFactory.sol",
+    "contracts/TimeswapPair.sol",
     "artifacts/contracts/TimeswapFactory.sol/TimeswapFactory.json",
     "artifacts/contracts/TimeswapPair.sol/TimeswapPair.json",
     "artifacts/contracts/interfaces/**/*.json",
