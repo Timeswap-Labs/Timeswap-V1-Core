@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.1",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
@@ -12,7 +12,7 @@
     "!artifacts/contracts/interfaces/**/*.dbg.json"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.10",
@@ -29,7 +29,8 @@
     "typechain": "^5.1.2"
   },
   "dependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "@openzeppelin/contracts": "^4.1.0"
   },
   "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git",
   "publishConfig": {
@@ -38,5 +39,8 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test"
+  },
+  "volta": {
+    "node": "14.17.6"
   }
 }
