@@ -2,17 +2,16 @@
 pragma solidity =0.8.1;
 
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {Contract} from './Contract.sol';
+import {Address} from '@openzeppelin/contracts/utils/Address.sol';
 
 library SafeBalance {
-    using Contract for address;
+    using Address for address;
 
     function safeBalance(
         IERC20 token
     ) internal view returns (uint256) {
-    (bool success, bytes memory data) =
-        address(token).staticcall(abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)));
-        require(success && data.length >= 32);
+     bytes memory data =
+        address(token).functionStaticCall(abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)),"balanceOf Call to IERC20 token not successful");
         return abi.decode(data, (uint256));
     }
 }
