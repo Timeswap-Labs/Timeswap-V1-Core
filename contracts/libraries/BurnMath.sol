@@ -10,44 +10,34 @@ library BurnMath {
     using SafeCast for uint256;
 
     function getAsset(
-        uint256 liquidityIn,
-        uint112 assetState,
-        uint128 assetLock,
-        uint128 totalBonds,
-        uint256 totalLiquidity
+        IPair.State memory state,
+        uint256 liquidityIn
     ) internal pure returns (uint128 assetOut) {
-        uint256 assetReserve = assetState + assetLock;
-        if (assetReserve <= totalBonds) return assetOut;
+        uint256 assetReserve = state.reserves.asset;
+        if (assetReserve <= state.totalClaims.bond) return assetOut;
         uint256 _assetOut = assetReserve;
-        _assetOut -= totalBonds;
-        _assetOut = _assetOut.mulDiv(liquidityIn, totalLiquidity);
+        _assetOut -= state.totalClaims.bond;
+        _assetOut = _assetOut.mulDiv(liquidityIn, state.totalLiquidity);
         assetOut = _assetOut.toUint128();
     }
 
-    function getUint112(uint128 assetOut) internal pure returns (uint112 _assetOut) {
-        _assetOut = uint256(assetOut).truncateUint112();
-    }
-
     function getCollateral(
-        uint256 liquidityIn,
-        uint112 assetState,
-        IPair.Tokens memory lock,
-        IPair.Claims memory supplies,
-        uint256 totalLiquidity
+        IPair.State memory state,
+        uint256 liquidityIn
     ) internal pure returns (uint128 collateralOut) {
-        uint256 assetReserve = assetState + lock.asset;
-        uint256 _collateralOut = lock.collateral;
-        if (assetReserve >= supplies.bond) {
-            _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity);
+        uint256 assetReserve = state.reserves.asset;
+        uint256 _collateralOut = state.reserves.collateral;
+        if (assetReserve >= state.totalClaims.bond) {
+            _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
             return collateralOut = _collateralOut.toUint128();
         }
-        uint256 _reduce = supplies.bond;
+        uint256 _reduce = state.totalClaims.bond;
         _reduce -= assetReserve;
-        _reduce *= supplies.insurance;
-        if (lock.collateral * supplies.bond <= _reduce) return collateralOut;
-        _collateralOut *= supplies.bond;
+        _reduce *= state.totalClaims.insurance;
+        if (state.reserves.collateral * state.totalClaims.bond <= _reduce) return collateralOut;
+        _collateralOut *= state.totalClaims.bond;
         _collateralOut -= _reduce;
-        _collateralOut = _collateralOut.mulDiv(liquidityIn, totalLiquidity * supplies.bond);
+        _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity * state.totalClaims.bond);
         collateralOut = _collateralOut.toUint128();
     }
 }

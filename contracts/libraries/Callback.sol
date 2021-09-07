@@ -14,7 +14,13 @@ library Callback {
     using SafeBalance for IERC20;
     using SafeCast for uint256;
 
-    function mint(IERC20 asset, IERC20 collateral, uint112 assetIn, uint112 collateralIn, bytes calldata data) internal {
+    function mint(
+        IERC20 asset,
+        IERC20 collateral,
+        uint112 assetIn,
+        uint112 collateralIn,
+        bytes calldata data
+    ) internal returns (uint112 _collateralIn) {
         uint256 assetReserve = asset.safeBalance();
         uint256 collateralReserve = collateral.safeBalance();
         ITimeswapMintCallback(msg.sender).timeswapMintCallback(assetIn, collateralIn, data);
@@ -22,6 +28,8 @@ library Callback {
         uint256 _collateralReserve = collateral.safeBalance();
         require(_assetReserve >= assetReserve + assetIn, 'MO');
         require(_collateralReserve >= collateralReserve + collateralIn, 'MO');
+
+        _collateralIn = (_collateralReserve - collateralReserve).toUint112();
     }
 
     function lend(IERC20 asset, uint112 assetIn, bytes calldata data) internal {
@@ -31,11 +39,17 @@ library Callback {
         require(_assetReserve >= assetReserve + assetIn, 'M0');
     }
 
-    function borrow(IERC20 collateral, uint112 collateralIn, bytes calldata data) internal {
+    function borrow(
+        IERC20 collateral,
+        uint112 collateralIn,
+        bytes calldata data
+    ) internal returns (uint112 _collateralIn) {
         uint256 collateralReserve = collateral.safeBalance();
         ITimeswapBorrowCallback(msg.sender).timeswapBorrowCallback(collateralIn, data);
         uint256 _collateralReserve = collateral.safeBalance();
         require(_collateralReserve >= collateralReserve + collateralIn, 'MO');
+
+        _collateralIn = (_collateralReserve - collateralReserve).toUint112();
     }
     
     function pay(IERC20 asset, uint128 assetIn, bytes calldata data) internal {

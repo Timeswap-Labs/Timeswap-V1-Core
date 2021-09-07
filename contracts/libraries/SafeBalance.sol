@@ -10,8 +10,11 @@ library SafeBalance {
     function safeBalance(
         IERC20 token
     ) internal view returns (uint256) {
-     bytes memory data =
-        address(token).functionStaticCall(abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)),"balanceOf Call to IERC20 token not successful");
+        bytes memory data =
+            address(token).functionStaticCall(
+                abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)),
+                "balanceOf Call to IERC20 token not successful"
+            );
         return abi.decode(data, (uint256));
     }
 }
