@@ -1,5 +1,19 @@
 {
-  "name": "hardhat-project",
+  "version": "1.0.1",
+  "name": "@timeswap-labs/timeswap-v1-core",
+  "files": [
+    "contracts/interfaces",
+    "contracts/libraries",
+    "contracts/TimeswapFactory.sol",
+    "contracts/TimeswapPair.sol",
+    "artifacts/contracts/TimeswapFactory.sol/TimeswapFactory.json",
+    "artifacts/contracts/TimeswapPair.sol/TimeswapPair.json",
+    "artifacts/contracts/interfaces/**/*.json",
+    "!artifacts/contracts/interfaces/**/*.dbg.json"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.10",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -15,6 +29,18 @@
     "typechain": "^5.1.2"
   },
   "dependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "@openzeppelin/contracts": "^4.1.0"
+  },
+  "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test"
+  },
+  "volta": {
+    "node": "14.17.6"
   }
 }

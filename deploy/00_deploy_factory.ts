@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const protocolFee = 30;
     const fee = 30;
     
-  await deploy('Factory', {
+  await deploy('TimeswapFactory', {
     from: factoryDeployer,
     args: [factoryOwner, fee, protocolFee],
     log: true,

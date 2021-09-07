@@ -3,7 +3,7 @@ pragma solidity =0.8.1;
 
 import {IPair} from './interfaces/IPair.sol';
 import {IFactory} from './interfaces/IFactory.sol';
-import {IERC20} from './interfaces/IERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {MintMath} from './libraries/MintMath.sol';
 import {BurnMath} from './libraries/BurnMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
