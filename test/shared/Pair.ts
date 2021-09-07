@@ -93,6 +93,7 @@ export class PairSigner extends Pair {
       .connect(this.signerWithAddress)
       .burn(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, liquidityIn)
     await txn.wait()
+    return txn
   }
 
   async lend(interestDecrease: bigint, cdpDecrease: bigint): Promise<ContractTransaction> {
@@ -117,6 +118,7 @@ export class PairSigner extends Pair {
         insurance: insurance,
       })
     await txn.wait()
+    return txn
   }
 
   async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
