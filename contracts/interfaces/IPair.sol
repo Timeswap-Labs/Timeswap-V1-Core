@@ -24,17 +24,18 @@ interface IPair {
     }
 
     struct State {
-        uint112 asset;
-        uint112 interest;
-        uint112 cdp;
+        Tokens reserves;
+        uint256 totalLiquidity;
+        Claims totalClaims;
+        uint120 totalDebtCreated;
+        uint112 x;
+        uint112 y;
+        uint112 z;
     }
 
     struct Pool {
         State state;
-        Tokens lock;
-        uint256 totalLiquidity;
         mapping(address => uint256) liquidities;
-        Claims totalClaims;
         mapping(address => Claims) claims;
         mapping(address => Due[]) dues;
     }
@@ -43,7 +44,7 @@ interface IPair {
 
     /// @dev Emits when the state gets updated.
     /// @param maturity The unix timestamp maturity of the Pool.
-    /// @param state The new updated state.
+    /// @param state The new state of the pool
     event Sync(uint256 indexed maturity, State state);
 
     /// @dev Emits when mint function is called.
@@ -179,13 +180,15 @@ interface IPair {
     /// @dev Returns the Constant Product state of a Pool.
     /// @dev The Y state follows the UQ96.32 format.
     /// @param maturity The unix timestamp maturity of the Pool.
-    /// @return The X, Y, and Z state which calculates the price.
-    function state(uint256 maturity) external view returns (State memory);
+    /// @return x The x state.
+    /// @return y The y state.
+    /// @return z The z state.
+    function constantProduct(uint256 maturity) external view returns (uint112 x, uint112 y, uint112 z);
 
-    /// @dev Returns the asset ERC20 and collateral ERC20 locked in a Pool.
+    /// @dev Returns the asset ERC20 and collateral ERC20 balances of a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @return The asset ERC20 and collateral ERC20 locked.
-    function totalLocked(uint256 maturity) external view returns (Tokens memory);
+    function totalReserves(uint256 maturity) external view returns (Tokens memory);
 
     /// @dev Returns the total liquidity supply of a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.
@@ -209,6 +212,11 @@ interface IPair {
     /// @return The claims balance.
     function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 
+    /// @dev Returns the total debt created.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @return The total asset ERC20 debt created.
+    function totalDebtCreated(uint256 maturity) external view returns (uint120);
+
     /// @dev Returns the collateralized debts of a user in a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param owner The address of the user.
@@ -223,9 +231,9 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param liquidityTo The address of the receiver of liquidity balance.
     /// @param dueTo The addres of the receiver of collateralized debt balance.
-    /// @param assetIn The increase in the X state.
-    /// @param interestIncrease The increase in the Y state.
-    /// @param cdpIncrease The increase in the Z state.
+    /// @param xIncrease The increase in the X state.
+    /// @param yIncrease The increase in the Y state.
+    /// @param zIncrease The increase in the Z state.
     /// @param data The data for callback.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
@@ -234,9 +242,9 @@ interface IPair {
         uint256 maturity,
         address liquidityTo,
         address dueTo,
-        uint112 assetIn,
-        uint112 interestIncrease,
-        uint112 cdpIncrease,
+        uint112 xIncrease,
+        uint112 yIncrease,
+        uint112 zIncrease,
         bytes calldata data
     )
         external
@@ -265,18 +273,18 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param bondTo The address of the receiver of bond balance.
     /// @param insuranceTo The addres of the receiver of insurance balance.
-    /// @param assetIn The increase in X state.
-    /// @param interestDecrease The decrease in Y state.
-    /// @param cdpDecrease The decrease in Z state.
+    /// @param xIncrease The increase in x state and the amount of asset ERC20 sent.
+    /// @param yDecrease The decrease in y state.
+    /// @param zDecrease The decrease in z state.
     /// @param data The data for callback.
     /// @return claimsOut The amount of bond balance and insurance balance received.
     function lend(
         uint256 maturity,
         address bondTo,
         address insuranceTo,
-        uint112 assetIn,
-        uint112 interestDecrease,
-        uint112 cdpDecrease,
+        uint112 xIncrease,
+        uint112 yDecrease,
+        uint112 zDecrease,
         bytes calldata data
     ) external returns (Claims memory claimsOut);
 
@@ -299,9 +307,9 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param assetTo The address of the receiver of asset ERC20.
     /// @param dueTo The addres of the receiver of collateralized debt.
-    /// @param assetOut The amount of asset ERC20 received by assetTo.
-    /// @param interestIncrease The increase in Y state.
-    /// @param cdpIncrease The increase in Z state.
+    /// @param xDecrease The dcrease in x state and amount of asset ERC20 received by assetTo.
+    /// @param yIncrease The increase in y state.
+    /// @param zIncrease The increase in z state.
     /// @param data The data for callback.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
@@ -309,9 +317,9 @@ interface IPair {
         uint256 maturity,
         address assetTo,
         address dueTo,
-        uint112 assetOut,
-        uint112 interestIncrease,
-        uint112 cdpIncrease,
+        uint112 xDecrease,
+        uint112 yIncrease,
+        uint112 zIncrease,
         bytes calldata data
     ) external returns (uint256 id, Due memory dueOut);
 

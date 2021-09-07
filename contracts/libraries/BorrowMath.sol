@@ -16,26 +16,26 @@ library BorrowMath {
 
     function check(
         IPair.State memory state,
-        uint112 assetOut,
-        uint112 interestIncrease,
-        uint112 cdpIncrease,
+        uint112 xDecrease,
+        uint112 yIncrease,
+        uint112 zIncrease,
         uint16 fee
     ) internal pure {
         uint128 feeBase = 0x10000 - fee;
-        uint112 assetReserve = state.asset - assetOut;
-        uint128 interestAdjusted = adjust(interestIncrease, state.interest, feeBase);
-        uint128 cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase);
-        state.checkConstantProduct(assetReserve, interestAdjusted, cdpAdjusted);
+        uint112 xReserve = state.x - xDecrease;
+        uint128 yAdjusted = adjust(state.y, yIncrease, feeBase);
+        uint128 zAdjusted = adjust(state.z, zIncrease, feeBase);
+        state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
 
-        uint256 minimum = assetOut;
-        minimum *= state.interest;
-        minimum = minimum.divUp(uint256(assetReserve) << 4);
-        require(interestIncrease >= minimum, 'Invalid');
+        uint256 minimum = xDecrease;
+        minimum *= state.y;
+        minimum = minimum.divUp(uint256(xReserve) << 4);
+        require(yIncrease >= minimum, 'Invalid');
     }
 
     function adjust(
-        uint112 increase,
         uint112 reserve,
+        uint112 increase,
         uint128 feeBase
     ) private pure returns (uint128 adjusted) {
         adjusted = reserve;
@@ -45,32 +45,32 @@ library BorrowMath {
 
     function getDebt(
         uint256 maturity,
-        uint112 assetOut,
-        uint112 interestIncrease
+        uint112 xDecrease,
+        uint112 yIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
         _debtOut -= block.timestamp;
-        _debtOut *= interestIncrease;
+        _debtOut *= yIncrease;
         _debtOut = _debtOut.shiftUp(32);
-        _debtOut += assetOut;
+        _debtOut += xDecrease;
         debtOut = _debtOut.toUint112();
     }
 
     function getCollateral(
         uint256 maturity,
         IPair.State memory state,
-        uint112 assetOut,
-        uint112 cdpIncrease
+        uint112 xDecrease,
+        uint112 zIncrease
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
-        _collateralIn *= state.interest;
-        _collateralIn += uint256(state.asset) << 32;
-        uint256 denominator = state.asset;
-        denominator -= assetOut;
-        denominator *= uint256(state.asset) << 32;
-        _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * state.cdp, denominator);
-        _collateralIn += cdpIncrease;
+        _collateralIn *= state.y;
+        _collateralIn += uint256(state.x) << 32;
+        uint256 denominator = state.x;
+        denominator -= xDecrease;
+        denominator *= uint256(state.x) << 32;
+        _collateralIn = _collateralIn.mulDivUp(uint256(xDecrease) * state.z, denominator);
+        _collateralIn += zIncrease;
         collateralIn = _collateralIn.toUint112();
     }
 }

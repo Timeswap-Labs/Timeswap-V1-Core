@@ -9,12 +9,12 @@ library ConstantProduct {
 
     function checkConstantProduct(
         IPair.State memory state,
-        uint112 assetReserve,
-        uint128 interestAdjusted,
-        uint128 cdpAdjusted
+        uint112 xReserve,
+        uint128 yAdjusted,
+        uint128 zAdjusted
     ) internal pure {
-        (uint256 prod0, uint256 prod1) = (uint256(interestAdjusted) * cdpAdjusted).mul512(assetReserve);
-        (uint256 _prod0, uint256 _prod1) = (uint256(state.interest) * state.cdp << 32).mul512(state.asset);
+        (uint256 prod0, uint256 prod1) = (uint256(yAdjusted) * zAdjusted).mul512(xReserve);
+        (uint256 _prod0, uint256 _prod1) = (uint256(state.y) * state.z << 32).mul512(state.x);
 
         require(prod1 >= _prod1, 'Invariance');
         if (prod1 == _prod1) require(prod0 >= _prod0, 'Invariance');
