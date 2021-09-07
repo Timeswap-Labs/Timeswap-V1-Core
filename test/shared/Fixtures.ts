@@ -2,12 +2,13 @@ import { advanceTimeAndBlock, getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
 import { PairSim } from './PairSim'
 import { testTokenNew } from './TestToken'
-import { LendParams, MintParams, BurnParams, WithdrawParams } from '../pair/TestCases'
+import { LendParams, BorrowParams, MintParams, BurnParams, WithdrawParams } from '../pair/TestCases'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import LendMath from '../libraries/LendMath'
+import BorrowMath from '../libraries/BorrowMath'
+import { FEE } from './Constants'
 
 import type { TestToken } from '../../typechain/TestToken'
-import { adjust, check, readjust } from '../libraries/LendMath'
-import { FEE } from './Constants'
 
 export async function constructorFixture(
   assetValue: bigint,
@@ -79,25 +80,60 @@ export async function lendFixture(
 
   const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
   const feeBase = 0x10000n + FEE
-  const interestAdjust = adjust(lendParams.interestDecrease, pairSim.pool.state.interest, feeBase)
+  const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSim.pool.state.interest, feeBase)
   const cdpAdjust = k / ((pairSim.pool.state.asset + lendParams.assetIn) * interestAdjust)
-  const cdpDecrease = readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
-  console.log('1')
-  console.log(cdpDecrease)
-  console.log('PairSim state', pairSim.pool.state)
-
-  console.log('Check 1', check(pairSim.pool.state, lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, FEE))
-  // console.log(
-  //   'Check 2',
-  //   check(pairSim.pool.state, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, FEE)
-  // )
+  const cdpDecrease = LendMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
 
   const txn = await pair.upgrade(signer).lend(lendParams.interestDecrease, cdpDecrease)
 
   const block = await getBlock(txn.blockHash!)
   pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
 
-  console.log('2')
+  return { pair, pairSim, assetToken, collateralToken }
+}
+
+export async function borrowFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  borrowParams: BorrowParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+
+  await collateralToken.transfer(pair.pairContract.address, borrowParams.collateralIn)
+
+  const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
+  const feeBase = 0x10000n - FEE
+  const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSim.pool.state.interest, feeBase)
+  const cdpAdjust = k / ((pairSim.pool.state.asset - borrowParams.assetOut) * interestAdjust)
+  const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
+
+  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
+
+  const block = await getBlock(txn.blockHash!)
+  pairSim.borrow(borrowParams.assetOut, borrowParams.collateralIn, borrowParams.interestIncrease, cdpIncrease, block)
+
+  return { pair, pairSim, assetToken, collateralToken }
+}
+
+export async function payFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  borrowParams: BorrowParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+
+  await collateralToken.transfer(pair.pairContract.address, borrowParams.collateralIn)
+
+  const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
+  const feeBase = 0x10000n - FEE
+  const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSim.pool.state.interest, feeBase)
+  const cdpAdjust = k / ((pairSim.pool.state.asset - borrowParams.assetOut) * interestAdjust)
+  const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
+
+  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
+
+  const block = await getBlock(txn.blockHash!)
+  pairSim.borrow(borrowParams.assetOut, borrowParams.collateralIn, borrowParams.interestIncrease, cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
@@ -130,4 +166,4 @@ export interface Fixture {
   collateralToken: TestToken
 }
 
-export default { constructorFixture, mintFixture, lendFixture }
+export default { constructorFixture, mintFixture, lendFixture, borrowFixture, payFixture }

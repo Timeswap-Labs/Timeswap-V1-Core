@@ -1,15 +1,15 @@
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { now } from '../shared/Helper'
-import { constructorFixture, Fixture, lendFixture, mintFixture } from '../shared/Fixtures'
+import { borrowFixture, constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import testCases from './TestCases'
 
 const { loadFixture, solidity } = waffle
 chai.use(solidity)
 const { expect } = chai
 
-describe('Lend', () => {
-  const tests = testCases.lend()
+describe('Borrow', () => {
+  const tests = testCases.borrow()
 
   async function fixture(): Promise<Fixture> {
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
@@ -19,15 +19,15 @@ describe('Lend', () => {
   tests.Success.forEach((test, idx) => {
     describe(`Success case ${idx + 1}`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
-        const { mintParams, lendParams } = test
+        const { mintParams, borrowParams } = test
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
-        const lend = await lendFixture(mint, signers[0], lendParams)
+        const borrow = await borrowFixture(mint, signers[0], borrowParams)
 
-        return lend
+        return borrow
       }
 
       it('Should have correct total reserves', async () => {

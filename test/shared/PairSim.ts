@@ -248,6 +248,7 @@ export class PairSim {
     dueOut.collateral = BorrowMath.getCollateral(this.maturity, this.pool.state, assetOut, cdpIncrease, now)
     dueOut.startBlock = blockNumber
 
+    this.reserves.collateral += collateralIn
     if (!(collateralIn >= dueOut.collateral)) return 'Insufficient'
     dueOut.collateral = collateralIn
 
