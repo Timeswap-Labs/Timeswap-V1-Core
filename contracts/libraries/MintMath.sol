@@ -44,16 +44,16 @@ library MintMath {
     }
 
     function min(
-        uint256 w,
         uint256 x,
-        uint256 y
-    ) private pure returns (uint256 z) {
-        if (w <= x && w <= y) {
-            z = w;
-        } else if (x <= w && x <= y) {
-            z = x;
+        uint256 y,
+        uint256 z
+    ) private pure returns (uint256 w) {
+        if (x <= y && x <= z) {
+            w = x;
+        } else if (y <= x && y <= z) {
+            w = y;
         } else {
-            z = y;
+            w = z;
         }
     }
 
