@@ -170,7 +170,7 @@ contract TimeswapPair is IPair {
         dueOut.collateral = MintMath.getCollateral(maturity, xIncrease, yIncrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        dueOut.collateral = Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
+        Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
 
@@ -315,7 +315,7 @@ contract TimeswapPair is IPair {
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        dueOut.collateral = Callback.borrow(collateral, dueOut.collateral, data);
+        Callback.borrow(collateral, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
 
