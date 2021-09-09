@@ -42,7 +42,7 @@ describe('Withdraw', () => {
       it('Should have correct total reserves', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const reserves = await pair.totalReserves()
+        const reserves = await pair.totalLocked()
         const reservesSim = pairSim.reserves
 
         expect(reserves.asset).to.equalBigInt(reservesSim.asset)

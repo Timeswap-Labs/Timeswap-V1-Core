@@ -6,7 +6,7 @@ import type { Factory } from '../../typechain/Factory'
 export async function factoryInit(): Promise<Factory> {
   const signers = await ethers.getSigners()
 
-  const factoryContractFactory = await ethers.getContractFactory('Factory')
+  const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory')
   const factory = (await factoryContractFactory.deploy(
     signers[10].address,
     constants.FEE,

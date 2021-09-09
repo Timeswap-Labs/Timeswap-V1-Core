@@ -134,8 +134,10 @@ describe('Mint', () => {
               pair.maturity,
               signers[0].address,
               signers[0].address,
+              mintParams.assetIn,
               mintParams.interestIncrease,
-              mintParams.cdpIncrease
+              mintParams.cdpIncrease,
+              ''
             )
         ).to.be.revertedWith('')
       })

@@ -157,7 +157,7 @@ export async function pairInit(asset: TestToken, collateral: TestToken, maturity
 
   await factory.createPair(asset.address, collateral.address)
 
-  const pairContractFactory = await ethers.getContractFactory('Pair')
+  const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
   const pairContract = pairContractFactory.attach(
     await factory.getPair(asset.address, collateral.address)
   ) as PairContract
