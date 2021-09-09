@@ -3,6 +3,7 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
+import "solidity-coverage"
 import { config } from 'dotenv'
 
 const env: any = config()['parsed']
