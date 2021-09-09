@@ -34,7 +34,7 @@ export async function mintFixture(
   await assetToken.transfer(pair.pairContract.address, mintParams.assetIn)
   await collateralToken.transfer(pair.pairContract.address, mintParams.collateralIn)
 
-  const txn = await pair.upgrade(signer).mint(mintParams.interestIncrease, mintParams.cdpIncrease)
+  const txn = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
 
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(mintParams.assetIn, mintParams.collateralIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
@@ -53,7 +53,7 @@ export async function burnFixture(
   await assetToken.transfer(pair.pairContract.address, mintParams.assetIn)
   await collateralToken.transfer(pair.pairContract.address, mintParams.collateralIn)
 
-  const txnMint = await pair.upgrade(signer).mint(mintParams.interestIncrease, mintParams.cdpIncrease)
+  const txnMint = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
   pairSim.mint(
     mintParams.assetIn,
     mintParams.collateralIn,
@@ -84,7 +84,7 @@ export async function lendFixture(
   const cdpAdjust = k / ((pairSim.pool.state.asset + lendParams.assetIn) * interestAdjust)
   const cdpDecrease = LendMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
 
-  const txn = await pair.upgrade(signer).lend(lendParams.interestDecrease, cdpDecrease)
+  const txn = await pair.upgrade(signer).lend(lendParams.assetIn,lendParams.interestDecrease, lendParams.cdpDecrease)
 
   const block = await getBlock(txn.blockHash!)
   pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
