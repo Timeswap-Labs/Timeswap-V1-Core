@@ -18,9 +18,4 @@ library SafeCast {
         if (x > type(uint112).max) return y = type(uint112).max;
         y = uint112(x);
     }
-
-    function truncateUint128(uint256 x) internal pure returns (uint128 y) {
-        if (x > type(uint128).max) return y = type(uint128).max;
-        y = uint128(x);
-    }
 }

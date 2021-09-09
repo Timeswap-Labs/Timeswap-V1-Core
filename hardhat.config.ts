@@ -1,6 +1,7 @@
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
+import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
 import { config } from 'dotenv'
 

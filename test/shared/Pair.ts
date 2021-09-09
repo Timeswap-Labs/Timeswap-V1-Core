@@ -4,7 +4,7 @@ import { factoryInit } from './Factory'
 import { Claims, Due, State, Tokens } from './PairInterface'
 import { ContractTransaction } from 'ethers'
 
-import type { Pair as PairContract } from '../../typechain/Pair'
+import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
 import type { TestToken } from '../../typechain/TestToken'
 
 export class Pair {
@@ -14,18 +14,15 @@ export class Pair {
     return new PairSigner(signerWithAddress, this)
   }
 
-  async totalReserves(): Promise<Tokens> {
-    const { asset, collateral } = await this.pairContract.totalReserves()
-    return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
-  }
+ 
 
   async state(): Promise<State> {
-    const { asset, interest, cdp } = await this.pairContract.state(this.maturity)
+    const [ asset, interest, cdp ] = await this.pairContract.constantProduct(this.maturity)
     return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }
   }
 
   async totalLocked(): Promise<Tokens> {
-    const { asset, collateral } = await this.pairContract.totalLocked(this.maturity)
+    const { asset, collateral } = await this.pairContract.totalReserves(this.maturity)
     return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
   }
 
@@ -74,15 +71,17 @@ export class PairSigner extends Pair {
     this.signerWithAddress = signerWithAddress
   }
 
-  async mint(interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
+  async mint(xIncrease: bigint,yIncrease: bigint, zIncrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .mint(
         this.maturity,
         this.signerWithAddress.address,
         this.signerWithAddress.address,
-        interestIncrease,
-        cdpIncrease
+        xIncrease,
+        yIncrease,
+        zIncrease,
+        ''
       )
     await txn.wait()
     return txn
@@ -96,15 +95,17 @@ export class PairSigner extends Pair {
     return txn
   }
 
-  async lend(interestDecrease: bigint, cdpDecrease: bigint): Promise<ContractTransaction> {
+  async lend(xIncrease: bigint, yDecrease: bigint, zDecrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .lend(
         this.maturity,
         this.signerWithAddress.address,
         this.signerWithAddress.address,
-        interestDecrease,
-        cdpDecrease
+        xIncrease,
+        yDecrease,
+        zDecrease,
+        ''
       )
     await txn.wait()
     return txn
@@ -130,7 +131,8 @@ export class PairSigner extends Pair {
         this.signerWithAddress.address,
         assetOut,
         interestIncrease,
-        cdpIncrease
+        cdpIncrease,
+        ''
       )
     await txn.wait()
     return txn
@@ -139,17 +141,12 @@ export class PairSigner extends Pair {
   async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut) //FIXME
+      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut, '') //FIXME
     await txn.wait()
     return txn
   }
 
-  async skim() {
-    const txn = await this.pairContract
-      .connect(this.signerWithAddress)
-      .skim(this.signerWithAddress.address, this.signerWithAddress.address)
-    await txn.wait()
-  }
+ 
 }
 
 export async function pairInit(asset: TestToken, collateral: TestToken, maturity: bigint) {

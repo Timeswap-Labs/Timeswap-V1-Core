@@ -12,23 +12,22 @@ library MintMath {
     using SafeCast for uint256;
 
     function getLiquidityTotal(
-        uint112 assetIn
+        uint112 xIncrease
     ) internal pure returns (uint256 liquidityTotal) {
-        liquidityTotal = assetIn;
+        liquidityTotal = xIncrease;
         liquidityTotal <<= 40;
     }
 
     function getLiquidityTotal(
         IPair.State memory state,
-        uint112 assetIn,
-        uint112 interestIncrease,
-        uint112 cdpIncrease,
-        uint256 total
+        uint112 xIncrease,
+        uint112 yIncrease,
+        uint112 zIncrease
     ) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = min(
-            total.mulDiv(assetIn, state.asset),
-            total.mulDiv(interestIncrease, state.interest),
-            total.mulDiv(cdpIncrease, state.cdp)
+            state.totalLiquidity.mulDiv(xIncrease, state.x),
+            state.totalLiquidity.mulDiv(yIncrease, state.y),
+            state.totalLiquidity.mulDiv(zIncrease, state.z)
         );
     }
 
@@ -45,44 +44,44 @@ library MintMath {
     }
 
     function min(
-        uint256 w,
         uint256 x,
-        uint256 y
-    ) private pure returns (uint256 z) {
-        if (w <= x && w <= y) {
-            z = w;
-        } else if (x <= w && x <= y) {
-            z = x;
+        uint256 y,
+        uint256 z
+    ) private pure returns (uint256 w) {
+        if (x <= y && x <= z) {
+            w = x;
+        } else if (y <= x && y <= z) {
+            w = y;
         } else {
-            z = y;
+            w = z;
         }
     }
 
     function getDebt(
         uint256 maturity,
-        uint112 assetIn,
-        uint112 interestIncrease
+        uint112 xIncrease,
+        uint112 yIncrease
     ) internal view returns (uint112 debtOut) {
         uint256 _debtOut = maturity;
         _debtOut -= block.timestamp;
-        _debtOut *= interestIncrease;
+        _debtOut *= yIncrease;
         _debtOut = _debtOut.shiftUp(32);
-        _debtOut += assetIn;
+        _debtOut += xIncrease;
         debtOut = _debtOut.toUint112();
     }
 
     function getCollateral(
         uint256 maturity,
-        uint112 assetIn,
-        uint112 interestIncrease,
-        uint112 cdpIncrease
+        uint112 xIncrease,
+        uint112 yIncrease,
+        uint112 zIncrease
     ) internal view returns (uint112 collateralOut) {
         uint256 _collateralOut = maturity;
         _collateralOut -= block.timestamp;
-        _collateralOut *= interestIncrease;
-        _collateralOut += uint256(assetIn) << 32;
-        _collateralOut = _collateralOut.mulDiv(cdpIncrease, uint256(assetIn) << 32);
-        _collateralOut += cdpIncrease;
+        _collateralOut *= yIncrease;
+        _collateralOut += uint256(xIncrease) << 32;
+        _collateralOut = _collateralOut.mulDiv(zIncrease, uint256(xIncrease) << 32);
+        _collateralOut += zIncrease;
         collateralOut = _collateralOut.toUint112();
     }
 }

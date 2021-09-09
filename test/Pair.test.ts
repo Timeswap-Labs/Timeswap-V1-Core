@@ -39,7 +39,7 @@ describe('Test Cases', () => {
     await assetToken.transfer(pair.pairContract.address, 2000n)
     await collateralToken.transfer(pair.pairContract.address, 2000n)
 
-    await pair.upgrade(signers[0]).mint(10n, 10n)
+    await pair.upgrade(signers[0]).mint(10n, 10n, 10n)
 
     // expect(2n).to.equal(3n)
   })
