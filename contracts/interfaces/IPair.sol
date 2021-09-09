@@ -178,7 +178,7 @@ interface IPair {
     function protocolFee() external view returns (uint16);
 
     /// @dev Returns the Constant Product state of a Pool.
-    /// @dev The Y state follows the UQ96.32 format.
+    /// @dev The Y state follows the UQ80.32 format.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @return x The x state.
     /// @return y The y state.

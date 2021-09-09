@@ -65,7 +65,8 @@ library LendMath {
         _insuranceOut += uint256(state.x) << 32;
         uint256 denominator = state.x;
         denominator += xIncrease;
-        denominator *= uint256(state.x) << 32;
+        denominator *= uint256(state.x);
+        denominator <<= 32;
         _insuranceOut = _insuranceOut.mulDiv(uint256(xIncrease) * state.z, denominator);
         _insuranceOut += zDecrease;
         insuranceOut = _insuranceOut.toUint128();

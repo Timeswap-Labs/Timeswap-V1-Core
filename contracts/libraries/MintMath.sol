@@ -15,7 +15,7 @@ library MintMath {
         uint112 xIncrease
     ) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = xIncrease;
-        liquidityTotal <<= 40;
+        liquidityTotal <<= 56;
     }
 
     function getLiquidityTotal(
@@ -61,13 +61,13 @@ library MintMath {
         uint256 maturity,
         uint112 xIncrease,
         uint112 yIncrease
-    ) internal view returns (uint112 debtOut) {
-        uint256 _debtOut = maturity;
-        _debtOut -= block.timestamp;
-        _debtOut *= yIncrease;
-        _debtOut = _debtOut.shiftUp(32);
-        _debtOut += xIncrease;
-        debtOut = _debtOut.toUint112();
+    ) internal view returns (uint112 debtIn) {
+        uint256 _debtIn = maturity;
+        _debtIn -= block.timestamp;
+        _debtIn *= yIncrease;
+        _debtIn = _debtIn.shiftUp(32);
+        _debtIn += xIncrease;
+        debtIn = _debtIn.toUint112();
     }
 
     function getCollateral(
@@ -75,13 +75,12 @@ library MintMath {
         uint112 xIncrease,
         uint112 yIncrease,
         uint112 zIncrease
-    ) internal view returns (uint112 collateralOut) {
-        uint256 _collateralOut = maturity;
-        _collateralOut -= block.timestamp;
-        _collateralOut *= yIncrease;
-        _collateralOut += uint256(xIncrease) << 32;
-        _collateralOut = _collateralOut.mulDiv(zIncrease, uint256(xIncrease) << 32);
-        _collateralOut += zIncrease;
-        collateralOut = _collateralOut.toUint112();
+    ) internal view returns (uint112 collateralIn) {
+        uint256 _collateralIn = maturity;
+        _collateralIn -= block.timestamp;
+        _collateralIn *= yIncrease;
+        _collateralIn += uint256(xIncrease) << 33;
+        _collateralIn = _collateralIn.mulDivUp(zIncrease, uint256(xIncrease) << 32);
+        collateralIn = _collateralIn.toUint112();
     }
 }
