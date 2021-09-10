@@ -1,5 +1,5 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
@@ -29,8 +29,8 @@
     "typechain": "^5.1.2"
   },
   "dependencies": {
-    "dotenv": "^10.0.0",
-    "@openzeppelin/contracts": "^4.1.0"
+    "@openzeppelin/contracts": "^4.1.0",
+    "dotenv": "^10.0.0"
   },
   "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git",
   "publishConfig": {
