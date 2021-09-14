@@ -27,9 +27,14 @@ library BorrowMath {
         uint128 zAdjusted = adjust(state.z, zIncrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
 
-        uint256 minimum = xDecrease;
-        minimum *= state.y;
-        minimum = minimum.divUp(uint256(xReserve) << 4);
+        uint256 minimum = state.y;
+        minimum <<= 16;
+        minimum *= xDecrease;
+        uint256 denominator = state.x;
+        denominator -= xDecrease;
+        denominator *= feeBase;
+        denominator << 4;
+        minimum = minimum.divUp(denominator);
         require(yIncrease >= minimum, 'Invalid');
     }
 

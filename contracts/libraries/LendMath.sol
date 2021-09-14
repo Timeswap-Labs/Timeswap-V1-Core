@@ -24,9 +24,14 @@ library LendMath {
         uint128 zAdjusted = adjust(state.z, zDecrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
 
-        uint256 minimum = xIncrease;
-        minimum *= state.y;
-        minimum /= uint256(xReserve) << 4;
+        uint256 minimum = state.y;
+        minimum <<= 16;
+        minimum *= xIncrease;
+        uint256 denominator = state.x;
+        denominator += xIncrease;
+        denominator *= feeBase;
+        denominator <<= 4;
+        minimum /= denominator;
         require(yDecrease >= minimum, 'Invalid');
     }
 
