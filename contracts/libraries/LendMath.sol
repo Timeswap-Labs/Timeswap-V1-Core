@@ -39,16 +39,6 @@ library LendMath {
         adjusted -= feeBase * decrease;
     }
 
-    function adjustForMin(
-        uint112 reserve,
-        uint112 decrease,
-        uint128 feeBase
-    ) private pure returns (uint128 adjusted) {
-        adjusted = reserve;
-        adjusted <<= 12;
-        adjusted -= feeBase * decrease;
-    }
-
     function getBond(
         uint256 maturity,
         uint112 xIncrease,
