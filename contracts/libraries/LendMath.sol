@@ -20,22 +20,26 @@ library LendMath {
     ) internal pure {
         uint128 feeBase = 0x10000 + fee;
         uint112 xReserve = state.x + xIncrease;
-        uint128 yAdjusted = adjust(state.y, yDecrease, feeBase, 16);
-        uint128 zAdjusted = adjust(state.z, zDecrease, feeBase, 16);
+        uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
+        uint128 zAdjusted = adjust(state.z, zDecrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
 
-        yAdjusted = adjust(state.y, yDecrease, feeBase, 12);
-        state.checkMinimum(xReserve, yAdjusted);
+        uint256 minimum = xIncrease;
+        minimum *= state.y;
+        minimum <<= 12;
+        uint256 denominator = xReserve;
+        denominator *= feeBase;
+        minimum /= denominator;
+        require(yDecrease >= minimum, 'Minimum');
     }
 
     function adjust(
         uint112 reserve,
         uint112 decrease,
-        uint128 feeBase,
-        uint8 shift
+        uint128 feeBase
     ) private pure returns (uint128 adjusted) {
         adjusted = reserve;
-        adjusted <<= shift;
+        adjusted <<= 16;
         adjusted -= feeBase * decrease;
     }
 

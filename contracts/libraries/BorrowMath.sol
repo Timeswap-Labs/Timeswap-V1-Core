@@ -23,22 +23,26 @@ library BorrowMath {
     ) internal pure {
         uint128 feeBase = 0x10000 - fee;
         uint112 xReserve = state.x - xDecrease;
-        uint128 yAdjusted = adjust(state.y, yIncrease, feeBase, 16);
-        uint128 zAdjusted = adjust(state.z, zIncrease, feeBase, 16);
+        uint128 yAdjusted = adjust(state.y, yIncrease, feeBase);
+        uint128 zAdjusted = adjust(state.z, zIncrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
 
-        yAdjusted = adjust(state.y, yIncrease, feeBase, 12);
-        state.checkMinimum(xReserve, yAdjusted);
+        uint256 minimum = xDecrease;
+        minimum *= state.y;
+        minimum <<= 12;
+        uint256 denominator = xReserve;
+        denominator *= feeBase;
+        minimum = minimum.divUp(denominator);
+        require(yIncrease >= minimum, 'Minimum');
     }
 
     function adjust(
         uint112 reserve,
         uint112 increase,
-        uint128 feeBase,
-        uint8 shift
+        uint128 feeBase
     ) private pure returns (uint128 adjusted) {
         adjusted = reserve;
-        adjusted <<= shift;
+        adjusted <<= 16;
         adjusted += feeBase * increase;
     }
 

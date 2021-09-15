@@ -19,15 +19,4 @@ library ConstantProduct {
         require(prod1 >= _prod1, 'Invariance');
         if (prod1 == _prod1) require(prod0 >= _prod0, 'Invariance');
     }
-
-    function checkMinimum(
-        IPair.State memory state,
-        uint112 xReserve,
-        uint128 yAdjusted
-    ) internal pure {
-        uint256 prod = uint256(yAdjusted) * xReserve;
-        uint256 _prod = uint256(state.y << 12) * state.x;
-
-        require(prod >= _prod, 'Minimum');
-    }
 }
