@@ -128,7 +128,7 @@ describe('Mint', () => {
         // await expect(result).to.be.revertedWith(test.errorMessage)
 
         await expect(
-          pair.pairContract
+          pair.pairContractCallee
             .connect(signers[0])
             .mint(
               pair.maturity,
@@ -136,8 +136,7 @@ describe('Mint', () => {
               signers[0].address,
               mintParams.assetIn,
               mintParams.interestIncrease,
-              mintParams.cdpIncrease,
-              ''
+              mintParams.cdpIncrease
             )
         ).to.be.revertedWith('')
       })

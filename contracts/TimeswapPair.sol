@@ -174,14 +174,14 @@ contract TimeswapPair is IPair {
 
         id = pool.dues[dueTo].insert(dueOut);
 
+        pool.state.reserves.asset += xIncrease;
+        pool.state.reserves.collateral += dueOut.collateral;
+        pool.state.totalDebtCreated += dueOut.debt;
+
         pool.state.x += xIncrease;
         pool.state.y += yIncrease;
         pool.state.z += zIncrease;
 
-        pool.state.reserves.asset += xIncrease;
-        pool.state.reserves.collateral += dueOut.collateral;
-        pool.state.totalDebtCreated += dueOut.debt;
-        
         emit Sync(maturity, pool.state);
         emit Mint(maturity, msg.sender, liquidityTo, dueTo, xIncrease, liquidityOut, id, dueOut);
     }
@@ -247,6 +247,8 @@ contract TimeswapPair is IPair {
 
         pool.claims[bondTo].bond += claimsOut.bond;
         pool.claims[insuranceTo].insurance += claimsOut.insurance;
+
+        pool.state.reserves.asset += xIncrease;
 
         pool.state.x += xIncrease;
         pool.state.y -= yDecrease;

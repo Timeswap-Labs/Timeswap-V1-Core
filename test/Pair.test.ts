@@ -36,8 +36,8 @@ describe('Test Cases', () => {
 
     const signers = await ethers.getSigners()
 
-    await assetToken.transfer(pair.pairContract.address, 2000n)
-    await collateralToken.transfer(pair.pairContract.address, 2000n)
+    await assetToken.transfer(pair.pairContractCallee.address, 2000n)
+    await collateralToken.transfer(pair.pairContractCallee.address, 2000n)
 
     await pair.upgrade(signers[0]).mint(10n, 10n, 10n)
 

@@ -31,8 +31,8 @@ export async function mintFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await assetToken.transfer(pair.pairContract.address, mintParams.assetIn)
-  await collateralToken.transfer(pair.pairContract.address, mintParams.collateralIn)
+  await assetToken.transfer(pair.pairContractCallee.address, mintParams.assetIn)
+  await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
 
@@ -50,8 +50,8 @@ export async function burnFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await assetToken.transfer(pair.pairContract.address, mintParams.assetIn)
-  await collateralToken.transfer(pair.pairContract.address, mintParams.collateralIn)
+  await assetToken.transfer(pair.pairContractCallee.address, mintParams.assetIn)
+  await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
   const txnMint = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
   pairSim.mint(
@@ -76,7 +76,7 @@ export async function lendFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await assetToken.transfer(pair.pairContract.address, lendParams.assetIn)
+  await assetToken.transfer(pair.pairContractCallee.address, lendParams.assetIn)
 
   const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
   const feeBase = 0x10000n + FEE
@@ -99,7 +99,7 @@ export async function borrowFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await collateralToken.transfer(pair.pairContract.address, borrowParams.collateralIn)
+  await collateralToken.transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
 
   const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
   const feeBase = 0x10000n - FEE
@@ -122,7 +122,7 @@ export async function payFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await collateralToken.transfer(pair.pairContract.address, borrowParams.collateralIn)
+  await collateralToken.transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
 
   const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
   const feeBase = 0x10000n - FEE
