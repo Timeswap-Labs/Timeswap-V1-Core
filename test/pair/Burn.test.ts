@@ -113,13 +113,13 @@ describe('Burn', () => {
 
   it('Should be a proper address', async () => {
     const { pair } = await loadFixture(fixture)
-    expect(pair.pairContract.address).to.be.properAddress
+    expect(pair.pairContractCallee.address).to.be.properAddress
   })
 
   it('Should have proper factory address', async () => {
     const { pair } = await loadFixture(fixture)
 
-    const result = await pair.pairContract.factory()
+    const result = await pair.pairContractCallee.factory()
     expect(result).to.be.properAddress
   })
 })
