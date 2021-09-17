@@ -46,15 +46,15 @@ describe('Mint', () => {
         expect(state.cdp).to.equalBigInt(stateSim.cdp)
       })
 
-      it('Should have correct total locked', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+      // it('Should have correct total locked', async () => {
+      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const locked = await pair.totalLocked()
-        const lockedSim = pairSim.pool.lock
+      //   const locked = await pair.totalLocked()
+      //   const lockedSim = pairSim.pool.lock
 
-        expect(locked.asset).to.equalBigInt(lockedSim.asset)
-        expect(locked.collateral).to.equalBigInt(lockedSim.collateral)
-      })
+      //   expect(locked.asset).to.equalBigInt(lockedSim.asset)
+      //   expect(locked.collateral).to.equalBigInt(lockedSim.collateral)
+      // })
 
       it('Should have correct total liquidity', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)

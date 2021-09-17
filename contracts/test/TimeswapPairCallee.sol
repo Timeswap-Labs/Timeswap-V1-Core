@@ -8,7 +8,7 @@ import {ITimeswapBorrowCallback} from '../interfaces/callback/ITimeswapBorrowCal
 import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '../interfaces/callback/ITimeswapPayCallback.sol';
-import "hardhat/console.sol";
+
 
 contract TimeswapPairCallee {
 
@@ -38,49 +38,11 @@ contract TimeswapPairCallee {
     function getDataMint(address from) public returns(bytes memory data){
         data =  abi.encode(PairCalleeInfoMint(pairContract.asset(),pairContract.collateral(),from,from));
     }
-    function factory() external  view returns (IFactory){
-        return pairContract.factory();
-    }
 
-    function asset() external  view returns (IERC20){
-        return pairContract.asset();
+    function factory()public returns(IFactory){
+        return factoryContract;
     }
-    function collateral() external  view returns (IERC20){
-        return pairContract.collateral();
-    }
-    function fee() external  view returns (uint16){
-        return pairContract.fee();
-    }
-    function protocolFee() external  view returns (uint16){
-        return pairContract.protocolFee();
-    }
-    function constantProduct(uint256 maturity) external  view returns (uint112 x, uint112 y, uint112 z){
-        return pairContract.constantProduct(maturity);
-    }
-    function totalReserves(uint256 maturity) external  view returns (IPair.Tokens memory){
-        return pairContract.totalReserves(maturity);
-    }
-
-    function totalLiquidity(uint256 maturity) external  view returns (uint256){
-        return pairContract.totalLiquidity(maturity);
-    }
-    function liquidityOf(uint256 maturity, address owner) external  view returns (uint256){
-        return pairContract.liquidityOf(maturity, owner);
-    }
-    function totalClaims(uint256 maturity) external  view returns (IPair.Claims memory){
-        return pairContract.totalClaims(maturity);
-    }
-
-    function claimsOf(uint256 maturity, address owner) external  view returns (IPair.Claims memory){
-        return  pairContract.claimsOf(maturity, owner);
-    }
-    function totalDebtCreated(uint256 maturity) external  view returns (uint120){
-        return pairContract.totalDebtCreated(maturity);
-    }
-
-    function duesOf(uint256 maturity, address owner) external  view returns (IPair.Due[] memory){
-        return pairContract.duesOf(maturity,owner);
-    }
+   
 
         function mint(
         uint256 maturity,
@@ -99,15 +61,7 @@ contract TimeswapPairCallee {
             return pairContract.mint(maturity, liquidityTo,dueTo,xIncrease,yIncrease,zIncrease,getDataMint(msg.sender));
         }
 
-    function burn(
-        uint256 maturity,
-        address assetTo,
-        address collateralTo,
-        uint256 liquidityIn
-    ) external  returns (IPair.Tokens memory tokensOut){
-        
-        return pairContract.burn(maturity,assetTo,collateralTo,liquidityIn);
-    }
+ 
     function lend(
         uint256 maturity,
         address bondTo,
@@ -119,14 +73,6 @@ contract TimeswapPairCallee {
         return pairContract.lend(maturity, bondTo, insuranceTo, xIncrease, yDecrease, zDecrease, getData(msg.sender));
     }
 
-    function withdraw(
-        uint256 maturity,
-        address assetTo,
-        address collateralTo,
-        IPair.Claims memory claimsIn
-    ) external  returns (IPair.Tokens memory tokensOut){
-        return pairContract.withdraw(maturity,assetTo,collateralTo,claimsIn);
-    }
 
     function borrow(
         uint256 maturity,
