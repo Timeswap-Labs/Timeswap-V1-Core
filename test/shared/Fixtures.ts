@@ -15,10 +15,13 @@ export async function constructorFixture(
   collateralValue: bigint,
   maturity: bigint
 ): Promise<Fixture> {
-  const assetToken = await testTokenNew('Ether', 'WETH', assetValue)
+  const assetToken = await testTokenNew('Ether', 'WETH', assetValue)  
   const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
 
   const pair = await pairInit(assetToken, collateralToken, maturity)
+  // call the approve function in the test Tokens
+  await assetToken.approve(pair.pairContractCallee.address,assetValue);
+  await collateralToken.approve(pair.pairContractCallee.address,collateralValue);
   const pairSim = new PairSim(maturity)
 
   return { pair, pairSim, assetToken, collateralToken }
