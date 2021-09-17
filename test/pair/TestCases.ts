@@ -17,7 +17,7 @@ function mintTestCases(): MintParams[] {
   const testCases = [
     {
       assetIn: 2000n,
-      collateralIn: 2000n,
+      collateralIn: 800n,
       interestIncrease: 20n,
       cdpIncrease: 400n,
     },
@@ -87,7 +87,7 @@ export function burn(): Burn {
   // pass inputs array and fail inputs array
 }
 function burnTestCases(): BurnParams[] {
-  const testCases = [{ liquidityIn: 1n }, { liquidityIn: 0n }];
+  const testCases = [{ liquidityIn: 1n }];
   return testCases;
 }
 

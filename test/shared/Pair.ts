@@ -9,7 +9,7 @@ import type { TimeswapPairCallee as PairContractCallee } from '../../typechain/T
 import type { TestToken } from '../../typechain/TestToken'
 
 export class Pair {
-  constructor(public pairContractCallee: PairContractCallee, public maturity: bigint) {}
+  constructor(public pairContractCallee: PairContractCallee, public pairContract: PairContract, public maturity: bigint) {}
 
   upgrade(signerWithAddress: SignerWithAddress): PairSigner {
     return new PairSigner(signerWithAddress, this)
@@ -18,41 +18,46 @@ export class Pair {
  
 
   async state(): Promise<State> {
-    const [ asset, interest, cdp ] = await this.pairContractCallee.constantProduct(this.maturity)
+    const [ asset, interest, cdp ] = await this.pairContract.constantProduct(this.maturity)
     return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }
   }
 
-  async totalLocked(): Promise<Tokens> {
-    const { asset, collateral } = await this.pairContractCallee.totalReserves(this.maturity)
+  async totalReserves(): Promise<Tokens> {
+    const { asset, collateral } = await this.pairContract.totalReserves(this.maturity)
     return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
   }
 
+  // async totalLocked(): Promise<Tokens> {
+  //   const { asset, collateral } = await this.pairContractCallee.totalReserves(this.maturity)
+  //   return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
+  // }
+
   async totalLiquidity(): Promise<bigint> {
-    const resultBN = await this.pairContractCallee.totalLiquidity(this.maturity)
+    const resultBN = await this.pairContract.totalLiquidity(this.maturity)
     const result = BigInt(resultBN.toString())
 
     return result
   }
 
   async liquidityOf(signerWithAddress: SignerWithAddress): Promise<bigint> {
-    const resultBN = await this.pairContractCallee.liquidityOf(this.maturity, signerWithAddress.address)
+    const resultBN = await this.pairContract.liquidityOf(this.maturity, signerWithAddress.address)
     const result = BigInt(resultBN.toString())
 
     return result
   }
 
   async totalClaims(): Promise<Claims> {
-    const { bond, insurance } = await this.pairContractCallee.totalClaims(this.maturity)
+    const { bond, insurance } = await this.pairContract.totalClaims(this.maturity)
     return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
   }
 
   async claimsOf(signerWithAddress: SignerWithAddress): Promise<Claims> {
-    const { bond, insurance } = await this.pairContractCallee.claimsOf(this.maturity, signerWithAddress.address)
+    const { bond, insurance } = await this.pairContract.claimsOf(this.maturity, signerWithAddress.address)
     return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
   }
 
   async duesOf(signerWithAddress: SignerWithAddress): Promise<Due[]> {
-    const dues = await this.pairContractCallee.duesOf(this.maturity, signerWithAddress.address)
+    const dues = await this.pairContract.duesOf(this.maturity, signerWithAddress.address)
 
     return dues.map((value) => {
       return {
@@ -68,7 +73,7 @@ export class PairSigner extends Pair {
   signerWithAddress: SignerWithAddress
 
   constructor(signerWithAddress: SignerWithAddress, pair: Pair) {
-    super(pair.pairContractCallee, pair.maturity)
+    super(pair.pairContractCallee,pair.pairContract, pair.maturity)
     this.signerWithAddress = signerWithAddress
   }
 
@@ -88,7 +93,7 @@ export class PairSigner extends Pair {
   }
 
   async burn(liquidityIn: bigint) {
-    const txn = await this.pairContractCallee
+    const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .burn(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, liquidityIn)
     await txn.wait()
@@ -111,7 +116,7 @@ export class PairSigner extends Pair {
   }
 
   async withdraw(bond: bigint, insurance: bigint) {
-    const txn = await this.pairContractCallee
+    const txn = await this.pairContract
       .connect(this.signerWithAddress)
       .withdraw(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, {
         bond: bond,
@@ -161,7 +166,7 @@ export async function pairInit(asset: TestToken, collateral: TestToken, maturity
   console.log(pairContractCallee.address)
   console.log(pairContract.address)
   console.log(factory.address)
-  return new Pair(pairContractCallee, maturity)
+  return new Pair(pairContractCallee,pairContract, maturity)
 }
 
 export default { Pair, PairSigner, pairInit }

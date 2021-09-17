@@ -57,6 +57,7 @@ export async function burnFixture(
   await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
   const txnMint = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
+  console.log(txnMint);
   pairSim.mint(
     mintParams.assetIn,
     mintParams.collateralIn,

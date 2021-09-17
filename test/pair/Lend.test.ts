@@ -33,7 +33,7 @@ describe('Lend', () => {
       it('Should have correct total reserves', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const reserves = await pair.totalLocked()
+        const reserves = await pair.totalReserves()
         const reservesSim = pairSim.reserves
 
         expect(reserves.asset).to.equalBigInt(reservesSim.asset)
@@ -54,7 +54,7 @@ describe('Lend', () => {
       it('Should have correct total locked', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const locked = await pair.totalLocked()
+        const locked = await pair.totalReserves()
         const lockedSim = pairSim.pool.lock
 
         expect(locked.asset).to.equalBigInt(lockedSim.asset)
