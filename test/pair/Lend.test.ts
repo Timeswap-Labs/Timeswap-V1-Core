@@ -46,9 +46,10 @@ describe('Lend', () => {
         const state = await pair.state()
         const stateSim = pairSim.pool.state
 
-        expect(state.asset).to.equal(stateSim.asset)
-        expect(state.interest).to.equal(stateSim.interest)
-        // expect(state.cdp).to.equal(stateSim.cdp)
+        
+        expect((state.asset)==(stateSim.asset)).to.be.true;
+        expect((state.interest)==(stateSim.interest)).to.be.true;
+        expect((state.cdp)==(stateSim.cdp)).to.be.true;
       })
 
       // it('Should have correct total locked', async () => {
