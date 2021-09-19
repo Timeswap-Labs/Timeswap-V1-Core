@@ -7,6 +7,7 @@ import PayMath from '../libraries/PayMath'
 import { PROTOCOL_FEE as protocolFee, FEE as fee } from './Constants'
 import ethers from 'ethers'
 import { Claims, claimsDefault, Due, dueDefault, Pool, poolDefault, Tokens, tokensDefault } from './PairInterface'
+import { setUncaughtExceptionCaptureCallback } from 'process'
 
 export class PairSim {
   public asset: bigint
@@ -140,7 +141,7 @@ export class PairSim {
       this.pool.lock.asset -= tokensOut.asset
     } else if (this.pool.lock.asset == 0n) {
       this.pool.state.asset -= tokensOut.asset
-    } else {
+    } else {  
       this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
       this.pool.lock.asset = 0n
     }
@@ -160,7 +161,6 @@ export class PairSim {
 
     if (this.pool.totalLiquidity <= 0) return 'Invalid'
 
-    this.reserves.asset += assetIn
     if (assetIn <= 0) return 'Invalid'
 
     if (!LendMath.check(this.pool.state, assetIn, interestDecrease, cdpDecrease, fee)) return 'lend math check fail'
@@ -170,11 +170,16 @@ export class PairSim {
     claimsOut.bond = LendMath.getBond(this.maturity, assetIn, interestDecrease, now)
     claimsOut.insurance = LendMath.getInsurance(this.maturity, this.pool.state, assetIn, cdpDecrease, now)
 
+    
+    
     this.pool.totalClaims.bond += claimsOut.bond
     this.pool.totalClaims.insurance += claimsOut.insurance
 
     this.claims.bond += claimsOut.bond
     this.claims.insurance += claimsOut.insurance
+
+    this.reserves.asset += assetIn
+
 
     this.pool.state.asset += assetIn
     this.pool.state.interest -= interestDecrease
@@ -202,22 +207,24 @@ export class PairSim {
       this.pool.lock,
       this.pool.totalClaims
     )
+    
 
     this.pool.totalClaims.bond -= claimsIn.bond
     this.pool.totalClaims.insurance -= claimsIn.insurance
 
+    
     this.claims.bond -= claimsIn.bond
     this.claims.insurance -= claimsIn.insurance
 
-    if (this.pool.lock.asset >= tokensOut.asset) {
-      this.pool.lock.asset -= tokensOut.asset
-    } else if (this.pool.lock.asset == 0n) {
-      this.pool.state.asset -= tokensOut.asset
-    } else {
-      this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
-      this.pool.lock.asset = 0n
-    }
-    this.pool.lock.collateral -= tokensOut.collateral
+    // if (this.pool.lock.asset >= tokensOut.asset) {
+    //   this.pool.lock.asset -= tokensOut.asset
+    // } else if (this.pool.lock.asset == 0n) {
+    //   this.pool.state.asset -= tokensOut.asset
+    // } else {
+    //   this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
+    //   this.pool.lock.asset = 0n
+    // }
+    // this.pool.lock.collateral -= tokensOut.collateral
 
     this.reserves.asset -= tokensOut.asset
     this.reserves.collateral -= tokensOut.collateral
@@ -227,7 +234,6 @@ export class PairSim {
 
   borrow(
     assetOut: bigint,
-    collateralIn: bigint,
     interestIncrease: bigint,
     cdpIncrease: bigint,
     block: ethers.providers.Block
@@ -248,10 +254,8 @@ export class PairSim {
     dueOut.collateral = BorrowMath.getCollateral(this.maturity, this.pool.state, assetOut, cdpIncrease, now)
     dueOut.startBlock = blockNumber
 
-    this.reserves.collateral += collateralIn
-    if (!(collateralIn >= dueOut.collateral)) return 'Insufficient'
-    dueOut.collateral = collateralIn
-
+    this.reserves.collateral += dueOut.collateral
+    
     // Due[] storage dues = this.dues[dueTo];
     // Implemented
 
@@ -261,7 +265,7 @@ export class PairSim {
     this.pool.state.asset -= assetOut
     this.pool.state.interest += interestIncrease
     this.pool.state.cdp += cdpIncrease
-    this.pool.lock.collateral += collateralIn
+    this.pool.lock.collateral += dueOut.collateral
 
     this.reserves.asset -= assetOut
 

@@ -57,7 +57,7 @@ export async function burnFixture(
   await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
   const txnMint = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
-  console.log(txnMint);
+  
   pairSim.mint(
     mintParams.assetIn,
     mintParams.collateralIn,
@@ -87,13 +87,13 @@ export async function lendFixture(
   const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSim.pool.state.interest, feeBase)
   const cdpAdjust = k / ((pairSim.pool.state.asset + lendParams.assetIn) * interestAdjust)
   const cdpDecrease = LendMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
-  console.log(`cdpDecrease computed through the LendMath is ${cdpDecrease}`);
+  
 
   const txn = await pair.upgrade(signer).lend(lendParams.assetIn,lendParams.interestDecrease, lendParams.cdpDecrease)
 
   const block = await getBlock(txn.blockHash!)
   //TODO: TO CALL THE pairSim.lend using the test case parameters instead of the cdpDecrease computed from the lendMath
-  pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
+  pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
@@ -116,7 +116,7 @@ export async function borrowFixture(
   const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
 
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(borrowParams.assetOut, borrowParams.collateralIn, borrowParams.interestIncrease, cdpIncrease, block)
+  pairSim.borrow(borrowParams.assetOut,  borrowParams.interestIncrease, cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
@@ -139,7 +139,7 @@ export async function payFixture(
   const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
 
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(borrowParams.assetOut, borrowParams.collateralIn, borrowParams.interestIncrease, cdpIncrease, block)
+  pairSim.borrow(borrowParams.assetOut,  borrowParams.interestIncrease, cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }

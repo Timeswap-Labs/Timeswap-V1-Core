@@ -1,4 +1,4 @@
-import chai from 'chai'
+import chai, { expect } from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { now } from '../shared/Helper'
 import { borrowFixture, constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
@@ -6,7 +6,11 @@ import testCases from './TestCases'
 
 const { loadFixture, solidity } = waffle
 chai.use(solidity)
-const { expect } = chai
+
+//TODO: Check why chai's native assertion library isnt working and remove the helper function
+function checkBigIntEquality(x: bigint, y: bigint){
+  expect(x.toString()).to.equal(y.toString());
+}
 
 describe('Borrow', () => {
   const tests = testCases.borrow()
@@ -36,8 +40,8 @@ describe('Borrow', () => {
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.reserves
 
-        expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-        expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+        checkBigIntEquality(reserves.asset,reservesSim.asset)
+        checkBigIntEquality(reserves.collateral,reservesSim.collateral)
       })
 
       it('Should have correct state', async () => {
@@ -46,20 +50,11 @@ describe('Borrow', () => {
         const state = await pair.state()
         const stateSim = pairSim.pool.state
 
-        expect(state.asset).to.equalBigInt(stateSim.asset)
-        expect(state.interest).to.equalBigInt(stateSim.interest)
-        expect(state.cdp).to.equalBigInt(stateSim.cdp)
+        checkBigIntEquality(state.asset,stateSim.asset)
+        checkBigIntEquality(state.interest,stateSim.interest)
+        checkBigIntEquality(state.cdp,stateSim.cdp)
       })
 
-      it('Should have correct total locked', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-        const locked = await pair.totalReserves()
-        const lockedSim = pairSim.pool.lock
-
-        expect(locked.asset).to.equalBigInt(lockedSim.asset)
-        expect(locked.collateral).to.equalBigInt(lockedSim.collateral)
-      })
 
       it('Should have correct total liquidity', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
@@ -67,7 +62,7 @@ describe('Borrow', () => {
         const liquidity = await pair.totalLiquidity()
         const liquiditySim = pairSim.pool.totalLiquidity
 
-        expect(liquidity).to.equalBigInt(liquiditySim)
+        checkBigIntEquality(liquidity,liquiditySim)
       })
 
       it('Should have correct liquidity of', async () => {
@@ -77,7 +72,7 @@ describe('Borrow', () => {
         const liquidityOf = await pair.liquidityOf(signers[0])
         const liquidityOfSim = pairSim.pool.senderLiquidity
 
-        expect(liquidityOf).to.equalBigInt(liquidityOfSim)
+        checkBigIntEquality(liquidityOf,liquidityOfSim)
       })
 
       it('Should have correct total claims', async () => {
@@ -86,8 +81,8 @@ describe('Borrow', () => {
         const claims = await pair.totalClaims()
         const claimsSim = pairSim.pool.totalClaims
 
-        expect(claims.bond).to.equalBigInt(claimsSim.bond)
-        expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+        checkBigIntEquality(claims.bond,claimsSim.bond)
+        checkBigIntEquality(claims.insurance,claimsSim.insurance)
       })
 
       it('Should have correct claims of', async () => {
@@ -97,8 +92,8 @@ describe('Borrow', () => {
         const claimsOf = await pair.claimsOf(signers[0])
         const claimsOfSim = pairSim.claims
 
-        expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-        expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+        checkBigIntEquality(claimsOf.bond,claimsOfSim.bond)
+        checkBigIntEquality(claimsOf.insurance,claimsOfSim.insurance)
       })
 
       it('Should have correct dues of', async () => {
@@ -111,9 +106,9 @@ describe('Borrow', () => {
         expect(duesOf.length).to.equal(duesOfSim.length)
 
         for (let i = 0; i < duesOf.length; i++) {
-          expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
-          expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
-          expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
+          checkBigIntEquality(duesOf[i].collateral,duesOfSim[i].collateral)
+          checkBigIntEquality(duesOf[i].debt,duesOfSim[i].debt)
+          checkBigIntEquality(duesOf[i].startBlock,duesOfSim[i].startBlock)
         }
       })
     })

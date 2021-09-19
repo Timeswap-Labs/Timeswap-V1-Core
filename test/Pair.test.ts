@@ -30,7 +30,7 @@ describe('Test Cases', () => {
   })
 
   it('Test Case 1', async () => {
-    console.log('Liquidity ', await pair.totalLiquidity())
+    
 
     // expect(assetToken.balanceOf())
 

@@ -163,9 +163,6 @@ export async function pairInit(asset: TestToken, collateral: TestToken, maturity
     await factory.getPair(asset.address, collateral.address)
   ) as PairContract
   const pairContractCallee = (await  pairContractCalleeFactory.deploy(pairContract.address)) as PairContractCallee
-  console.log(pairContractCallee.address)
-  console.log(pairContract.address)
-  console.log(factory.address)
   return new Pair(pairContractCallee,pairContract, maturity)
 }
 
