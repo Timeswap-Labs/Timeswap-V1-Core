@@ -45,6 +45,8 @@ describe('Withdraw', () => {
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.reserves
 
+        
+        
         expect(reserves.asset).to.equalBigInt(reservesSim.asset)
         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
       })
@@ -55,17 +57,10 @@ describe('Withdraw', () => {
         const state = await pair.state()
         const stateSim = pairSim.pool.state
 
+        
+        
+
         expect(state.asset).to.equalBigInt(stateSim.asset)
-      })
-
-      it('Should have correct total locked', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-        const locked = await pair.totalReserves()
-        const lockedSim = pairSim.pool.lock
-
-        expect(locked.asset).to.equalBigInt(lockedSim.asset)
-        expect(locked.collateral).to.equalBigInt(lockedSim.collateral)
       })
 
       it('Should have correct total liquidity', async () => {
@@ -92,6 +87,8 @@ describe('Withdraw', () => {
 
         const claims = await pair.totalClaims()
         const claimsSim = pairSim.pool.totalClaims
+        
+        
 
         expect(claims.bond).to.equalBigInt(claimsSim.bond)
         expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
