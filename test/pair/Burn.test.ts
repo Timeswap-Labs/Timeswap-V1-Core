@@ -111,6 +111,7 @@ describe('Burn', () => {
     })
   })
 
+  //TODO: this is not needed, duplicate from the constructor?
   it('Should be a proper address', async () => {
     const { pair } = await loadFixture(fixture)
     expect(pair.pairContractCallee.address).to.be.properAddress
