@@ -82,17 +82,9 @@ export async function lendFixture(
 
   await assetToken.transfer(pair.pairContractCallee.address, lendParams.assetIn)
 
-  const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
-  const feeBase = 0x10000n + FEE
-  const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSim.pool.state.interest, feeBase)
-  const cdpAdjust = k / ((pairSim.pool.state.asset + lendParams.assetIn) * interestAdjust)
-  const cdpDecrease = LendMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
-  
-
   const txn = await pair.upgrade(signer).lend(lendParams.assetIn,lendParams.interestDecrease, lendParams.cdpDecrease)
 
   const block = await getBlock(txn.blockHash!)
-  //TODO: TO CALL THE pairSim.lend using the test case parameters instead of the cdpDecrease computed from the lendMath
   pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
