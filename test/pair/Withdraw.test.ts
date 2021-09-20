@@ -6,7 +6,7 @@ import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture 
 
 const { loadFixture } = waffle
 
-describe('Pay', () => {
+describe('Withdraw', () => {
   const tests = testCases.withdraw()
   const mintTest = testCases.mint()
   const lendTest = testCases.lend()
@@ -18,7 +18,7 @@ describe('Pay', () => {
   }
 
   tests.Success.forEach((withdrawParams, idx) => {
-    describe.only(`Success case ${idx + 1} for pay`, () => {
+    describe(`Success case ${idx + 1} for withdraw`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
         await loadFixture(fixture)
 
