@@ -394,5 +394,87 @@ function withdrawMessage(params: WithdrawParams): {
     return { params, errorMessage: "" };
   }
 }
+export interface Pay {
+  Success: { mintParams: MintParams; borrowParams: BorrowParams; payParams: PayParams }[];
+  Failure: {
+    mintParams: MintParams;
+    borrowParams: BorrowParams;
+    payParams: PayParams;
+    errorMessage: string;
+  }[];
+}
 
-export default { mint, lend, burn, borrow, withdraw };
+export function pay(): Pay {
+  const mintTests = mintTestCases();
+  const borrowTests = borrowTestCases();
+  const payTests = payTestCases(borrowTests[0]);
+
+  const testCases = mintTests.flatMap((mintParams) => {
+    return borrowTests.flatMap((borrowParams) => {
+      return payTests.map((payParams) =>{
+        return { mintParams , borrowParams, payParams }
+      })
+    })
+  });
+
+  const success = testCases.filter(paySuccessCheck);
+  const failure = testCases.filter(payFailureCheck).map(payMessage);
+
+  return { Success: success, Failure: failure };
+  // generate random inputs based on some rule
+  // check which inputs will pass
+  // check which inputs will fail with which error
+  // pass inputs array and fail inputs array
+}
+function payTestCases(borrowParams: BorrowParams): PayParams[] {
+  const testCases = [
+    {ids : [0n], debtIn: [borrowParams.assetOut], collateralOut: [borrowParams.collateralIn]}
+
+  ];
+
+  return testCases;
+}
+export interface PayParams {
+  ids: bigint[];
+  debtIn: bigint[];
+  collateralOut: bigint[]
+}
+function paySuccessCheck(params: {mintParams: MintParams,borrowParams: BorrowParams,
+  payParams: PayParams}): boolean {
+  if (
+    params.payParams.ids.length == params.payParams.debtIn.length &&
+    params.payParams.ids.length == params.payParams.collateralOut.length &&
+    params.payParams.ids.length > 0
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function payFailureCheck(params: {mintParams: MintParams,borrowParams: BorrowParams,
+  payParams: PayParams}): boolean {
+  return !paySuccessCheck(params);
+}
+
+function payMessage({
+  mintParams,
+  borrowParams,
+  payParams
+}: {
+  mintParams: MintParams;
+  borrowParams: BorrowParams;
+  payParams: PayParams;
+}): {
+  mintParams: MintParams;
+  borrowParams: BorrowParams;
+  payParams: PayParams;
+  errorMessage: string;
+} {
+  if (paySuccessCheck({mintParams,borrowParams, payParams})) {
+    return { mintParams,borrowParams, payParams,  errorMessage: "Invalid" };
+  } else {
+    return { mintParams,borrowParams, payParams, errorMessage: "" };
+  }
+}
+export default { mint, lend, burn, borrow, withdraw, pay };

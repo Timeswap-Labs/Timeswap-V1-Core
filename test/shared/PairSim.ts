@@ -273,7 +273,6 @@ export class PairSim {
   }
 
   pay(
-    assetIn: bigint,
     ids: bigint[],
     debtsIn: bigint[],
     collateralsOut: bigint[],
@@ -311,9 +310,8 @@ export class PairSim {
       collateralOut += collateralsOut[i]
     }
 
-    if (!(assetIn >= debtIn)) return 'Invalid'
 
-    this.pool.lock.asset += assetIn
+    this.pool.lock.asset += debtIn
     this.pool.lock.collateral -= collateralOut
 
     this.reserves.collateral -= collateralOut
