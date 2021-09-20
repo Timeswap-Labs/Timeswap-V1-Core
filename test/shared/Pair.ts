@@ -7,6 +7,7 @@ import { advanceTimeAndBlock, getBlock } from './Helper'
 import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
 import type { TimeswapPairCallee as PairContractCallee } from '../../typechain/TimeswapPairCallee'
 import type { TestToken } from '../../typechain/TestToken'
+import { Address } from 'hardhat-deploy/dist/types'
 
 export class Pair {
   constructor(public pairContractCallee: PairContractCallee, public pairContract: PairContract, public maturity: bigint) {}
@@ -15,7 +16,9 @@ export class Pair {
     return new PairSigner(signerWithAddress, this)
   }
 
- 
+  async factory(): Promise<Address> {
+    return await this.pairContract.factory();
+  }
 
   async state(): Promise<State> {
     const [ asset, interest, cdp ] = await this.pairContract.constantProduct(this.maturity)
