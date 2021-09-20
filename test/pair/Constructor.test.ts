@@ -20,8 +20,7 @@ describe('Constructor', () => {
 
   it('Should have proper factory address', async () => {
     const { pair } = await loadFixture(fixture)
-    const result = await pair.pairContractCallee.factory()
-
+    const result = await pair.factory()
     expect(result).to.be.properAddress
   })
 })
