@@ -8,9 +8,7 @@ const { loadFixture } = waffle
 
 describe('Pay', () => {
   const tests = testCases.pay()
-  const mintTest = testCases.mint()
-  const lendTest = testCases.lend()
-  const borrowTest = testCases.borrow()
+  console.log(tests)
 
   async function fixture(): Promise<Fixture> {
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
