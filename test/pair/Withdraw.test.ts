@@ -18,7 +18,7 @@ describe('Withdraw', () => {
   }
 
   tests.Success.forEach((withdrawParams, idx) => {
-    describe.only(`Success case ${idx + 1} for withdraw`, () => {
+    describe(`Success case ${idx + 1} for withdraw`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
         await loadFixture(fixture)
 
