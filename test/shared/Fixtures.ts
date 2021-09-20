@@ -2,7 +2,7 @@ import { advanceTimeAndBlock, getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
 import { PairSim } from './PairSim'
 import { testTokenNew } from './TestToken'
-import { LendParams, BorrowParams, MintParams, BurnParams, WithdrawParams } from '../pair/TestCases'
+import { LendParams, BorrowParams, MintParams, BurnParams, WithdrawParams, PayParams } from '../pair/TestCases'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import LendMath from '../libraries/LendMath'
 import BorrowMath from '../libraries/BorrowMath'
@@ -124,22 +124,14 @@ export async function borrowFixture(
 export async function payFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  borrowParams: BorrowParams
+  payParams: PayParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-
-  await collateralToken.transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
-
-  const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
-  const feeBase = 0x10000n - FEE
-  const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSim.pool.state.interest, feeBase)
-  const cdpAdjust = k / ((pairSim.pool.state.asset - borrowParams.assetOut) * interestAdjust)
-  const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
-
-  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
+ 
+  const txn = await pair.upgrade(signer).pay(payParams.ids,payParams.debtIn,payParams.collateralOut);
 
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(borrowParams.assetOut,  borrowParams.interestIncrease, cdpIncrease, block)
+  pairSim.pay(payParams.ids,payParams.debtIn,payParams.collateralOut,block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }

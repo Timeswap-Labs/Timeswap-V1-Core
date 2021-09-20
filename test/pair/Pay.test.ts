@@ -2,22 +2,22 @@ import { ethers, waffle } from 'hardhat'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import testCases from './TestCases'
 import { expect } from '../shared/Expect'
-import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture } from '../shared/Fixtures'
+import { payFixture, constructorFixture, Fixture, mintFixture, borrowFixture, lendFixture } from '../shared/Fixtures'
 
 const { loadFixture } = waffle
 
 describe('Pay', () => {
-  const tests = testCases.withdraw()
+  const tests = testCases.pay()
   const mintTest = testCases.mint()
   const lendTest = testCases.lend()
-  const burnTest = testCases.burn()
+  const borrowTest = testCases.borrow()
 
   async function fixture(): Promise<Fixture> {
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
     return constructor
   }
 
-  tests.Success.forEach((withdrawParams, idx) => {
+  tests.Success.forEach((params, idx) => {
     describe.only(`Success case ${idx + 1} for pay`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
         await loadFixture(fixture)
@@ -25,18 +25,16 @@ describe('Pay', () => {
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
 
-        const mint = await mintFixture(constructor, signers[0], mintTest.Success[0])
-        const lend = await lendFixture(mint, signers[0], lendTest.Success[0].lendParams)
+        const mint = await mintFixture(constructor, signers[0], params.mintParams)
+        const borrow = await borrowFixture(mint, signers[0], params.borrowParams)
 
         await advanceTimeAndBlock(31536000)
-        const withdraw = await withdrawFixture(
-          lend,
+        const pay = await payFixture(
+          borrow,
           signers[0],
-          mintTest.Success[0],
-          burnTest.Success[0],
-          withdrawParams
+          params.payParams
         )
-        return withdraw
+        return pay
       }
 
       it('Should have correct total reserves', async () => {
