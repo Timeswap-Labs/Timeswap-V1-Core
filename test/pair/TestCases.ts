@@ -408,19 +408,13 @@ export function pay(): Pay {
   const mintTests = mintTestCases();
   const borrowTests = borrowTestCases();
   const payTests = payTestCases(borrowTests[0]);
+  const payTestFail = payTestCaseFailure(borrowTests[0])
 
-  const testCases = mintTests.flatMap((mintParams) => {
-    return borrowTests.flatMap((borrowParams) => {
-      return payTests.map((payParams) =>{
-        return { mintParams , borrowParams, payParams }
-      })
-    })
-  });
+  const successTestCase = {mintTests,borrowTests,payTests};
+  const failureTestCase = {mintTests, borrowTests, payTestFail}
 
-  const success = testCases.filter(paySuccessCheck);
-  const failure = testCases.filter(payFailureCheck).map(payMessage);
 
-  return { Success: success, Failure: failure };
+  return { Success: successTestCase, Failure: payMessage(failureTestCase) };
   // generate random inputs based on some rule
   // check which inputs will pass
   // check which inputs will fail with which error
@@ -429,6 +423,14 @@ export function pay(): Pay {
 function payTestCases(borrowParams: BorrowParams): PayParams[] {
   const testCases = [
     {ids : [0n], debtIn: [borrowParams.assetOut], collateralOut: [borrowParams.collateralIn]}
+
+  ]
+
+  return testCases;
+}
+function payTestCaseFailure(borrowParams: BorrowParams): PayParams[] {
+  const testCases = [
+    {ids : [], debtIn: [borrowParams.assetOut], collateralOut: [borrowParams.collateralIn]}
 
   ];
 
