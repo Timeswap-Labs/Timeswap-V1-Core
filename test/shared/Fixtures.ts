@@ -99,16 +99,16 @@ export async function borrowFixture(
 
   await collateralToken.transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
 
-  const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
-  const feeBase = 0x10000n - FEE
-  const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSim.pool.state.interest, feeBase)
-  const cdpAdjust = k / ((pairSim.pool.state.asset - borrowParams.assetOut) * interestAdjust)
-  const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
+  // const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
+  // const feeBase = 0x10000n - FEE
+  // const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSim.pool.state.interest, feeBase)
+  // const cdpAdjust = k / ((pairSim.pool.state.asset - borrowParams.assetOut) * interestAdjust)
+  // const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
 
-  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
+  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)
 
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(borrowParams.assetOut,  borrowParams.interestIncrease, cdpIncrease, block)
+  pairSim.borrow(borrowParams.assetOut,  borrowParams.interestIncrease, borrowParams.cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
