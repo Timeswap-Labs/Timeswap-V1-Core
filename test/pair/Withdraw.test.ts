@@ -6,7 +6,7 @@ import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture 
 
 const { loadFixture } = waffle
 
-describe('Withdraw', () => {
+describe('Pay', () => {
   const tests = testCases.withdraw()
   const mintTest = testCases.mint()
   const lendTest = testCases.lend()

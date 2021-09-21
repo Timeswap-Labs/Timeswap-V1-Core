@@ -395,9 +395,7 @@ function withdrawMessage(params: WithdrawParams): {
   }
 }
 export interface Pay {
-  // Type '{ mintTests: MintParams[]; borrowTests: BorrowParams[]; 0: any; payTests: PayParams[]; }' is missing the following properties from type '{ mintParams: MintParams; borrowParams: BorrowParams; payParams: PayParams; }': mintParams, borrowParams, payParamsts(2739)
-
-  Success: { mintParams: MintParams[]; borrowParams: BorrowParams[]; payParams: PayParams[] };
+  Success: { mintParams: MintParams; borrowParams: BorrowParams; payParams: PayParams }[];
   Failure: {
     mintParams: MintParams;
     borrowParams: BorrowParams;
@@ -406,31 +404,36 @@ export interface Pay {
   }[];
 }
 
-// TODO: to assign a type to the return value
-export function pay(): any {
-  const mintTests = mintTestCases(); // getting the mint Test Cases
-  const lendTests = lendTestCases(); // getting the lend Test Cases
-  const borrowTests = borrowTestCases(); // getting the borrow Test Cases
+export function pay(): Pay {
+  const mintTests = mintTestCases();
+  const borrowTests = borrowTestCases();
   const payTests = payTestCases(borrowTests[0]);
-  // const payTestFail = payTestCaseFailure(borrowTests[0])
+  const payTestFail = payTestCaseFailure(borrowTests[0])
 
   const successTestCase = {mintTests,borrowTests,payTests};
-  // const failureTestCase = {mintTests, borrowTests, payTestFail}
+  const failureTestCase = {mintTests, borrowTests, payTestFail}
 
-  return { Success: successTestCase };
+
+  return { Success: successTestCase, Failure: payMessage(failureTestCase) };
+  // generate random inputs based on some rule
+  // check which inputs will pass
+  // check which inputs will fail with which error
+  // pass inputs array and fail inputs array
 }
 function payTestCases(borrowParams: BorrowParams): PayParams[] {
-  // TODO: we should not be passing in the id, we should rather we pulling out the id from the contract
   const testCases = [
-    {ids : [1n], debtIn: [borrowParams.assetOut], collateralOut: [borrowParams.collateralIn]}
+    {ids : [0n], debtIn: [borrowParams.assetOut], collateralOut: [borrowParams.collateralIn]}
+
   ]
+
   return testCases;
 }
-
 function payTestCaseFailure(borrowParams: BorrowParams): PayParams[] {
   const testCases = [
     {ids : [], debtIn: [borrowParams.assetOut], collateralOut: [borrowParams.collateralIn]}
+
   ];
+
   return testCases;
 }
 export interface PayParams {
