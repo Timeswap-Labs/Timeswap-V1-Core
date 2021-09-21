@@ -129,15 +129,13 @@ export class PairSigner extends Pair {
     return txn
   }
 
-
-  // pairContract.borrow(maturity,assetTo,dueTo,xDecrease,yIncrease,zIncrease,getData(msg.sender));
   async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .borrow(
         this.maturity,
         this.signerWithAddress.address,
-        this.pairContractCallee.address,
+        this.signerWithAddress.address,
         assetOut,
         interestIncrease,
         cdpIncrease
@@ -145,11 +143,11 @@ export class PairSigner extends Pair {
     await txn.wait()
     return txn
   }
-  // pairContract.pay(maturity,to,owner,ids,assetsIn,collateralsOut,getData(msg.sender));
+
   async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut) //FIXME
+      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut) //FIXME
     await txn.wait()
     return txn
   }

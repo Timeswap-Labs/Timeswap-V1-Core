@@ -58,14 +58,9 @@ describe('Pay', () => {
         const constructor = await loadFixture(fixture)
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
-        console.log("mint has worked");
         const borrow = await borrowFixture(mint, signers[0], borrowParams)
-        console.log(borrow);
-        console.log("borrow has worked");
 
         await advanceTimeAndBlock(31535000)  // pushing the time ahead
-        console.log("Advancing time");
-        //TODO: to resolve
         const pay = await payFixture(
           borrow,
           signers[0],
