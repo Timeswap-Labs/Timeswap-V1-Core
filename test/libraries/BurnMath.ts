@@ -7,6 +7,7 @@ export function getAsset(
     totalBonds: bigint,
     totalLiquidity: bigint
 ) : bigint {
+    
     const assetReserve = assetState
     if (assetReserve <= totalBonds) return 0n
     let _assetOut = assetReserve

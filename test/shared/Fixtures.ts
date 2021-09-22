@@ -45,8 +45,8 @@ export async function mintFixture(
   const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal,PROTOCOL_FEE,(await now()));
 
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
-  console.log(collateralIn)
-  console.log(liquidity);
+  
+  
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(mintParams.assetIn, collateralIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
 
@@ -56,24 +56,13 @@ export async function mintFixture(
 export async function burnFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  mintParams: MintParams,
   burnParams: BurnParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await assetToken.transfer(pair.pairContractCallee.address, mintParams.assetIn)
-  await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
-  const txnMint = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
   
-  pairSim.mint(
-    mintParams.assetIn,
-    mintParams.collateralIn,
-    mintParams.interestIncrease,
-    mintParams.cdpIncrease,
-    await getBlock(txnMint.blockHash!)
-  )
-  advanceTimeAndBlock(31536000)
+  
 
   const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
   const block = await getBlock(txnBurn.blockHash!)

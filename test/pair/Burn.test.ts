@@ -1,8 +1,8 @@
 import { ethers, waffle } from 'hardhat'
-import { now } from '../shared/Helper'
+import { now , advanceTimeAndBlock} from '../shared/Helper'
 import testCases from './TestCases'
 import { expect } from '../shared/Expect'
-import { burnFixture, constructorFixture, Fixture } from '../shared/Fixtures'
+import { burnFixture, mintFixture,constructorFixture, Fixture } from '../shared/Fixtures'
 
 const { loadFixture } = waffle
 
@@ -22,7 +22,10 @@ describe('Burn', () => {
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
 
-        const burn = await burnFixture(constructor, signers[0], mintTest.Success[0], burnParams)
+        const mint = await mintFixture(constructor, signers[0], mintTest.Success[0]);
+        advanceTimeAndBlock(31536000)
+
+        const burn = await burnFixture(mint,signers[0],burnParams)
         return burn
       }
 
@@ -84,8 +87,9 @@ describe('Burn', () => {
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
-
-        const burn = await burnFixture(constructor, signers[0], mintTest.Success[0], burnParams.params)
+        const mint = await mintFixture(constructor, signers[0], mintTest.Success[0]);
+        advanceTimeAndBlock(31536000)
+        const burn = await burnFixture(constructor, signers[0], burnParams.params)
         return burn
       }
 
