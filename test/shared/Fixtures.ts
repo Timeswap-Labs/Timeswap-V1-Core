@@ -6,7 +6,10 @@ import { LendParams, BorrowParams, MintParams, BurnParams, WithdrawParams, PayPa
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import LendMath from '../libraries/LendMath'
 import BorrowMath from '../libraries/BorrowMath'
-import { FEE } from './Constants'
+import MintMath from '../libraries/MintMath'
+import { FEE, PROTOCOL_FEE } from './Constants'
+import { now } from '../shared/Helper'
+
 
 import type { TestToken } from '../../typechain/TestToken'
 
@@ -37,10 +40,15 @@ export async function mintFixture(
   await assetToken.transfer(pair.pairContractCallee.address, mintParams.assetIn)
   await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
-  const txn = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
+  const collateralIn = MintMath.getCollateral(pair.maturity,mintParams.assetIn,mintParams.interestIncrease,mintParams.cdpIncrease,(await now()));
+  const liquidityTotal = MintMath.getLiquidityTotal1(mintParams.assetIn)
+  const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal,PROTOCOL_FEE,(await now()));
 
+  const txn = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
+  console.log(collateralIn)
+  console.log(liquidity);
   const block = await getBlock(txn.blockHash!)
-  pairSim.mint(mintParams.assetIn, mintParams.collateralIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
+  pairSim.mint(mintParams.assetIn, collateralIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }

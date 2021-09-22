@@ -7,7 +7,7 @@ export function getAsset(
     totalBonds: bigint,
     totalLiquidity: bigint
 ) : bigint {
-    const assetReserve = assetState + assetLock
+    const assetReserve = assetState
     if (assetReserve <= totalBonds) return 0n
     let _assetOut = assetReserve
     _assetOut -= totalBonds
@@ -28,7 +28,7 @@ export function getCollateral(
     },
     totalLiquidity: bigint
 ) : bigint {
-    let assetReserve = assetState + lock.asset
+    let assetReserve = assetState
     let _collateralOut = lock.collateral
     if (assetReserve >= supplies.bond) {
         _collateralOut = mulDiv(_collateralOut, liquidityIn, totalLiquidity)

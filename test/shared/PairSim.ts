@@ -52,10 +52,13 @@ export class PairSim {
 
     let liquidityOut: bigint
 
+    console.log(assetIn,collateralIn,interestIncrease,cdpIncrease);
+    console.log('total liquidity',this.pool.totalLiquidity)
     if (this.pool.totalLiquidity == 0n) {
       const liquidityTotal = MintMath.getLiquidityTotal1(assetIn)
       liquidityOut = MintMath.getLiquidity(this.maturity, liquidityTotal, protocolFee, now)
       this.pool.totalLiquidity += liquidityTotal
+      console.log('total liquidity', this.pool.totalLiquidity)
       this.pool.ownerLiquidity += liquidityTotal - liquidityOut
 
       //   this.pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut
@@ -74,6 +77,7 @@ export class PairSim {
       //     pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
     }
 
+      console.log('total liquidity',this.pool.totalLiquidity);
     if (!(liquidityOut > 0)) return 'Invalid'
 
     // pool.liquidities[liquidityTo] += liquidityOut;
@@ -149,7 +153,10 @@ export class PairSim {
 
     this.reserves.asset -= tokensOut.asset
     this.reserves.collateral -= tokensOut.collateral
-
+    console.log(this.reserves.asset);
+    console.log(tokensOut.asset);
+    console.log(tokensOut.collateral)
+    console.log(this.reserves.collateral);
     return tokensOut
   }
 
@@ -250,6 +257,8 @@ export class PairSim {
     if (!BorrowMath.check(this.pool.state, assetOut, interestIncrease, cdpIncrease, fee))
       return 'constant product check'
     let dueOut = dueDefault()
+
+    console.log(assetOut,interestIncrease,cdpIncrease,this.pool,this.claims,this.reserves)
     dueOut.debt = BorrowMath.getDebt(this.maturity, assetOut, interestIncrease, now)
     dueOut.collateral = BorrowMath.getCollateral(this.maturity, this.pool.state, assetOut, cdpIncrease, now)
     dueOut.startBlock = blockNumber

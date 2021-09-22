@@ -1,9 +1,9 @@
 import { shiftUp } from '../libraries/Math'
-import { mulDiv } from '../libraries/FullMath'
+import { mulDiv, mulDivUp } from '../libraries/FullMath'
 
 export function getLiquidityTotal1(assetIn: bigint): bigint {
   let liquidityTotal = assetIn
-  liquidityTotal <<= 40n
+  liquidityTotal <<= 56n
   return liquidityTotal
 }
 
@@ -65,9 +65,8 @@ export function getCollateral(
   let _collateralOut = maturity
   _collateralOut -= now
   _collateralOut *= interestIncrease
-  _collateralOut += assetIn << 32n
-  _collateralOut = mulDiv(_collateralOut, cdpIncrease, assetIn << 32n)
-  _collateralOut += cdpIncrease
+  _collateralOut += assetIn << 33n
+  _collateralOut = mulDivUp(_collateralOut, cdpIncrease, assetIn << 32n)
   const collateralOut = _collateralOut
   return collateralOut
 }
