@@ -14,7 +14,6 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
-import "hardhat/console.sol";
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
