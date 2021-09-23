@@ -14,6 +14,7 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import 'hardhat/console.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -332,6 +333,8 @@ contract TimeswapPair is IPair {
         asset.safeTransfer(assetTo, xDecrease);
 
         emit Sync(maturity, pool.state);
+        console.log("borrow tx successful");
+        console.log("borrow tx: dueTo", dueTo);
         emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
     }
 
@@ -345,6 +348,7 @@ contract TimeswapPair is IPair {
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
+        
         require(block.timestamp < maturity, 'Expired');
         require(ids.length == assetsIn.length, 'Invalid');
         require(ids.length == collateralsOut.length, 'Invalid');
@@ -356,10 +360,14 @@ contract TimeswapPair is IPair {
         Due[] storage dues = pool.dues[owner];
 
         for (uint256 i = 0; i < ids.length; i++) {
-            Due storage due = dues[ids[i]];
+            console.log("this is hit6");
+            Due storage due = dues[ids[i]]; // FIXME
+            console.log("this is hit7");
             require(due.startBlock != BlockNumber.get(), 'Invalid');
+            console.log("this is hit8");
 
-            if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
+            if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden from the owner');
+            console.log("we have hit this");
             PayMath.checkProportional(assetsIn[i], collateralsOut[i], due);
             
             due.debt -= assetsIn[i];

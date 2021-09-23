@@ -130,12 +130,21 @@ export class PairSigner extends Pair {
   }
 
   async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
+    // uint256 maturity,
+    //     address assetTo,
+    //     address dueTo,
+    //     uint112 xDecrease,
+    //     uint112 yIncrease,
+    //     uint112 zIncrease,
+    //     bytes calldata data
+    console.log(this.pairContractCallee.address);
+    console.log(this.pairContract.address);
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .borrow(
         this.maturity,
         this.signerWithAddress.address,
-        this.signerWithAddress.address,
+        this.pairContractCallee.address,
         assetOut,
         interestIncrease,
         cdpIncrease
@@ -145,9 +154,19 @@ export class PairSigner extends Pair {
   }
 
   async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
+    console.log("this is hit4");
+    console.log(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut);
+    console.log("this is hit5");
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut) //FIXME
+      .pay(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut)
+      // uint256 maturity,
+      // address to,
+      // address owner,
+      // uint256[] memory ids,
+      // uint112[] memory assetsIn,
+      // uint112[] memory collateralsOut,
+      // bytes calldata data
     await txn.wait()
     return txn
   }

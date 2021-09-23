@@ -116,8 +116,11 @@ export async function payFixture(
   payParams: PayParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-
+  console.log(pair.pairContractCallee.address)
+  console.log(signer.address);
+  console.log("this is hit2");
   console.log(payParams);
+  console.log("this is hit3");
   const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
 
   const block = await getBlock(txn.blockHash!)
