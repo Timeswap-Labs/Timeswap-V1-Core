@@ -68,25 +68,19 @@ describe('Pay', () => {
           signers[0],
           payParams
         )
-        console.log(pay);
         return pay
       }
 
-      it('to be deleted', async () => {
+      it('Should have correct total reserves', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
+
+        const reserves = await pair.totalReserves()
+        const reservesSim = pairSim.reserves // pairSim is not getting the reserves (the assets)
+        console.log("reserves, reservesSim", reserves, reservesSim);
+
+        expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+        expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
       })
-
-      // it('Should have correct total reserves', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-      //   const reserves = await pair.totalReserves()
-      //   const reservesSim = pairSim.reserves
-
-
-
-      //   expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-      //   expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
-      // })
 
       // it('Should have correct state asset', async () => {
       //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
