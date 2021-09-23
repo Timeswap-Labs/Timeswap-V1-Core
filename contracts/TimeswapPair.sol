@@ -174,7 +174,7 @@ contract TimeswapPair is IPair {
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-        console.log(id);
+        
 
         pool.state.reserves.asset += xIncrease;
         pool.state.reserves.collateral += dueOut.collateral;
@@ -322,7 +322,7 @@ contract TimeswapPair is IPair {
         Callback.borrow(collateral, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-        console.log(id);
+        
         pool.state.reserves.asset -= xDecrease;
         pool.state.reserves.collateral += dueOut.collateral;
         pool.state.totalDebtCreated += dueOut.debt;

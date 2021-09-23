@@ -59,8 +59,8 @@ export class Pair {
     return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
   }
 
-  async duesOf(signerWithAddress: SignerWithAddress): Promise<Due[]> {
-    const dues = await this.pairContract.duesOf(this.maturity, signerWithAddress.address)
+  async duesOf(): Promise<Due[]> {
+    const dues = await this.pairContract.duesOf(this.maturity,this.pairContractCallee.address)
 
     return dues.map((value) => {
       return {
@@ -85,7 +85,6 @@ export class PairSigner extends Pair {
       .connect(this.signerWithAddress)
       .mint(
         this.maturity,
-        this.signerWithAddress.address,
         this.signerWithAddress.address,
         xIncrease,
         yIncrease,
@@ -143,7 +142,6 @@ export class PairSigner extends Pair {
       .borrow(
         this.maturity,
         this.signerWithAddress.address,
-        this.pairContractCallee.address,
         assetOut,
         interestIncrease,
         cdpIncrease

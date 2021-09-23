@@ -101,7 +101,7 @@ describe('Lend', () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
         const signers = await ethers.getSigners()
 
-        const duesOf = await pair.duesOf(signers[0])
+        const duesOf = await pair.duesOf()
         const duesOfSim = pairSim.dues
 
         expect(duesOf.length).to.equal(duesOfSim.length)

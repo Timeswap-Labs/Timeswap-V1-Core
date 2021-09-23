@@ -100,7 +100,7 @@ describe('Mint', () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
         const signers = await ethers.getSigners()
 
-        const duesOf = await pair.duesOf(signers[0])
+        const duesOf = await pair.duesOf()
         const duesOfSim = pairSim.dues
 
         expect(duesOf.length).to.equal(duesOfSim.length)
@@ -132,7 +132,6 @@ describe('Mint', () => {
             .connect(signers[0])
             .mint(
               pair.maturity,
-              signers[0].address,
               signers[0].address,
               mintParams.assetIn,
               mintParams.interestIncrease,
