@@ -20,10 +20,6 @@ export class Pair {
     return await this.pairContract.factory();
   }
 
-  async pools(): Promise<any> {
-    return await this.pairContract.pools();
-  }
-
   async state(): Promise<State> {
     const [ asset, interest, cdp ] = await this.pairContract.constantProduct(this.maturity)
     return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }

@@ -64,8 +64,6 @@ describe('Pay', () => {
         
         const borrow = await borrowFixture(mint, signers[0], borrowParams)
         console.log((await borrow.pair.totalReserves()));
-        const abc = await borrow.pair.pools()
-        console.log(abc);
         await advanceTimeAndBlock(31535000)  // pushing the time ahead
         const pay = await payFixture(
           borrow,
