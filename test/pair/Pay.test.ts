@@ -33,7 +33,7 @@ describe('Pay', () => {
           cdpIncrease: 2n
         },
         payParams:
-          { ids: [1n], debtIn: [200n], collateralOut: [72n] }
+          { ids: [0n], debtIn: [200n], collateralOut: [72n] }
       }
     ],
   };

@@ -331,11 +331,15 @@ contract TimeswapPair is IPair {
         pool.state.z += zIncrease;
 
         asset.safeTransfer(assetTo, xDecrease);
+        Due[] storage dues = pool.dues[dueTo];
+        Due storage due = dues[id];
 
         emit Sync(maturity, pool.state);
         console.log("borrow tx successful");
         console.log("borrow tx: dueTo", dueTo);
-        emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
+        console.log("borrow tx: id", id);
+        console.log("due.collateral", due.collateral);
+        // emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
     }
 
     /// @inheritdoc IPair
