@@ -9,12 +9,7 @@ library PayMath {
         uint112 assetIn,
         uint112 collateralOut,
         IPair.Due memory due
-    ) internal view {
-        //TODO: to remove console.log and also make the function as pure
-        console.log("assetIn", assetIn);  // 200
-        console.log("due.collateral", due.collateral); // 71
-        console.log("collateralOut", collateralOut); // 50
-        console.log("due.debt", due.debt); // 201
+    ) internal pure {
         require(uint256(assetIn) * due.collateral >= uint256(collateralOut) * due.debt, 'Forbidden');
     }
 }

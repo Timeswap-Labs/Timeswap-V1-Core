@@ -137,7 +137,7 @@ export class PairSigner extends Pair {
     //     uint112 yIncrease,
     //     uint112 zIncrease,
     //     bytes calldata data
-    console.log("assetOut from borrow in Pair.ts", assetOut);
+
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .borrow(
@@ -153,9 +153,6 @@ export class PairSigner extends Pair {
   }
 
   async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
-    console.log("this is hit4");
-    console.log(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut);
-    console.log("this is hit5");
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .pay(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut)

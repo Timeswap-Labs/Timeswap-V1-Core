@@ -14,7 +14,6 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
-import 'hardhat/console.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -308,16 +307,13 @@ contract TimeswapPair is IPair {
         require(assetTo != address(this) && dueTo != address(this), 'Invalid');
         require(xDecrease > 0, 'Invalid');
         require(yIncrease > 0 || zIncrease > 0, 'Invalid');
-        console.log("the borrow function");
-        console.log(xDecrease, yIncrease, zIncrease);
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
 
         BorrowMath.check(pool.state, xDecrease, yIncrease, zIncrease, fee);
 
-        dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease); // FIXME the debt is being increased by 1
-        console.log("dueOut.debt from the borrow function");
-        console.log(dueOut.debt);
+        dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease); 
+
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 
@@ -338,7 +334,6 @@ contract TimeswapPair is IPair {
         Due storage due = dues[id];
 
         emit Sync(maturity, pool.state);
-        console.log("due.collateral", due.collateral);
         // emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
     }
 
@@ -364,7 +359,6 @@ contract TimeswapPair is IPair {
         Due[] storage dues = pool.dues[owner];
 
         for (uint256 i = 0; i < ids.length; i++) {
-            console.log(ids[i]);
             Due storage due = dues[ids[i]]; // FIXME: the id is coming to be 0 for the first borrow also, irrespective of the mint function being carried out earlier
             require(due.startBlock != BlockNumber.get(), 'Invalid');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
@@ -374,15 +368,12 @@ contract TimeswapPair is IPair {
             assetIn += assetsIn[i];
             collateralOut += collateralsOut[i];
         }
-        console.log("this is hit123");
         if (assetIn > 0) Callback.pay(asset, assetIn, data);
-        console.log("this is hit124");
 
         pool.state.reserves.asset += assetIn;
         pool.state.reserves.collateral -= collateralOut;
 
         if (collateralOut > 0) collateral.safeTransfer(to, collateralOut);
-        console.log("this is hit125");
 
         emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }

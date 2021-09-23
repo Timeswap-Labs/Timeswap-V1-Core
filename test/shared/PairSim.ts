@@ -325,6 +325,7 @@ export class PairSim {
     this.pool.lock.asset += debtIn
     this.pool.lock.collateral -= collateralOut
 
+    this.reserves.asset += debtIn
     this.reserves.collateral -= collateralOut
 
     return collateralOut
