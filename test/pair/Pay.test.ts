@@ -57,10 +57,8 @@ describe('Pay', () => {
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
-        // return { pair, pairSim, assetToken, collateralToken }
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
-        // return { pair, pairSim, assetToken, collateralToken }
         
         const borrow = await borrowFixture(mint, signers[0], borrowParams)
         console.log((await borrow.pair.totalReserves()));
