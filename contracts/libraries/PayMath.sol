@@ -2,7 +2,6 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
-import "hardhat/console.sol";
 
 library PayMath {
     function checkProportional(

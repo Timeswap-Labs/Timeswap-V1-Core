@@ -8,7 +8,6 @@ import {ITimeswapBorrowCallback} from '../interfaces/callback/ITimeswapBorrowCal
 import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '../interfaces/callback/ITimeswapPayCallback.sol';
-import 'hardhat/console.sol';
 
 
 contract TimeswapPairCallee {
