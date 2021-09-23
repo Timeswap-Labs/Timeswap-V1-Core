@@ -18,13 +18,13 @@ export async function constructorFixture(
   collateralValue: bigint,
   maturity: bigint
 ): Promise<Fixture> {
-  const assetToken = await testTokenNew('Ether', 'WETH', assetValue)  
+  const assetToken = await testTokenNew('Ether', 'WETH', assetValue)
   const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
 
   const pair = await pairInit(assetToken, collateralToken, maturity)
   // call the approve function in the test Tokens
-  await assetToken.approve(pair.pairContractCallee.address,assetValue);
-  await collateralToken.approve(pair.pairContractCallee.address,collateralValue);
+  await assetToken.approve(pair.pairContractCallee.address, assetValue);
+  await collateralToken.approve(pair.pairContractCallee.address, collateralValue);
   const pairSim = new PairSim(maturity)
 
   return { pair, pairSim, assetToken, collateralToken }
@@ -40,13 +40,13 @@ export async function mintFixture(
   await assetToken.transfer(pair.pairContractCallee.address, mintParams.assetIn)
   await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
 
-  const collateralIn = MintMath.getCollateral(pair.maturity,mintParams.assetIn,mintParams.interestIncrease,mintParams.cdpIncrease,(await now()));
+  const collateralIn = MintMath.getCollateral(pair.maturity, mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, (await now()));
   const liquidityTotal = MintMath.getLiquidityTotal1(mintParams.assetIn)
-  const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal,PROTOCOL_FEE,(await now()));
+  const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal, PROTOCOL_FEE, (await now()));
 
-  const txn = await pair.upgrade(signer).mint(mintParams.assetIn,mintParams.interestIncrease, mintParams.cdpIncrease)
-  
-  
+  const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
+
+
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(mintParams.assetIn, collateralIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
 
@@ -61,8 +61,8 @@ export async function burnFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
 
-  
-  
+
+
 
   const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
   const block = await getBlock(txnBurn.blockHash!)
@@ -79,7 +79,7 @@ export async function lendFixture(
 
   await assetToken.transfer(pair.pairContractCallee.address, lendParams.assetIn)
 
-  const txn = await pair.upgrade(signer).lend(lendParams.assetIn,lendParams.interestDecrease, lendParams.cdpDecrease)
+  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)
 
   const block = await getBlock(txn.blockHash!)
   pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
@@ -105,7 +105,7 @@ export async function borrowFixture(
   const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
 
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(borrowParams.assetOut,  borrowParams.interestIncrease, cdpIncrease, block)
+  pairSim.borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
@@ -116,11 +116,12 @@ export async function payFixture(
   payParams: PayParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
- 
-  const txn = await pair.upgrade(signer).pay(payParams.ids,payParams.debtIn,payParams.collateralOut);
+
+  console.log(payParams);
+  const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
 
   const block = await getBlock(txn.blockHash!)
-  pairSim.pay(payParams.ids,payParams.debtIn,payParams.collateralOut,block)
+  pairSim.pay(payParams.ids, payParams.debtIn, payParams.collateralOut, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }

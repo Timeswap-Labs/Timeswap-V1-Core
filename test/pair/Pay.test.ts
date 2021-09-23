@@ -40,6 +40,7 @@ describe('Pay', () => {
 
   async function fixture(): Promise<Fixture> {
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
+    //return { pair, pairSim, assetToken, collateralToken }
     return constructor
   }
 
@@ -56,10 +57,15 @@ describe('Pay', () => {
 
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
+        // return { pair, pairSim, assetToken, collateralToken }
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
+        // return { pair, pairSim, assetToken, collateralToken }
+        
         const borrow = await borrowFixture(mint, signers[0], borrowParams)
-
+        console.log((await borrow.pair.totalReserves()));
+        const abc = await borrow.pair.pools()
+        console.log(abc);
         await advanceTimeAndBlock(31535000)  // pushing the time ahead
         const pay = await payFixture(
           borrow,
