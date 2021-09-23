@@ -6,6 +6,10 @@ import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 
 const { loadFixture } = waffle
 
+//TODO: Check why chai's native assertion library isnt working and remove the helper function
+function checkBigIntEquality(x: bigint, y: bigint){
+  expect(x.toString()).to.equal(y.toString());
+}
 describe('Mint', () => {
   const tests = testCases.mint()
 
@@ -46,15 +50,6 @@ describe('Mint', () => {
         expect(state.cdp).to.equalBigInt(stateSim.cdp)
       })
 
-      // it('Should have correct total locked', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-      //   const locked = await pair.totalLocked()
-      //   const lockedSim = pairSim.pool.lock
-
-      //   expect(locked.asset).to.equalBigInt(lockedSim.asset)
-      //   expect(locked.collateral).to.equalBigInt(lockedSim.collateral)
-      // })
 
       it('Should have correct total liquidity', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
@@ -74,7 +69,15 @@ describe('Mint', () => {
 
         expect(liquidityOf).to.equalBigInt(liquidityOfSim)
       })
+      it('Should have correct total debt', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
 
+        const totalDebtCreated = await pair.totalDebtCreated()
+        const totalDebtCreatedSim = pairSim.pool.totalDebt
+
+        checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
+      })
       it('Should have correct total claims', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 

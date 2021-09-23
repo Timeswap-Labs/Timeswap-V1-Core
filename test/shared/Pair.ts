@@ -59,6 +59,10 @@ export class Pair {
     return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
   }
 
+  async totalDebtCreated(): Promise<bigint> {
+    const totalDebtCreated  = await this.pairContract.totalDebtCreated(this.maturity)
+    return BigInt(totalDebtCreated.toString())
+  }
   async duesOf(): Promise<Due[]> {
     const dues = await this.pairContract.duesOf(this.maturity,this.pairContractCallee.address)
 
@@ -151,9 +155,10 @@ export class PairSigner extends Pair {
   }
 
   async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
+    let owner = this.pairContractCallee.address
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut)
+      .pay(this.maturity, this.signerWithAddress.address, owner, ids, debtsIn, collateralsOut)
       // uint256 maturity,
       // address to,
       // address owner,

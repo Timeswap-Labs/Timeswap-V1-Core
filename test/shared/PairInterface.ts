@@ -42,6 +42,7 @@ export interface Pool {
   ownerLiquidity: bigint
   senderLiquidity: bigint
   totalLiquidity: bigint
+  totalDebt:bigint
   totalClaims: Claims
 }
 
@@ -52,6 +53,7 @@ export function poolDefault(): Pool {
     ownerLiquidity: 0n,
     senderLiquidity: 0n,
     totalLiquidity: 0n,
+    totalDebt: 0n,
     totalClaims: claimsDefault(),
   }
 }
