@@ -14,6 +14,7 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import "hardhat/console.sol";
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -173,6 +174,7 @@ contract TimeswapPair is IPair {
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
+        console.log(id);
 
         pool.state.reserves.asset += xIncrease;
         pool.state.reserves.collateral += dueOut.collateral;
@@ -320,7 +322,7 @@ contract TimeswapPair is IPair {
         Callback.borrow(collateral, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-
+        console.log(id);
         pool.state.reserves.asset -= xDecrease;
         pool.state.reserves.collateral += dueOut.collateral;
         pool.state.totalDebtCreated += dueOut.debt;

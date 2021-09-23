@@ -102,10 +102,16 @@ describe('Borrow', () => {
 
         const duesOf = await pair.duesOf(signers[0])
         const duesOfSim = pairSim.dues
-
+        console.log(duesOf.length,duesOfSim.length);
+          
         expect(duesOf.length).to.equal(duesOfSim.length)
 
         for (let i = 0; i < duesOf.length; i++) {
+          console.log(duesOf[i].collateral,duesOfSim[i].collateral);
+          console.log(duesOf[i].debt,duesOfSim[i].debt);
+          console.log(duesOf[i].startBlock,duesOfSim[i].startBlock);
+          
+          
           checkBigIntEquality(duesOf[i].collateral,duesOfSim[i].collateral)
           checkBigIntEquality(duesOf[i].debt,duesOfSim[i].debt)
           checkBigIntEquality(duesOf[i].startBlock,duesOfSim[i].startBlock)
