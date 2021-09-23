@@ -48,7 +48,7 @@ describe('Pay', () => {
   // TODO: we are getting an object of mintCases, BorrowCases and payCases
   // TODO: Need to restructure the testCases.pay to send in an array of the test cases
   tests.Success.forEach((test, idx) => {
-    describe.only(`Success case ${idx + 1} for pay`, () => {
+    describe(`Success case ${idx + 1} for pay`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
         const { mintParams, borrowParams, payParams } = test
 

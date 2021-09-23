@@ -361,7 +361,7 @@ contract TimeswapPair is IPair {
         Due[] storage dues = pool.dues[owner];
 
         for (uint256 i = 0; i < ids.length; i++) {
-            Due storage due = dues[ids[i]]; // FIXME: the id is coming to be 0 for the first borrow also, irrespective of the mint function being carried out earlier
+            Due storage due = dues[ids[i]]; 
             require(due.startBlock != BlockNumber.get(), 'Invalid');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
             PayMath.checkProportional(assetsIn[i], collateralsOut[i], due);
