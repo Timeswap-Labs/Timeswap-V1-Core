@@ -75,6 +75,15 @@ describe('Borrow', () => {
         checkBigIntEquality(liquidityOf,liquidityOfSim)
       })
 
+      it('Should have correct total debt', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
+
+        const totalDebtCreated = await pair.totalDebtCreated()
+        const totalDebtCreatedSim = pairSim.pool.totalDebt
+
+        checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
+      })
       it('Should have correct total claims', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 

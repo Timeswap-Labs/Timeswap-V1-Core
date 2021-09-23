@@ -43,8 +43,7 @@ export class PairSim {
     const now = BigInt(block.timestamp)
     const blockNumber = BigInt(block.number)
 
-    this.reserves.asset += assetIn
-    this.reserves.collateral += collateralIn
+
 
     if (!(now < this.maturity)) return 'Expired'
     if (!(interestIncrease > 0 && cdpIncrease > 0)) return 'Invalid'
@@ -92,13 +91,13 @@ export class PairSim {
 
     if (!(collateralIn >= dueOut.collateral)) return 'Insufficient'
 
-    dueOut.collateral = collateralIn
-
     // Due[] storage dues = pool.dues[dueTo];
     // implemented
     const id = BigInt(this.dues.length)
     this.dues.push(dueOut)
-
+    this.pool.totalDebt += dueOut.debt;
+    this.reserves.asset += assetIn
+    this.reserves.collateral += dueOut.collateral
     this.pool.state.asset += assetIn
     this.pool.state.interest += interestIncrease
     this.pool.state.cdp += cdpIncrease
@@ -141,14 +140,6 @@ export class PairSim {
     // Implemented below
     this.pool.senderLiquidity -= liquidityIn
 
-    if (this.pool.lock.asset >= tokensOut.asset) {
-      this.pool.lock.asset -= tokensOut.asset
-    } else if (this.pool.lock.asset == 0n) {
-      this.pool.state.asset -= tokensOut.asset
-    } else {  
-      this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
-      this.pool.lock.asset = 0n
-    }
     this.pool.lock.collateral -= tokensOut.collateral
 
     this.reserves.asset -= tokensOut.asset
@@ -270,7 +261,7 @@ export class PairSim {
 
     const id = BigInt(this.dues.length)
     this.dues.push(dueOut)
-
+    this.pool.totalDebt += dueOut.debt
     this.pool.state.asset -= assetOut
     this.pool.state.interest += interestIncrease
     this.pool.state.cdp += cdpIncrease

@@ -6,6 +6,11 @@ import { burnFixture, mintFixture,constructorFixture, Fixture } from '../shared/
 
 const { loadFixture } = waffle
 
+//TODO: Check why chai's native assertion library isnt working and remove the helper function
+function checkBigIntEquality(x: bigint, y: bigint){
+  expect(x.toString()).to.equal(y.toString());
+}
+
 describe('Burn', () => {
   const tests = testCases.burn()
   const mintTest = testCases.mint()
@@ -67,7 +72,16 @@ describe('Burn', () => {
 
         expect(liquidityOf).to.equalBigInt(liquidityOfSim)
       })
+      
+      it('Should have correct total debt', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
 
+        const totalDebtCreated = await pair.totalDebtCreated()
+        const totalDebtCreatedSim = pairSim.pool.totalDebt
+
+        checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
+      })
       it('Should have correct total claims', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
