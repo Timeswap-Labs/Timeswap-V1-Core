@@ -361,6 +361,8 @@ contract TimeswapPair is IPair {
 
         for (uint256 i = 0; i < ids.length; i++) {
             console.log("this is hit6");
+            console.log(ids[i]);
+            console.log("this is hit6+1");
             Due storage due = dues[ids[i]]; // FIXME
             console.log("this is hit7");
             require(due.startBlock != BlockNumber.get(), 'Invalid');
