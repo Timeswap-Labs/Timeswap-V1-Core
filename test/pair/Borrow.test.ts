@@ -108,6 +108,7 @@ describe('Borrow', () => {
         for (let i = 0; i < duesOf.length; i++) {
           checkBigIntEquality(duesOf[i].collateral,duesOfSim[i].collateral)
           checkBigIntEquality(duesOf[i].debt,duesOfSim[i].debt)
+          console.log("duesOf[i].debt,duesOfSim[i].debt", duesOf[i].debt,duesOfSim[i].debt);
           checkBigIntEquality(duesOf[i].startBlock,duesOfSim[i].startBlock)
         }
       })

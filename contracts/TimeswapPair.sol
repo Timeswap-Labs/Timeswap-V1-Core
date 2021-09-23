@@ -315,7 +315,7 @@ contract TimeswapPair is IPair {
 
         BorrowMath.check(pool.state, xDecrease, yIncrease, zIncrease, fee);
 
-        dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease);
+        dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease); // FIXME the debt is being increased by 1
         console.log("dueOut.debt from the borrow function");
         console.log(dueOut.debt);
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
@@ -364,31 +364,25 @@ contract TimeswapPair is IPair {
         Due[] storage dues = pool.dues[owner];
 
         for (uint256 i = 0; i < ids.length; i++) {
-            console.log("this is hit6");
             console.log(ids[i]);
-            console.log("this is hit6+1");
-            Due storage due = dues[ids[i]]; // FIXME
-            console.log("this is hit7");
+            Due storage due = dues[ids[i]]; // FIXME: the id is coming to be 0 for the first borrow also, irrespective of the mint function being carried out earlier
             require(due.startBlock != BlockNumber.get(), 'Invalid');
-            console.log("this is hit8");
-
-            if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden from the owner');
-            console.log("we have hit this");
+            if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
             PayMath.checkProportional(assetsIn[i], collateralsOut[i], due);
-            
             due.debt -= assetsIn[i];
             due.collateral -= collateralsOut[i];
-
             assetIn += assetsIn[i];
             collateralOut += collateralsOut[i];
         }
-
+        console.log("this is hit123");
         if (assetIn > 0) Callback.pay(asset, assetIn, data);
+        console.log("this is hit124");
 
         pool.state.reserves.asset += assetIn;
         pool.state.reserves.collateral -= collateralOut;
 
         if (collateralOut > 0) collateral.safeTransfer(to, collateralOut);
+        console.log("this is hit125");
 
         emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }

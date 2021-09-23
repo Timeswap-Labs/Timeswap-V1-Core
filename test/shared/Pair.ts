@@ -137,8 +137,7 @@ export class PairSigner extends Pair {
     //     uint112 yIncrease,
     //     uint112 zIncrease,
     //     bytes calldata data
-    console.log(this.pairContractCallee.address);
-    console.log(this.pairContract.address);
+    console.log("assetOut from borrow in Pair.ts", assetOut);
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .borrow(

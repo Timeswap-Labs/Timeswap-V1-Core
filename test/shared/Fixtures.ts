@@ -93,8 +93,6 @@ export async function borrowFixture(
   borrowParams: BorrowParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-  console.log("borrowParams from fixtures.ts");
-  console.log(borrowParams);
   await collateralToken.transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
 
   const k = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
@@ -116,11 +114,7 @@ export async function payFixture(
   payParams: PayParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-  console.log(pair.pairContractCallee.address)
-  console.log(signer.address);
-  console.log("this is hit2");
-  console.log(payParams);
-  console.log("this is hit3");
+  console.log("payParams", payParams);
   const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
 
   const block = await getBlock(txn.blockHash!)

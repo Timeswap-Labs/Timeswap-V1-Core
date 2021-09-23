@@ -8,6 +8,7 @@ import {ITimeswapBorrowCallback} from '../interfaces/callback/ITimeswapBorrowCal
 import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '../interfaces/callback/ITimeswapPayCallback.sol';
+import 'hardhat/console.sol';
 
 
 contract TimeswapPairCallee {
@@ -128,6 +129,17 @@ contract TimeswapPairCallee {
         collateral.transferFrom(from, address(pair), collateralIn);
     }
     
+
+
+    function timeswapPayCallback(
+        uint128 assetIn,
+        bytes calldata data
+    ) external {
+        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
+        IPair pair = factoryContract.getPair(asset, collateral);
+        asset.transferFrom(from, address(pair), assetIn);
+        console.log("timeswapPayCallback was successful");
+    }
 
     function collateralizedDebtCallback(
         IPair pair,
