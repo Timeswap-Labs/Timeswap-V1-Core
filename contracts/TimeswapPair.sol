@@ -308,13 +308,16 @@ contract TimeswapPair is IPair {
         require(assetTo != address(this) && dueTo != address(this), 'Invalid');
         require(xDecrease > 0, 'Invalid');
         require(yIncrease > 0 || zIncrease > 0, 'Invalid');
-
+        console.log("the borrow function");
+        console.log(xDecrease, yIncrease, zIncrease);
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
 
         BorrowMath.check(pool.state, xDecrease, yIncrease, zIncrease, fee);
 
         dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease);
+        console.log("dueOut.debt from the borrow function");
+        console.log(dueOut.debt);
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 
@@ -335,9 +338,6 @@ contract TimeswapPair is IPair {
         Due storage due = dues[id];
 
         emit Sync(maturity, pool.state);
-        console.log("borrow tx successful");
-        console.log("borrow tx: dueTo", dueTo);
-        console.log("borrow tx: id", id);
         console.log("due.collateral", due.collateral);
         // emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
     }
