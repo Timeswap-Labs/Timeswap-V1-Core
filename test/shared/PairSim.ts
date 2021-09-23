@@ -245,7 +245,6 @@ export class PairSim {
     cdpIncrease: bigint,
     block: ethers.providers.Block
   ): { id: bigint; dueOut: Due } | string {
-    console.log("IS THIS BEING LOGGED?");
     const now = BigInt(block.timestamp)
     const blockNumber = BigInt(block.number)
 
@@ -261,7 +260,6 @@ export class PairSim {
 
     
     dueOut.debt = BorrowMath.getDebt(this.maturity, assetOut, interestIncrease, now)
-    console.log("dueOut.debt", dueOut.debt);
     dueOut.collateral = BorrowMath.getCollateral(this.maturity, this.pool.state, assetOut, cdpIncrease, now)
     dueOut.startBlock = blockNumber
 
