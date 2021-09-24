@@ -2,7 +2,7 @@ import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { now } from '../shared/Helper'
 import { constructorFixture, Fixture, lendFixture, mintFixture } from '../shared/Fixtures'
-import testCases from './TestCases'
+import testCases from '../testCases/TestCases'
 import { expect } from '../shared/Expect'
 
 const { loadFixture, solidity } = waffle
