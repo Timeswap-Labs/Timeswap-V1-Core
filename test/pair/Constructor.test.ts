@@ -7,7 +7,7 @@ import { now } from '../shared/Helper'
 import { factoryInit } from '../shared/Factory';
 import { testTokenNew } from '../shared/TestToken';
 import { IERC20 } from "../../typechain/IERC20";
-import { TimeswapPair__factory } from "../../typechain/factories/TimeswapPair__factory";
+import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
 import { IFactory } from "../../typechain/IFactory";
 import { constructorFixture, Fixture } from '../shared/Fixtures'
 import { Address } from 'hardhat-deploy/dist/types';
@@ -42,8 +42,11 @@ describe('Deploying Pair Contract', () => {
     pairContractAddress = await factory.callStatic.createPair(assetToken.address, collateralToken.address);
     expect(pairContractAddress).to.be.properAddress;
     await expect(await factory.createPair(assetToken.address, collateralToken.address)).to.emit(factory, 'CreatePair').withArgs(assetToken.address, collateralToken.address, pairContractAddress);
-    const pairContract = (new TimeswapPair__factory).attach(pairContractAddress);
-    console.log(await pairContract.asset());
+    // const pairContract = (new TimeswapPair__factory).attach(pairContractAddress);
+    // console.log(await pairContract.asset());
+    const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
+    const pairContract = pairContractFactory.attach(pairContractAddress) as PairContract;
+    console.log(await pairContract.factory());
     // expect(await pairContract.attach(pairContractAddress).factory()).to.be.equal(factory.address);
     // expect(await pairContract.attach(pairContractAddress).asset()).to.be.equal(assetToken.address);
     // expect(await pairContract.attach(pairContractAddress).collateral()).to.be.equal(collateralToken.address);
