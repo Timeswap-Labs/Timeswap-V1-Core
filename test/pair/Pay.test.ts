@@ -131,4 +131,31 @@ describe('Pay', () => {
     })
     // })
   })
+  describe(`Failure case`, () => {
+    it('Should fail with correct error', async () => {
+      const {mintParams, borrowParams, payParams} = tests.Success[0]
+
+      const constructor = await loadFixture(fixture)
+      const signers = await ethers.getSigners()
+
+      // This is passing, but won't fail for a wrong error message
+      // Think it is due to the `await txn.wait()`
+      // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
+      // await expect(result).to.be.revertedWith(test.errorMessage)
+      const mint = await mintFixture(constructor,signers[0],mintParams)
+      const {pair} =await borrowFixture(mint,signers[0],borrowParams,true)
+      await expect( pair.pairContractCallee
+      .connect(signers[0])
+      .pay(
+        pair.maturity,
+        signers[0].address,
+        signers[0].address,
+        payParams.ids,
+        payParams.debtIn,
+        payParams.collateralOut
+      )
+    ).to.be.revertedWith('Forbidden');
+  })
+})
+
   })

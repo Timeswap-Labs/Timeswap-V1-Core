@@ -90,7 +90,8 @@ export async function lendFixture(
 export async function borrowFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  borrowParams: BorrowParams
+  borrowParams: BorrowParams,
+  owner= false
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   await collateralToken.transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
@@ -100,7 +101,7 @@ export async function borrowFixture(
   const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSim.pool.state.interest, feeBase)
   const cdpAdjust = k / ((pairSim.pool.state.asset - borrowParams.assetOut) * interestAdjust)
   const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
-  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease)
+  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, owner=owner)
 
   const block = await getBlock(txn.blockHash!)
   pairSim.borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, block)

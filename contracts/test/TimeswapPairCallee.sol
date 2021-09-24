@@ -74,11 +74,12 @@ contract TimeswapPairCallee {
     function borrow(
         uint256 maturity,
         address assetTo,
+        address dueTo,
         uint112 xDecrease,
         uint112 yIncrease,
         uint112 zIncrease
     ) external  returns (uint256 id, IPair.Due memory dueOut){
-        return pairContract.borrow(maturity,assetTo,address(this),xDecrease,yIncrease,zIncrease,getData(msg.sender));
+        return pairContract.borrow(maturity,assetTo,dueTo,xDecrease,yIncrease,zIncrease,getData(msg.sender));
     }
     function pay(
         uint256 maturity,
