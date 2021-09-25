@@ -2,7 +2,7 @@ import { ethers, waffle } from 'hardhat'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import testCases from '../testCases/TestCases'
 import { expect } from '../shared/Expect'
-import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture } from '../shared/Fixtures'
+import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture, borrowFixture } from '../shared/Fixtures'
 
 const { loadFixture } = waffle
 
@@ -14,6 +14,7 @@ describe('Withdraw', () => {
   const tests = testCases.withdraw()
   const mintTest = testCases.mint()
   const lendTest = testCases.lend()
+  const borrowTest = testCases.borrow()
   const burnTest = testCases.burn()
 
   async function fixture(): Promise<Fixture> {
@@ -31,10 +32,10 @@ describe('Withdraw', () => {
 
         const mint = await mintFixture(constructor, signers[0], mintTest.Success[0])
         const lend = await lendFixture(mint, signers[0], lendTest.Success[0].lendParams)
-
+        const borrow = await borrowFixture(lend,signers[0],borrowTest.Success[0].borrowParams)
         await advanceTimeAndBlock(31536000)
         const withdraw = await withdrawFixture(
-          lend,
+          borrow,
           signers[0],
           mintTest.Success[0],
           burnTest.Success[0],

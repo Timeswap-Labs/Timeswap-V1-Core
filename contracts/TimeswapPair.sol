@@ -14,6 +14,7 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import 'hardhat/console.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -266,26 +267,35 @@ contract TimeswapPair is IPair {
         address collateralTo,
         Claims memory claimsIn
     ) external override lock returns (Tokens memory tokensOut) {
+        console.log(1);
         require(block.timestamp >= maturity, 'Active');
         require(assetTo != address(0) && collateralTo != address(0), 'Zero');
         require(assetTo != address(this) && collateralTo != address(this), 'Invalid');
         require(claimsIn.bond > 0 || claimsIn.insurance > 0, 'Invalid');
+        console.log(1);
 
         Pool storage pool = pools[maturity];
+        console.log(1);
 
         tokensOut.asset = WithdrawMath.getAsset(pool.state, claimsIn.bond);
         tokensOut.collateral = WithdrawMath.getCollateral(pool.state, claimsIn.insurance);
+                console.log(1);
 
         pool.state.totalClaims.bond -= claimsIn.bond;
         pool.state.totalClaims.insurance -= claimsIn.insurance;
+        console.log(1);
 
         Claims storage sender = pool.claims[msg.sender];
+        console.log(sender.bond);
+        console.log(sender.insurance);
 
         sender.bond -= claimsIn.bond;
         sender.insurance -= claimsIn.insurance;
+        console.log(1);
 
         pool.state.reserves.asset -= tokensOut.asset;
         pool.state.reserves.collateral -= tokensOut.collateral;
+        console.log(1);
 
         if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
