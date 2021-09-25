@@ -4,30 +4,47 @@ import LendMath from '../libraries/LendMath'
 import WithdrawMath from '../libraries/WithdrawMath'
 import BorrowMath from '../libraries/BorrowMath'
 import PayMath from '../libraries/PayMath'
-import { PROTOCOL_FEE as protocolFee, FEE as fee } from './Constants'
 import ethers from 'ethers'
-import { Claims, claimsDefault, Due, dueDefault, Pool, poolDefault, Tokens, tokensDefault } from './PairInterface'
+import { Claims, claimsDefault, Due, dueDefault, Factory, Pool, poolDefault, Pools, poolsDefault, Tokens, tokensDefault, initFactory } from './PairInterface'
 import { setUncaughtExceptionCaptureCallback } from 'process'
 
+const ZERO_ADDRESSS ="0x0000000000000000000000000000000000000000"
 export class PairSim {
-  public asset: bigint
-  public collateral: bigint
+  public asset: string
+  public collateral: string
+  public protocolFee: bigint
+  public fee: bigint
+  public pools: Pool[]
+  public contractAddress: string
+  public factory: Factory
 
-  pool: Pool
-  claims: Claims
-  dues: Due[]
-  reserves: Tokens
 
-  constructor(public maturity: bigint) {
-    this.asset = 0n
-    this.collateral = 0n
-    this.dues = []
-    this.pool = poolDefault()
-    this.claims = claimsDefault()
-    this.reserves = tokensDefault()
+
+  constructor(asset:string,collateral:string,fee:bigint,protocolFee:bigint, contractAddress:string, factoryAddress:string,owner:string) {
+    this.asset = asset
+    this.collateral = collateral
+    this.fee = fee
+    this.protocolFee = protocolFee
+    this.pools = []
+    this.contractAddress = contractAddress
+    this.factory = initFactory(factoryAddress,owner)
   }
 
+  getPool(maturity: bigint): Pool{
+    let pool = this.pools.find((x)=>x.maturity == maturity)
+    if(pool == undefined){
+      pool = poolDefault(maturity)
+    }
+    return pool
+  }
+  addLiquidity(pool: Pool, liquidity: bigint, liquidityProvider: string){
+    pool.liquidities.push({liquidityProvider: liquidityProvider, liquidity: liquidity})
+    return pool
+  }
   mint(
+    maturity: bigint,
+    liquidityTo: string,
+    dueTo: string,
     assetIn: bigint,
     collateralIn: bigint,
     interestIncrease: bigint,
@@ -40,40 +57,38 @@ export class PairSim {
         dueOut: Due
       }
     | string {
+
     const now = BigInt(block.timestamp)
     const blockNumber = BigInt(block.number)
 
 
 
-    if (!(now < this.maturity)) return 'Expired'
+    if (!(now < maturity)) return 'Expired'
+    if( !(liquidityTo != ZERO_ADDRESSS && dueTo != ZERO_ADDRESSS)) return 'Zero'
+    if( !(liquidityTo != this.contractAddress && dueTo != this.contractAddress)) return 'Zero'
     if (!(interestIncrease > 0 && cdpIncrease > 0)) return 'Invalid'
     if (!(assetIn > 0)) return 'Invalid'
 
+    let pool = this.getPool(maturity)
+
     let liquidityOut: bigint
 
-    
-    
-    if (this.pool.totalLiquidity == 0n) {
+    if (pool.state.totalLiquidity == 0n) {
       const liquidityTotal = MintMath.getLiquidityTotal1(assetIn)
-      liquidityOut = MintMath.getLiquidity(this.maturity, liquidityTotal, protocolFee, now)
-      this.pool.totalLiquidity += liquidityTotal
-      
-      this.pool.ownerLiquidity += liquidityTotal - liquidityOut
-
-      //   this.pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut
+      liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
+      pool.state.totalLiquidity += liquidityTotal
+      pool = this.addLiquidity(pool,liquidityTotal-liquidityOut,liquidityTo)
     } else {
       const liquidityTotal = MintMath.getLiquidityTotal2(
-        this.pool.state,
+        pool.state,
         assetIn,
         interestIncrease,
         cdpIncrease,
-        this.pool.totalLiquidity
+        pool.state.totalLiquidity
       )
-      liquidityOut = MintMath.getLiquidity(this.maturity, liquidityTotal, protocolFee, now)
-      this.pool.totalLiquidity += liquidityTotal
-      this.pool.ownerLiquidity += liquidityTotal - liquidityOut
-
-      //     pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
+      liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
+      pool.state.totalLiquidity += liquidityTotal
+      pool = this.addLiquidity(pool,liquidityTotal - liquidityOut,liquidityTo);
     }
 
       
@@ -81,7 +96,7 @@ export class PairSim {
 
     // pool.liquidities[liquidityTo] += liquidityOut;
     // Implemented below
-    this.pool.senderLiquidity += liquidityOut
+    pool.senderLiquidity += liquidityOut
 
     let dueOut = dueDefault()
 
