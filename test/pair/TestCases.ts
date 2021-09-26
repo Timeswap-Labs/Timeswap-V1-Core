@@ -1,4 +1,4 @@
-import { Claims } from "../shared/PairInterface";
+import { TotalClaims } from "../shared/PairInterface";
 
 export function mint(): Mint {
   const testCases = mintTestCases();
@@ -366,7 +366,7 @@ function borrowMessage({
 }
 
 export interface WithdrawParams {
-  claimsIn: Claims;
+  claimsIn: TotalClaims;
 }
 
 function withdrawSuccessCheck(withdrawParams: WithdrawParams): boolean {

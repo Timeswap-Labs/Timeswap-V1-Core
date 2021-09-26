@@ -3,8 +3,12 @@ import { now } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import testCases from './TestCases'
 import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+
 
 const { loadFixture } = waffle
+let maturity  = 0n
+let signers: SignerWithAddress[]= []
 
 //TODO: Check why chai's native assertion library isnt working and remove the helper function
 function checkBigIntEquality(x: bigint, y: bigint){
@@ -30,6 +34,8 @@ describe('Mint Multiple', () => {
     ] 
 
   async function fixture(): Promise<Fixture> {
+    maturity = (await now()) + 31536000n
+    signers = await ethers.getSigners()
     const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
     return constructor
   }
