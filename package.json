@@ -4,7 +4,7 @@
     "test": "hardhat test",
     "test:hardhat": "hardhat test --network hardhat"
   },
-  "version": "1.0.3",
+  "version": "1.0.10",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
