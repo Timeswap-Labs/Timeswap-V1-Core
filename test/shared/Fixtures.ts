@@ -122,24 +122,24 @@ export async function lendFixture(
 //   return { pair, pairSim, assetToken, collateralToken }
 // }
 
-// export async function withdrawFixture(
-//   fixture: Fixture,
-//   signer: SignerWithAddress,
-//   mintParams: MintParams,
-//   burnParams: BurnParams,
-//   withdrawParams: WithdrawParams
-// ): Promise<Fixture> {
-//   const { pair, pairSim, assetToken, collateralToken } = fixture
+export async function withdrawFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  mintParams: MintParams,
+  burnParams: BurnParams,
+  withdrawParams: WithdrawParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
 
-//   const txnWithdraw = await pair
-//     .upgrade(signer)
-//     .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance)
-//   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
+  const txnWithdraw = await pair
+    .upgrade(signer)
+    .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance)
+  const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
 
-//   pairSim.withdraw(withdrawParams.claimsIn, blockWithdraw)
+  pairSim.withdraw(pair.maturity,signer.address,signer.address,withdrawParams.claimsIn,signer.address, blockWithdraw)
 
-//   return { pair, pairSim, assetToken, collateralToken }
-// }
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
 
 

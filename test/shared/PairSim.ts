@@ -98,6 +98,14 @@ export class PairSim {
     }
     return pool
   }
+  removeClaim(pool: Pool, claim: TotalClaims,lender: string){
+    const maybeClaim = pool.claims.find((x)=>(x.lender == lender))
+    if(maybeClaim != undefined){
+      maybeClaim.claims.bond -= claim.bond
+      maybeClaim.claims.insurance -= claim.insurance
+    }
+    return pool
+  }
   mint(
     maturity: bigint,
     liquidityTo: string,
@@ -251,49 +259,48 @@ export class PairSim {
     return claimsOut
   }
 
-  // withdraw(claimsIn: Claims, block: ethers.providers.Block): Tokens | string {
-  //   const now = BigInt(block.timestamp)
+  withdraw(maturity: bigint, assetTo:string, collateralTo: string,claimsIn: TotalClaims, sender: string,block: ethers.providers.Block): Tokens | string {
+    const now = BigInt(block.timestamp)
 
-  //   if (now < this.maturity) return 'Active'
-  //   if (claimsIn.bond <= 0 || claimsIn.insurance <= 0) return 'Invalid'
+    if (now < maturity) return 'Active'
+    if( !(assetTo != ZERO_ADDRESSS && collateralTo != ZERO_ADDRESSS)) return 'Zero'
+    if( !(assetTo != this.contractAddress && collateralTo != this.contractAddress)) return 'Invalid'
+    if (claimsIn.bond <= 0 || claimsIn.insurance <= 0) return 'Invalid'
 
-  //   let tokensOut = tokensDefault()
-  //   tokensOut.asset = WithdrawMath.getAsset(
-  //     claimsIn.bond,
-  //     this.pool.state.asset,
-  //     this.pool.lock.asset,
-  //     this.pool.totalClaims.bond
-  //   )
-  //   tokensOut.collateral = WithdrawMath.getCollateral(
-  //     claimsIn.insurance,
-  //     this.pool.state.asset,
-  //     this.pool.lock,
-  //     this.pool.totalClaims
-  //   )
+    const pool = this.getPool(maturity)
+    let tokensOut = tokensDefault()
+    tokensOut.asset = WithdrawMath.getAsset(
+      pool.state,
+      claimsIn.bond
+    )
+    tokensOut.collateral = WithdrawMath.getCollateral(
+      pool.state,
+      claimsIn.insurance
+    )
     
 
-  //   this.pool.totalClaims.bond -= claimsIn.bond
-  //   this.pool.totalClaims.insurance -= claimsIn.insurance
+    pool.state.totalClaims.bond -= claimsIn.bond
+    pool.state.totalClaims.insurance -= claimsIn.insurance
 
+    const claim = this.getClaims(pool, sender)
     
-  //   this.claims.bond -= claimsIn.bond
-  //   this.claims.insurance -= claimsIn.insurance
+    this.removeClaim(pool,claimsIn,sender)
 
-  //   // if (this.pool.lock.asset >= tokensOut.asset) {
-  //   //   this.pool.lock.asset -= tokensOut.asset
-  //   // } else if (this.pool.lock.asset == 0n) {
-  //   //   this.pool.state.asset -= tokensOut.asset
-  //   // } else {
-  //   //   this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
-  //   //   this.pool.lock.asset = 0n
-  //   // }
-  //   // this.pool.lock.collateral -= tokensOut.collateral
+    // if (this.pool.lock.asset >= tokensOut.asset) {
+    //   this.pool.lock.asset -= tokensOut.asset
+    // } else if (this.pool.lock.asset == 0n) {
+    //   this.pool.state.asset -= tokensOut.asset
+    // } else {
+    //   this.pool.state.asset -= tokensOut.asset - this.pool.lock.asset
+    //   this.pool.lock.asset = 0n
+    // }
+    // this.pool.lock.collateral -= tokensOut.collateral
 
-  //   this.reserves.asset -= tokensOut.asset
-  //   this.reserves.collateral -= tokensOut.collateral
+    pool.state.reserves.asset -= tokensOut.asset
+    pool.state.reserves.collateral -= tokensOut.collateral
 
-  //   return tokensOut
-  // }
+    return tokensOut
+  }
 
   // borrow(
   //   assetOut: bigint,
