@@ -5,7 +5,7 @@ import WithdrawMath from '../libraries/WithdrawMath'
 import BorrowMath from '../libraries/BorrowMath'
 import PayMath from '../libraries/PayMath'
 import ethers from 'ethers'
-import { Claims, totalClaimsDefault, Due, dueDefault, Factory, Pool, poolDefault,  Tokens, tokensDefault, initFactory } from './PairInterface'
+import { Claims, totalClaimsDefault, Due, dueDefault, Factory, Pool, poolDefault,  Tokens, tokensDefault, initFactory, TotalClaims } from './PairInterface'
 import { setUncaughtExceptionCaptureCallback } from 'process'
 
 const ZERO_ADDRESSS ="0x0000000000000000000000000000000000000000"
@@ -44,16 +44,6 @@ export class PairSim {
     }
     else return liquidity.liquidity
   }
-  addLiquidity(pool: Pool, liquidity: bigint, liquidityProvider: string){
-    const maybeLiquidity = pool.liquidities.find((x)=>(x.liquidityProvider == liquidityProvider))
-    if(maybeLiquidity != undefined){
-      maybeLiquidity.liquidity = liquidity
-    }
-    else{
-      pool.liquidities.push({liquidityProvider: liquidityProvider, liquidity: liquidity})
-    }
-    return pool
-  }
   getClaims(pool: Pool, lender: string){
     const claims = pool.claims.find((x)=>(x.lender == lender))
     if(claims == undefined){
@@ -68,6 +58,24 @@ export class PairSim {
     }
     return dues
   }
+  addLiquidity(pool: Pool, liquidity: bigint, liquidityProvider: string){
+    const maybeLiquidity = pool.liquidities.find((x)=>(x.liquidityProvider == liquidityProvider))
+    if(maybeLiquidity != undefined){
+      maybeLiquidity.liquidity += liquidity
+    }
+    else{
+      pool.liquidities.push({liquidityProvider: liquidityProvider, liquidity: liquidity})
+    }
+    return pool
+  }
+  removeLiquidity(pool: Pool, liquidity: bigint, liquidityProvider: string){
+    const maybeLiquidity = pool.liquidities.find((x)=>(x.liquidityProvider == liquidityProvider))
+    if(maybeLiquidity != undefined){
+      maybeLiquidity.liquidity -= liquidity
+    }
+    return pool
+  }
+
   addDue(pool: Pool, due: Due[], dueTo: string){
     const dues = pool.dues.find((due)=>due.borrower==dueTo)
     if(dues!=undefined){
@@ -76,6 +84,19 @@ export class PairSim {
     else {
       pool.dues.push({borrower: dueTo, due: due})
     }
+  }
+
+  addClaim(pool: Pool, claim: TotalClaims,lender: string){
+    const maybeClaim = pool.claims.find((x)=>(x.lender == lender))
+    if(maybeClaim != undefined){
+      maybeClaim.claims.bond += claim.bond
+      maybeClaim.claims.insurance += claim.insurance
+
+    }
+    else{
+      pool.claims.push({lender: lender, claims: claim})
+    }
+    return pool
   }
   mint(
     maturity: bigint,
@@ -100,7 +121,7 @@ export class PairSim {
 
     if (!(now < maturity)) return 'Expired'
     if( !(liquidityTo != ZERO_ADDRESSS && dueTo != ZERO_ADDRESSS)) return 'Zero'
-    if( !(liquidityTo != this.contractAddress && dueTo != this.contractAddress)) return 'Zero'
+    if( !(liquidityTo != this.contractAddress && dueTo != this.contractAddress)) return 'Invalid'
     if (!(interestIncrease > 0 && cdpIncrease > 0)) return 'Invalid'
     if (!(assetIn > 0)) return 'Invalid'
 
@@ -118,8 +139,7 @@ export class PairSim {
         pool.state,
         assetIn,
         interestIncrease,
-        cdpIncrease,
-        pool.state.totalLiquidity
+        cdpIncrease
       )
       liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
       pool.state.totalLiquidity += liquidityTotal
@@ -159,81 +179,77 @@ export class PairSim {
     }
   }
 
-  // burn(liquidityIn: bigint, block: ethers.providers.Block): Tokens | string {
-  //   const now = BigInt(block.timestamp)
+  burn(maturity: bigint, assetTo: string,collateralTo: string,liquidityIn: bigint, sender: string, block: ethers.providers.Block): Tokens | string {
+    const now = BigInt(block.timestamp)
 
-  //   if (now < this.maturity) return 'Active'
-  //   if (liquidityIn <= 0) return 'Invalid'
+    if (now < maturity) return 'Active'
+    if( !(assetTo != ZERO_ADDRESSS && collateralTo != ZERO_ADDRESSS)) return 'Zero'
+    if( !(assetTo != this.contractAddress && collateralTo != this.contractAddress)) return 'Invalid'
+    if (liquidityIn <= 0) return 'Invalid'
 
-  //   const total = this.pool.totalLiquidity
 
-  //   let tokensOut = tokensDefault()
-  //   tokensOut.asset = BurnMath.getAsset(
-  //     liquidityIn,
-  //     this.pool.state.asset,
-  //     this.pool.lock.asset,
-  //     this.pool.totalClaims.bond,
-  //     total
-  //   )
-  //   tokensOut.collateral = BurnMath.getCollateral(
-  //     liquidityIn,
-  //     this.pool.state.asset,
-  //     this.pool.lock,
-  //     this.pool.totalClaims,
-  //     total
-  //   )
+    let pool = this.getPool(maturity)
 
-  //   this.pool.totalLiquidity -= liquidityIn
+    let tokensOut = tokensDefault()
+    tokensOut.asset = BurnMath.getAsset(
+      pool.state,
+      liquidityIn
+    )
+    tokensOut.collateral = BurnMath.getCollateral(
+      pool.state,
+      liquidityIn,
+    )
 
-  //   // pool.liquidities[msg.sender] -= liquidityIn;
-  //   // Implemented below
-  //   this.pool.senderLiquidity -= liquidityIn
+    pool.state.totalLiquidity -= liquidityIn
 
-  //   this.pool.lock.collateral -= tokensOut.collateral
+    // pool.liquidities[msg.sender] -= liquidityIn;
+    // Implemented below
+    this.removeLiquidity(pool,liquidityIn,sender)
 
-  //   this.reserves.asset -= tokensOut.asset
-  //   this.reserves.collateral -= tokensOut.collateral
+
+    pool.state.reserves.asset -= tokensOut.asset
+    pool.state.reserves.collateral -= tokensOut.collateral
     
-    
-    
-    
-  //   return tokensOut
-  // }
+    return tokensOut
+  }
 
-  // lend(assetIn: bigint, interestDecrease: bigint, cdpDecrease: bigint, block: ethers.providers.Block): Claims | string {
-  //   const now = BigInt(block.timestamp)
+  lend(maturity:bigint, bondTo: string, insuranceTo:string,assetIn: bigint, interestDecrease: bigint, cdpDecrease: bigint, block: ethers.providers.Block): TotalClaims | string {
+    const now = BigInt(block.timestamp)
 
-  //   if (now >= this.maturity) return 'Expired'
-  //   if (interestDecrease <= 0 || cdpDecrease <= 0) return 'Invalid'
+    if (now >= maturity) return 'Expired'
+    if( !(bondTo != ZERO_ADDRESSS && insuranceTo != ZERO_ADDRESSS)) return 'Zero'
+    if( !(bondTo != this.contractAddress && insuranceTo != this.contractAddress)) return 'Invalid'
+    if (assetIn <= 0) return 'Invalid'
+    if (interestDecrease <= 0 || cdpDecrease <= 0) return 'Invalid'
 
-  //   if (this.pool.totalLiquidity <= 0) return 'Invalid'
+    const pool = this.getPool(maturity)
 
-  //   if (assetIn <= 0) return 'Invalid'
+    if (pool.state.totalLiquidity <= 0) return 'Invalid'
 
-  //   if (!LendMath.check(this.pool.state, assetIn, interestDecrease, cdpDecrease, fee)) return 'lend math check fail'
 
-  //   let claimsOut = claimsDefault()
+    if (!LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, this.fee)) return 'lend math check fail'
 
-  //   claimsOut.bond = LendMath.getBond(this.maturity, assetIn, interestDecrease, now)
-  //   claimsOut.insurance = LendMath.getInsurance(this.maturity, this.pool.state, assetIn, cdpDecrease, now)
+    let claimsOut = totalClaimsDefault()
+
+    claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease, now)
+    claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease, now)
 
     
     
-  //   this.pool.totalClaims.bond += claimsOut.bond
-  //   this.pool.totalClaims.insurance += claimsOut.insurance
+    pool.state.totalClaims.bond += claimsOut.bond
+    pool.state.totalClaims.insurance += claimsOut.insurance
+  
+    this.addClaim(pool,claimsOut,bondTo)
 
-  //   this.claims.bond += claimsOut.bond
-  //   this.claims.insurance += claimsOut.insurance
-
-  //   this.reserves.asset += assetIn
+    pool.state.reserves.asset += assetIn
 
 
-  //   this.pool.state.asset += assetIn
-  //   this.pool.state.interest -= interestDecrease
-  //   this.pool.state.cdp -= cdpDecrease
+    pool.state.asset += assetIn
+    pool.state.interest -= interestDecrease
+    pool.state.cdp -= cdpDecrease
 
-  //   return claimsOut
-  // }
+    return claimsOut
+  }
 
   // withdraw(claimsIn: Claims, block: ethers.providers.Block): Tokens | string {
   //   const now = BigInt(block.timestamp)

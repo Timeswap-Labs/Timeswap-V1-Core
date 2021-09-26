@@ -57,39 +57,35 @@ export async function mintFixture(
   return { pair, pairSim, assetToken, collateralToken }
 }
 
-// export async function burnFixture(
-//   fixture: Fixture,
-//   signer: SignerWithAddress,
-//   burnParams: BurnParams
-// ): Promise<Fixture> {
-//   const { pair, pairSim, assetToken, collateralToken } = fixture
+export async function burnFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  burnParams: BurnParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
 
+  const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
+  const block = await getBlock(txnBurn.blockHash!)
+  pairSim.burn(pair.maturity,signer.address,signer.address,burnParams.liquidityIn,signer.address, block)
 
+  return { pair, pairSim, assetToken, collateralToken }
+}
+export async function lendFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  lendParams: LendParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
 
+  await assetToken.transfer(pair.pairContractCallee.address, lendParams.assetIn)
 
+  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)
 
-//   const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
-//   const block = await getBlock(txnBurn.blockHash!)
-//   pairSim.burn(burnParams.liquidityIn, block)
+  const block = await getBlock(txn.blockHash!)
+  pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
 
-//   return { pair, pairSim, assetToken, collateralToken }
-// }
-// export async function lendFixture(
-//   fixture: Fixture,
-//   signer: SignerWithAddress,
-//   lendParams: LendParams
-// ): Promise<Fixture> {
-//   const { pair, pairSim, assetToken, collateralToken } = fixture
-
-//   await assetToken.transfer(pair.pairContractCallee.address, lendParams.assetIn)
-
-//   const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)
-
-//   const block = await getBlock(txn.blockHash!)
-//   pairSim.lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
-
-//   return { pair, pairSim, assetToken, collateralToken }
-// }
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
 // export async function borrowFixture(
 //   fixture: Fixture,

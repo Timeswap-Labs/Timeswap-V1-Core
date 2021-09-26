@@ -14,7 +14,7 @@ export interface Due {
 }
 
 export interface Liquidity {liquidityProvider: string, liquidity: bigint }
-export interface Claims {lender: string, claims: TotalClaims }
+export interface Claims {lender: string, claims: TotalClaims } //TODO: Currently bondTo and insuranceTo must be one and the same
 export interface Dues {borrower: string, due: Due[]}
 
 export interface ConstantProduct {asset: bigint, interest: bigint, cdp: bigint}
