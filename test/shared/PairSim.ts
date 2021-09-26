@@ -86,6 +86,13 @@ export class PairSim {
     }
   }
 
+  removeDue(pool: Pool, due: Due, dueTo: string){
+    const dues = pool.dues.find((due)=>due.borrower==dueTo)
+    if(dues!=undefined){
+        dues.due = dues.due.filter(x=>x!=due)
+    }
+    
+  }
   addClaim(pool: Pool, claim: TotalClaims,lender: string){
     const maybeClaim = pool.claims.find((x)=>(x.lender == lender))
     if(maybeClaim != undefined){
@@ -343,51 +350,55 @@ export class PairSim {
     return { id: id, dueOut: dueOut }
   }
 
-  // pay(
-  //   ids: bigint[],
-  //   debtsIn: bigint[],
-  //   collateralsOut: bigint[],
-  //   block: ethers.providers.Block
-  // ): bigint | string {
-  //   const now = BigInt(block.timestamp)
-  //   const blockNumber = BigInt(block.number)
+  pay(
+    maturity: bigint,
+    to: string,
+    owner: string,
+    ids: bigint[],
+    debtsIn: bigint[],
+    collateralsOut: bigint[],
+    sender: string,
+    block: ethers.providers.Block
+  ): bigint | string {
+    const now = BigInt(block.timestamp)
+    const blockNumber = BigInt(block.number)
 
-  //   if (!(now < this.maturity)) return 'Expired'
-  //   if (!(ids.length == debtsIn.length)) return 'Invalid'
-  //   if (!(ids.length == collateralsOut.length)) return 'Invalid'
+    if (!(now < maturity)) return 'Expired'
+    if (!(ids.length == debtsIn.length)) return 'Invalid'
+    if (!(ids.length == collateralsOut.length)) return 'Invalid'
+    if (!(to != ZERO_ADDRESSS)) return 'Zero'
+    if (!(to != this.contractAddress)) return 'Invalid'
+    
+    const pool = this.getPool(maturity)
 
-  //   // Due[] storage dues = pool.dues[owner];
-  //   // Implemented
+    // Due[] storage dues = pool.dues[owner];
+    // Implemented
 
-  //   let debtIn = 0n
-  //   let collateralOut = 0n
+    let debtIn = 0n
+    let collateralOut = 0n
 
-  //   for (let i = 0; i < ids.length; i++) {
-  //     const due = this.dues[i]
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i]
+      const dues = this.getDues(pool,sender).due
+      const due = dues[Number(id)]
 
-  //     if (!(due.startBlock != blockNumber)) return 'Invalid'
-  //     if (!(debtsIn[i] > 0)) return 'Invalid'
+      if (!(due.startBlock != blockNumber)) return 'Invalid'
+      if (!(debtsIn[i] > 0)) return 'Invalid'
 
-  //     debtsIn[i] = PayMath.getDebt(debtsIn[i], due.debt)
+      if(!PayMath.checkProportional(debtsIn[i],collateralsOut[i],due)) return collateralOut
 
-  //     const collateral = PayMath.getCollateral(collateralsOut[i], debtsIn[i], due.collateral, due.debt)
-  //     if (collateral === null) return 'Collateral Null'
-  //     else collateralsOut[i] = collateral
+      due.debt -= debtsIn[i]
+      due.collateral -= collateralsOut[i]
 
-  //     due.debt -= debtsIn[i]
-  //     due.collateral -= collateralsOut[i]
-
-  //     debtIn += debtsIn[i]
-  //     collateralOut += collateralsOut[i]
-  //   }
+      debtIn += debtsIn[i]
+      collateralOut += collateralsOut[i]
+    }
 
 
-  //   this.pool.lock.asset += debtIn
-  //   this.pool.lock.collateral -= collateralOut
 
-  //   this.reserves.asset += debtIn
-  //   this.reserves.collateral -= collateralOut
+    pool.state.reserves.asset += debtIn
+    pool.state.reserves.collateral -= collateralOut
 
-  //   return collateralOut
-  // }
+    return collateralOut
+  }
 }

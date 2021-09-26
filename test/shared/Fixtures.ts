@@ -110,19 +110,19 @@ export async function borrowFixture(
   return { pair, pairSim, assetToken, collateralToken }
 }
 
-// export async function payFixture(
-//   fixture: Fixture,
-//   signer: SignerWithAddress,
-//   payParams: PayParams
-// ): Promise<Fixture> {
-//   const { pair, pairSim, assetToken, collateralToken } = fixture
-//   const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
+export async function payFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  payParams: PayParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+  const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
 
-//   const block = await getBlock(txn.blockHash!)
-//   pairSim.pay(payParams.ids, payParams.debtIn, payParams.collateralOut, block)
+  const block = await getBlock(txn.blockHash!)
+  pairSim.pay(pair.maturity,signer.address,signer.address,payParams.ids, payParams.debtIn, payParams.collateralOut,signer.address, block)
 
-//   return { pair, pairSim, assetToken, collateralToken }
-// }
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
 export async function withdrawFixture(
   fixture: Fixture,
