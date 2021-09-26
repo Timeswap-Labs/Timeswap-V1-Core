@@ -11,6 +11,7 @@ function checkBigIntEquality(x: bigint, y: bigint){
   expect(x.toString()).to.equal(y.toString());
 }
 describe('Mint Multiple', () => {
+  //TODO: move the tests back to testcases.ts file
   const tests = [
     [
         {
@@ -49,7 +50,7 @@ describe('Mint Multiple', () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
         const reserves = await pair.totalReserves()
-        const reservesSim = pairSim.reserves
+        const reservesSim = pairSim.getPool(maturity).state.reserves
 
         expect(reserves.asset).to.equalBigInt(reservesSim.asset)
         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
@@ -59,7 +60,7 @@ describe('Mint Multiple', () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
         const state = await pair.state()
-        const stateSim = pairSim.pool.state
+        const stateSim = pairSim.getPool(maturity).state
 
         expect(state.asset).to.equalBigInt(stateSim.asset)
         expect(state.interest).to.equalBigInt(stateSim.interest)
@@ -71,7 +72,7 @@ describe('Mint Multiple', () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
         const liquidity = await pair.totalLiquidity()
-        const liquiditySim = pairSim.pool.totalLiquidity
+        const liquiditySim = pairSim.getPool(maturity).state.totalLiquidity
 
         expect(liquidity).to.equalBigInt(liquiditySim)
       })
@@ -81,7 +82,7 @@ describe('Mint Multiple', () => {
         const signers = await ethers.getSigners()
 
         const liquidityOf = await pair.liquidityOf(signers[0])
-        const liquidityOfSim = pairSim.pool.senderLiquidity
+        const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(maturity), signers[0].address)
 
         expect(liquidityOf).to.equalBigInt(liquidityOfSim)
       })
@@ -90,7 +91,7 @@ describe('Mint Multiple', () => {
         const signers = await ethers.getSigners()
 
         const totalDebtCreated = await pair.totalDebtCreated()
-        const totalDebtCreatedSim = pairSim.pool.totalDebt
+        const totalDebtCreatedSim = pairSim.getPool(maturity).state.totalDebtCreated
 
         checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
       })
@@ -98,7 +99,7 @@ describe('Mint Multiple', () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
         const claims = await pair.totalClaims()
-        const claimsSim = pairSim.pool.totalClaims
+        const claimsSim = pairSim.getPool(maturity).state.totalClaims
 
         expect(claims.bond).to.equalBigInt(claimsSim.bond)
         expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
@@ -109,7 +110,7 @@ describe('Mint Multiple', () => {
         const signers = await ethers.getSigners()
 
         const claimsOf = await pair.claimsOf(signers[0])
-        const claimsOfSim = pairSim.claims
+        const claimsOfSim = pairSim.getClaims(pairSim.getPool(maturity),signers[0].address)
 
         expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
         expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
@@ -120,7 +121,7 @@ describe('Mint Multiple', () => {
         const signers = await ethers.getSigners()
 
         const duesOf = await pair.duesOf()
-        const duesOfSim = pairSim.dues
+        const duesOfSim = pairSim.getDues(pairSim.getPool(maturity),signers[0].address).due
 
         expect(duesOf.length).to.equal(duesOfSim.length)
 
@@ -131,5 +132,5 @@ describe('Mint Multiple', () => {
         }
       })
     })
+    })
   })
-})

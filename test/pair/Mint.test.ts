@@ -14,6 +14,7 @@ function checkBigIntEquality(x: bigint, y: bigint){
   expect(x.toString()).to.equal(y.toString());
 }
 describe('Mint', () => {
+  //TODO: move the tests back to testcases.ts file
   const tests = [
     {
       assetIn: 2000n,
@@ -21,7 +22,14 @@ describe('Mint', () => {
       interestIncrease: 20n,
       cdpIncrease: 400n,
     },]
-
+    const testsFailure = [
+      {
+        assetIn: 2000n,
+        collateralIn: 800n,
+        interestIncrease: 0n,
+        cdpIncrease: 0n,
+      },]
+  
   async function fixture(): Promise<Fixture> {
 
     maturity = (await now()) + 31536000n
@@ -130,31 +138,32 @@ describe('Mint', () => {
     })
   })
 
-  // tests.Failure.forEach((test, idx) => {
-  //   describe(`Failure case ${idx + 1}`, () => {
-  //     it('Should fail with correct error', async () => {
-  //       const mintParams = test.params
+  testsFailure.forEach((test, idx) => {
+    describe(`Failure case ${idx + 1}`, () => {
+      it('Should fail with correct error', async () => {
+        const mintParams = test
+        const { pair } = await loadFixture(fixture)
+        const signers = await ethers.getSigners()
 
-  //       const { pair } = await loadFixture(fixture)
-  //       const signers = await ethers.getSigners()
+        // This is passing, but won't fail for a wrong error message
+        // Think it is due to the `await txn.wait()`
+        // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
+        // await expect(result).to.be.revertedWith(test.errorMessage)
 
-  //       // This is passing, but won't fail for a wrong error message
-  //       // Think it is due to the `await txn.wait()`
-  //       // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
-  //       // await expect(result).to.be.revertedWith(test.errorMessage)
+ 
 
-  //       await expect(
-  //         pair.pairContractCallee
-  //           .connect(signers[0])
-  //           .mint(
-  //             pair.maturity,
-  //             signers[0].address,
-  //             mintParams.assetIn,
-  //             mintParams.interestIncrease,
-  //             mintParams.cdpIncrease
-  //           )
-  //       ).to.be.revertedWith('')
-  //     })
-  //   })
-  // })
+        await expect(
+          pair.pairContractCallee
+            .connect(signers[0])
+            .mint(
+              pair.maturity,
+              signers[0].address,
+              mintParams.assetIn,
+              mintParams.interestIncrease,
+              mintParams.cdpIncrease
+            )
+        ).to.be.revertedWith('')
+      })
+    })
+  })
 })
