@@ -214,6 +214,7 @@ contract TimeswapPair is IPair {
         if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
+        emit Sync(maturity, pool.state);
         emit Burn(maturity, msg.sender, assetTo, collateralTo, liquidityIn, tokensOut);
     }
 
@@ -231,7 +232,6 @@ contract TimeswapPair is IPair {
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
         require(bondTo != address(this) && insuranceTo != address(this), 'Invalid');
         require(xIncrease > 0, 'Invalid');
-        require(yDecrease > 0 || zDecrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
@@ -290,6 +290,7 @@ contract TimeswapPair is IPair {
         if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
+        emit Sync(maturity, pool.state);
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
     }
 
@@ -307,7 +308,7 @@ contract TimeswapPair is IPair {
         require(assetTo != address(0) && dueTo != address(0), 'Zero');
         require(assetTo != address(this) && dueTo != address(this), 'Invalid');
         require(xDecrease > 0, 'Invalid');
-        require(yIncrease > 0 || zIncrease > 0, 'Invalid');
+
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
 
@@ -331,11 +332,9 @@ contract TimeswapPair is IPair {
         pool.state.z += zIncrease;
 
         asset.safeTransfer(assetTo, xDecrease);
-        Due[] storage dues = pool.dues[dueTo];
-        Due storage due = dues[id];
 
         emit Sync(maturity, pool.state);
-        // emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
+        emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
     }
 
     /// @inheritdoc IPair
@@ -376,6 +375,7 @@ contract TimeswapPair is IPair {
 
         if (collateralOut > 0) collateral.safeTransfer(to, collateralOut);
 
+        emit Sync(maturity, pool.state);
         emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }
 }
