@@ -256,10 +256,7 @@ export class PairSim {
     claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease, now)
     
     claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease, now)
-    
-
-    
-    
+  
     pool.state.totalClaims.bond += claimsOut.bond
     pool.state.totalClaims.insurance += claimsOut.insurance
   
@@ -323,7 +320,7 @@ export class PairSim {
     if( !(assetTo != ZERO_ADDRESSS && dueTo != ZERO_ADDRESSS)) return 'Zero'
     if( !(assetTo != this.contractAddress && dueTo != this.contractAddress)) return 'Invalid'
     if (assetOut <= 0) return 'Invalid'
-    if (interestIncrease <= 0 || cdpIncrease <= 0) return 'Invalid'
+    if (interestIncrease <= 0 && cdpIncrease <= 0) return 'Invalid'
 
     const pool = this.getPool(maturity)
 
@@ -333,29 +330,21 @@ export class PairSim {
       return 'constant product check'
     let dueOut = dueDefault()
 
-    
     dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease, now)
     dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease, now)
     dueOut.startBlock = blockNumber
-
-    
-    // Due[] storage dues = this.dues[dueTo];
-    // Implemented
-
 
     const dues = this.getDues(pool,dueTo)
     const id = BigInt(pool.dues.length)
     dues.due.push(dueOut)
     this.addDue(pool, dues.due,dueTo)
-
+    
     pool.state.reserves.asset -= assetOut
     pool.state.reserves.collateral += dueOut.collateral
     pool.state.totalDebtCreated += dueOut.debt
     pool.state.asset -= assetOut
     pool.state.interest += interestIncrease
     pool.state.cdp += cdpIncrease
-
-
     return { id: id, dueOut: dueOut }
   }
 

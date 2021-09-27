@@ -60,7 +60,7 @@ describe('Pay', () => {
         const mint = await mintFixture(constructor, signers[0], mintParams)
         
         const borrow = await borrowFixture(mint, signers[0], borrowParams)
-        await advanceTimeAndBlock(31535000)  // pushing the time ahead
+        await advanceTimeAndBlock(31535000)  
         const pay = await payFixture(
           borrow,
           signers[0],
@@ -157,8 +157,10 @@ describe('Pay', () => {
 
     // })
   })
+  
   describe(`Failure case`, () => {
     it('Should fail with correct error', async () => {
+  
       const {mintParams, borrowParams, payParams} = tests.Success[0]
 
       const constructor = await loadFixture(fixture)
@@ -168,7 +170,7 @@ describe('Pay', () => {
       // Think it is due to the `await txn.wait()`
       // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
       // await expect(result).to.be.revertedWith(test.errorMessage)
-      const mint = await mintFixture(constructor,signers[0],mintParams)
+      const mint = await mintFixture(constructor,signers[0],mintParams);
       const {pair} =await borrowFixture(mint,signers[0],borrowParams,true)
       await expect( pair.pairContractCallee
       .connect(signers[0])
