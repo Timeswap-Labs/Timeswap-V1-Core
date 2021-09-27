@@ -266,7 +266,7 @@ export function withdraw(): Withdraw {
 function borrowTestCases(): BorrowParams[] {
   const testCases = [
     {
-      assetOut: 200n,
+      assetOut: 150n,
       collateralIn: 72n,
       interestIncrease: 1n,
       cdpIncrease: 2n,
