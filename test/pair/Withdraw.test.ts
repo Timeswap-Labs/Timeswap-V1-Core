@@ -34,8 +34,8 @@ describe('Withdraw', () => {
         // ideally we should do this from a different address compared to the one which is minting
         const lend = await lendFixture(mint, signers[1], lendTest.Success[0].lendParams);
         // we are now borrowing; we should do this from a totally different address 
-        // const borrow = await borrowFixture(lend,signers[0],borrowTest.Success[0].borrowParams)
-        return lend;
+        const borrow = await borrowFixture(lend,signers[0],borrowTest.Success[0].borrowParams)
+        return borrow;
         await advanceTimeAndBlock(31536000)
         // const withdraw = await withdrawFixture(
         //   borrow,

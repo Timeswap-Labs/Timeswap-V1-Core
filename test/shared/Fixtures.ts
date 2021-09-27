@@ -88,6 +88,7 @@ export async function lendFixture(
     const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
     const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase)
+    console.log("cdpDecrease", cdpDecrease);
 
     const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease);
     const block = await getBlock(txn.blockHash!)
@@ -96,7 +97,6 @@ export async function lendFixture(
   } else {
     throw Error;
   }
-
   
 }
 

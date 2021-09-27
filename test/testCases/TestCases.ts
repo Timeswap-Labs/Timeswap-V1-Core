@@ -149,8 +149,8 @@ export function lend(): Lend {
 
 function lendTestCases(): LendParams[] {
   const testCases = [
-    { assetIn: 20n, interestDecrease: 5n, cdpDecrease: 2n },
-    { assetIn: 20n, interestDecrease: 0n, cdpDecrease: 0n },
+    { assetIn: 100n, interestDecrease: 0n, cdpDecrease: 2n },
+    { assetIn: 100n, interestDecrease: 0n, cdpDecrease: 0n },
   ];
 
   return testCases;
