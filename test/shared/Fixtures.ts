@@ -78,22 +78,26 @@ export async function lendFixture(
 
   await assetToken.connect(signer).transfer(pair.pairContractCallee.address, lendParams.assetIn)
 
-  //TODO: we must lend after using the Math
-  const cp_pairContact = await pair.state();
-  const k_pairContract = (cp_pairContact.asset * cp_pairContact.interest * cp_pairContact.cdp) << 32n;
-  const cp_pairSimContact = await pairSim.state();
-  const k_pairSim = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
-  // const feeBase = 0x10000n + FEE
-  // const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSim.pool.state.interest, feeBase)
-  // const cdpAdjust = k / ((pairSim.pool.state.asset + lendParams.assetIn) * interestAdjust)
-  // const cdpDecrease = LendMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
+  const pairContractState = await pair.state();
+  const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
+  const pairSimPool = pairSim.getPool(pair.maturity);
+  const pairSimContractState = pairSimPool.state
+  const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
+  if (k_pairContract == k_pairContract) {
+    const feeBase = 0x10000n + FEE
+    const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)
+    const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
+    const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase)
 
-  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)
+    const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease);
+    const block = await getBlock(txn.blockHash!)
+    pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
+    return { pair, pairSim, assetToken, collateralToken }
+  } else {
+    throw Error;
+  }
 
-  const block = await getBlock(txn.blockHash!)
-  pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
-
-  return { pair, pairSim, assetToken, collateralToken }
+  
 }
 
 export async function burnFixture(

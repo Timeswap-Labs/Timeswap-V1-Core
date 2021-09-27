@@ -37,6 +37,7 @@ export class PairSim {
     }
     return pool
   }
+
   getLiquidity(pool: Pool, liquidityProvider: string){
     const liquidity = pool.liquidities.find((x)=>(x.liquidityProvider == liquidityProvider))
     if(liquidity == undefined){
@@ -44,6 +45,7 @@ export class PairSim {
     }
     else return liquidity.liquidity
   }
+
   getClaims(pool: Pool, lender: string){
     const claims = pool.claims.find((x)=>(x.lender == lender))
     if(claims == undefined){
@@ -51,6 +53,7 @@ export class PairSim {
     }
     else return claims.claims
   }
+
   getDues(pool: Pool, borrower: string){
     let dues = pool.dues.find((due)=>due.borrower==borrower)
     if(dues==undefined){
@@ -58,6 +61,7 @@ export class PairSim {
     }
     return dues
   }
+
   addLiquidity(pool: Pool, liquidity: bigint, liquidityProvider: string){
     const maybeLiquidity = pool.liquidities.find((x)=>(x.liquidityProvider == liquidityProvider))
     if(maybeLiquidity != undefined){
@@ -112,12 +116,6 @@ export class PairSim {
       maybeClaim.claims.insurance -= claim.insurance
     }
     return pool
-  }
-
-  // TODO: to add state function
-  state(pool: Pool){
-    const [ asset, interest, cdp ] = pool.constantProduct(this.maturity)
-    return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }
   }
 
   mint(
