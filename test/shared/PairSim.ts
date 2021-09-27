@@ -113,6 +113,13 @@ export class PairSim {
     }
     return pool
   }
+
+  // TODO: to add state function
+  state(pool: Pool){
+    const [ asset, interest, cdp ] = pool.constantProduct(this.maturity)
+    return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }
+  }
+
   mint(
     maturity: bigint,
     liquidityTo: string,

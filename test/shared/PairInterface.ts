@@ -1,3 +1,6 @@
+import { BigNumberish } from "@ethersproject/bignumber"
+import { assert } from "console"
+
 export interface Tokens {
   asset: bigint
   collateral: bigint
@@ -59,6 +62,11 @@ export function dueDefault(): Due {
 export function stateDefault(): State {
   return {reserves: tokensDefault(), totalLiquidity: 0n, totalClaims: totalClaimsDefault(),totalDebtCreated: 0n, asset: 0n, interest: 0n, cdp: 0n }
 }
+
+//TODO: to add the state function
+export function state(maturity: BigNumberish):ConstantProduct{
+  return //TODO: to add the state function
+} 
 
 export function poolDefault(maturity=0n): Pool {
   return {

@@ -1,14 +1,17 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
+import { ContractTransaction } from 'ethers'
+import { Address } from 'hardhat-deploy/dist/types'
+import { BigNumberish } from '@ethersproject/bignumber';
+
 import { factoryInit } from './Factory'
 import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
-
 import { TotalClaims, Due, State, Tokens, ConstantProduct } from './PairInterface'
-import { ContractTransaction } from 'ethers'
+
 import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
 import type { TimeswapPairCallee as PairContractCallee } from '../../typechain/TimeswapPairCallee'
 import type { TestToken } from '../../typechain/TestToken'
-import { Address } from 'hardhat-deploy/dist/types'
+
 
 export class Pair {
   constructor(public pairContractCallee: PairContractCallee, public pairContract: PairContract, public factoryContract: Factory,public maturity: bigint) {}
@@ -164,13 +167,6 @@ export class PairSigner extends Pair {
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .pay(this.maturity, this.signerWithAddress.address, owner, ids, debtsIn, collateralsOut)
-      // uint256 maturity,
-      // address to,
-      // address owner,
-      // uint256[] memory ids,
-      // uint112[] memory assetsIn,
-      // uint112[] memory collateralsOut,
-      // bytes calldata data
     await txn.wait()
     return txn
   }
@@ -179,17 +175,21 @@ export class PairSigner extends Pair {
 }
 
 export async function pairInit(asset: TestToken, collateral: TestToken, maturity: bigint) {
-  const factory = await factoryInit()
-
-  await factory.createPair(asset.address, collateral.address)
-
   const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
   const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
+  
+  const factory = await factoryInit()
+  await factory.createPair(asset.address, collateral.address)
+
+  
   const pairContract = pairContractFactory.attach(
     await factory.getPair(asset.address, collateral.address)
   ) as PairContract
+
   const pairContractCallee = (await  pairContractCalleeFactory.deploy(pairContract.address)) as PairContractCallee
+
   return new Pair(pairContractCallee,pairContract, factory,maturity)
+
 }
 
 export default { Pair, PairSigner, pairInit }

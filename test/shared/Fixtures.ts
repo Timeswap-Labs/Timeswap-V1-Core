@@ -1,3 +1,4 @@
+import { ethers } from 'hardhat'
 import { advanceTimeAndBlock, getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
 import { PairSim } from './PairSim'
@@ -12,23 +13,35 @@ import { now } from '../shared/Helper'
 import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
 
 import type { TestToken } from '../../typechain/TestToken'
-import { ethers } from 'hardhat'
+
 
 export async function constructorFixture(
   assetValue: bigint,
   collateralValue: bigint,
   maturity: bigint
 ): Promise<Fixture> {
+  const signers = await ethers.getSigners();
   const assetToken = await testTokenNew('Ether', 'WETH', assetValue)
   const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
 
   const pair = await pairInit(assetToken, collateralToken, maturity)
   const factory = pair.factoryContract
   const factoryAddress =  factory.address
+  
   const owner = await factory.owner()
+
   // call the approve function in the test Tokens
+  for (let i=1;i<6;i++) {
+    await assetToken.transfer(signers[i].address,200n);
+    await collateralToken.transfer(signers[i].address,200n);
+    
+    await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 200n);
+    await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 200n);
+  }
+
   await assetToken.approve(pair.pairContractCallee.address, assetValue);
   await collateralToken.approve(pair.pairContractCallee.address, collateralValue);
+  
   const pairSim = new PairSim(assetToken.address,collateralToken.address,FEE,PROTOCOL_FEE,pair.pairContract.address,factoryAddress,owner)
 
   return { pair, pairSim, assetToken, collateralToken }
@@ -41,18 +54,44 @@ export async function mintFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await assetToken.transfer(pair.pairContractCallee.address, mintParams.assetIn)
-  await collateralToken.transfer(pair.pairContractCallee.address, mintParams.collateralIn)
-
-  const collateralIn = MintMath.getCollateral(pair.maturity, mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, (await now()));
-  const liquidityTotal = MintMath.getLiquidityTotal1(mintParams.assetIn)
-  const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal, PROTOCOL_FEE, (await now()));
+  await assetToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.assetIn)
+  await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.collateralIn)
+  
+  // const collateralIn = MintMath.getCollateral(pair.maturity, mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, (await now()));
+  // const liquidityTotal = MintMath.getLiquidityTotal1(mintParams.assetIn)
+  // const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal, PROTOCOL_FEE, (await now()));
 
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
-
-
+  
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(pair.maturity,signer.address,signer.address,mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
+
+  return { pair, pairSim, assetToken, collateralToken }
+}
+
+export async function lendFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  lendParams: LendParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+
+  await assetToken.connect(signer).transfer(pair.pairContractCallee.address, lendParams.assetIn)
+
+  //TODO: we must lend after using the Math
+  const cp_pairContact = await pair.state();
+  const k_pairContract = (cp_pairContact.asset * cp_pairContact.interest * cp_pairContact.cdp) << 32n;
+  const cp_pairSimContact = await pairSim.state();
+  const k_pairSim = (pairSim.pool.state.asset * pairSim.pool.state.interest * pairSim.pool.state.cdp) << 32n
+  // const feeBase = 0x10000n + FEE
+  // const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSim.pool.state.interest, feeBase)
+  // const cdpAdjust = k / ((pairSim.pool.state.asset + lendParams.assetIn) * interestAdjust)
+  // const cdpDecrease = LendMath.readjust(cdpAdjust, pairSim.pool.state.cdp, feeBase)
+
+  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)
+
+  const block = await getBlock(txn.blockHash!)
+  pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
@@ -70,22 +109,8 @@ export async function burnFixture(
 
   return { pair, pairSim, assetToken, collateralToken }
 }
-export async function lendFixture(
-  fixture: Fixture,
-  signer: SignerWithAddress,
-  lendParams: LendParams
-): Promise<Fixture> {
-  const { pair, pairSim, assetToken, collateralToken } = fixture
 
-  await assetToken.transfer(pair.pairContractCallee.address, lendParams.assetIn)
 
-  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)
-
-  const block = await getBlock(txn.blockHash!)
-  pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, block)
-
-  return { pair, pairSim, assetToken, collateralToken }
-}
 
 export async function borrowFixture(
   fixture: Fixture,
