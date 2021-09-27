@@ -80,32 +80,29 @@ describe('Withdraw', () => {
         const signers = await ethers.getSigners()
 
         const liquidityOf = await pair.liquidityOf(signers[0])
-        const liquidityOfSim = pairSim.getPool(maturity).state.senderLiquidity // FIXME
-
+        const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(maturity), signers[0].address); 
         expect(liquidityOf).to.equalBigInt(liquidityOfSim)
       })
 
-      // it('Should have correct total debt', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-      //   const signers = await ethers.getSigners()
+      it('Should have correct total debt', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
 
-      //   const totalDebtCreated = await pair.totalDebtCreated()
-      //   const totalDebtCreatedSim = pairSim.pool.totalDebt
+        const totalDebtCreated = await pair.totalDebtCreated()
+        const totalDebtCreatedSim = pairSim.getPool(maturity).state.totalDebtCreated
 
-      //   checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
-      // })
+        checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
+      })
 
-      // it('Should have correct total claims', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+      it('Should have correct total claims', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-      //   const claims = await pair.totalClaims()
-      //   const claimsSim = pairSim.pool.totalClaims
+        const claims = await pair.totalClaims()
+        const claimsSim = pairSim.getPool(maturity).state.totalClaims
         
-        
-
-      //   expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      //   expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
-      // })
+        expect(claims.bond).to.equalBigInt(claimsSim.bond)
+        expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      })
     })
   })
 })
