@@ -1,7 +1,5 @@
-import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
-import testCases from '../testCases/TestCases'
 import { expect } from '../shared/Expect'
 import { payFixture, constructorFixture, Fixture, mintFixture, borrowFixture, lendFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'

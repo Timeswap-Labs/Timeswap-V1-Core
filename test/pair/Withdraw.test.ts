@@ -2,7 +2,7 @@ import { ethers, waffle } from 'hardhat'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import testCases from '../testCases/TestCases'
 import { expect } from '../shared/Expect'
-import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture } from '../shared/Fixtures'
+import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture, borrowFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 const { loadFixture } = waffle

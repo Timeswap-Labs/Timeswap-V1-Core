@@ -1,7 +1,6 @@
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { Contract } from '@ethersproject/contracts';
 
 import { now } from '../shared/Helper'
 import { factoryInit } from '../shared/Factory';
@@ -9,7 +8,6 @@ import { testTokenNew } from '../shared/TestToken';
 import { IERC20 } from "../../typechain/IERC20";
 import type { TimeswapPair } from '../../typechain/TimeswapPair'
 import { IFactory } from "../../typechain/IFactory";
-import { constructorFixture, Fixture } from '../shared/Fixtures'
 import { Address } from 'hardhat-deploy/dist/types';
 import Constants from '../shared/Constants';
 

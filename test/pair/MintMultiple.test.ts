@@ -1,7 +1,7 @@
 import { ethers, waffle } from 'hardhat'
 import { now } from '../shared/Helper'
 import { expect } from '../shared/Expect'
-import testCases from './TestCases'
+import testCases from '../testCases/TestCases'
 import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
