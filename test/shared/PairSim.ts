@@ -234,30 +234,29 @@ export class PairSim {
   }
 
   lend(maturity:bigint, bondTo: string, insuranceTo:string,assetIn: bigint, interestDecrease: bigint, cdpDecrease: bigint, block: ethers.providers.Block): TotalClaims | string {
-    console.log("Getting into the Lend tx in the PairSim");
     const now = BigInt(block.timestamp)
     if (now >= maturity) return 'Expired'
-    if( !(bondTo != ZERO_ADDRESSS && insuranceTo != ZERO_ADDRESSS)) {console.log("THIS1");; return 'Zero'}
-    if( !(bondTo != this.contractAddress && insuranceTo != this.contractAddress)) {console.log("THIS2");;return 'Invalid'}
-    if (assetIn <= 0) {console.log("THIS3");return 'Invalid'}
-    if (interestDecrease <= 0 || cdpDecrease <= 0) {console.log(interestDecrease,cdpDecrease);console.log("THIS4");return 'Invalid'}
-    console.log("BASIC REQUIRMENT CHECKS DONE");
+    if( !(bondTo != ZERO_ADDRESSS && insuranceTo != ZERO_ADDRESSS)) { return 'Zero'}
+    if( !(bondTo != this.contractAddress && insuranceTo != this.contractAddress)) { return 'Invalid'}
+    if (assetIn <= 0) { return 'Invalid'}
+    if (interestDecrease <= 0 && cdpDecrease <= 0) { return 'Invalid'}
+
 
     const pool = this.getPool(maturity)
-    console.log("GOT THE POOL", pool);
+
 
     if (pool.state.totalLiquidity <= 0) return 'Invalid'
 
-    console.log("Going into LendMath.Check");
+
     if (!LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, this.fee)) return 'lend math check fail'
-    console.log("LendMath.Check is successful");
+
 
     let claimsOut = totalClaimsDefault()
 
     claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease, now)
-    console.log("claimsOut.bond from the PairSim: ", claimsOut.bond);
+    
     claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease, now)
-    console.log("claimsOut.insurance from the PairSim: ", claimsOut.insurance);
+    
 
     
     

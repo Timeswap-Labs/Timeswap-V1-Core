@@ -57,36 +57,34 @@ describe('Withdraw', () => {
         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
       })
 
-      // it('Should have correct state asset', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+      it('Should have correct state asset', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-      //   const state = await pair.state()
-      //   const stateSim = pairSim.pool.state
+        const state = await pair.state()
+        const stateSim = pairSim.getPool(maturity).state
 
-        
-        
+        expect(state.asset).to.equalBigInt(stateSim.asset)
+      })
 
-      //   expect(state.asset).to.equalBigInt(stateSim.asset)
-      // })
+      it('Should have correct total liquidity', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-      // it('Should have correct total liquidity', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const liquidity = await pair.totalLiquidity()
+        const liquiditySim = pairSim.getPool(maturity).state.totalLiquidity
 
-      //   const liquidity = await pair.totalLiquidity()
-      //   const liquiditySim = pairSim.pool.totalLiquidity
+        expect(liquidity).to.equalBigInt(liquiditySim)
+      })
 
-      //   expect(liquidity).to.equalBigInt(liquiditySim)
-      // })
+      it('Should have correct liquidity of', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
 
-      // it('Should have correct liquidity of', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-      //   const signers = await ethers.getSigners()
+        const liquidityOf = await pair.liquidityOf(signers[0])
+        const liquidityOfSim = pairSim.getPool(maturity).state.senderLiquidity // FIXME
 
-      //   const liquidityOf = await pair.liquidityOf(signers[0])
-      //   const liquidityOfSim = pairSim.pool.senderLiquidity
+        expect(liquidityOf).to.equalBigInt(liquidityOfSim)
+      })
 
-      //   expect(liquidityOf).to.equalBigInt(liquidityOfSim)
-      // })
       // it('Should have correct total debt', async () => {
       //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
       //   const signers = await ethers.getSigners()
