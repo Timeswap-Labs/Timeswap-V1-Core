@@ -30,7 +30,7 @@ library WithdrawMath {
         uint256 _collateralOut = state.totalClaims.bond;
         _collateralOut -= assetReserve;
         _collateralOut *= state.totalClaims.insurance;
-        if (state.reserves.collateral * state.totalClaims.bond >= _collateralOut) 
+        if (uint256(state.reserves.collateral) * state.totalClaims.bond >= _collateralOut)
             return collateralOut = insuranceIn;
         _collateralOut = _collateralOut.mulDiv(insuranceIn, state.totalClaims.bond * state.totalClaims.insurance);
         collateralOut = _collateralOut.toUint128();
