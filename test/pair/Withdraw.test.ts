@@ -11,6 +11,7 @@ function checkBigIntEquality(x: bigint, y: bigint){
   expect(x.toString()).to.equal(y.toString());
 }
 describe('Withdraw', () => {
+  let maturity = 0n;
   const tests = testCases.withdraw()
   const mintTest = testCases.mint()
   const lendTest = testCases.lend()
@@ -18,7 +19,8 @@ describe('Withdraw', () => {
   const burnTest = testCases.burn()
 
   async function fixture(): Promise<Fixture> {
-    const constructor = await constructorFixture(100000n, 100000n, (await now()) + 31536000n)  // setting up the contract 
+    maturity = (await now()) + 31536000n
+    const constructor = await constructorFixture(100000n, 100000n, maturity)  // setting up the contract 
     return constructor
   }
 
@@ -28,36 +30,28 @@ describe('Withdraw', () => {
         const signers = await ethers.getSigners()
         const constructor = await loadFixture(fixture)
 
-        // we are providing liquidity
+        // we are providing liquidity from account[0]
         const mint = await mintFixture(constructor, signers[0], mintTest.Success[0]) 
-        // we are then lending to the pool
-        // ideally we should do this from a different address compared to the one which is minting
+        // we are then lending to the pool from a account[1]
         const lend = await lendFixture(mint, signers[1], lendTest.Success[0].lendParams);
-        // we are now borrowing; we should do this from a totally different address 
+        // we are now borrowing from the pool from account[2]
         const borrow = await borrowFixture(lend,signers[2],borrowTest.Success[0].borrowParams)
-        return borrow;
-        await advanceTimeAndBlock(31536000)
-        // const withdraw = await withdrawFixture(
-        //   borrow,
-        //   signers[0],
-        //   mintTest.Success[0],
-        //   burnTest.Success[0],
-        //   withdrawParams
-        // )
-        // return withdraw
+        await advanceTimeAndBlock(31536001);
+        // we are now withdrawing from the pool using account[1]
+        const withdraw = await withdrawFixture(
+          borrow,
+          signers[1],
+          withdrawParams
+        )
+        return withdraw
       }
 
       it('Should have correct total reserves', async () => {
-        console.log("hi");
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-        // const reserves = await pair.totalReserves()
-        // const reservesSim = pairSim.reserves
-
-        
-        
-        // expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-        // expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+        const reserves = await pair.totalReserves()
+        const reservesSim = pairSim.getPool(maturity).state.reserves;
+        expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+        expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
       })
 
       // it('Should have correct state asset', async () => {

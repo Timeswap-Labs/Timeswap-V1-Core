@@ -57,10 +57,6 @@ export async function mintFixture(
   await assetToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.assetIn)
   await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.collateralIn)
   
-  // const collateralIn = MintMath.getCollateral(pair.maturity, mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, (await now()));
-  // const liquidityTotal = MintMath.getLiquidityTotal1(mintParams.assetIn)
-  // const liquidity = MintMath.getLiquidity(pair.maturity, liquidityTotal, PROTOCOL_FEE, (await now()));
-
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   
   const block = await getBlock(txn.blockHash!)
@@ -108,19 +104,21 @@ export async function borrowFixture(
   await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
 
   const pairContractState = await pair.state();
-  const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
+  let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
   const pairSimPool = pairSim.getPool(pair.maturity);
   const pairSimContractState = pairSimPool.state
-  const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
+  let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairContract) {
     const feeBase = 0x10000n - FEE
     const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSimContractState.interest, feeBase)
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset - borrowParams.assetOut) * interestAdjust)
     const cdpIncrease = BorrowMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase)
     const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, owner)
-
     const block = await getBlock(txn.blockHash!)
     pairSim.borrow(pair.maturity,signer.address,signer.address,borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, block)
+    let k_pairContract1 = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
+    let k_pairSimContract1 = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
+    console.log(k_pairContract1 == k_pairSimContract1); //FIXME: the k after the borrow tx is not the same.
     return { pair, pairSim, assetToken, collateralToken }
   } else {
     throw Error;
@@ -159,18 +157,17 @@ export async function payFixture(
 export async function withdrawFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  mintParams: MintParams,
-  burnParams: BurnParams,
   withdrawParams: WithdrawParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
 
   const txnWithdraw = await pair
     .upgrade(signer)
-    .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance)
+    .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
+
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
 
-  pairSim.withdraw(pair.maturity,signer.address,signer.address,withdrawParams.claimsIn,signer.address, blockWithdraw)
+  pairSim.withdraw(pair.maturity,signer.address,signer.address,withdrawParams.claimsIn,signer.address, blockWithdraw);
 
   return { pair, pairSim, assetToken, collateralToken }
 }
