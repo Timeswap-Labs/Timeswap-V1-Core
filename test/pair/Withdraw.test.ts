@@ -33,11 +33,14 @@ describe('Withdraw', () => {
         // we are providing liquidity from account[0]
         const mint = await mintFixture(constructor, signers[0], mintTest.Success[0]) 
         // we are then lending to the pool from a account[1]
+        console.log("Doing the lend tx");
         const lend = await lendFixture(mint, signers[1], lendTest.Success[0].lendParams);
         // we are now borrowing from the pool from account[2]
+        console.log("Doing the borrow tx");
         const borrow = await borrowFixture(lend,signers[2],borrowTest.Success[0].borrowParams)
         await advanceTimeAndBlock(31536001);
         // we are now withdrawing from the pool using account[1]
+        console.log("Doing the withdraw tx");
         const withdraw = await withdrawFixture(
           borrow,
           signers[1],

@@ -79,7 +79,7 @@ export async function lendFixture(
   const pairSimPool = pairSim.getPool(pair.maturity);
   const pairSimContractState = pairSimPool.state
   const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
-  if (k_pairContract == k_pairContract) {
+  if (k_pairContract == k_pairSimContract) {
     const feeBase = 0x10000n + FEE
     const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
@@ -87,6 +87,9 @@ export async function lendFixture(
     const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease);
     const block = await getBlock(txn.blockHash!)
     pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
+    //FIXME: the constant product after the lendtx is not matching;
+    console.log(await pair.state());
+    console.log((pairSim.getPool(pair.maturity)).state);
     return { pair, pairSim, assetToken, collateralToken }
   } else {
     throw Error;
@@ -101,14 +104,15 @@ export async function borrowFixture(
   owner= false
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-  await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, borrowParams.collateralIn)
-
+  await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, borrowParams.collateralIn);
   const pairContractState = await pair.state();
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
+  console.log("k_pairContract", k_pairContract);
   const pairSimPool = pairSim.getPool(pair.maturity);
   const pairSimContractState = pairSimPool.state
   let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
-  if (k_pairContract == k_pairContract) {
+  console.log("k_pairSimContract", k_pairSimContract);
+  if (k_pairContract == k_pairSimContract) {
     const feeBase = 0x10000n - FEE
     const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSimContractState.interest, feeBase)
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset - borrowParams.assetOut) * interestAdjust)
@@ -116,12 +120,17 @@ export async function borrowFixture(
     const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, owner)
     const block = await getBlock(txn.blockHash!)
     pairSim.borrow(pair.maturity,signer.address,signer.address,borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, block)
-    let k_pairContract1 = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
-    let k_pairSimContract1 = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
+    //
+    let pairContractState1 = await pair.state();
+
+    let k_pairContract1 = (pairContractState1.asset * pairContractState1.interest * pairContractState1.cdp) << 32n;
+    let pairSimPool1 = pairSim.getPool(pair.maturity);
+    let pairSimContractState1 = pairSimPool1.state
+    let k_pairSimContract1 = (pairSimContractState1.asset * pairSimContractState1.interest * pairSimContractState1.cdp) << 32n
     console.log(k_pairContract1 == k_pairSimContract1); //FIXME: the k after the borrow tx is not the same.
     return { pair, pairSim, assetToken, collateralToken }
   } else {
-    throw Error;
+    throw Error ("There is an error in the borrow fixture");
   }
 
 }
