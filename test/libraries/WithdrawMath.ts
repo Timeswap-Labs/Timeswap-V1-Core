@@ -1,38 +1,29 @@
 import { mulDiv } from '../libraries/FullMath'
+import { State } from '../shared/PairInterface'
 
 export function getAsset(
-    bondIn: bigint,
-    assetState: bigint,
-    assetLock: bigint,
-    totalBonds: bigint
+    state: State,
+    bondIn: bigint
 ) : bigint {
-    let assetReserve = assetState + assetLock
-    if (assetReserve >= totalBonds) return bondIn
+    let assetReserve = state.reserves.asset
+    if (assetReserve >= state.totalClaims.bond) return bondIn
     let _assetOut = bondIn
     _assetOut *= assetReserve
-    _assetOut /= totalBonds
+    _assetOut /= state.totalClaims.bond
     return _assetOut
 }
 
 export function getCollateral(
-    insuranceIn: bigint,
-    assetState: bigint,
-    lock: {
-        asset: bigint,
-        collateral: bigint
-    }    ,
-    supplies: {
-        bond: bigint,
-        insurance: bigint
-    },
+    state: State,
+    insuranceIn: bigint
 ) : bigint {
-    let assetReserve = assetState + lock.asset
-    if (assetReserve >= supplies.bond) return 0n
-    let _collateralOut = supplies.bond
+    let assetReserve = state.reserves.asset 
+    if (assetReserve >= state.totalClaims.bond) return 0n
+    let _collateralOut = state.totalClaims.bond;
     _collateralOut -= assetReserve
-    _collateralOut *= supplies.insurance
-    if (lock.collateral * supplies.bond >= _collateralOut) return insuranceIn
-    _collateralOut = mulDiv(_collateralOut, insuranceIn, supplies.bond * supplies.insurance)
+    _collateralOut *= state.totalClaims.insurance
+    if (state.reserves.collateral * state.totalClaims.bond >= _collateralOut) return insuranceIn
+    _collateralOut = mulDiv(_collateralOut, insuranceIn, state.totalClaims.bond * state.totalClaims.insurance)
     return _collateralOut
 }
 
