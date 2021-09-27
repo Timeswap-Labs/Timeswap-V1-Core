@@ -80,6 +80,7 @@ export async function lendFixture(
   const pairSimContractState = pairSimPool.state
   const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairSimContract) {
+
     const feeBase = 0x10000n + FEE
     const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
@@ -91,6 +92,7 @@ export async function lendFixture(
     console.log(await pair.state());
     console.log((pairSim.getPool(pair.maturity)).state);
     return { pair, pairSim, assetToken, collateralToken }
+    
   } else {
     throw Error;
   }
