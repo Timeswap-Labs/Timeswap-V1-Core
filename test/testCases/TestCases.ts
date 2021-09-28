@@ -87,7 +87,7 @@ export function burn(): Burn {
   // pass inputs array and fail inputs array
 }
 function burnTestCases(): BurnParams[] {
-  const testCases = [{ liquidityIn: 32697198273646328347n }];
+  const testCases = [{ liquidityIn: 132697204941179723912n }];
   return testCases;
 }
 
@@ -284,7 +284,7 @@ function borrowTestCases(): BorrowParams[] {
 function withdrawTestCases(): WithdrawParams[] {
   const testCases = [
     // { claimsIn: { bond: 100n, insurance: 1n } },
-    { claimsIn: { bond: 80n, insurance: 1n } },
+    { claimsIn: { bond: 100n, insurance: 37n } },
     // { claimsIn: 1000n },
   ];
 

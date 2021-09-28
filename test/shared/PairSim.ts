@@ -191,7 +191,7 @@ export class PairSim {
     pool.state.cdp += cdpIncrease
 
     this.pools.push(pool)
-
+    console.log(liquidityOut);
     return {
       liquidityOut: liquidityOut,
       id: id,
@@ -254,15 +254,18 @@ export class PairSim {
     let claimsOut = totalClaimsDefault()
 
     claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease, now)
+    console.log("claimsOut.bond", claimsOut.bond);
     
     claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease, now)
-  
+    console.log("claimsOut.insurance", claimsOut.insurance);
+
     pool.state.totalClaims.bond += claimsOut.bond
     pool.state.totalClaims.insurance += claimsOut.insurance
   
     this.addClaim(pool,claimsOut,bondTo)
 
     pool.state.reserves.asset += assetIn
+    console.log(assetIn);
 
 
     pool.state.asset += assetIn
@@ -282,14 +285,18 @@ export class PairSim {
 
     const pool = this.getPool(maturity)
     let tokensOut = tokensDefault()
+
     tokensOut.asset = WithdrawMath.getAsset(
       pool.state,
       claimsIn.bond
     )
+    console.log("tokensOut.asset", tokensOut.asset);
+
     tokensOut.collateral = WithdrawMath.getCollateral(
       pool.state,
       claimsIn.insurance
     )
+    console.log("tokensOut.collateral", tokensOut.collateral);
     
 
     pool.state.totalClaims.bond -= claimsIn.bond

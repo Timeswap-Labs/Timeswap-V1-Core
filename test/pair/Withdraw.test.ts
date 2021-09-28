@@ -2,7 +2,7 @@ import { ethers, waffle } from 'hardhat'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import testCases from '../testCases/TestCases'
 import { expect } from '../shared/Expect'
-import { withdrawFixture, constructorFixture, Fixture, mintFixture, lendFixture, borrowFixture } from '../shared/Fixtures'
+import { withdrawFixture, burnFixture, constructorFixture, Fixture, mintFixture, lendFixture, borrowFixture } from '../shared/Fixtures'
 
 const { loadFixture } = waffle
 
@@ -16,7 +16,7 @@ describe('Withdraw', () => {
   const mintTest = testCases.mint()
   const lendTest = testCases.lend()
   const borrowTest = testCases.borrow()
-  const burnTest = testCases.burn()
+  const burntests = testCases.burn()
 
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 31536000n
@@ -40,9 +40,11 @@ describe('Withdraw', () => {
         const borrow = await borrowFixture(lend,signers[2],borrowTest.Success[0].borrowParams)
         await advanceTimeAndBlock(31536001);
         // we are now withdrawing from the pool using account[1]
-        
+
+        const burn = await burnFixture(borrow,signers[0],burntests.Success[0]);
+
         const withdraw = await withdrawFixture(
-          borrow,
+          burn,
           signers[1],
           withdrawParams
         )
