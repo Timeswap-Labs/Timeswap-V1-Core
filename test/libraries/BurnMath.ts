@@ -1,47 +1,36 @@
 import { mulDiv } from '../libraries/FullMath'
+import {State} from '../shared/PairInterface'
 
 export function getAsset(
-    liquidityIn: bigint,
-    assetState: bigint,
-    assetLock: bigint,
-    totalBonds: bigint,
-    totalLiquidity: bigint
+    state: State,
+    liquidityIn: bigint
 ) : bigint {
     
-    const assetReserve = assetState
-    if (assetReserve <= totalBonds) return 0n
+    const assetReserve = state.reserves.asset
+    if (assetReserve <= state.totalClaims.bond) return 0n
     let _assetOut = assetReserve
-    _assetOut -= totalBonds
-    _assetOut = mulDiv(_assetOut, liquidityIn, totalLiquidity)
+    _assetOut -= state.totalClaims.bond
+    _assetOut = mulDiv(_assetOut, liquidityIn, state.totalLiquidity)
     return _assetOut
 }
 
 export function getCollateral(
-    liquidityIn: bigint,
-    assetState: bigint,
-    lock: {
-        asset: bigint,
-        collateral: bigint
-    }    ,
-    supplies: {
-        bond: bigint,
-        insurance: bigint
-    },
-    totalLiquidity: bigint
+    state: State,
+    liquidityIn: bigint
 ) : bigint {
-    let assetReserve = assetState
-    let _collateralOut = lock.collateral
-    if (assetReserve >= supplies.bond) {
-        _collateralOut = mulDiv(_collateralOut, liquidityIn, totalLiquidity)
+    let assetReserve = state.reserves.asset
+    let _collateralOut = state.reserves.collateral
+    if (assetReserve >= state.totalClaims.bond) {
+        _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
         return _collateralOut 
     }
-    let _reduce = supplies.bond
+    let _reduce = state.totalClaims.bond
     _reduce -= assetReserve
-    _reduce *= supplies.insurance
-    if (lock.collateral * supplies.bond <= _reduce) return 0n
-    _collateralOut *= supplies.bond
+    _reduce *= state.totalClaims.insurance
+    if (state.reserves.collateral * state.totalClaims.bond <= _reduce) return 0n
+    _collateralOut *= state.totalClaims.bond
     _collateralOut -= _reduce
-    _collateralOut = mulDiv(_collateralOut, liquidityIn, totalLiquidity * supplies.bond)
+    _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity * state.totalClaims.bond)
     return _collateralOut
 }
 

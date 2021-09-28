@@ -1,5 +1,6 @@
 import { shiftUp } from '../libraries/Math'
 import { mulDiv, mulDivUp } from '../libraries/FullMath'
+import { State } from '../shared/PairInterface'
 
 export function getLiquidityTotal1(assetIn: bigint): bigint {
   let liquidityTotal = assetIn
@@ -8,20 +9,15 @@ export function getLiquidityTotal1(assetIn: bigint): bigint {
 }
 
 export function getLiquidityTotal2(
-  state: {
-    asset: bigint
-    interest: bigint
-    cdp: bigint
-  },
+  state: State,
   assetIn: bigint,
   interestIncrease: bigint,
   cdpIncrease: bigint,
-  total: bigint
 ): bigint {
   const liquidityTotal = min(
-    mulDiv(total, assetIn, state.asset),
-    mulDiv(total, interestIncrease, state.interest),
-    mulDiv(total, cdpIncrease, state.cdp)
+    mulDiv(state.totalLiquidity, assetIn, state.asset),
+    mulDiv(state.totalLiquidity, interestIncrease, state.interest),
+    mulDiv(state.totalLiquidity, cdpIncrease, state.cdp)
   )
   return liquidityTotal
 }

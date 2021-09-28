@@ -1,4 +1,4 @@
-import { Claims } from "../shared/PairInterface";
+import { TotalClaims } from "../shared/PairInterface";
 
 export function mint(): Mint {
   const testCases = mintTestCases();
@@ -87,7 +87,7 @@ export function burn(): Burn {
   // pass inputs array and fail inputs array
 }
 function burnTestCases(): BurnParams[] {
-  const testCases = [{ liquidityIn: 1n }];
+  const testCases = [{ liquidityIn: 32697198273646328347n }];
   return testCases;
 }
 
@@ -149,8 +149,8 @@ export function lend(): Lend {
 
 function lendTestCases(): LendParams[] {
   const testCases = [
-    { assetIn: 2000n, interestDecrease: 1n, cdpDecrease: 2n },
-    { assetIn: 2000n, interestDecrease: 0n, cdpDecrease: 0n },
+    { assetIn: 100n, interestDecrease: 0n, cdpDecrease: 2n },
+    { assetIn: 100n, interestDecrease: 0n, cdpDecrease: 0n },
   ];
 
   return testCases;
@@ -266,7 +266,7 @@ export function withdraw(): Withdraw {
 function borrowTestCases(): BorrowParams[] {
   const testCases = [
     {
-      assetOut: 200n,
+      assetOut: 150n,
       collateralIn: 72n,
       interestIncrease: 1n,
       cdpIncrease: 2n,
@@ -366,7 +366,7 @@ function borrowMessage({
 }
 
 export interface WithdrawParams {
-  claimsIn: Claims;
+  claimsIn: TotalClaims;
 }
 
 function withdrawSuccessCheck(withdrawParams: WithdrawParams): boolean {

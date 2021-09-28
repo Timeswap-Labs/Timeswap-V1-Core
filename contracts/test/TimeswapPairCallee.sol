@@ -39,9 +39,7 @@ contract TimeswapPairCallee {
         data =  abi.encode(PairCalleeInfoMint(pairContract.asset(),pairContract.collateral(),from,from));
     }
 
-    function factory()public returns(IFactory){
-        return factoryContract;
-    }
+
    
 
         function mint(
@@ -76,11 +74,12 @@ contract TimeswapPairCallee {
     function borrow(
         uint256 maturity,
         address assetTo,
+        address dueTo,
         uint112 xDecrease,
         uint112 yIncrease,
         uint112 zIncrease
     ) external  returns (uint256 id, IPair.Due memory dueOut){
-        return pairContract.borrow(maturity,assetTo,address(this),xDecrease,yIncrease,zIncrease,getData(msg.sender));
+        return pairContract.borrow(maturity,assetTo,dueTo,xDecrease,yIncrease,zIncrease,getData(msg.sender));
     }
     function pay(
         uint256 maturity,
@@ -138,15 +137,5 @@ contract TimeswapPairCallee {
         
     }
 
-    function collateralizedDebtCallback(
-        IPair pair,
-        uint256 maturity,
-        uint128 assetIn,
-        bytes calldata data
-    ) external  {
-        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
 
-        asset.transferFrom(from, address(pair), assetIn);
-
-    }
 }
