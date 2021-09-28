@@ -43,7 +43,7 @@ export async function constructorFixture(
   await collateralToken.approve(pair.pairContractCallee.address, collateralValue);
   
   const pairSim = new PairSim(assetToken.address,collateralToken.address,FEE,PROTOCOL_FEE,pair.pairContract.address,factoryAddress,owner)
-
+  
   return { pair, pairSim, assetToken, collateralToken }
 }
 
@@ -89,8 +89,8 @@ export async function lendFixture(
     const block = await getBlock(txn.blockHash!)
     pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
     //FIXME: the constant product after the lendtx is not matching;
-    console.log(await pair.state());
-    console.log((pairSim.getPool(pair.maturity)).state);
+    
+    
     return { pair, pairSim, assetToken, collateralToken }
     
   } else {
@@ -106,14 +106,15 @@ export async function borrowFixture(
   owner= false
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-  await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, borrowParams.collateralIn);
   const pairContractState = await pair.state();
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
   const pairSimPool = pairSim.getPool(pair.maturity);
   const pairSimContractState = pairSimPool.state
+  
+  
   let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairSimContract) {
-    console.log("HI");
+    
     const feeBase = 0x10000n - FEE
     const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairSimContractState.interest, feeBase)
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset - borrowParams.assetOut) * interestAdjust)

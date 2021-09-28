@@ -3,6 +3,8 @@ import { advanceTimeAndBlock, now } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import { payFixture, constructorFixture, Fixture, mintFixture, borrowFixture, lendFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { Console } from 'console'
+import ConstantProduct from '../libraries/ConstantProduct'
 
 const { loadFixture, solidity } = waffle
 let maturity  = 0n
@@ -45,7 +47,14 @@ describe('Pay', () => {
     //return { pair, pairSim, assetToken, collateralToken }
     return constructor
   }
-
+  //TODO: A hack around setting an ew state for failure test, a way has to be figured to re run the fixture by clearing the snapshot
+  async function fixture1(): Promise<Fixture> {
+    maturity = (await now()) + 31536000n
+    signers = await ethers.getSigners()
+    const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
+    //return { pair, pairSim, assetToken, collateralToken }
+    return constructor
+  }
 
   // TODO: we are getting an object of mintCases, BorrowCases and payCases
   // TODO: Need to restructure the testCases.pay to send in an array of the test cases
@@ -163,8 +172,10 @@ describe('Pay', () => {
   
       const {mintParams, borrowParams, payParams} = tests.Success[0]
 
-      const constructor = await loadFixture(fixture)
+      const constructor = await loadFixture(fixture1)
+
       const signers = await ethers.getSigners()
+
 
       // This is passing, but won't fail for a wrong error message
       // Think it is due to the `await txn.wait()`

@@ -233,20 +233,20 @@ contract TimeswapPair is IPair {
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
         require(bondTo != address(this) && insuranceTo != address(this), 'Invalid');
         require(xIncrease > 0, 'Invalid');
-        console.log("yDec", yDecrease);
-        console.log("zDec", zDecrease);
+        
+        
         require(yDecrease > 0 || zDecrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
 
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
-        console.log("lendMath check has been cleared");
+        
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
-        console.log("claimsOut.bond from the Contract", claimsOut.bond);
+        
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);
-        console.log("claimsOut.insurance from the Contract", claimsOut.insurance);
+        
 
         Callback.lend(asset, xIncrease, data);
 
@@ -261,9 +261,9 @@ contract TimeswapPair is IPair {
         pool.state.x += xIncrease;
         pool.state.y -= yDecrease;
         pool.state.z -= zDecrease;
-        console.log("X:", pool.state.x);
-        console.log("Y:", pool.state.y);
-        console.log("Z:", pool.state.z);
+        
+        
+        
 
         emit Sync(maturity, pool.state);
         emit Lend(maturity, msg.sender, bondTo, insuranceTo, xIncrease, claimsOut);
