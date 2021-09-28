@@ -2,7 +2,7 @@ import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { now } from '../shared/Helper'
 import { borrowFixture, constructorFixture, lendFixture, Fixture, mintFixture } from '../shared/Fixtures'
-import testCases from '../testCases/TestCases'
+import * as testCases from '../testCases'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from '../shared/Expect'
 

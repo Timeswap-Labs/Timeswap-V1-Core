@@ -1,6 +1,6 @@
 import { ethers, waffle } from 'hardhat'
 import { now , advanceTimeAndBlock} from '../shared/Helper'
-import testCases from '../testCases/TestCases';
+import * as testCases from '../testCases';
 import { expect } from '../shared/Expect'
 import { burnFixture, mintFixture,constructorFixture, Fixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'

@@ -3,7 +3,6 @@ import { advanceTimeAndBlock, now } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import { payFixture, constructorFixture, Fixture, mintFixture, borrowFixture, lendFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Console } from 'console'
 import ConstantProduct from '../libraries/ConstantProduct'
 
 const { loadFixture, solidity } = waffle

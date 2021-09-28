@@ -1,13 +1,13 @@
 import { ethers, waffle } from 'hardhat'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
-import testCases from '../testCases/TestCases'
+import * as testCases from '../testCases'
 import { expect } from '../shared/Expect'
 import { withdrawFixture, burnFixture, constructorFixture, Fixture, mintFixture, lendFixture, borrowFixture } from '../shared/Fixtures'
 
 const { loadFixture } = waffle
 
 //TODO: Check why chai's native assertion library isnt working and remove the helper function
-function checkBigIntEquality(x: bigint, y: bigint){
+function checkBigIntEquality(x: bigint, y: bigint) {
   expect(x.toString()).to.equal(y.toString());
 }
 describe('Withdraw', () => {
@@ -31,14 +31,13 @@ describe('Withdraw', () => {
         const constructor = await loadFixture(fixture)
 
         // we are providing liquidity from account[0]
-        const mint = await mintFixture(constructor, signers[0], mintTest.Success[0]) 
+        const mint = await mintFixture(constructor, signers[0], mintTest.Success[0])
 
         // we are then lending to the pool from a account[1]
         const lend = await lendFixture(mint, signers[1], lendTest.Success[0].lendParams);
-        
+
         // we are now borrowing from the pool from account[2]
-        const borrow = await borrowFixture(lend,signers[2],borrowTest.Success[0].borrowParams);
-        console.info("Borrow done");
+        const borrow = await borrowFixture(lend, signers[2], borrowTest.Success[0].borrowParams);
 
         await advanceTimeAndBlock(31536001);
 
@@ -56,63 +55,58 @@ describe('Withdraw', () => {
 
       it('Should have correct total reserves', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        console.log("HI");
+        const reserves = await pair.totalReserves()
+        const reservesSim = pairSim.getPool(maturity).state.reserves;
+        expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+        expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
       })
 
-      // it('Should have correct total reserves', async () => {
-      //   
-      //   const reserves = await pair.totalReserves()
-      //   const reservesSim = pairSim.getPool(maturity).state.reserves;
-      //   expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-      //   expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
-      // })
+      it('Should have correct state asset', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-      // it('Should have correct state asset', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const state = await pair.state()
+        const stateSim = pairSim.getPool(maturity).state
 
-      //   const state = await pair.state()
-      //   const stateSim = pairSim.getPool(maturity).state
+        expect(state.asset).to.equalBigInt(stateSim.asset)
+      })
 
-      //   expect(state.asset).to.equalBigInt(stateSim.asset)
-      // })
+      it('Should have correct total liquidity', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-      // it('Should have correct total liquidity', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const liquidity = await pair.totalLiquidity()
+        const liquiditySim = pairSim.getPool(maturity).state.totalLiquidity
 
-      //   const liquidity = await pair.totalLiquidity()
-      //   const liquiditySim = pairSim.getPool(maturity).state.totalLiquidity
+        expect(liquidity).to.equalBigInt(liquiditySim)
+      })
 
-      //   expect(liquidity).to.equalBigInt(liquiditySim)
-      // })
+      it('Should have correct liquidity of', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
 
-      // it('Should have correct liquidity of', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-      //   const signers = await ethers.getSigners()
+        const liquidityOf = await pair.liquidityOf(signers[0])
+        const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(maturity), signers[0].address);
+        expect(liquidityOf).to.equalBigInt(liquidityOfSim)
+      })
 
-      //   const liquidityOf = await pair.liquidityOf(signers[0])
-      //   const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(maturity), signers[0].address); 
-      //   expect(liquidityOf).to.equalBigInt(liquidityOfSim)
-      // })
+      it('Should have correct total debt', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const signers = await ethers.getSigners()
 
-      // it('Should have correct total debt', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-      //   const signers = await ethers.getSigners()
+        const totalDebtCreated = await pair.totalDebtCreated()
+        const totalDebtCreatedSim = pairSim.getPool(maturity).state.totalDebtCreated
 
-      //   const totalDebtCreated = await pair.totalDebtCreated()
-      //   const totalDebtCreatedSim = pairSim.getPool(maturity).state.totalDebtCreated
+        checkBigIntEquality(totalDebtCreated, totalDebtCreatedSim)
+      })
 
-      //   checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
-      // })
+      it('Should have correct total claims', async () => {
+        const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-      // it('Should have correct total claims', async () => {
-      //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        const claims = await pair.totalClaims()
+        const claimsSim = pairSim.getPool(maturity).state.totalClaims
 
-      //   const claims = await pair.totalClaims()
-      //   const claimsSim = pairSim.getPool(maturity).state.totalClaims
-        
-      //   expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      //   expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
-      // })
+        expect(claims.bond).to.equalBigInt(claimsSim.bond)
+        expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      })
     })
   })
 })
