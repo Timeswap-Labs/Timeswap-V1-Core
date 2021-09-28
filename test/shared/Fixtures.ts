@@ -32,11 +32,11 @@ export async function constructorFixture(
 
   // call the approve function in the test Tokens
   for (let i=1;i<6;i++) {
-    await assetToken.transfer(signers[i].address,200n);
-    await collateralToken.transfer(signers[i].address,200n);
+    await assetToken.transfer(signers[i].address,5000n);
+    await collateralToken.transfer(signers[i].address,10000n);
     
-    await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 200n);
-    await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 200n);
+    await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 5000n);
+    await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 10000n);
   }
 
   await assetToken.approve(pair.pairContractCallee.address, assetValue);

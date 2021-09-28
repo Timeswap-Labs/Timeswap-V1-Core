@@ -315,7 +315,6 @@ contract TimeswapPair is IPair {
         BorrowMath.check(pool.state, xDecrease, yIncrease, zIncrease, fee);
 
         dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease); 
-
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 

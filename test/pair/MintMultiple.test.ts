@@ -36,7 +36,7 @@ describe('Mint Multiple', () => {
         async function fixture(): Promise<Fixture> {
                 maturity = (await now()) + 31536000n
                 signers = await ethers.getSigners()
-                const constructor = await constructorFixture(10000n, 10000n, (await now()) + 31536000n)
+                const constructor = await constructorFixture(100000n, 100000n, (await now()) + 31536000n)
                 return constructor
         }
 

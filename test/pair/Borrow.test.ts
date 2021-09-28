@@ -1,7 +1,7 @@
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { now } from '../shared/Helper'
-import { borrowFixture, constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
+import { borrowFixture, constructorFixture, lendFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import testCases from '../testCases/TestCases'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from '../shared/Expect'
@@ -19,11 +19,12 @@ function checkBigIntEquality(x: bigint, y: bigint){
 
 describe('Borrow', () => {
   const tests = testCases.borrow()
+  const lendTest = testCases.lend();
 
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 31536000n
     signers = await ethers.getSigners()
-    const constructor = await constructorFixture(10000n, 10000n, maturity)
+    const constructor = await constructorFixture(100000n, 100000n, maturity)
     return constructor
   }
 
@@ -36,7 +37,8 @@ describe('Borrow', () => {
         const constructor = await loadFixture(fixture)
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
-        const borrow = await borrowFixture(mint, signers[0], borrowParams)
+        const lend = await lendFixture(mint, signers[1], lendTest.Success[0].lendParams);
+        const borrow = await borrowFixture(lend, signers[0], borrowParams)
 
         return borrow
       }
