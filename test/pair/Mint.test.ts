@@ -31,7 +31,7 @@ describe('Mint', () => {
       assetIn: assetInValue,  // xIncrease
       collateralIn: collateralInValue,
       interestIncrease: 5000n, // yIncrease
-      cdpIncrease: 3000n, // zIncrease
+      cdpIncrease: BigInt(((BigNumber.from(assetInValue).div(100))).toString()), // zIncrease
     },]
 
     // Based on preliminary analysis the balance of the Pool for the Collateral Token is only 2 of cdpIncrease + 1; it is not changing by either the collateralIn value, interest value,  maturity number, fee, protocol fee
@@ -56,16 +56,21 @@ describe('Mint', () => {
 
   tests.forEach((mintParams, idx) => {
     describe(`Success case ${idx + 1}`, () => {
+      console.log(mintParams);
       async function fixtureSuccess(): Promise<Fixture> {
         const constructor = await loadFixture(fixture)
 
         const mint = await mintFixture(constructor, signers[0], mintParams)
+        let abc = BigNumber.from(mintParams.cdpIncrease);
+        abc = abc.mul(2).add(1);
+        console.log("abc", abc.toString());
 
         return mint;
       }
 
       it('Should have correct total reserves', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
+        
 
         // const reserves = await pair.totalReserves()
         // const reservesSim = pairSim.getPool(maturity).state.reserves
