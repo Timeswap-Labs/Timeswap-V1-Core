@@ -23,15 +23,16 @@ describe('Mint', () => {
     return BigNumber.from(new Decimal(MaxUint112.toString()).mul(Math.random().toString()).round().toString())
   }
 
-  let assetInValue:bigint = BigInt(pseudoRandomBigNumber().toString());
+  let assetInValue:bigint = BigInt(pseudoRandomBigNumber().toString()); //TODO: assetV divided 2**32
   let collateralInValue:bigint = BigInt(((BigNumber.from(assetInValue).div(10))).toString());
   //TODO: move the tests back to testcases.ts file
   const tests = [
     {
-      assetIn: assetInValue,  // xIncrease
+      assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(40))).toString()),  // xIncrease
       collateralIn: collateralInValue,
-      interestIncrease: 5000n, // yIncrease
-      cdpIncrease: BigInt(((BigNumber.from(assetInValue).div(100))).toString()), // zIncrease
+      interestIncrease: BigInt(((BigNumber.from(assetInValue).mul(1))).toString()), // yIncrease
+      cdpIncrease: 200n, // zIncrease
+      // BigInt(((BigNumber.from(assetInValue).div(100))).toString())
     },]
 
     // Based on preliminary analysis the balance of the Pool for the Collateral Token is only 2 of cdpIncrease + 1; it is not changing by either the collateralIn value, interest value,  maturity number, fee, protocol fee
@@ -60,10 +61,7 @@ describe('Mint', () => {
       async function fixtureSuccess(): Promise<Fixture> {
         const constructor = await loadFixture(fixture)
 
-        const mint = await mintFixture(constructor, signers[0], mintParams)
-        let abc = BigNumber.from(mintParams.cdpIncrease);
-        abc = abc.mul(2).add(1);
-        console.log("abc", abc.toString());
+        const mint = await mintFixture(constructor, signers[0], mintParams);
 
         return mint;
       }
