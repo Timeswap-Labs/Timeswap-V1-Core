@@ -92,8 +92,8 @@ export class PairSigner extends Pair {
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .mint(
-        this.maturity,
-        this.signerWithAddress.address,
+        this.maturity, // maturity
+        this.signerWithAddress.address, // liquidityTo
         xIncrease,
         yIncrease,
         zIncrease

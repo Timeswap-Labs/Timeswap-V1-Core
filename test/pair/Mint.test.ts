@@ -30,7 +30,7 @@ describe('Mint', () => {
     {
       assetIn: assetInValue,
       collateralIn: collateralInValue,
-      interestIncrease: 20n,
+      interestIncrease: 1000n,
       cdpIncrease: 400n,
     },]
     // const testsFailure = [

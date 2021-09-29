@@ -24,8 +24,8 @@ export async function constructorFixture(
   const signers = await ethers.getSigners();
   let av = BigNumber.from(assetValue);
   let cv = BigNumber.from(collateralValue);
-  av = av.mul(5);
-  cv = cv.mul(5);
+  av = av.mul(2);
+  cv = cv.mul(2);
   const assetToken = await testTokenNew('Ether', 'WETH', BigInt(av.toString()))
   const collateralToken = await testTokenNew('Matic', 'MATIC', BigInt(cv.toString()))
 
@@ -58,11 +58,33 @@ export async function mintFixture(
   mintParams: MintParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
+  console.log("signer.address", signer.address);
+  console.log("pair.pairContract.address", pair.pairContract.address);
+  console.log("pair.pairContractCallee.address", pair.pairContractCallee.address);
+  console.log("MINTPARAMS.assetIn", mintParams.assetIn);
+  
+  console.log("1: Initial balance of signer of assetToken", (await assetToken.balanceOf(signer.address)).toString());
+  console.log("2: Initial balance of signer of collateralToken", (await collateralToken.balanceOf(signer.address)).toString());
+
+  console.log("3: Initial balance of CalleeContract of assetToken", (await assetToken.balanceOf(pair.pairContractCallee.address)).toString());
+  console.log("4: Initial balance of CalleeContract of collateralToken", (await collateralToken.balanceOf(pair.pairContractCallee.address)).toString());
 
   await assetToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.assetIn)
   await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.collateralIn)
+
+  console.log("5: AfterTransfer balance of CalleeContract of assetToken", (await assetToken.balanceOf(pair.pairContractCallee.address)).toString());
+  console.log("6: AfterTransfer balance of CalleeContract of collateralToken", (await collateralToken.balanceOf(pair.pairContractCallee.address)).toString());
   
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
+
+  console.log("7: After Tx balance of signer for assetToken", (await assetToken.balanceOf(signer.address)).toString());
+  console.log("8: After Tx balance of signer for collateral", (await collateralToken.balanceOf(signer.address)).toString());
+
+  console.log("9: After Tx balance of CalleeContract for assetToken", (await assetToken.balanceOf(pair.pairContractCallee.address)).toString());
+  console.log("10: After Tx balance of CalleeContract for collateralToken", (await collateralToken.balanceOf(pair.pairContractCallee.address)).toString());
+
+  console.log("11: After Tx balance of PairContract for assetToken", (await assetToken.balanceOf(pair.pairContract.address)).toString());
+  console.log("12: After Tx balance of PairContract for collateralToken", (await collateralToken.balanceOf(pair.pairContract.address)).toString());
   
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(pair.maturity,signer.address,signer.address,BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block)
