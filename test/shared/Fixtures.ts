@@ -13,6 +13,7 @@ import { now } from '../shared/Helper'
 import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
 
 import type { TestToken } from '../../typechain/TestToken'
+import { BigNumber } from '@ethersproject/bignumber'
 
 
 export async function constructorFixture(
@@ -21,8 +22,12 @@ export async function constructorFixture(
   maturity: bigint
 ): Promise<Fixture> {
   const signers = await ethers.getSigners();
-  const assetToken = await testTokenNew('Ether', 'WETH', assetValue)
-  const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
+  let av = assetValue as unknown as BigNumber;
+  let cv = collateralValue as unknown as BigNumber;
+  av = av.mul(5);
+  cv = cv.mul(5);
+  const assetToken = await testTokenNew('Ether', 'WETH', av as unknown as bigint)
+  const collateralToken = await testTokenNew('Matic', 'MATIC', cv as unknown as bigint)
 
   const pair = await pairInit(assetToken, collateralToken, maturity)
   const factory = pair.factoryContract
@@ -31,13 +36,13 @@ export async function constructorFixture(
   const owner = await factory.owner()
 
   // call the approve function in the test Tokens
-  for (let i=1;i<6;i++) {
-    await assetToken.transfer(signers[i].address,5000n);
-    await collateralToken.transfer(signers[i].address,10000n);
+  // for (let i=1;i<6;i++) {
+  //   await assetToken.transfer(signers[i].address,5000n);
+  //   await collateralToken.transfer(signers[i].address,10000n);
     
-    await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 5000n);
-    await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 10000n);
-  }
+  //   await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 5000n);
+  //   await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 10000n);
+  // }
 
   await assetToken.approve(pair.pairContractCallee.address, assetValue);
   await collateralToken.approve(pair.pairContractCallee.address, collateralValue);
@@ -58,6 +63,7 @@ export async function mintFixture(
   await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.collateralIn)
   
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
+  console.log("txn is done");
   
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(pair.maturity,signer.address,signer.address,mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
