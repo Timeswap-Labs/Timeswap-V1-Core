@@ -22,12 +22,12 @@ export async function constructorFixture(
   maturity: bigint
 ): Promise<Fixture> {
   const signers = await ethers.getSigners();
-  let av = assetValue as unknown as BigNumber;
-  let cv = collateralValue as unknown as BigNumber;
+  let av = BigNumber.from(assetValue);
+  let cv = BigNumber.from(collateralValue);
   av = av.mul(5);
   cv = cv.mul(5);
-  const assetToken = await testTokenNew('Ether', 'WETH', av as unknown as bigint)
-  const collateralToken = await testTokenNew('Matic', 'MATIC', cv as unknown as bigint)
+  const assetToken = await testTokenNew('Ether', 'WETH', BigInt(av.toString()))
+  const collateralToken = await testTokenNew('Matic', 'MATIC', BigInt(cv.toString()))
 
   const pair = await pairInit(assetToken, collateralToken, maturity)
   const factory = pair.factoryContract
@@ -63,10 +63,9 @@ export async function mintFixture(
   await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.collateralIn)
   
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
-  console.log("txn is done");
   
   const block = await getBlock(txn.blockHash!)
-  pairSim.mint(pair.maturity,signer.address,signer.address,mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease, block)
+  pairSim.mint(pair.maturity,signer.address,signer.address,BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block)
 
   return { pair, pairSim, assetToken, collateralToken }
 }
