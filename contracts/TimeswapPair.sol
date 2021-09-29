@@ -14,6 +14,7 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import 'hardhat/console.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -147,9 +148,12 @@ contract TimeswapPair is IPair {
 
         if (pool.state.totalLiquidity == 0) {
             uint256 liquidityTotal = MintMath.getLiquidityTotal(xIncrease);
+            console.log("liquidityTotal", liquidityTotal);
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
+            console.log("liquidityOut", liquidityOut);
 
             pool.state.totalLiquidity += liquidityTotal;
+            console.log("pool.liquidities[factory.owner()]",pool.liquidities[factory.owner()]);
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         } else {
             uint256 liquidityTotal = MintMath.getLiquidityTotal(
@@ -167,7 +171,9 @@ contract TimeswapPair is IPair {
         pool.liquidities[liquidityTo] += liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
+        console.log("dueOut.debt", dueOut.debt);
         dueOut.collateral = MintMath.getCollateral(maturity, xIncrease, yIncrease, zIncrease);
+        console.log("dueOut.collateral", dueOut.collateral);
         dueOut.startBlock = BlockNumber.get();
 
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
