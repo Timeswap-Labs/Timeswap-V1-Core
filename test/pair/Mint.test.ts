@@ -28,10 +28,10 @@ describe('Mint', () => {
   //TODO: move the tests back to testcases.ts file
   const tests = [
     {
-      assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(40))).toString()),  // xIncrease
+      assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(30))).toString()),  // xIncrease
       collateralIn: collateralInValue,
-      interestIncrease: BigInt(((BigNumber.from(assetInValue).mul(1))).toString()), // yIncrease
-      cdpIncrease: 200n, // zIncrease
+      interestIncrease: BigInt(((BigNumber.from(assetInValue).div(100000))).toString()), // yIncrease
+      cdpIncrease: 41407828134964681949000000n, // zIncrease
       // BigInt(((BigNumber.from(assetInValue).div(100))).toString())
     },]
 
