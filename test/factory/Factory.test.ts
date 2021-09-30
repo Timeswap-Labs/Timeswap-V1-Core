@@ -53,7 +53,6 @@ describe('Factory Contract', () => {
     await factory.connect(signers[10]).setOwner(signers[1].address);
     await expect(factory.connect(signers[2]).acceptOwner()).to.be.revertedWith("Forbidden");
   })
-
 });
 
 describe("", async () => {
