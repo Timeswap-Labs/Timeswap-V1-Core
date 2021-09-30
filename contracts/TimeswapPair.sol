@@ -175,7 +175,6 @@ contract TimeswapPair is IPair {
 
         id = pool.dues[dueTo].insert(dueOut);
         
-
         pool.state.reserves.asset += xIncrease;
         pool.state.reserves.collateral += dueOut.collateral;
         pool.state.totalDebtCreated += dueOut.debt;
@@ -347,7 +346,6 @@ contract TimeswapPair is IPair {
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
-        
         require(block.timestamp < maturity, 'Expired');
         require(ids.length == assetsIn.length, 'Invalid');
         require(ids.length == collateralsOut.length, 'Invalid');
@@ -358,7 +356,7 @@ contract TimeswapPair is IPair {
 
         Due[] storage dues = pool.dues[owner];
 
-        for (uint256 i = 0; i < ids.length; i++) {
+        for (uint256 i; i < ids.length; i++) {
             Due storage due = dues[ids[i]]; 
             require(due.startBlock != BlockNumber.get(), 'Invalid');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');

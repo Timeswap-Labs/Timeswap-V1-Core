@@ -6,8 +6,6 @@ import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
-import 'hardhat/console.sol';
-
 library MintMath {
     using Math for uint256;
     using FullMath for uint256;
@@ -15,7 +13,7 @@ library MintMath {
 
     function getLiquidityTotal(
         uint112 xIncrease
-    ) internal view returns (uint256 liquidityTotal) {
+    ) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = xIncrease;
         liquidityTotal <<= 56;
     }
