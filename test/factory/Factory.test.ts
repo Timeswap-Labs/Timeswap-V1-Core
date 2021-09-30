@@ -26,7 +26,6 @@ describe('Factory Contract', () => {
     factory = await factoryInit(signers[10].address, fee, protocol_fee); // deploying the factory
   })
 
-  
   it("Set Owner and accept owner from another account", async () => {
     // setting new owner and emitting event
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`);
@@ -54,33 +53,51 @@ describe('Factory Contract', () => {
     await factory.connect(signers[10]).setOwner(signers[1].address);
     await expect(factory.connect(signers[2]).acceptOwner()).to.be.revertedWith("Forbidden");
   })
-  
+
 });
 
-describe("", async()=>{
+describe("", async () => {
   it("Deploying factory with zero address: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with default fee and default protocolFee`);
     await expect(factoryInit(ethers.constants.AddressZero)).to.be.revertedWith('Zero');
   });
 })
 
-describe("", async()=>{
+describe("", async () => {
   it("Deploying factory with fee greater than uint16: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with fee: uint116 (edgecase)`);
     await expect(
-      factoryInit(ethers.constants.AddressZero, 
-      BigInt((MaxUint16.add(1).toString())))
-      ).to.be.reverted;
+      factoryInit(ethers.constants.AddressZero,
+        BigInt((MaxUint16.add(1).toString())))
+    ).to.be.reverted;
   });
 })
 
-describe("", async()=>{
+describe("", async () => {
   it("Deploying factory with protocolfee greater than uint16: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with protocolfee: uint116 (edgecase)`);
     await expect(
-      factoryInit(ethers.constants.AddressZero, 
-      undefined,
-      BigInt((MaxUint16.add(1).toString())))
-      ).to.be.reverted;
+      factoryInit(ethers.constants.AddressZero,
+        undefined,
+        BigInt((MaxUint16.add(1).toString())))
+    ).to.be.reverted;
   });
+})
+
+describe("", async () => {
+  it("Deploying factory with 0 fee", async () => {
+    console.log("Deploying factory with 0 fee");
+    let signerAddress = await ethers.getSigners();
+    let factoryContract = await factoryInit(signerAddress[1].address, 0n, undefined);
+    expect(await factoryContract.owner()).to.be.equal(signerAddress[1].address);
+  })
+})
+
+describe("", async () => {
+  it("Deploying factory with 0 protocol fee", async () => {
+    console.log("Deploying factory with 0 protocol fee");
+    let signerAddress = await ethers.getSigners();
+    let factoryContract = await factoryInit(signerAddress[1].address, undefined, 0n);
+    expect(await factoryContract.owner()).to.be.equal(signerAddress[1].address);
+  })
 })
