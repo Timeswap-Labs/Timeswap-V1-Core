@@ -1,5 +1,4 @@
 import { BigNumberish } from "@ethersproject/bignumber"
-import { assert } from "console"
 
 export interface Tokens {
   asset: bigint

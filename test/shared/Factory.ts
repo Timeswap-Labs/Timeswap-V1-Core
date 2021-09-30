@@ -7,6 +7,7 @@ import constants from './Constants';
 
 let signers: SignerWithAddress[];
 
+
 (async () => {
   signers = await ethers.getSigners()
 })();
@@ -15,6 +16,7 @@ export async function factoryInit(
   ownerAddress: Address = signers[10].address,
   fee: BigInt = constants.FEE,
   protocolFee: BigInt = constants.PROTOCOL_FEE): Promise<Factory> {
+    console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocolFee}`);
     const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory')
     const factory = (await factoryContractFactory.deploy(
       ownerAddress,

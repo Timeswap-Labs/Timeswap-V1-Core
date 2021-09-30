@@ -16,11 +16,8 @@ library MintMath {
     function getLiquidityTotal(
         uint112 xIncrease
     ) internal view returns (uint256 liquidityTotal) {
-        console.log("xIncrease from MintMath", xIncrease);
         liquidityTotal = xIncrease;
-        console.log("liquidityTotal from MintMath", liquidityTotal);
         liquidityTotal <<= 56;
-        console.log("liquidityTotal from MintMath after base shift", liquidityTotal);
     }
 
     function getLiquidityTotal(
@@ -82,20 +79,11 @@ library MintMath {
         uint112 zIncrease
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
-        console.log(maturity);
         _collateralIn -= block.timestamp;
-        console.log("_collateralIn after blocktime adjustment", _collateralIn);
         _collateralIn *= yIncrease;
-        console.log("yIncrease in the getCollateral function in MintMath", yIncrease);
-        console.log("_collateralIn after multiplying with yIncrease", _collateralIn);
         _collateralIn += uint256(xIncrease) << 33;
-        console.log("xIncrease in the getCollateral function in MintMath", xIncrease);
-        console.log("xIncrease256 in the getCollateral function in MintMath", uint256(xIncrease));
-        console.log("_collateralIn after xIncrease adjustment and bit shift", _collateralIn);
-        console.log("zIncrease aka cdpIncrease and xIncrease left bit shift by 32", zIncrease, uint256(xIncrease) << 32);
+        uint256(xIncrease) << 32;
         _collateralIn = _collateralIn.mulDivUp(zIncrease, uint256(xIncrease) << 32);
-        console.log("_collateralIn after mulDivUp", _collateralIn);
         collateralIn = _collateralIn.toUint112();
-        console.log("_collateralIn after Uint112", _collateralIn);
     }
 }

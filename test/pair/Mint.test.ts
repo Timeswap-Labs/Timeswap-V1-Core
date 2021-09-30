@@ -16,6 +16,7 @@ let signers: SignerWithAddress[]= []
 function checkBigIntEquality(x: bigint, y: bigint){
   expect(x.toString()).to.equal(y.toString());
 }
+
 describe('Mint', () => {
   Decimal.config({ toExpNeg: 0, toExpPos: 500 })
   
@@ -23,14 +24,14 @@ describe('Mint', () => {
     return BigNumber.from(new Decimal(MaxUint112.toString()).mul(Math.random().toString()).round().toString())
   }
 
-  let assetInValue:bigint = BigInt(pseudoRandomBigNumber().toString()); //TODO: assetV divided 2**32
-  let collateralInValue:bigint = BigInt(((BigNumber.from(assetInValue).div(10))).toString());
+  let assetInValue:bigint = BigInt(pseudoRandomBigNumber().toString());
+  let collateralInValue:bigint = assetInValue;
   //TODO: move the tests back to testcases.ts file
   const tests = [
     {
-      assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(30))).toString()),  // xIncrease
+      assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(50))).toString()),  // xIncrease
       collateralIn: collateralInValue,
-      interestIncrease: BigInt(((BigNumber.from(assetInValue).div(100000))).toString()), // yIncrease
+      interestIncrease: BigInt(((BigNumber.from(assetInValue).div(100000000))).toString()), // yIncrease
       cdpIncrease: 41407828134964681949000000n, // zIncrease
       // BigInt(((BigNumber.from(assetInValue).div(100))).toString())
     },]
@@ -57,7 +58,6 @@ describe('Mint', () => {
 
   tests.forEach((mintParams, idx) => {
     describe(`Success case ${idx + 1}`, () => {
-      console.log(mintParams);
       async function fixtureSuccess(): Promise<Fixture> {
         const constructor = await loadFixture(fixture)
 
