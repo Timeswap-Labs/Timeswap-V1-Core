@@ -52,7 +52,7 @@ interface IPair {
     /// @param sender The address of the caller.
     /// @param liquidityTo The address of the receiver of liquidity balance.
     /// @param dueTo The addres of the receiver of collateralized debt balance.
-    /// @param assetIn The increase in the X state.
+    /// @param xIncrease The increase in the X state.
     /// @param liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @param id The array index of the collateralized debt received by dueTo.
     /// @param dueOut The collateralized debt received by dueTo.
@@ -61,7 +61,7 @@ interface IPair {
         address indexed sender,
         address indexed liquidityTo,
         address indexed dueTo,
-        uint112 assetIn,
+        uint112 xIncrease,
         uint256 liquidityOut,
         uint256 id,
         Due dueOut
@@ -88,14 +88,14 @@ interface IPair {
     /// @param sender The address of the caller.
     /// @param bondTo The address of the receiver of bond balance.
     /// @param insuranceTo The addres of the receiver of insurance balance.
-    /// @param assetIn The increase in X state.
+    /// @param xIncrease The increase in X state.
     /// @param claimsOut The amount of bond balance and insurance balance received.
     event Lend(
         uint256 maturity,
         address indexed sender,
         address indexed bondTo,
         address indexed insuranceTo,
-        uint112 assetIn,
+        uint112 xIncrease,
         Claims claimsOut
     );
 
@@ -120,7 +120,7 @@ interface IPair {
     /// @param sender The address of the caller.
     /// @param assetTo The address of the receiver of asset ERC20.
     /// @param dueTo The addres of the receiver of collateralized debt.
-    /// @param assetOut The amount of asset ERC20 received by assetTo.
+    /// @param xDecrease The amount of asset ERC20 received by assetTo.
     /// @param id The array index of the collateralized debt received by dueTo.
     /// @param dueOut The collateralized debt received by dueTo.
     event Borrow(
@@ -128,7 +128,7 @@ interface IPair {
         address indexed sender,
         address indexed assetTo,
         address indexed dueTo,
-        uint112 assetOut,
+        uint112 xDecrease,
         uint256 id,
         Due dueOut
     );
