@@ -1,16 +1,20 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
-import { factoryInit } from './Factory'
-import { Claims, Due, State, Tokens } from './PairInterface'
 import { ContractTransaction } from 'ethers'
-import { advanceTimeAndBlock, getBlock } from './Helper'
+import { Address } from 'hardhat-deploy/dist/types'
+import { BigNumberish } from '@ethersproject/bignumber';
+
+import { factoryInit } from './Factory'
+import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
+import { TotalClaims, Due, State, Tokens, ConstantProduct } from './PairInterface'
+
 import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
 import type { TimeswapPairCallee as PairContractCallee } from '../../typechain/TimeswapPairCallee'
 import type { TestToken } from '../../typechain/TestToken'
-import { Address } from 'hardhat-deploy/dist/types'
+
 
 export class Pair {
-  constructor(public pairContractCallee: PairContractCallee, public pairContract: PairContract, public maturity: bigint) {}
+  constructor(public pairContractCallee: PairContractCallee, public pairContract: PairContract, public factoryContract: Factory,public maturity: bigint) {}
 
   upgrade(signerWithAddress: SignerWithAddress): PairSigner {
     return new PairSigner(signerWithAddress, this)
@@ -20,7 +24,7 @@ export class Pair {
     return await this.pairContract.factory();
   }
 
-  async state(): Promise<State> {
+  async state(): Promise<ConstantProduct> {
     const [ asset, interest, cdp ] = await this.pairContract.constantProduct(this.maturity)
     return { asset: BigInt(asset.toString()), interest: BigInt(interest.toString()), cdp: BigInt(cdp.toString()) }
   }
@@ -49,16 +53,20 @@ export class Pair {
     return result
   }
 
-  async totalClaims(): Promise<Claims> {
+  async totalClaims(): Promise<TotalClaims> {
     const { bond, insurance } = await this.pairContract.totalClaims(this.maturity)
     return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
   }
 
-  async claimsOf(signerWithAddress: SignerWithAddress): Promise<Claims> {
+  async claimsOf(signerWithAddress: SignerWithAddress): Promise<TotalClaims> {
     const { bond, insurance } = await this.pairContract.claimsOf(this.maturity, signerWithAddress.address)
     return { bond: BigInt(bond.toString()), insurance: BigInt(insurance.toString()) }
   }
 
+  async totalDebtCreated(): Promise<bigint> {
+    const totalDebtCreated  = await this.pairContract.totalDebtCreated(this.maturity)
+    return BigInt(totalDebtCreated.toString())
+  }
   async duesOf(): Promise<Due[]> {
     const dues = await this.pairContract.duesOf(this.maturity,this.pairContractCallee.address)
 
@@ -76,7 +84,7 @@ export class PairSigner extends Pair {
   signerWithAddress: SignerWithAddress
 
   constructor(signerWithAddress: SignerWithAddress, pair: Pair) {
-    super(pair.pairContractCallee,pair.pairContract, pair.maturity)
+    super(pair.pairContractCallee,pair.pairContract, pair.factoryContract, pair.maturity)
     this.signerWithAddress = signerWithAddress
   }
 
@@ -128,7 +136,7 @@ export class PairSigner extends Pair {
     return txn
   }
 
-  async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint): Promise<ContractTransaction> {
+  async borrow(assetOut: bigint, interestIncrease: bigint, cdpIncrease: bigint, owner: boolean): Promise<ContractTransaction> {
     // uint256 maturity,
     //     address assetTo,
     //     address dueTo,
@@ -136,12 +144,16 @@ export class PairSigner extends Pair {
     //     uint112 yIncrease,
     //     uint112 zIncrease,
     //     bytes calldata data
-
+    let dueTo = this.pairContractCallee.address;
+    if(owner){
+      dueTo=this.signerWithAddress.address
+    }
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .borrow(
         this.maturity,
         this.signerWithAddress.address,
+        dueTo,
         assetOut,
         interestIncrease,
         cdpIncrease
@@ -151,16 +163,10 @@ export class PairSigner extends Pair {
   }
 
   async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
+    let owner = this.pairContractCallee.address
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.pairContractCallee.address, ids, debtsIn, collateralsOut)
-      // uint256 maturity,
-      // address to,
-      // address owner,
-      // uint256[] memory ids,
-      // uint112[] memory assetsIn,
-      // uint112[] memory collateralsOut,
-      // bytes calldata data
+      .pay(this.maturity, this.signerWithAddress.address, owner, ids, debtsIn, collateralsOut)
     await txn.wait()
     return txn
   }
@@ -169,17 +175,21 @@ export class PairSigner extends Pair {
 }
 
 export async function pairInit(asset: TestToken, collateral: TestToken, maturity: bigint) {
-  const factory = await factoryInit()
-
-  await factory.createPair(asset.address, collateral.address)
-
   const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
   const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
+  
+  const factory = await factoryInit()
+  await factory.createPair(asset.address, collateral.address)
+
+  
   const pairContract = pairContractFactory.attach(
     await factory.getPair(asset.address, collateral.address)
   ) as PairContract
+
   const pairContractCallee = (await  pairContractCalleeFactory.deploy(pairContract.address)) as PairContractCallee
-  return new Pair(pairContractCallee,pairContract, maturity)
+
+  return new Pair(pairContractCallee,pairContract, factory,maturity)
+
 }
 
 export default { Pair, PairSigner, pairInit }
