@@ -64,7 +64,7 @@ describe("", async () => {
 
 describe("", async () => {
   it("Deploying factory with fee greater than uint16: Reverted", async () => {
-    console.log(`Deploying TimeSwap Factory with fee: uint116 (edgecase)`);
+    console.log(`Deploying TimeSwap Factory with fee: uint16 (edgecase)`);
     await expect(
       factoryInit(
         undefined,
@@ -76,7 +76,7 @@ describe("", async () => {
 
 describe("", async () => {
   it("Deploying factory with protocolfee greater than uint16: Reverted", async () => {
-    console.log(`Deploying TimeSwap Factory with protocolfee: uint116 (edgecase)`);
+    console.log(`Deploying TimeSwap Factory with protocolfee: uint16 (edgecase)`);
     await expect(
       factoryInit(
         undefined,
