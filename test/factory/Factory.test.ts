@@ -67,8 +67,10 @@ describe("", async () => {
   it("Deploying factory with fee greater than uint16: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with fee: uint116 (edgecase)`);
     await expect(
-      factoryInit(ethers.constants.AddressZero,
-        BigInt((MaxUint16.add(1).toString())))
+      factoryInit(
+        undefined,
+        BigInt((MaxUint16.add(1).toString()))),
+        undefined
     ).to.be.reverted;
   });
 })
@@ -77,9 +79,34 @@ describe("", async () => {
   it("Deploying factory with protocolfee greater than uint16: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with protocolfee: uint116 (edgecase)`);
     await expect(
-      factoryInit(ethers.constants.AddressZero,
+      factoryInit(
+        undefined,
         undefined,
         BigInt((MaxUint16.add(1).toString())))
+    ).to.be.reverted;
+  });
+})
+
+describe("", async () => {
+  it("Deploying factory with negative fee: Reverted", async () => {
+    console.log(`Deploying TimeSwap Factory with negative fee (edgecase)`);
+    await expect(
+      factoryInit(
+        undefined,
+        -1n,
+        undefined)
+    ).to.be.reverted;
+  });
+})
+
+describe("", async () => {
+  it("Deploying factory with negative protocolfee: Reverted", async () => {
+    console.log(`Deploying TimeSwap Factory with negative protocolfee (edgecase)`);
+    await expect(
+      factoryInit(
+        undefined,
+        undefined,
+        -1n)
     ).to.be.reverted;
   });
 })
