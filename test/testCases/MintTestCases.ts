@@ -4,7 +4,7 @@ import { now, pseudoRandomBigUint } from "../shared/Helper";
 import { shiftUp } from '../libraries/Math'
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
-
+const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
 export interface MintParams {
     assetIn: bigint;
@@ -12,6 +12,7 @@ export interface MintParams {
     interestIncrease: bigint;
     cdpIncrease: bigint;
     maturity: bigint,
+    currentTimeStamp: bigint
 }
 export interface Mint {
     Success: MintParams[];
@@ -30,7 +31,7 @@ export async function mint(): Promise<Mint> {
 
 export async function mintTestCases(): Promise<MintParams[]> {
     const nt = await now();
-    const testcases = Array(2)
+    const testcases = Array(100)
         .fill(null)
         .map(() => {
             return {
@@ -38,32 +39,27 @@ export async function mintTestCases(): Promise<MintParams[]> {
                 collateralIn: pseudoRandomBigUint(MaxUint112),
                 interestIncrease: pseudoRandomBigUint(MaxUint112),
                 cdpIncrease: pseudoRandomBigUint(MaxUint112),
-                maturity: BigInt((BigNumber.from(nt).add(BigNumber.from(pseudoRandomBigUint(MaxUint112)))).toString())
+                maturity: BigInt((BigNumber.from(nt).add(BigNumber.from(pseudoRandomBigUint(MaxUint32)))).toString()),
+                currentTimeStamp: nt
             }
         })
     return testcases;
 }
 
-export async function mintSuccessCheck({
+export function mintSuccessCheck({
     assetIn,
     interestIncrease,
     cdpIncrease,
-    maturity
-}: MintParams): Promise<boolean> {
-    // {x+(yd)>>32}<=maxUint112 // TODO: DIPESH TO PUT THIS AS A RESTRICTION
-    console.log(MaxUint112.toString());
-    console.log("DOING THE FILTERATION");
-    const nt = await now();
-    console.log("NT",nt);
-    let a = BigNumber.from(maturity).sub(BigNumber.from(nt));
-    console.log("duration", a.toString(), a>MaxUint112);
+    maturity,
+    currentTimeStamp
+}: MintParams): boolean {
+    let a = BigNumber.from(maturity).sub(BigNumber.from(currentTimeStamp));
     a = a.mul(BigNumber.from(interestIncrease));
-    console.log("after multiplication", a.toString(), a>MaxUint112);
     a = BigNumber.from(shiftUp(BigInt(a.toString()), 32n));
-    console.log("after shiftUP", a.toString(), a>MaxUint112);
     a = a.add(BigNumber.from(assetIn));
-    console.log("after addition", a.toString(), a>MaxUint112);
-    if (a>MaxUint112) return false;
+    if (a.gt(MaxUint112)) {
+        return false;
+    }
     if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) { 
         return false;
     } else {
