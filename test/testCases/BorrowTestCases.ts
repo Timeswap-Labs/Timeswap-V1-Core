@@ -1,7 +1,7 @@
 import * as Mint from "./MintTestCases"
 
-export function borrow(): Borrow {
-    const mintTests = Mint.mintTestCases();
+export async function borrow(): Promise<Borrow> {
+    const mintTests = await Mint.mintTestCases();
     const borrowTests = borrowTestCases();
 
     const testCases = mintTests.flatMap((mintParams) => {

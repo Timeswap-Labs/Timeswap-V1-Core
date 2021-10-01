@@ -67,8 +67,9 @@ library MintMath {
         uint256 _debtIn = maturity;
         _debtIn -= block.timestamp;
         _debtIn *= yIncrease;
-        _debtIn = _debtIn.shiftUp(32);
+        _debtIn = _debtIn.shiftUp(32); 
         _debtIn += xIncrease;
+        console.log("_debtInL71", _debtIn);
         debtIn = _debtIn.toUint112();
     }
 
@@ -82,7 +83,6 @@ library MintMath {
         _collateralIn -= block.timestamp;
         _collateralIn *= yIncrease;
         _collateralIn += uint256(xIncrease) << 33;
-        uint256(xIncrease) << 32;
         _collateralIn = _collateralIn.mulDivUp(zIncrease, uint256(xIncrease) << 32);
         collateralIn = _collateralIn.toUint112();
     }

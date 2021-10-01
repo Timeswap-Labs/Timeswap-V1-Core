@@ -57,19 +57,19 @@ export async function mintFixture(
   signer: SignerWithAddress,
   mintParams: MintParams
 ): Promise<Fixture> {
-  console.log("Inside the mintFixture");
+  // console.log("Inside the mintFixture");
   const { pair, pairSim, assetToken, collateralToken } = fixture
-  console.log("Got pair, pairSim from the constructor fixture");
+  // console.log("Got pair, pairSim from the constructor fixture");
   // await assetToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.assetIn);
   // console.log("assetToken.transfer successful");
   // await collateralToken.connect(signer).transfer(pair.pairContractCallee.address, mintParams.collateralIn)
   // console.log("collateralToken.transfer successful");
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
-  console.log("mint tx in the tspair contract successful");
+  // console.log("mint tx in the tspair contract successful");
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(pair.maturity,signer.address,signer.address,BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block)
-  console.log("mint tx in the pairSim successful");
-  console.log("preparing to return the updated state");
+  // console.log("mint tx in the pairSim successful");
+  // console.log("preparing to return the updated state");
 
   return { pair, pairSim, assetToken, collateralToken }
 }
