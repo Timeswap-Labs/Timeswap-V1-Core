@@ -1,31 +1,13 @@
-export function mint(): Mint {
-    const testCases = mintTestCases();
+import { BigNumber } from "@ethersproject/bignumber";
+import { pseudoRandomBigUint } from "../shared/Helper";
 
-    const success = testCases.filter(mintSuccessCheck);
-    const failure = testCases.filter(mintFailureCheck).map(mintMessage);
-
-    return { Success: success, Failure: failure };
+const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
+export interface MintParams {
+    assetIn: bigint;
+    collateralIn: bigint;
+    interestIncrease: bigint;
+    cdpIncrease: bigint;
 }
-
-export function mintTestCases(): MintParams[] {
-    const testCases = [
-        {
-            assetIn: 2000n,
-            collateralIn: 800n,
-            interestIncrease: 20n,
-            cdpIncrease: 400n,
-        },
-        {
-            assetIn: 2000n,
-            collateralIn: 2000n,
-            interestIncrease: 0n,
-            cdpIncrease: 0n,
-        },
-    ];
-
-    return testCases;
-}
-
 export interface Mint {
     Success: MintParams[];
     Failure: {
@@ -34,18 +16,33 @@ export interface Mint {
     }[];
 }
 
-export interface MintParams {
-    assetIn: bigint;
-    collateralIn: bigint;
-    interestIncrease: bigint;
-    cdpIncrease: bigint;
+export function mint(): Mint {
+    const testCases = mintTestCases();
+    const Success = testCases.filter(mintSuccessCheck);
+    const Failure = testCases.filter(mintFailureCheck).map(mintMessage);
+    return { Success, Failure };
+}
+
+export function mintTestCases(): MintParams[] {
+    const testcases = Array(10)
+        .fill(null)
+        .map(() => {
+            return {
+                assetIn: pseudoRandomBigUint(MaxUint112),
+                collateralIn: pseudoRandomBigUint(MaxUint112),
+                interestIncrease: pseudoRandomBigUint(MaxUint112),
+                cdpIncrease: pseudoRandomBigUint(MaxUint112),
+            }
+        })
+    return testcases;
 }
 
 export function mintSuccessCheck({
     interestIncrease,
     cdpIncrease,
 }: MintParams): boolean {
-    if (!(interestIncrease > 0n && cdpIncrease > 0n)) {
+    if (!(interestIncrease > 0n && cdpIncrease > 0n)) { 
+        // if both the interestIncrease and the cdpIncrease are below zero
         return false;
     } else {
         return true;

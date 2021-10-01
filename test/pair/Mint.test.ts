@@ -1,74 +1,72 @@
 import { Decimal } from 'decimal.js'
 import { ethers, waffle } from 'hardhat'
-import { now } from '../shared/Helper'
+import { now, pseudoRandomBigUint, pseudoRandomBigUint256 } from '../shared/Helper'
 import { expect } from '../shared/Expect'
-import * as testCases from '../testCases'
+import * as TestCases from '../testCases'
 import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from 'ethers'
+import { mint } from '../testCases'
 
 const { loadFixture } = waffle
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1)
-let maturity  = 0n
-let signers: SignerWithAddress[]= []
+let maturity = 0n
+let signers: SignerWithAddress[];
 
 //TODO: Check why chai's native assertion library isnt working and remove the helper function
-function checkBigIntEquality(x: bigint, y: bigint){
+function checkBigIntEquality(x: bigint, y: bigint) {
   expect(x.toString()).to.equal(y.toString());
 }
 
+Decimal.config({ toExpNeg: 0, toExpPos: 500 })
+
 describe('Mint', () => {
-  Decimal.config({ toExpNeg: 0, toExpPos: 500 })
-  
-  function pseudoRandomBigNumber() {
-    return BigNumber.from(new Decimal(MaxUint112.toString()).mul(Math.random().toString()).round().toString())
-  }
-
-  let assetInValue:bigint = BigInt(pseudoRandomBigNumber().toString());
-  let collateralInValue:bigint = assetInValue;
+  let assetInValue: bigint = pseudoRandomBigUint(MaxUint112); // creating ERC20 with this number
+  let collateralInValue: bigint = pseudoRandomBigUint(MaxUint112); // creating ERC20 with this number
+  const tests = TestCases.mint();
   //TODO: move the tests back to testcases.ts file
-  const tests = [
-    {
-      assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(50))).toString()),  // xIncrease
-      collateralIn: collateralInValue,
-      interestIncrease: BigInt(((BigNumber.from(assetInValue).div(100000000))).toString()), // yIncrease
-      cdpIncrease: 41407828134964681949000000n, // zIncrease
-      // BigInt(((BigNumber.from(assetInValue).div(100))).toString())
-    },]
 
-    // Based on preliminary analysis the balance of the Pool for the Collateral Token is only 2 of cdpIncrease + 1; it is not changing by either the collateralIn value, interest value,  maturity number, fee, protocol fee
+  // const tests = [
+  //   {
+  //     assetIn: BigInt(((BigNumber.from(assetInValue)).div(BigNumber.from(2).pow(50))).toString()),  // xIncrease
+  //     collateralIn: collateralInValue,
+  //     interestIncrease: BigInt(((BigNumber.from(assetInValue).div(100000000))).toString()), // yIncrease
+  //     cdpIncrease: 41407828134964681949000000n, // zIncrease
+  //     // BigInt(((BigNumber.from(assetInValue).div(100))).toString())
+  //   },]
+  // const testsFailure = [
+  //   {
+  //     assetIn: 2000n,
+  //     collateralIn: 800n,
+  //     interestIncrease: 0n,
+  //     cdpIncrease: 0n,
+  //   },]
 
-    // const testsFailure = [
-    //   {
-    //     assetIn: 2000n,
-    //     collateralIn: 800n,
-    //     interestIncrease: 0n,
-    //     cdpIncrease: 0n,
-    //   },]
-  
+  // it('Should have correct total reserves', async () => {
+  //   console.log(TestCases.mintTestCases());
+  //   console.log("Hi");
+  // })
+
   async function fixture(): Promise<Fixture> {
-
     maturity = (await now()) + 62208000n
-    signers = await ethers.getSigners()
-
     const constructor = await constructorFixture(assetInValue, collateralInValue, maturity)
-    
+    // constructor = { pair, pairSim, assetToken, collateralToken }
     return constructor
   }
 
-  tests.forEach((mintParams, idx) => {
+  tests.Success.forEach((mintParams, idx) => {
     describe(`Success case ${idx + 1}`, () => {
       async function fixtureSuccess(): Promise<Fixture> {
+        signers = await ethers.getSigners();
         const constructor = await loadFixture(fixture)
-
         const mint = await mintFixture(constructor, signers[0], mintParams);
-
         return mint;
       }
 
       it('Should have correct total reserves', async () => {
         const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        
+        console.log("logging from Should have correct total reserves");
+
 
         // const reserves = await pair.totalReserves()
         // const reservesSim = pairSim.getPool(maturity).state.reserves
