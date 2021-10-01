@@ -24,14 +24,14 @@ export function mint(): Mint {
 }
 
 export function mintTestCases(): MintParams[] {
-    const testcases = Array(10)
+    const testcases = Array(5)
         .fill(null)
         .map(() => {
             return {
                 assetIn: pseudoRandomBigUint(MaxUint112),
                 collateralIn: pseudoRandomBigUint(MaxUint112),
-                interestIncrease: pseudoRandomBigUint(MaxUint112),
-                cdpIncrease: pseudoRandomBigUint(MaxUint112),
+                interestIncrease: BigInt(BigNumber.from(pseudoRandomBigUint(MaxUint112)).div(2).toString()),
+                cdpIncrease: BigInt(BigNumber.from(pseudoRandomBigUint(MaxUint112)).div(2).toString()),
             }
         })
     return testcases;
