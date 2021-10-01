@@ -1,17 +1,23 @@
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
+import { Address } from 'hardhat-deploy/dist/types';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { BigNumber } from "@ethersproject/bignumber";
+import { constants } from 'ethers';
 
-import { now } from '../shared/Helper'
-import { factoryInit } from '../shared/Factory';
-import { testTokenNew } from '../shared/TestToken';
 import { IERC20 } from "../../typechain/IERC20";
 import type { TimeswapPair } from '../../typechain/TimeswapPair'
 import { IFactory } from "../../typechain/IFactory";
-import { Address } from 'hardhat-deploy/dist/types';
+
+
+import { pseudoRandomBigInt, pseudoRandomBigInt256 } from '../shared/Helper'
+import { factoryInit } from '../shared/Factory';
+import { testTokenNew } from '../shared/TestToken';
+import { now } from '../shared/Helper'
 import Constants from '../shared/Constants';
 
-const { loadFixture, solidity } = waffle
+
+const { solidity } = waffle
 chai.use(solidity)
 const { expect } = chai
 
@@ -20,14 +26,12 @@ describe('Deploying Pair Contract', () => {
   let factory: IFactory;
   let assetToken: IERC20;
   let collateralToken: IERC20;
-  let assetValue: bigint = 10000n;
+  let assetValue: bigint = BigInt((constants.MaxUint256).toString());
   let collateralValue: bigint = assetValue;
-  let maturity: bigint;
+  // let maturity: bigint = pseudoRandomBigInt(MaxUint128);
+  let maturity: bigint = pseudoRandomBigInt256();
   let pairContractAddress: Address;
-
-  (async ()=> {
-    maturity = await now() + 31536000n
-  })();
+  
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
