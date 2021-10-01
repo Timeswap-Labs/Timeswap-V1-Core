@@ -168,12 +168,13 @@ contract TimeswapPair is IPair {
         pool.liquidities[liquidityTo] += liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
-        console.log("dueOut.debt", dueOut.debt);
+        
         dueOut.collateral = MintMath.getCollateral(maturity, xIncrease, yIncrease, zIncrease);
-        console.log("dueOut.collateral", dueOut.collateral);
+        
         dueOut.startBlock = BlockNumber.get();
-
+        
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
+        
 
         id = pool.dues[dueTo].insert(dueOut);
         

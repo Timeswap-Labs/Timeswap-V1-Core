@@ -2,6 +2,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { now, pseudoRandomBigUint } from "../shared/Helper";
 
 import { shiftUp } from '../libraries/Math'
+import { mulDivUp } from "../libraries/FullMath";
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
@@ -31,7 +32,7 @@ export async function mint(): Promise<Mint> {
 
 export async function mintTestCases(): Promise<MintParams[]> {
     const nt = await now();
-    const testcases = Array(5)
+    const testcases = Array(100)
         .fill(null)
         .map(() => {
             return {
@@ -53,13 +54,19 @@ export function mintSuccessCheck({
     maturity,
     currentTimeStamp
 }: MintParams): boolean {
-    let a = BigNumber.from(maturity).sub(BigNumber.from(currentTimeStamp));
-    a = a.mul(BigNumber.from(interestIncrease));
-    a = BigNumber.from(shiftUp(BigInt(a.toString()), 32n));
+    // filtering for failure under MintMath.getDebt()
+    let a1 = BigNumber.from(maturity).sub(BigNumber.from(currentTimeStamp));
+    let a2 = a1.mul(BigNumber.from(interestIncrease));
+    let a = BigNumber.from(shiftUp(BigInt(a2.toString()), 32n));
     a = a.add(BigNumber.from(assetIn));
     if (a.gt(MaxUint112)) {
         return false;
     }
+    // filtering for failure under MintMath.getCollateralCases()
+    let b = a2;
+    b = b.add(BigNumber.from(assetIn << 33n));
+    b = BigNumber.from(mulDivUp(BigInt(b.toString()),cdpIncrease,assetIn << 32n));
+    if (b.gt(MaxUint112)) return false;
     if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) { 
         return false;
     } else {

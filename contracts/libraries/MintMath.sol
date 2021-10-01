@@ -5,7 +5,6 @@ import {IPair} from '../interfaces/IPair.sol';
 import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
-import 'hardhat/console.sol';
 
 library MintMath {
     using Math for uint256;
@@ -68,7 +67,6 @@ library MintMath {
         _debtIn *= yIncrease;
         _debtIn = _debtIn.shiftUp(32); 
         _debtIn += xIncrease;
-        console.log("_debtInL71", _debtIn);
         debtIn = _debtIn.toUint112();
     }
 
