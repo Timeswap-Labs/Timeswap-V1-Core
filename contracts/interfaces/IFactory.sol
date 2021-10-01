@@ -32,7 +32,7 @@ interface IFactory {
     function pendingOwner() external view returns (address);
 
     /// @dev Return the fee earned by liquidity providers.
-    /// @return The fee following UQ.16 format.
+    /// @return The fee following UQ0.16 format.
     function fee() external view returns (uint16);
 
     /// @dev Return the protocol fee per second earned by the owner.
@@ -51,6 +51,7 @@ interface IFactory {
     /// @dev Cannot create a Timeswap Pool with the same pair parameters.
     /// @param asset The address of the ERC20 being lent and borrowed.
     /// @param collateral The address of the ERC20 as the collateral.
+    /// @return pair The address of the Timeswap Pair contract.
     function createPair(IERC20 asset, IERC20 collateral) external returns (IPair pair);
 
     /// @dev Set the pending owner of the factory.
@@ -60,5 +61,5 @@ interface IFactory {
 
     /// @dev Set the pending owner as the owner of the factory.
     /// @dev Can only be called by the pending owner.
-    function acceptOwner() external;    
+    function acceptOwner() external;
 }

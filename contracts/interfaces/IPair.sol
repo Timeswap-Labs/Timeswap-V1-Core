@@ -39,12 +39,12 @@ interface IPair {
         mapping(address => Claims) claims;
         mapping(address => Due[]) dues;
     }
-    
+
     /* ===== EVENT ===== */
 
     /// @dev Emits when the state gets updated.
     /// @param maturity The unix timestamp maturity of the Pool.
-    /// @param state The new state of the pool
+    /// @param state The new state of the pool.
     event Sync(uint256 indexed maturity, State state);
 
     /// @dev Emits when mint function is called.
@@ -183,7 +183,14 @@ interface IPair {
     /// @return x The x state.
     /// @return y The y state.
     /// @return z The z state.
-    function constantProduct(uint256 maturity) external view returns (uint112 x, uint112 y, uint112 z);
+    function constantProduct(uint256 maturity)
+        external
+        view
+        returns (
+            uint112 x,
+            uint112 y,
+            uint112 z
+        );
 
     /// @dev Returns the asset ERC20 and collateral ERC20 balances of a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.

@@ -9,6 +9,6 @@ library PayMath {
         uint112 collateralOut,
         IPair.Due memory due
     ) internal pure {
-        require(uint256(assetIn) * due.collateral >= uint256(collateralOut) * due.debt, 'Forbidden');
+        require(uint256(assetIn) * due.collateral >= uint256(collateralOut) * due.debt, 'E303');
     }
 }

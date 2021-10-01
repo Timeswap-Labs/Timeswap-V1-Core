@@ -36,7 +36,7 @@ Check the `asset` and the `collateral` passed, and verify that they are not the 
 
 ### E104
 
-A similar Pair contract exist.
+A similar Pair contract exists.
 
 A pair contract with the same asset and collateral already exists.
 
@@ -62,7 +62,7 @@ Trying to do an operation on a pool which has already matured.
 
 Some operations like mint, lend, etc. can't be performed on a pool which has already matured.
 
-Can occur in `mint`, `lend`, `borrow`, or `pay`.
+Can occur in `mint`, `lend`, `borrow` or `pay`.
 
 Check the maturity and verify that the pool has not yet matured.
 
@@ -75,3 +75,69 @@ Operations like burn and withdraw can only be performed on a pool after maturity
 Can occur in `burn` or `withdraw`.
 
 Check the maturity and verify that the pool has matured.
+
+### E204
+
+The address passed is the address of the Pair Contract.
+
+The address passed to functions, cannot be the address of the Pair Contract itself.
+
+Can occur in `mint`, `burn`, `lend`, `withdraw`, `borrow` or `pay`.
+
+Check the address passed, and verify it is not the Pair Contract's address.
+
+### E205
+
+The parameters passed are 0.
+
+The parameters passed to the function can't be 0 (or can't be both 0). In `pay` the length of the arrays passed must be the same.
+
+Can occur in `mint`, `burn`, `lend`, `withdraw`, `borrow` or `pay`.
+
+Check the parameters passed to the function.
+
+### E206
+
+Total liquidity of the pool is 0.
+
+Lend or borrow can only be done if the pool has some liquidity.
+
+Can occur in `lend` or `borrow`.
+
+Check the total liquidity of the pool and ensure it is not 0.
+
+### E207
+
+The start block of the due is the same as the current block for pay.
+
+Borrow and Pay back can't happen in the same block.
+
+Can occur in `pay`.
+
+Check the transactions.
+
+### E211
+
+Reentrancy guard error.
+
+### E212
+
+`MintMat.getLiquidity` returned 0.
+
+### E213
+
+`collateralsOut[i]` is not equal to 0 for the owner who is not the one to call the function
+
+## Libraries
+
+### E301
+
+Invariance error. When the new constant product is greater than the old constant product.
+
+### E302
+
+`yDecrease` / `yIncrease` is greater than the `minimum` calculated.
+
+### E303
+
+Product of `assetIn` and `due.collateral` must be greater than or equal to the product of `collateralOut` and `due.debt`.
