@@ -8,16 +8,17 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from 'ethers'
 import { mint, MintParams } from '../testCases'
 
+Decimal.config({ toExpNeg: 0, toExpPos: 500 })
+
 const { loadFixture } = waffle
+
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
-let maturity = 0n
 let signers: SignerWithAddress[];
 
 function checkBigIntEquality(x: bigint, y: bigint) {
   expect(x.toString()).to.equal(y.toString());
 }
 
-Decimal.config({ toExpNeg: 0, toExpPos: 500 })
 
 describe('Mint', () => {
   let assetInValue: bigint = BigInt(MaxUint224.toString()); // creating ERC20 with this number
@@ -31,9 +32,9 @@ describe('Mint', () => {
   it('', async () => {
     tests.Success.forEach((mintParams: MintParams, idx: number) => {
       describe(`Success case ${idx + 1}`, () => {
+
         async function fixture(): Promise<Fixture> {
-          maturity = mintParams.maturity;
-          const constructor = await constructorFixture(assetInValue, collateralInValue, maturity)
+          const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity)
           return constructor
         }
 
@@ -48,7 +49,7 @@ describe('Mint', () => {
           const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
           const reserves = await pair.totalReserves()
-          const reservesSim = pairSim.getPool(maturity).state.reserves
+          const reservesSim = pairSim.getPool(mintParams.maturity).state.reserves
 
           expect(reserves.asset).to.equalBigInt(reservesSim.asset)
           expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)

@@ -44,7 +44,6 @@ export async function mintTestCases(): Promise<MintParams[]> {
     return testcases;
 }
 
-// TODO: EVEN XINCREASE HAS TO BE GREATER THAN ZERO
 export async function mintSuccessCheck({
     assetIn,
     interestIncrease,
@@ -52,11 +51,18 @@ export async function mintSuccessCheck({
     maturity
 }: MintParams): Promise<boolean> {
     // {x+(yd)>>32}<=maxUint112 // TODO: DIPESH TO PUT THIS AS A RESTRICTION
+    console.log(MaxUint112.toString());
+    console.log("DOING THE FILTERATION");
     const nt = await now();
+    console.log("NT",nt);
     let a = BigNumber.from(maturity).sub(BigNumber.from(nt));
+    console.log("duration", a.toString(), a>MaxUint112);
     a = a.mul(BigNumber.from(interestIncrease));
+    console.log("after multiplication", a.toString(), a>MaxUint112);
     a = BigNumber.from(shiftUp(BigInt(a.toString()), 32n));
+    console.log("after shiftUP", a.toString(), a>MaxUint112);
     a = a.add(BigNumber.from(assetIn));
+    console.log("after addition", a.toString(), a>MaxUint112);
     if (a>MaxUint112) return false;
     if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) { 
         return false;
