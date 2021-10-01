@@ -4,7 +4,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
 
-import { pseudoRandomBigInt } from '../shared/Helper'
+import { pseudoRandomBigUint } from '../shared/Helper'
 import { factoryInit } from '../shared/Factory';
 
 const { solidity } = waffle
@@ -21,8 +21,8 @@ describe('Factory Contract', () => {
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
-    fee = pseudoRandomBigInt(MaxUint16);
-    protocol_fee = pseudoRandomBigInt(MaxUint16);
+    fee = pseudoRandomBigUint(MaxUint16);
+    protocol_fee = pseudoRandomBigUint(MaxUint16);
     factory = await factoryInit(signers[10].address, fee, protocol_fee); // deploying the factory
   })
 

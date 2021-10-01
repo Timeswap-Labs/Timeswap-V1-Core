@@ -6,11 +6,11 @@ import { constants } from 'ethers';
 Decimal.config({ toExpNeg: 0, toExpPos: 500 })
 
 
-export function pseudoRandomBigInt(maxUint: BigNumber): bigint {
+export function pseudoRandomBigUint(maxUint: BigNumber): bigint {
     return BigInt((BigNumber.from(new Decimal(maxUint.toString()).mul(Math.random().toString()).round().toString())).toString());
 }
 
-export function pseudoRandomBigInt256() {
+export function pseudoRandomBigUint256() {
   return BigInt((BigNumber.from(new Decimal(constants.MaxUint256.toString()).mul(Math.random().toString()).round().toString())).toString());
 }
 
@@ -53,6 +53,6 @@ export default {
   getBlock,
   getTimestamp,
   setTime,
-  pseudoRandomBigInt,
-  pseudoRandomBigInt256
+  pseudoRandomBigUint,
+  pseudoRandomBigUint256
 }
