@@ -5,6 +5,7 @@ import {IPair} from '../interfaces/IPair.sol';
 import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
+import 'hardhat/console.sol';
 
 library MintMath {
     using Math for uint256;

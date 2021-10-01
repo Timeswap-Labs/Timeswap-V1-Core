@@ -31,7 +31,7 @@ export async function mint(): Promise<Mint> {
 
 export async function mintTestCases(): Promise<MintParams[]> {
     const nt = await now();
-    const testcases = Array(100)
+    const testcases = Array(5)
         .fill(null)
         .map(() => {
             return {
