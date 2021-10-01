@@ -7,7 +7,6 @@ import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
-
 library BorrowMath {
     using Math for uint256;
     using FullMath for uint256;
