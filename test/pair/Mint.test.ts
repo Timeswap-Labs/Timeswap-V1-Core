@@ -6,7 +6,7 @@ import * as TestCases from '../testCases'
 import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from 'ethers'
-import { mint, MintParams } from '../testCases'
+import { MintParams } from '../testCases'
 
 Decimal.config({ toExpNeg: 0, toExpPos: 500 })
 
@@ -14,10 +14,6 @@ const { loadFixture } = waffle
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
-
-function checkBigIntEquality(x: bigint, y: bigint) {
-  expect(x.toString()).to.equal(y.toString());
-}
 
 
 describe('Mint', () => {
@@ -27,8 +23,6 @@ describe('Mint', () => {
 
   before(async () => {
     tests = await TestCases.mint();
-    console.log("Total Success Cases: ", tests.Success.length);
-    console.log("Total Failure Cases: ", tests.Failure.length);
   });
 
   it('', async () => {
@@ -92,7 +86,7 @@ describe('Mint', () => {
           const totalDebtCreated = await pair.totalDebtCreated()
           const totalDebtCreatedSim = pairSim.getPool(mintParams.maturity).state.totalDebtCreated
 
-          checkBigIntEquality(totalDebtCreated, totalDebtCreatedSim)
+          expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim);
         })
 
         it('Should have correct total claims', async () => {
@@ -136,7 +130,7 @@ describe('Mint', () => {
 
     tests.Failure.forEach((mintParams: MintParams, idx: number) => {
       describe(`Failure case ${idx + 1}`, () => {
-        it('Should fail with correct error', async () => {
+        it('Should fail', async () => {
           async function fixture(): Promise<Fixture> {
             const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity)
             return constructor

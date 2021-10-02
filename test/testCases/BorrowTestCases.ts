@@ -1,3 +1,12 @@
+import { BigNumber } from "@ethersproject/bignumber";
+import { now, pseudoRandomBigUint } from "../shared/Helper";
+
+import { shiftUp } from '../libraries/Math'
+import { mulDivUp } from "../libraries/FullMath";
+
+const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
+const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
+
 import * as Mint from "./MintTestCases"
 
 export async function borrow(): Promise<Borrow> {
@@ -11,7 +20,7 @@ export async function borrow(): Promise<Borrow> {
     });
 
     const success = testCases.filter(borrowSuccessCheck);
-    const failure = testCases.filter(borrowFailureCheck).map(borrowMessage);
+    const failure = testCases.filter(borrowFailureCheck);
 
     return { Success: success, Failure: failure };
     // generate random inputs based on some rule
@@ -44,7 +53,6 @@ export interface Borrow {
     Failure: {
         mintParams: Mint.MintParams;
         borrowParams: BorrowParams;
-        errorMessage: string;
     }[];
 }
 
@@ -80,28 +88,28 @@ function borrowFailureCheck(value: {
     return !borrowSuccessCheck(value);
 }
 
-function borrowMessage({
-    mintParams,
-    borrowParams,
-}: {
-    mintParams: Mint.MintParams;
-    borrowParams: BorrowParams;
-}): {
-    mintParams: Mint.MintParams;
-    borrowParams: BorrowParams;
-    errorMessage: string;
-} {
-    if (Mint.mintMessage(mintParams).errorMessage !== "") {
-        return {
-            mintParams,
-            borrowParams,
-            errorMessage: Mint.mintMessage(mintParams).errorMessage,
-        };
-    } else if (
-        !(borrowParams.interestIncrease > 0n || borrowParams.cdpIncrease > 0n)
-    ) {
-        return { mintParams, borrowParams, errorMessage: "Invalid" };
-    } else {
-        return { mintParams, borrowParams, errorMessage: "" };
-    }
-}
+// function borrowMessage({
+//     mintParams,
+//     borrowParams,
+// }: {
+//     mintParams: Mint.MintParams;
+//     borrowParams: BorrowParams;
+// }): {
+//     mintParams: Mint.MintParams;
+//     borrowParams: BorrowParams;
+//     errorMessage: string;
+// } {
+//     if (Mint.mintMessage(mintParams).errorMessage !== "") {
+//         return {
+//             mintParams,
+//             borrowParams,
+//             errorMessage: Mint.mintMessage(mintParams).errorMessage,
+//         };
+//     } else if (
+//         !(borrowParams.interestIncrease > 0n || borrowParams.cdpIncrease > 0n)
+//     ) {
+//         return { mintParams, borrowParams, errorMessage: "Invalid" };
+//     } else {
+//         return { mintParams, borrowParams, errorMessage: "" };
+//     }
+// }

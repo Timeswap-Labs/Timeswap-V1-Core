@@ -7,6 +7,8 @@ import { mulDivUp } from "../libraries/FullMath";
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
+//TODO: change this increase the test cases
+const count = 2;
 export interface MintParams {
     assetIn: bigint;
     collateralIn: bigint;
@@ -17,22 +19,19 @@ export interface MintParams {
 }
 export interface Mint {
     Success: MintParams[];
-    Failure: {
-        params: MintParams;
-        errorMessage: string;
-    }[];
+    Failure: MintParams[];
 }
 
 export async function mint(): Promise<Mint> {
     const testCases = await mintTestCases();
     const Success = testCases.filter(mintSuccessCheck);
-    const Failure = testCases.filter(mintFailureCheck).map(mintMessage);
+    const Failure = testCases.filter(mintFailureCheck);
     return { Success, Failure };
 }
 
 export async function mintTestCases(): Promise<MintParams[]> {
     const nt = await now();
-    const testcases = Array(100)
+    const testcases = Array(count)
         .fill(null)
         .map(() => {
             return {
@@ -60,13 +59,17 @@ export function mintSuccessCheck({
     let a = BigNumber.from(shiftUp(BigInt(a2.toString()), 32n));
     a = a.add(BigNumber.from(assetIn));
     if (a.gt(MaxUint112)) {
+        // console.log("Failing at getDebt");
         return false;
     }
-    // filtering for failure under MintMath.getCollateralCases()
+    // filtering for failure under MintMath.getCollateral()
     let b = a2;
     b = b.add(BigNumber.from(assetIn << 33n));
     b = BigNumber.from(mulDivUp(BigInt(b.toString()),cdpIncrease,assetIn << 32n));
-    if (b.gt(MaxUint112)) return false;
+    if (b.gt(MaxUint112)) {
+        // console.log("Failing at getCollateral");
+        return false
+    };
     if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) { 
         return false;
     } else {
@@ -76,15 +79,4 @@ export function mintSuccessCheck({
 
 function mintFailureCheck(params: MintParams): boolean {
     return !mintSuccessCheck(params);
-}
-
-export function mintMessage(params: MintParams): {
-    params: MintParams;
-    errorMessage: string;
-} {
-    if (!(params.interestIncrease > 0n && params.cdpIncrease > 0n && params.assetIn > 0n)) {
-        return { params, errorMessage: "One of the params is Zero" };
-    } else {
-        return { params, errorMessage: "Math Error" };
-    }
 }
