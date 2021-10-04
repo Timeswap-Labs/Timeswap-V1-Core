@@ -79,17 +79,16 @@ export async function lendFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture;
   // await assetToken.connect(signer).transfer(pair.pairContractCallee.address, lendParams.assetIn);
   const pairContractState = await pair.state();
+  if (lendParams.interestDecrease>pairContractState.interest) throw Error("yDecrease is too high");
+  if (lendParams.cdpDecrease>pairContractState.cdp) throw Error("cdpDecrease is too high");
   const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
   const pairSimPool = pairSim.getPool(pair.maturity);
   const pairSimContractState = pairSimPool.state // getting state from the contract
   const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairSimContract) {
-    if (lendParams.interestDecrease>pairSimContractState.interest) throw Error("yDecrease is too high");
-    if (lendParams.cdpDecrease>pairSimContractState.cdp) throw Error("cdpDecrease is too high");
     const feeBase = 0x10000n + FEE  // uint128 feeBase = 0x10000 + fee;
     const xReserve: bigint = pairSimContractState.asset + lendParams.assetIn; // uint112 xReserve = state.x + xIncrease;
     if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
-    console.log(lendParams.interestDecrease, pairSimContractState.interest);
     const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
     if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint128 
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
@@ -101,10 +100,12 @@ export async function lendFixture(
     denominator = denominator*feeBase
     minimum = minimum/denominator;
     if (lendParams.interestDecrease < minimum) throw Error("Intrest Increase is less than required"); //uint112;
-    console.log("NO ERROR TILL NOW; DOING THE TX");
+    console.log("DOING THE TX");
     const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease);
+    console.log("TX DONE");
     const block = await getBlock(txn.blockHash!)
     pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
+    console.log("PAIRSIM TX DONE");
     return { pair, pairSim, assetToken, collateralToken }
     
   } else {

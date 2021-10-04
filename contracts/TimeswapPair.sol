@@ -235,20 +235,20 @@ contract TimeswapPair is IPair {
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
         require(bondTo != address(this) && insuranceTo != address(this), 'Invalid');
         require(xIncrease > 0, 'Invalid');
-        console.log("All requires passed");
+        
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
         // TODO to update the error message
         require(pool.state.y>yDecrease, "yDecrease is too high");
-        console.log("the total Liquidity is higher");
+        
         
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
-        console.log("LendMath.check DONE");
+        
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
-        console.log("claimsOut.bond", claimsOut.bond);
+        
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);
-        console.log("claimsOut.insurance", claimsOut.insurance);
+        
 
         Callback.lend(asset, xIncrease, data);
 
