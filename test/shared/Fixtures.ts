@@ -93,6 +93,7 @@ export async function lendFixture(
     if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint128 
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
     const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase);
+    console.log("cdpDecrease", cdpDecrease);
     let minimum = lendParams.assetIn;
     minimum = minimum*pairSimContractState.interest;
     minimum = minimum << 12n;

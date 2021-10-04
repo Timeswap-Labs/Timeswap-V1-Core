@@ -25,11 +25,25 @@ describe('Lend', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.lend();
+    tests = [
+      {
+        lendAssetIn: 237610557474961966470000000000n,
+        lendInterestDecrease: 1036459088346607068400000000000n,
+        lendCdpDecrease: 589282358457526935070000000000n,
+        assetIn: 112472928633246085270000000000000n,
+        collateralIn: 749283148479034033240000000000000n,
+        interestIncrease: 466961018103522903540000000000000n,
+        cdpIncrease: 1359799416146396658900000000000000n,
+        maturity: 1747256449n,
+        currentTimeStamp: 1633347547n
+      }
+    ]
     console.log("tests.length from line 28 in lend.tests", tests.length);
   });
 
   it('', () => {
     tests.forEach((testCase: Lend) => {
+      console.log(tests);
       describe("", () => {
           
         async function fixture(): Promise<Fixture> {
