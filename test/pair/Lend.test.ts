@@ -57,9 +57,7 @@ describe('Lend', () => {
         }
 
         it("", async () => {
-          console.log("ABDEFG");
           try {
-            console.log("calling the fixtureSuccess");
             const returnObj = await loadFixture(fixtureSuccess);
             pair = returnObj.pair;
             pairSim = returnObj.pairSim;

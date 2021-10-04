@@ -87,8 +87,9 @@ export async function lendFixture(
     const feeBase = 0x10000n + FEE  // uint128 feeBase = 0x10000 + fee;
     const xReserve: bigint = pairSimContractState.asset + lendParams.assetIn; // uint112 xReserve = state.x + xIncrease;
     if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
+    console.log(lendParams.interestDecrease, pairSimContractState.interest);
     const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
-    if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint112 
+    if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint128 
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
     const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase);
     let minimum = lendParams.assetIn;
