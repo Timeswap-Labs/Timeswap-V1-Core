@@ -84,6 +84,8 @@ export async function lendFixture(
   const pairSimContractState = pairSimPool.state // getting state from the contract
   const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairSimContract) {
+    if (lendParams.interestDecrease>pairSimContractState.interest) throw Error("yDecrease is too high");
+    if (lendParams.cdpDecrease>pairSimContractState.cdp) throw Error("cdpDecrease is too high");
     const feeBase = 0x10000n + FEE  // uint128 feeBase = 0x10000 + fee;
     const xReserve: bigint = pairSimContractState.asset + lendParams.assetIn; // uint112 xReserve = state.x + xIncrease;
     if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;

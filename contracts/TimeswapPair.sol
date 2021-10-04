@@ -238,6 +238,8 @@ contract TimeswapPair is IPair {
         console.log("All requires passed");
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
+        // TODO to update the error message
+        require(pool.state.y>yDecrease, "yDecrease is too high");
         console.log("the total Liquidity is higher");
         
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);

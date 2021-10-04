@@ -24,6 +24,7 @@ library LendMath {
         uint112 xReserve = state.x + xIncrease;
         console.log("A");
         console.log(yDecrease, state.y);
+        console.log(yDecrease<state.y);
         uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
         console.log("B");
         console.log(zDecrease, state.z);
@@ -58,6 +59,7 @@ library LendMath {
         console.log("1.2");
         console.log(_adjusted);
         console.log(uint256(feeBase) * decrease);
+        console.log(_adjusted>(uint256(feeBase) * decrease));
         _adjusted -= uint256(feeBase) * decrease;
         console.log("_adjusted", "1.2.1");
         adjusted = _adjusted.toUint128();
