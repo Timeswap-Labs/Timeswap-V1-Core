@@ -246,9 +246,9 @@ contract TimeswapPair is IPair {
         
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
-        
+        console.log("claimsOut.bond", claimsOut.bond);
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);
-        
+        console.log("claimsOut.insurance", claimsOut.insurance);
 
         Callback.lend(asset, xIncrease, data);
 

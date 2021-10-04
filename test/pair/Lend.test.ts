@@ -153,6 +153,7 @@ describe('Lend', () => {
 
 
           } catch (errorMessage) {
+            console.log(errorMessage);
 
             describe("", async () => {
               it("Lend Tx should fail", async () => {

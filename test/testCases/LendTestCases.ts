@@ -4,7 +4,7 @@ import { now, pseudoRandomBigUint } from "../shared/Helper";
 import { shiftUp } from '../libraries/Math'
 import { mulDivUp } from "../libraries/FullMath";
 
-const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
+const MaxUint112 = BigNumber.from(2).pow(100).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
 import * as Mint from "./MintTestCases"
