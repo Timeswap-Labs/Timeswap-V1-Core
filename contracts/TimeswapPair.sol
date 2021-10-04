@@ -238,8 +238,9 @@ contract TimeswapPair is IPair {
 
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
-
+        
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
+        
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);

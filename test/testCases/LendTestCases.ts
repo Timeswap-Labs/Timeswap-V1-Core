@@ -8,6 +8,7 @@ const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
 import * as Mint from "./MintTestCases"
+import Constants from "../shared/Constants";
 export interface Lend {
     Success: { mintParams: Mint.MintParams; lendParams: LendParams }[];
     Failure: {
@@ -58,19 +59,17 @@ function lendSuccessCheck(params: {
     mintParams: Mint.MintParams;
     lendParams: LendParams;
 }): boolean {
-    if (!Mint.mintSuccessCheck(params.mintParams)) {
-        return false;
-    } else if (
+    if (!Mint.mintSuccessCheck(params.mintParams)) return false;
+    if(
         !(
             params.lendParams.interestDecrease > 0n ||
             params.lendParams.cdpDecrease > 0n
         )
-    ) {
-        return false;
-    } else {
+    ) return false;
+    
         return true;
     }
-}
+
 
 function lendFailureCheck(value: {
     mintParams: Mint.MintParams;

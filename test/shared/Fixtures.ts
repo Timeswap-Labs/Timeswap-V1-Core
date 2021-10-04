@@ -7,7 +7,7 @@ import { LendParams, BorrowParams, MintParams, BurnParams, WithdrawParams, PayPa
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import LendMath from '../libraries/LendMath'
 import BorrowMath from '../libraries/BorrowMath'
-import MintMath from '../libraries/MintMath'
+import MintMath, { min } from '../libraries/MintMath'
 import { FEE, PROTOCOL_FEE } from './Constants'
 import { now } from '../shared/Helper'
 import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
@@ -15,6 +15,8 @@ import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory
 import type { TestToken } from '../../typechain/TestToken'
 import { BigNumber } from '@ethersproject/bignumber'
 
+const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
+const MaxUint128 = BigNumber.from(2).pow(128).sub(1);
 
 export async function constructorFixture(
   assetValue: bigint,
@@ -74,27 +76,36 @@ export async function lendFixture(
   signer: SignerWithAddress,
   lendParams: LendParams
 ): Promise<Fixture> {
-  const { pair, pairSim, assetToken, collateralToken } = fixture
-
-  await assetToken.connect(signer).transfer(pair.pairContractCallee.address, lendParams.assetIn)
-
+  const { pair, pairSim, assetToken, collateralToken } = fixture;
+  // await assetToken.connect(signer).transfer(pair.pairContractCallee.address, lendParams.assetIn);
   const pairContractState = await pair.state();
   const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
   const pairSimPool = pairSim.getPool(pair.maturity);
-  const pairSimContractState = pairSimPool.state
+  const pairSimContractState = pairSimPool.state // getting state from the contract
   const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairSimContract) {
 
-    const feeBase = 0x10000n + FEE
-    const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)
+
+    const feeBase = 0x10000n + FEE  // uint128 feeBase = 0x10000 + fee;
+    const xReserve: bigint = pairSimContractState.asset + lendParams.assetIn; // uint112 xReserve = state.x + xIncrease;
+    if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
+    const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
+    if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint112 
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
     const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase);
+    
+    let minimum = lendParams.assetIn;
+    minimum = minimum*pairSimContractState.interest;
+    minimum = minimum << 12n;
+    let denominator = pairSimContractState.asset;
+    denominator = denominator*feeBase
+    minimum = minimum/denominator;
+    if (lendParams.interestDecrease < minimum) throw Error("Intrest Increase is less than required"); //uint112;
+    console.log("NO ERROR TILL NOW; DOING THE TX");
+
     const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease);
     const block = await getBlock(txn.blockHash!)
     pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
-    //FIXME: the constant product after the lendtx is not matching;
-    
-    
     return { pair, pairSim, assetToken, collateralToken }
     
   } else {

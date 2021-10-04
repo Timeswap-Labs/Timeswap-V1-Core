@@ -18,7 +18,6 @@ export function check(
   const cdpAdjusted = adjust(cdpDecrease, state.cdp, feeBase)
 
   if (!checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)) return false
-
   let minimum = assetIn
   minimum *= state.interest
   minimum /= assetReserve << 4n
