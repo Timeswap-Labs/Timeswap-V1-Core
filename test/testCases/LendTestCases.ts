@@ -10,44 +10,62 @@ const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 import * as Mint from "./MintTestCases"
 import Constants from "../shared/Constants";
 export interface Lend {
-    Success: { mintParams: Mint.MintParams; lendParams: LendParams }[];
-    Failure: {
-        mintParams: Mint.MintParams;
-        lendParams: LendParams;
-    }[];
+    assetIn: bigint;
+    collateralIn: bigint;
+    interestIncrease: bigint;
+    cdpIncrease: bigint;
+    maturity: bigint,
+    currentTimeStamp: bigint;
+    lendAssetIn:bigint;
+    lendInterestDecrease:bigint;
+    lendCdpDecrease:bigint;
 }
+
 export interface LendParams {
     assetIn: bigint;
     interestDecrease: bigint;
     cdpDecrease: bigint;
 }
 
-export async function lend(): Promise<Lend> {
-    const mintTests = await Mint.mintTestCases();
-    // const mintTests = await Mint.mint();
-    // const mintSuccessTestCases = mintTests.Success;
-    // const mintFailureTestCases = mintTests.Failure;
-    const lendTests = lendTestCases();
-
-    // filter lendTests based on its own success and failure criteria
-    // then flatmap
-
-    const testCases = mintTests.flatMap((mintParams) => {
-        return lendTests.map((lendParams) => {
-            return { mintParams, lendParams };
-        });
-    });
-
-    const success = testCases.filter(lendSuccessCheck);
-    const failure = testCases.filter(lendFailureCheck);
-
-    return { Success: success, Failure: failure };
-
+export async function lend(): Promise<Lend[]> {
+    const mintTests = await Mint.mint(); // an object with two keys Success and Failure
+    const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
+    const lendCases: Lend[] = [];
+    for (let i=0; i<mintSuccessTestCases.length; i++) {
+        lendCases.push({
+            lendAssetIn: pseudoRandomBigUint(MaxUint112),
+            lendInterestDecrease: pseudoRandomBigUint(MaxUint112),
+            lendCdpDecrease: pseudoRandomBigUint(MaxUint112),
+            assetIn: mintSuccessTestCases[i].assetIn,
+            collateralIn: mintSuccessTestCases[i].collateralIn,
+            interestIncrease: mintSuccessTestCases[i].interestIncrease,
+            cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
+            maturity: mintSuccessTestCases[i].maturity,
+            currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp}
+            )
+    }
+    return lendCases;
 }
+
+    // console.log("mintSuccessTestCases.length", mintSuccessTestCases.length);
+    // const lendTests = lendTestCases();
+
+    // const testCases = mintSuccessTestCases.flatMap((mintParams) => {
+    //     return lendTests.map((lendParams) => {
+    //         return { mintParams, lendParams };
+    //     });
+    // });
+    // console.log(testCases);
+
+    // const success = testCases.filter(lendSuccessCheck);
+    // const failure = testCases.filter(lendFailureCheck);
+
+    // return { Success: success, Failure: failure };
+
+
 
 export function lendTestCases(): LendParams[] {
     const testCases = [
-        //TODO: to randomize the following test cases
         { assetIn: 100n, interestDecrease: 0n, cdpDecrease: 2n },
         { assetIn: 100n, interestDecrease: 0n, cdpDecrease: 0n },
     ];
@@ -59,15 +77,13 @@ function lendSuccessCheck(params: {
     mintParams: Mint.MintParams;
     lendParams: LendParams;
 }): boolean {
-    if (!Mint.mintSuccessCheck(params.mintParams)) return false;
     if(
         !(
             params.lendParams.interestDecrease > 0n ||
             params.lendParams.cdpDecrease > 0n
         )
     ) return false;
-    
-        return true;
+    return true;
     }
 
 

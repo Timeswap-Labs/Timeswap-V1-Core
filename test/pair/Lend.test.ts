@@ -6,72 +6,125 @@ import * as TestCases from '../testCases'
 import { expect } from '../shared/Expect'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
+import { Lend, LendParams, MintParams } from '../testCases'
 
 const { loadFixture, solidity } = waffle
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
+
 let signers: SignerWithAddress[];
 
+let assetInValue: bigint = BigInt(MaxUint224.toString());
+let collateralInValue: bigint = BigInt(MaxUint224.toString());
+
 describe('Lend', () => {
-  let assetInValue: bigint = BigInt(MaxUint224.toString()); // creating ERC20 with this number
-  let collateralInValue: bigint = BigInt(MaxUint224.toString());
   let tests: any;
+  let pair: any;
+  let pairSim: any;
 
   before(async () => {
+    signers = await ethers.getSigners();
     tests = await TestCases.lend();
-    console.log(`Success Length ${tests.Success.length}`);
-    console.log(`Failure Length ${tests.Failure.length}`); // TODO: this consists of cases for which the mint will fail; it makes no sense. hence, need to update this to only include those cases for which the mint will work but only the lending will fail
+    console.log(tests.length);
   });
 
-  it('', async () => {
-    tests.Success.forEach((test: any, idx: number) => {
-      let pair: any;
-      let pairSim: any;
-      const { mintParams, lendParams } = test;
-
-      describe(`Success case ${idx + 1}`, () => {
+  it('', () => {
+    tests.forEach((testCase: Lend) => {
+      describe("", () => {
         async function fixture(): Promise<Fixture> {
-          const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity);
-          const mint = await mintFixture(constructor, signers[0], mintParams);
+          const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+          const mintParameters: MintParams = {
+            assetIn: testCase.assetIn,
+            collateralIn: testCase.collateralIn,
+            interestIncrease: testCase.interestIncrease,
+            cdpIncrease: testCase.cdpIncrease,
+            maturity: testCase.maturity,
+            currentTimeStamp: testCase.currentTimeStamp
+          };
+          const mint = await mintFixture(constructor, signers[0], mintParameters);
           return mint;
         }
 
-        async function fixtureSuccess(): Promise<Fixture | undefined>  {
-          let lend: any;
+        async function fixtureSuccess(): Promise<Fixture> {
           const mint = await loadFixture(fixture);
-          try {
-            lend = await lendFixture(mint, signers[0], lendParams);
-            return lend;
-          } catch (error) {
-            tests.Failure.push(test);
-            throw Error;
+          const lendParams: LendParams =
+          {
+            assetIn: testCase.lendAssetIn,
+            interestDecrease: testCase.lendInterestDecrease,
+            cdpDecrease: testCase.lendCdpDecrease
           }
+          return lendFixture(mint, signers[0], lendParams);
         }
 
-        before(async () => {
-          signers = await ethers.getSigners();
+        it("", async () => {
+          console.log("ABDEFG");
           try {
+            console.log("calling the fixtureSuccess");
             const returnObj = await loadFixture(fixtureSuccess);
-            if (returnObj != undefined) {
-              pair = returnObj.pair;
-              pairSim = returnObj.pairSim;
-            }
-          } catch (error) {
-            console.log("THERE WAS AN ERROR IN THE LOADFIXTURE(FIXTURESUCCESS");
-            throw Error;
+            pair = returnObj.pair;
+            pairSim = returnObj.pairSim;
+            it('Should have correct total reserves', async () => {
+              const reserves = await pair.totalReserves()
+              const reservesSim = pairSim.getPool(testCase.maturity).state.reserves
+              console.log(reserves.asset==reservesSim.asset, "CHECKING ASSET Value");
+              expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+              expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+            })
+          } catch (errorMessage) {
+            throw errorMessage;
           }
         })
+      })
+    });
+  })
+})
 
+  // it('', async () => {
+  //   let pair: any;
+  //   let pairSim: any;
 
+  //   tests.Success.forEach((test: any, idx: number) => {
+  //     describe(`Success case ${idx + 1}`, () => {
+  //       const { mintParams, lendParams } = test;
 
+  //       async function fixture(): Promise<Fixture> {
+  //         const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity);
+  //         const mint = await mintFixture(constructor, signers[0], mintParams);
+  //         return mint;
+  //       }
 
-        it('Should have correct total reserves', async () => {
-          const reserves = await pair.totalReserves()
-          const reservesSim = pairSim.getPool(mintParams.maturity).state.reserves
+  //       async function fixtureSuccess(): Promise<Fixture | undefined> {
+  //         let lend: any;
+  //         const mint = await loadFixture(fixture);
+  //         try {
+  //           lend = await lendFixture(mint, signers[0], lendParams);
+  //           return lend;
+  //         } catch (error) {
+  //           throw Error;
+  //         }
+  //       }
 
-          expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-          expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
-        })
+  //       before(async () => {
+  //         signers = await ethers.getSigners();
+  //         try {
+  //           const returnObj = await loadFixture(fixtureSuccess);
+  //           if (returnObj != undefined) {
+  //             pair = returnObj.pair;
+  //             pairSim = returnObj.pairSim;
+  //           }
+  //         } catch (error) {
+  //           console.log("THERE WAS AN ERROR IN THE LOADFIXTURE(FIXTURESUCCESS");
+  //           throw Error;
+  //         }
+  //       })
+
+  //       it('Should have correct total reserves', async () => {
+  //         const reserves = await pair.totalReserves()
+  //         const reservesSim = pairSim.getPool(mintParams.maturity).state.reserves
+
+  //         expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+  //         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+  //       })
 
         // it('Should have correct state', async () => {
         //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
@@ -149,33 +202,129 @@ describe('Lend', () => {
         //     expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         //   }
         // })
-      })
-    })
 
-    tests.Failure.forEach((test: any, idx: number) => {
-      const { mintParams, lendParams } = test;
-      describe(`Failure case ${idx + 1}`, () => {
-        async function fixture(): Promise<Fixture> {
-          const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity);
-          const mint = await mintFixture(constructor, signers[0], mintParams);
-          console.log("miniting done");
-          return mint;
-        }
 
-        before(async () => {
-          signers = await ethers.getSigners();
-        })
 
-        it('Should fail', async () => {
-          const mint = await loadFixture(fixture);
-          try {
-            await lendFixture(mint, signers[0], lendParams);
-          } catch (error) {
-            console.log(error);
-          }
+  //       
+  //     });
+  //   })
 
-        })
-      })
-    })
-  })
-})
+
+
+  //     // await describe(`Testing for Failure Cases:`, () => {
+  //     //   tests.Success.forEach((failureObject: any,idx: number})  => {
+  //     //     describe(` Success case ${idx + 1}`, () => {
+  //     //       const { mintParams, lendParams } = test.Success[idx];
+
+  //     //       async function fixture(): Promise<Fixture> {
+  //     //         const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity);
+  //     //         const mint = await mintFixture(constructor, signers[0], mintParams);
+  //     //         return mint;
+  //     //       }
+
+  //     //       async function fixtureSuccess(): Promise<Fixture | undefined>  {
+  //     //         let lend: any;
+  //     //         const mint = await loadFixture(fixture);
+  //     //         try {
+  //     //           lend = await lendFixture(mint, signers[0], lendParams);
+  //     //           return lend;
+  //     //         } catch (error) {
+  //     //           FailureTests.push(test);
+  //     //           throw Error;
+  //     //         }
+  //     //       }
+
+  //     //       before(async () => {
+  //     //         signers = await ethers.getSigners();
+  //     //         try {
+  //     //           const returnObj = await loadFixture(fixtureSuccess);
+  //     //           if (returnObj != undefined) {
+  //     //             pair = returnObj.pair;
+  //     //             pairSim = returnObj.pairSim;
+  //     //           }
+  //     //         } catch (error) {
+  //     //           console.log("THERE WAS AN ERROR IN THE LOADFIXTURE(FIXTURESUCCESS");
+  //     //           throw Error;
+  //     //         }
+  //     //       })
+
+  //     //       it('Should have correct total reserves', async () => {
+  //     //         const reserves = await pair.totalReserves()
+  //     //         const reservesSim = pairSim.getPool(mintParams.maturity).state.reserves
+
+  //     //         expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+  //     //         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+  //     //       })
+
+
+  //     //     })
+  //     //   });
+  //     })
+
+    //   describe(`Failure test case ${idx + 1}`, () => {
+    //     async function fixture(): Promise<Fixture> {
+    //       const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity);
+    //       const mint = await mintFixture(constructor, signers[0], mintParams);
+    //       return mint;
+    //     }
+
+    //     async function fixtureSuccess(): Promise<Fixture | undefined>  {
+    //       let lend: any;
+    //       const mint = await loadFixture(fixture);
+    //       try {
+    //         lend = await lendFixture(mint, signers[0], lendParams);
+    //         return lend;
+    //       } catch (error) {
+    //         FailureTests.push(test);
+    //         throw Error;
+    //       }
+    //     }
+
+    //     before(async () => {
+    //       signers = await ethers.getSigners();
+    //       try {
+    //         const returnObj = await loadFixture(fixtureSuccess);
+    //         if (returnObj != undefined) {
+    //           pair = returnObj.pair;
+    //           pairSim = returnObj.pairSim;
+    //         }
+    //       } catch (error) {
+    //         console.log("THERE WAS AN ERROR IN THE LOADFIXTURE(FIXTURESUCCESS");
+    //         throw Error;
+    //       }
+    //     })
+
+    //     it('Should have correct total reserves', async () => {
+    //       const reserves = await pair.totalReserves()
+    //       const reservesSim = pairSim.getPool(mintParams.maturity).state.reserves
+
+    //       expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+    //       expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+    //     })
+
+    // })
+
+
+    // tests.Failure.forEach((test: any, idx: number) => {
+    //   const { mintParams, lendParams } = test;
+    //   describe(`Failure case ${idx + 1}`, () => {
+    //     async function fixture(): Promise<Fixture> {
+    //       const constructor = await constructorFixture(assetInValue, collateralInValue, mintParams.maturity);
+    //       const mint = await mintFixture(constructor, signers[0], mintParams);
+    //       console.log("miniting done");
+    //       return mint;
+    //     }
+
+    //     before(async () => {
+    //       signers = await ethers.getSigners();
+    //     })
+
+    //     it('Should fail', async () => {
+    //       const mint = await loadFixture(fixture);
+    //       try {
+    //         await lendFixture(mint, signers[0], lendParams);
+    //       } catch (error) {
+    //         console.log(error);
+    //       }
+
+    //     })

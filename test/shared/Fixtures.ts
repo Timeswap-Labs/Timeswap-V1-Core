@@ -84,8 +84,6 @@ export async function lendFixture(
   const pairSimContractState = pairSimPool.state // getting state from the contract
   const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract == k_pairSimContract) {
-
-
     const feeBase = 0x10000n + FEE  // uint128 feeBase = 0x10000 + fee;
     const xReserve: bigint = pairSimContractState.asset + lendParams.assetIn; // uint112 xReserve = state.x + xIncrease;
     if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
@@ -93,7 +91,6 @@ export async function lendFixture(
     if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint112 
     const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
     const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase);
-    
     let minimum = lendParams.assetIn;
     minimum = minimum*pairSimContractState.interest;
     minimum = minimum << 12n;
@@ -102,7 +99,6 @@ export async function lendFixture(
     minimum = minimum/denominator;
     if (lendParams.interestDecrease < minimum) throw Error("Intrest Increase is less than required"); //uint112;
     console.log("NO ERROR TILL NOW; DOING THE TX");
-
     const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, cdpDecrease);
     const block = await getBlock(txn.blockHash!)
     pairSim.lend(pair.maturity,signer.address,signer.address,lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)

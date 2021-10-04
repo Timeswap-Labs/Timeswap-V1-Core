@@ -240,10 +240,12 @@ contract TimeswapPair is IPair {
         require(pool.state.totalLiquidity > 0, 'Invalid');
         
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
-        
+        console.log("LendMath.check DONE");
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
+        console.log("claimsOut.bond", claimsOut.bond);
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);
+        console.log("claimsOut.insurance", claimsOut.insurance);
 
         Callback.lend(asset, xIncrease, data);
 
