@@ -4,8 +4,9 @@ import { now, pseudoRandomBigUint } from "../shared/Helper";
 import { shiftUp } from '../libraries/Math'
 import { mulDivUp } from "../libraries/FullMath";
 
-const MaxUint112 = BigNumber.from(2).pow(100).sub(1);
+const MaxUint64 = BigNumber.from(2).pow(64).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
+const MaxUint16= BigNumber.from(2).pow(16).sub(1);
 
 import * as Mint from "./MintTestCases"
 import Constants from "../shared/Constants";
@@ -33,15 +34,16 @@ export async function lend(): Promise<Lend[]> {
     const lendCases: Lend[] = [];
     for (let i=0; i<mintSuccessTestCases.length; i++) {
         lendCases.push({
-            lendAssetIn: pseudoRandomBigUint(MaxUint112),
-            lendInterestDecrease: pseudoRandomBigUint(MaxUint112),
-            lendCdpDecrease: pseudoRandomBigUint(MaxUint112),
             assetIn: mintSuccessTestCases[i].assetIn,
             collateralIn: mintSuccessTestCases[i].collateralIn,
             interestIncrease: mintSuccessTestCases[i].interestIncrease,
             cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
             maturity: mintSuccessTestCases[i].maturity,
-            currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp}
+            currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
+            lendAssetIn: mintSuccessTestCases[i].assetIn/10n,
+            lendInterestDecrease: mintSuccessTestCases[i].interestIncrease/100n,
+            lendCdpDecrease: mintSuccessTestCases[i].cdpIncrease/10n,
+        }
             )
     }
     return lendCases;

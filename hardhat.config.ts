@@ -34,6 +34,6 @@ export default {
     alwaysGenerateOverloads: true,
   },
   mocha: {
-    timeout: 20000
+    timeout: 60000
   }
 }

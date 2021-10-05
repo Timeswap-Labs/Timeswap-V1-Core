@@ -9,6 +9,8 @@ import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallbac
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '../interfaces/callback/ITimeswapPayCallback.sol';
 
+import 'hardhat/console.sol';
+
 
 contract TimeswapPairCallee {
     IPair public immutable  pairContract;
@@ -71,6 +73,7 @@ contract TimeswapPairCallee {
         uint112 yDecrease,
         uint112 zDecrease
     ) external returns (IPair.Claims memory claimsOut){
+        console.log("hitting here2");
         return pairContract.lend(
             maturity,
             bondTo,

@@ -25,27 +25,13 @@ describe('Lend', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.lend();
-    tests = [
-      {
-        lendAssetIn: 237610557474961966470000000000n,
-        lendInterestDecrease: 1036459088346607068400000000000n,
-        lendCdpDecrease: 589282358457526935070000000000n,
-        assetIn: 112472928633246085270000000000000n,
-        collateralIn: 749283148479034033240000000000000n,
-        interestIncrease: 466961018103522903540000000000000n,
-        cdpIncrease: 1359799416146396658900000000000000n,
-        maturity: 1747256449n,
-        currentTimeStamp: 1633347547n
-      }
-    ]
     console.log("tests.length from line 28 in lend.tests", tests.length);
   });
 
   it('', () => {
     tests.forEach((testCase: Lend) => {
-      console.log(tests);
+      console.log(testCase);
       describe("", () => {
-          
         async function fixture(): Promise<Fixture> {
           const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
           const mintParameters: MintParams = {
@@ -59,7 +45,7 @@ describe('Lend', () => {
           const mint = await mintFixture(constructor, signers[0], mintParameters);
           return mint;
         }
-
+        
         async function fixtureSuccess(): Promise<Fixture> {
           const mint = await loadFixture(fixture);
           const lendParams: LendParams =
@@ -72,17 +58,13 @@ describe('Lend', () => {
         }
 
         it("", async () => {
-
           try {
             const returnObj = await loadFixture(fixtureSuccess);
-            console.log("DID NOT GET AND ERROR");
             pair = returnObj.pair;
             pairSim = returnObj.pairSim;
-            console.log("GOT THE PAIR AND PAIRSIM AFTER THE LENDFIXTURE");
             
             describe("Success Test Cases", async () => {
               it('Should have correct total reserves', async () => {
-                console.log("CHECKING THIS");
                 const reserves = await pair.totalReserves()
                 const reservesSim = pairSim.getPool(testCase.maturity).state.reserves
                 expect(reserves.asset).to.equalBigInt(reservesSim.asset)
@@ -168,11 +150,12 @@ describe('Lend', () => {
 
           } catch (errorMessage) {
             console.log(errorMessage);
-
             describe("", async () => {
               it("Lend Tx should fail", async () => {
-                console.log("EXPECTING A FAILED TX");
+                console.log("attempting failed tx");
                 const mint = await loadFixture(fixture);
+                console.log(mint);
+                console.log("mint fix done");
                 const lendParams: LendParams =
                 {
                   assetIn: testCase.lendAssetIn,
@@ -180,11 +163,16 @@ describe('Lend', () => {
                   cdpDecrease: testCase.lendCdpDecrease
                 }
                 const { pair } = mint;
-                await expect(pair.pairContractCallee
-                  .connect(signers[0])
-                  .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, tests.currentTimeStamp)).to.be.reverted
-                console.log("FAILED TX DONE");
-              })
+                console.log(pair);
+                console.log("got the pair instance");
+                await pair.pairContractCallee
+                .connect(signers[0])
+                .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, tests.currentTimeStamp);
+                // await expect(pair.pairContractCallee
+                //   .connect(signers[0])
+                //   .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, tests.currentTimeStamp)).to.be.reverted;
+                console.log("failed tx done");
+              }).timeout(60000);
             })
           }
         })

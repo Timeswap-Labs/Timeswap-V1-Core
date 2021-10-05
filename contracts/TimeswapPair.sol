@@ -242,6 +242,7 @@ contract TimeswapPair is IPair {
         // TODO to update the error message
         require(pool.state.y>yDecrease, "yDecrease is too high");
         console.log("doing the LendMath.check");
+
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
