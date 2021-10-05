@@ -1,14 +1,10 @@
-import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
-import { now } from '../shared/Helper'
-import { constructorFixture, Fixture, lendFixture, mintFixture } from '../shared/Fixtures'
+import { constructorFixture, lendFixture, mintFixture } from '../shared/Fixtures'
 import * as TestCases from '../testCases'
 import { expect } from '../shared/Expect'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Lend, LendParams, MintParams } from '../testCases'
-
-const { loadFixture, solidity } = waffle
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 
@@ -19,13 +15,11 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString());
 
 describe('Lend', () => {
   let tests: any;
-  let pair: any;
-  let pairSim: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.lend();
-    console.log("tests.length from line 28 in lend.tests", tests.length);
+    console.log("tests.length", tests.length);
   });
 
   it('', () => {

@@ -9,53 +9,21 @@ const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
 import * as Mint from "./MintTestCases"
 
-export async function borrow(): Promise<Borrow> {
-    const mintTests = await Mint.mintTestCases();
-    const borrowTests = borrowTestCases();
-
-    const testCases = mintTests.flatMap((mintParams) => {
-        return borrowTests.map((borrowParams) => {
-            return { mintParams, borrowParams };
-        });
-    });
-
-    const success = testCases.filter(borrowSuccessCheck);
-    const failure = testCases.filter(borrowFailureCheck);
-
-    return { Success: success, Failure: failure };
-    // generate random inputs based on some rule
-    // check which inputs will pass
-    // check which inputs will fail with which error
-    // pass inputs array and fail inputs array
-}
-
-export function borrowTestCases(): BorrowParams[] {
-    const testCases = [
-        {
-            assetOut: 2010n,
-            collateralIn: 5000n,
-            interestIncrease: 100n,
-            cdpIncrease: 2n,
-        },
-        {
-            assetOut: 200n,
-            collateralIn: 72n,
-            interestIncrease: 0n,
-            cdpIncrease: 0n,
-        },
-    ];
-
-    return testCases;
-}
-
 export interface Borrow {
-    Success: { mintParams: Mint.MintParams; borrowParams: BorrowParams }[];
-    Failure: {
-        mintParams: Mint.MintParams;
-        borrowParams: BorrowParams;
-    }[];
+    assetIn: bigint;
+    collateralIn: bigint;
+    interestIncrease: bigint;
+    cdpIncrease: bigint;
+    maturity: bigint,
+    currentTimeStamp: bigint;
+    lendAssetIn: bigint;
+    lendInterestDecrease: bigint;
+    lendCdpDecrease: bigint;
+    borrowAssetOut: bigint;
+    borrowCollateralIn: bigint;
+    borrowInterestIncrease: bigint;
+    borrowCdpIncrease: bigint;
 }
-
 export interface BorrowParams {
     assetOut: bigint;
     collateralIn: bigint;
@@ -63,53 +31,29 @@ export interface BorrowParams {
     cdpIncrease: bigint;
 }
 
-function borrowSuccessCheck(params: {
-    mintParams: Mint.MintParams;
-    borrowParams: BorrowParams;
-}): boolean {
-    if (!Mint.mintSuccessCheck(params.mintParams)) {
-        return false;
-    } else if (
-        !(
-            params.borrowParams.interestIncrease > 0n ||
-            params.borrowParams.cdpIncrease > 0n
+export async function borrow(): Promise<Borrow[]> {
+    const mintTests = await Mint.mint(); // an object with two keys Success and Failure
+    const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
+    const borrowCases: Borrow[] = [];
+    for (let i = 0; i < mintSuccessTestCases.length; i++) {
+        borrowCases.push({
+            assetIn: mintSuccessTestCases[i].assetIn,
+            collateralIn: mintSuccessTestCases[i].collateralIn,
+            interestIncrease: mintSuccessTestCases[i].interestIncrease,
+            cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
+            maturity: mintSuccessTestCases[i].maturity,
+            currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
+            lendAssetIn: (mintSuccessTestCases[i].assetIn) / 10n,
+            lendInterestDecrease: (mintSuccessTestCases[i].assetIn) / 100n,
+            lendCdpDecrease: 2n,
+            borrowAssetOut: 100n,
+            borrowCollateralIn: 100n,
+            borrowInterestIncrease: 100n,
+            borrowCdpIncrease: 100n,
+        }
         )
-    ) {
-        return false;
-    } else {
-        return true;
     }
+    return borrowCases;
 }
 
-function borrowFailureCheck(value: {
-    mintParams: Mint.MintParams;
-    borrowParams: BorrowParams;
-}): boolean {
-    return !borrowSuccessCheck(value);
-}
 
-// function borrowMessage({
-//     mintParams,
-//     borrowParams,
-// }: {
-//     mintParams: Mint.MintParams;
-//     borrowParams: BorrowParams;
-// }): {
-//     mintParams: Mint.MintParams;
-//     borrowParams: BorrowParams;
-//     errorMessage: string;
-// } {
-//     if (Mint.mintMessage(mintParams).errorMessage !== "") {
-//         return {
-//             mintParams,
-//             borrowParams,
-//             errorMessage: Mint.mintMessage(mintParams).errorMessage,
-//         };
-//     } else if (
-//         !(borrowParams.interestIncrease > 0n || borrowParams.cdpIncrease > 0n)
-//     ) {
-//         return { mintParams, borrowParams, errorMessage: "Invalid" };
-//     } else {
-//         return { mintParams, borrowParams, errorMessage: "" };
-//     }
-// }
