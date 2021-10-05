@@ -60,15 +60,10 @@ export async function mintFixture(
   signer: SignerWithAddress,
   mintParams: MintParams
 ): Promise<Fixture> {
-
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
-  // console.log("mint tx in the tspair contract successful");
   const block = await getBlock(txn.blockHash!)
   pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block)
-  // console.log("mint tx in the pairSim successful");
-  // console.log("preparing to return the updated state");
-
   return { pair, pairSim, assetToken, collateralToken }
 }
 
@@ -92,17 +87,17 @@ export async function lendFixture(
     if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
     const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairSimContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
     if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint128 
-    const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
-    console.log("cdpAdjust, pairSimContractState.cdp, feeBase", cdpAdjust, pairSimContractState.cdp, feeBase);
-    const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase);
-    if (cdpDecrease < 0) throw Error("zAdjusted is neg; yDec is too large");
+    // const cdpAdjust = k_pairSimContract / ((pairSimContractState.asset + lendParams.assetIn) * interestAdjust)
+    // const cdpDecrease = LendMath.readjust(cdpAdjust, pairSimContractState.cdp, feeBase);
+    const cdpDecrease = lendParams.cdpDecrease;
+    // if (cdpDecrease < 0) throw Error("zAdjusted is neg; yDec is too large");
     let minimum = lendParams.assetIn;
     minimum = minimum * pairSimContractState.interest;
     minimum = minimum << 12n;
     let denominator = pairSimContractState.asset;
     denominator = denominator * feeBase
     minimum = minimum / denominator;
-    if (lendParams.interestDecrease < minimum) throw Error("Intrest Increase is less than required"); //uint112;
+    if (lendParams.interestDecrease < minimum) throw Error("Intrest Decrease is less than required"); //uint112;
     let _insuranceOut = pair.maturity;
     _insuranceOut -= await now();
     _insuranceOut *= pairContractState.interest;
@@ -111,7 +106,6 @@ export async function lendFixture(
     _denominator += lendParams.assetIn;
     _denominator *= pairContractState.interest;
     _denominator = _denominator << 32n;
-    console.log("uint256(xIncrease) * state.z", lendParams.assetIn * pairContractState.cdp);
     _insuranceOut = (_insuranceOut * lendParams.assetIn * pairContractState.cdp)
     if (_insuranceOut > BigInt(MaxUint256.toString())) throw Error ("insuranceOut is greater than uint256 - A");
     _insuranceOut = _insuranceOut/_denominator;

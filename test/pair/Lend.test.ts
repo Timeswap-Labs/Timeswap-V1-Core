@@ -30,153 +30,154 @@ describe('Lend', () => {
 
   it('', () => {
     tests.forEach((testCase: Lend) => {
-      console.log(testCase);
-      describe("", () => {
-        async function fixture(): Promise<Fixture> {
-          const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-          const mintParameters: MintParams = {
-            assetIn: testCase.assetIn,
-            collateralIn: testCase.collateralIn,
-            interestIncrease: testCase.interestIncrease,
-            cdpIncrease: testCase.cdpIncrease,
-            maturity: testCase.maturity,
-            currentTimeStamp: testCase.currentTimeStamp
-          };
-          const mint = await mintFixture(constructor, signers[0], mintParameters);
-          return mint;
-        }
-        
-        async function fixtureSuccess(): Promise<Fixture> {
-          const mint = await loadFixture(fixture);
-          const lendParams: LendParams =
-          {
-            assetIn: testCase.lendAssetIn,
-            interestDecrease: testCase.lendInterestDecrease,
-            cdpDecrease: testCase.lendCdpDecrease
-          }
-          return lendFixture(mint, signers[0], lendParams);
-        }
 
-        it("", async () => {
+      describe("", async () => {
+        let pair: any;
+        let pairSim: any;
+
+        beforeEach(async () => {
           try {
-            const returnObj = await loadFixture(fixtureSuccess);
+            const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+            const mintParameters: MintParams = {
+              assetIn: testCase.assetIn,
+              collateralIn: testCase.collateralIn,
+              interestIncrease: testCase.interestIncrease,
+              cdpIncrease: testCase.cdpIncrease,
+              maturity: testCase.maturity,
+              currentTimeStamp: testCase.currentTimeStamp
+            };
+            const mint = await mintFixture(constructor, signers[0], mintParameters);
+            const lendParams: LendParams =
+            {
+              assetIn: testCase.lendAssetIn,
+              interestDecrease: testCase.lendInterestDecrease,
+              cdpDecrease: testCase.lendCdpDecrease
+            }
+            const returnObj = await lendFixture(mint, signers[0], lendParams);
             pair = returnObj.pair;
             pairSim = returnObj.pairSim;
-            
-            describe("Success Test Cases", async () => {
-              it('Should have correct total reserves', async () => {
-                const reserves = await pair.totalReserves()
-                const reservesSim = pairSim.getPool(testCase.maturity).state.reserves
-                expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-                expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
-              })
+          } catch (error) {
+            describe("Testing for Failure Cases", async () => {
+              beforeEach(async () => {
+                const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+                const mintParameters: MintParams = {
+                  assetIn: testCase.assetIn,
+                  collateralIn: testCase.collateralIn,
+                  interestIncrease: testCase.interestIncrease,
+                  cdpIncrease: testCase.cdpIncrease,
+                  maturity: testCase.maturity,
+                  currentTimeStamp: testCase.currentTimeStamp
+                };
+                const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+                pair = returnObj.pair;
+                pairSim = returnObj.pairSim;
+              });
 
-              // it('Should have correct state', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-              //   const state = await pair.state()
-              //   const stateSim = pairSim.getPool(testCase.maturity).state
-              //   expect(state.asset).to.equalBigInt(stateSim.asset)
-              //   expect(state.interest).to.equalBigInt(stateSim.interest)
-              //   expect(state.cdp).to.equalBigInt(stateSim.cdp)
-              // })
-
-              // it('Should have correct total liquidity', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-              //   const liquidity = await pair.totalLiquidity()
-              //   const liquiditySim = pairSim.getPool(testCase.maturity).state.totalLiquidity
-
-              //   expect(liquidity).to.equalBigInt(liquiditySim)
-              // })
-
-              // it('Should have correct liquidity of', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-              //   const signers = await ethers.getSigners()
-
-              //   const liquidityOf = await pair.liquidityOf(signers[0])
-              //   const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(testCase.maturity), signers[0].address)
-
-              //   expect(liquidityOf).to.equalBigInt(liquidityOfSim)
-              // })
-
-              // it('Should have correct total debt', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-              //   const signers = await ethers.getSigners()
-
-              //   const totalDebtCreated = await pair.totalDebtCreated()
-              //   const totalDebtCreatedSim = pairSim.getPool(testCase.maturity).state.totalDebtCreated
-              //   expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim);
-              // })
-
-              // it('Should have correct total claims', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-
-              //   const claims = await pair.totalClaims()
-              //   const claimsSim = pairSim.getPool(testCase.maturity).state.totalClaims
-
-              //   expect(claims.bond).to.equalBigInt(claimsSim.bond)
-              //   expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
-              // })
-
-              // it('Should have correct claims of', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-              //   const signers = await ethers.getSigners()
-
-              //   const claimsOf = await pair.claimsOf(signers[0])
-              //   const claimsOfSim = pairSim.getClaims(pairSim.getPool(testCase.maturity), signers[0].address)
-
-              //   expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-              //   expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
-              // })
-
-              // it('Should have correct dues of', async () => {
-              //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
-              //   const signers = await ethers.getSigners()
-
-              //   const duesOf = await pair.duesOf()
-              //   const duesOfSim = pairSim.getDues(pairSim.getPool(testCase.maturity), signers[0].address).due
-
-              //   expect(duesOf.length).to.equal(duesOfSim.length)
-
-              //   for (let i = 0; i < duesOf.length; i++) {
-              //     expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
-              //     expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
-              //     expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
-              //   }
-              // })
-            })
-
-
-          } catch (errorMessage) {
-            console.log(errorMessage);
-            describe("", async () => {
               it("Lend Tx should fail", async () => {
-                console.log("attempting failed tx");
-                const mint = await loadFixture(fixture);
-                console.log(mint);
-                console.log("mint fix done");
                 const lendParams: LendParams =
                 {
                   assetIn: testCase.lendAssetIn,
                   interestDecrease: testCase.lendInterestDecrease,
                   cdpDecrease: testCase.lendCdpDecrease
                 }
-                const { pair } = mint;
-                console.log(pair);
-                console.log("got the pair instance");
-                await pair.pairContractCallee
-                .connect(signers[0])
-                .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, tests.currentTimeStamp);
-                // await expect(pair.pairContractCallee
-                //   .connect(signers[0])
-                //   .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease, tests.currentTimeStamp)).to.be.reverted;
-                console.log("failed tx done");
-              }).timeout(60000);
+                await expect(pair.pairContractCallee
+                  .connect(signers[0])
+                  .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)).to.be.reverted;
+                
+              });
             })
+
+          }
+        });
+
+        it('', async () => {
+          if (pair != undefined && pairSim != undefined) {
+            console.log("Should have correct reserves");
+            const reserves = await pair.totalReserves()
+            const reservesSim = pairSim.getPool(testCase.maturity).state.reserves
+            expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+            expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
+          } else {
           }
         })
+
       })
-    });
+    })
   })
-})
+});
+
+
+ // it('Should have correct state', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+
+          //   const state = await pair.state()
+          //   const stateSim = pairSim.getPool(testCase.maturity).state
+          //   expect(state.asset).to.equalBigInt(stateSim.asset)
+          //   expect(state.interest).to.equalBigInt(stateSim.interest)
+          //   expect(state.cdp).to.equalBigInt(stateSim.cdp)
+          // })
+
+          // it('Should have correct total liquidity', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+
+          //   const liquidity = await pair.totalLiquidity()
+          //   const liquiditySim = pairSim.getPool(testCase.maturity).state.totalLiquidity
+
+          //   expect(liquidity).to.equalBigInt(liquiditySim)
+          // })
+
+          // it('Should have correct liquidity of', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+          //   const signers = await ethers.getSigners()
+
+          //   const liquidityOf = await pair.liquidityOf(signers[0])
+          //   const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(testCase.maturity), signers[0].address)
+
+          //   expect(liquidityOf).to.equalBigInt(liquidityOfSim)
+          // })
+
+          // it('Should have correct total debt', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+          //   const signers = await ethers.getSigners()
+
+          //   const totalDebtCreated = await pair.totalDebtCreated()
+          //   const totalDebtCreatedSim = pairSim.getPool(testCase.maturity).state.totalDebtCreated
+          //   expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim);
+          // })
+
+          // it('Should have correct total claims', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+
+          //   const claims = await pair.totalClaims()
+          //   const claimsSim = pairSim.getPool(testCase.maturity).state.totalClaims
+
+          //   expect(claims.bond).to.equalBigInt(claimsSim.bond)
+          //   expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+          // })
+
+          // it('Should have correct claims of', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+          //   const signers = await ethers.getSigners()
+
+          //   const claimsOf = await pair.claimsOf(signers[0])
+          //   const claimsOfSim = pairSim.getClaims(pairSim.getPool(testCase.maturity), signers[0].address)
+
+          //   expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
+          //   expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+          // })
+
+          // it('Should have correct dues of', async () => {
+          //   const { pair, pairSim } = await loadFixture(fixtureSuccess)
+          //   const signers = await ethers.getSigners()
+
+          //   const duesOf = await pair.duesOf()
+          //   const duesOfSim = pairSim.getDues(pairSim.getPool(testCase.maturity), signers[0].address).due
+
+          //   expect(duesOf.length).to.equal(duesOfSim.length)
+
+          //   for (let i = 0; i < duesOf.length; i++) {
+          //     expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
+          //     expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
+          //     expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
+          //   }
+          // })
