@@ -19,6 +19,8 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString());
 
 describe('Lend', () => {
   let tests: any;
+  let pair: any;
+  let pairSim: any;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -32,23 +34,19 @@ describe('Lend', () => {
       describe("", async () => {
         let pair: any;
         let pairSim: any;
-        let mint: any;
-
-        before(async() => {
-          const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-          const mintParameters: MintParams = {
-            assetIn: testCase.assetIn,
-            collateralIn: testCase.collateralIn,
-            interestIncrease: testCase.interestIncrease,
-            cdpIncrease: testCase.cdpIncrease,
-            maturity: testCase.maturity,
-            currentTimeStamp: testCase.currentTimeStamp
-          };
-          mint = await mintFixture(constructor, signers[0], mintParameters);
-        })
 
         beforeEach(async () => {
           try {
+            const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+            const mintParameters: MintParams = {
+              assetIn: testCase.assetIn,
+              collateralIn: testCase.collateralIn,
+              interestIncrease: testCase.interestIncrease,
+              cdpIncrease: testCase.cdpIncrease,
+              maturity: testCase.maturity,
+              currentTimeStamp: testCase.currentTimeStamp
+            };
+            const mint = await mintFixture(constructor, signers[0], mintParameters);
             const lendParams: LendParams =
             {
               assetIn: testCase.lendAssetIn,
@@ -60,9 +58,21 @@ describe('Lend', () => {
             pairSim = returnObj.pairSim;
           } catch (error) {
             describe("Testing for Failure Cases", async () => {
-              pair = mint.pair;
-              pairSim = mint.pairSim;
-              
+              beforeEach(async () => {
+                const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+                const mintParameters: MintParams = {
+                  assetIn: testCase.assetIn,
+                  collateralIn: testCase.collateralIn,
+                  interestIncrease: testCase.interestIncrease,
+                  cdpIncrease: testCase.cdpIncrease,
+                  maturity: testCase.maturity,
+                  currentTimeStamp: testCase.currentTimeStamp
+                };
+                const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+                pair = returnObj.pair;
+                pairSim = returnObj.pairSim;
+              });
+
               it("Lend Tx should fail", async () => {
                 const lendParams: LendParams =
                 {
