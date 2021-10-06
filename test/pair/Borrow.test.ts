@@ -1,26 +1,21 @@
-import { ethers, waffle } from 'hardhat'
+import { ethers, } from 'hardhat'
 import { constructorFixture, borrowFixture, mintFixture } from '../shared/Fixtures'
 import * as TestCases from '../testCases'
 import { expect } from '../shared/Expect'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Borrow, BorrowParams, MintParams } from '../testCases'
-
-
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
-
 let signers: SignerWithAddress[];
-
 let assetInValue: bigint = BigInt(MaxUint224.toString());
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
-
 
 describe('Borrow', () => {
   let tests: any;
 
   before(async () => {
     signers = await ethers.getSigners();
-    tests = await TestCases.borrow();
+    tests = await TestCases.lend();
     console.log("tests.length", tests.length);
   });
 
@@ -48,14 +43,14 @@ describe('Borrow', () => {
               assetOut: testCase.borrowAssetOut,
               collateralIn: testCase.borrowCollateralIn,
               interestIncrease: testCase.borrowInterestIncrease,
-              cdpIncrease: testCase.borrowCdpIncrease,
+              cdpIncrease: testCase.borrowCdpIncrease
             }
             const returnObj = await borrowFixture(mint, signers[0], borrowParams);
             pair = returnObj.pair;
             pairSim = returnObj.pairSim;
           } catch (error) {
             describe("Testing for Failure Cases", async () => {
-              beforeEach(async () => {
+              before(async () => {
                 const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
                 const mintParameters: MintParams = {
                   assetIn: testCase.assetIn,
@@ -69,21 +64,19 @@ describe('Borrow', () => {
                 pair = returnObj.pair;
                 pairSim = returnObj.pairSim;
               });
-
-              it("Borrow Tx should fail", async () => {
+              it("Lend Tx should fail", async () => {
                 const borrowParams: BorrowParams =
                 {
                   assetOut: testCase.borrowAssetOut,
                   collateralIn: testCase.borrowCollateralIn,
                   interestIncrease: testCase.borrowInterestIncrease,
-                  cdpIncrease: testCase.borrowCdpIncrease,
+                  cdpIncrease: testCase.borrowCdpIncrease
                 }
                 await expect(pair.pairContractCallee
                   .connect(signers[0])
                   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
               });
             })
-
           }
         });
 

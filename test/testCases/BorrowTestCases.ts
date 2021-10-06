@@ -16,9 +16,6 @@ export interface Borrow {
     cdpIncrease: bigint;
     maturity: bigint,
     currentTimeStamp: bigint;
-    lendAssetIn: bigint;
-    lendInterestDecrease: bigint;
-    lendCdpDecrease: bigint;
     borrowAssetOut: bigint;
     borrowCollateralIn: bigint;
     borrowInterestIncrease: bigint;
@@ -43,9 +40,6 @@ export async function borrow(): Promise<Borrow[]> {
             cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
             maturity: mintSuccessTestCases[i].maturity,
             currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
-            lendAssetIn: (mintSuccessTestCases[i].assetIn) / 10n,
-            lendInterestDecrease: (mintSuccessTestCases[i].assetIn) / 100n,
-            lendCdpDecrease: 2n,
             borrowAssetOut: 100n,
             borrowCollateralIn: 100n,
             borrowInterestIncrease: 100n,

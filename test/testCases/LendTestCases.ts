@@ -33,6 +33,7 @@ export async function lend(): Promise<Lend[]> {
     const mintTests = await Mint.mint(); // an object with two keys Success and Failure
     const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
     const lendCases: Lend[] = [];
+    //TODO: the asset in the pull can be smaller than the lendAssetIn
     for (let i = 0; i < mintSuccessTestCases.length; i++) {
         lendCases.push({
             assetIn: mintSuccessTestCases[i].assetIn,
@@ -43,22 +44,9 @@ export async function lend(): Promise<Lend[]> {
             currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
             lendAssetIn: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn) / 2n,
             lendInterestDecrease: (mintSuccessTestCases[i].interestIncrease) / 10n,
-            lendCdpDecrease: pseudoRandomBigUint(MaxUint112)
-            // ((BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn)*(BigInt(Math.round(Math.random()+1)))) - (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn),  
+            lendCdpDecrease: pseudoRandomBigUint(MaxUint112)  
         }
         )
     }
-    let tempLC = [{
-        assetIn: 319779880192897455310000000000000n,
-        collateralIn: 2119284665317684574500000000000000n,
-        interestIncrease: 1895137789476211447000000000000000n,
-        cdpIncrease: 1205909613706401805700000000000000n,
-        maturity: 1856196510n,
-        currentTimeStamp: 1633512136n,
-        lendAssetIn: 2436258489170965086610248164610047n,
-        lendInterestDecrease: 189513778947621144700000000000000n,
-        lendCdpDecrease: 612433849593336638940000000000000n
-      }
-    ]
     return lendCases;
 }

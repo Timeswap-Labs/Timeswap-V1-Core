@@ -9,6 +9,7 @@ const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
+
 describe('Lend', () => {
   let tests: any;
   before(async () => {
