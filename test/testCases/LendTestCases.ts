@@ -41,8 +41,8 @@ export async function lend(): Promise<Lend[]> {
             maturity: mintSuccessTestCases[i].maturity,
             currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
             lendAssetIn:  (mintSuccessTestCases[i].assetIn)/10n,
-            lendInterestDecrease: (mintSuccessTestCases[i].assetIn)/100n,
-            lendCdpDecrease: 2n,
+            lendInterestDecrease: (mintSuccessTestCases[i].interestIncrease)/10n,
+            lendCdpDecrease: (mintSuccessTestCases[i].cdpIncrease)/100n
         }
             )
     }

@@ -73,7 +73,6 @@ contract TimeswapPairCallee {
         uint112 yDecrease,
         uint112 zDecrease
     ) external returns (IPair.Claims memory claimsOut){
-        console.log("hitting here2");
         return pairContract.lend(
             maturity,
             bondTo,

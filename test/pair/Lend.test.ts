@@ -51,6 +51,7 @@ describe('Lend', () => {
             pair = returnObj.pair;
             pairSim = returnObj.pairSim;
           } catch (error) {
+            console.log(error);
             describe("Testing for Failure Cases", async () => {
               beforeEach(async () => {
                 const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);

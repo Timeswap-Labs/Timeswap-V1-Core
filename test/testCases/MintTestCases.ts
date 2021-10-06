@@ -35,8 +35,8 @@ export async function mintTestCases(): Promise<MintParams[]> {
         .fill(null)
         .map(() => {
             return {
-                assetIn: pseudoRandomBigUint(MaxUint112),
-                collateralIn: pseudoRandomBigUint(MaxUint112),
+                assetIn: pseudoRandomBigUint(MaxUint112),  
+                collateralIn: pseudoRandomBigUint(MaxUint112), 
                 interestIncrease: pseudoRandomBigUint(MaxUint112),
                 cdpIncrease: pseudoRandomBigUint(MaxUint112),
                 maturity: BigInt((BigNumber.from(nt).add(BigNumber.from(pseudoRandomBigUint(MaxUint32)))).toString()),

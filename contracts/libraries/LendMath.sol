@@ -21,22 +21,17 @@ library LendMath {
         uint16 fee
     ) internal view {
         uint128 feeBase = 0x10000 + fee;
-        
         uint112 xReserve = state.x + xIncrease;
-        
         uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
-        
         uint128 zAdjusted = adjust(state.z, zDecrease, feeBase);
-        
+        console.log(zAdjusted);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
-        
         uint256 minimum = xIncrease;
         minimum *= state.y;
         minimum <<= 12;
         uint256 denominator = xReserve;
         denominator *= feeBase;
         minimum /= denominator;
-        
         require(yDecrease >= minimum, 'Minimum');
         
     }
@@ -48,15 +43,10 @@ library LendMath {
         uint128 feeBase
     ) private view returns (uint128 adjusted) {
         uint256 _adjusted = reserve;
-        
         _adjusted <<= 16;
-        
         uint256 _adjustedDecrease = uint256(feeBase) * decrease;
         _adjusted -= _adjustedDecrease;
-        
         adjusted = _adjusted.toUint128();
-        
-        
     }
 
     function getBond(
@@ -93,7 +83,7 @@ library LendMath {
         denominator *= uint256(state.x);
         
         denominator <<= 32;
-        
+        console.log("ABOUT TO DO MULDIVUP");
         
         
         _insuranceOut = _insuranceOut.mulDiv(uint256(xIncrease) * state.z, denominator);
