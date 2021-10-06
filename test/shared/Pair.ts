@@ -110,7 +110,7 @@ export class PairSigner extends Pair {
     return txn
   }
 
-  async lend(xIncrease: bigint, yDecrease: bigint, zDecrease: bigint): Promise<ContractTransaction> {
+  async lend(xIncrease: bigint, yDecrease: bigint, zDecrease: bigint): Promise<ContractTransaction> { 
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .lend(

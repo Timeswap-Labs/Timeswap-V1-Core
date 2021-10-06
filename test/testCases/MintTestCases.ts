@@ -8,7 +8,7 @@ const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
 //TODO: change this increase the test cases
-const count = 10;
+const count = 100;
 export interface MintParams {
     assetIn: bigint;
     collateralIn: bigint;

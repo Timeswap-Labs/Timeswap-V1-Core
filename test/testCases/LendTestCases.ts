@@ -4,12 +4,13 @@ import { now, pseudoRandomBigUint } from "../shared/Helper";
 import { shiftUp } from '../libraries/Math'
 import { mulDivUp } from "../libraries/FullMath";
 
+const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint64 = BigNumber.from(2).pow(64).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
-const MaxUint16= BigNumber.from(2).pow(16).sub(1);
+const MaxUint16 = BigNumber.from(2).pow(16).sub(1);
 
 import * as Mint from "./MintTestCases"
-import Constants from "../shared/Constants";
+
 export interface Lend {
     assetIn: bigint;
     collateralIn: bigint;
@@ -17,9 +18,9 @@ export interface Lend {
     cdpIncrease: bigint;
     maturity: bigint,
     currentTimeStamp: bigint;
-    lendAssetIn:bigint;
-    lendInterestDecrease:bigint;
-    lendCdpDecrease:bigint;
+    lendAssetIn: bigint;
+    lendInterestDecrease: bigint;
+    lendCdpDecrease: bigint;
 }
 
 export interface LendParams {
@@ -32,7 +33,7 @@ export async function lend(): Promise<Lend[]> {
     const mintTests = await Mint.mint(); // an object with two keys Success and Failure
     const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
     const lendCases: Lend[] = [];
-    for (let i=0; i<mintSuccessTestCases.length; i++) {
+    for (let i = 0; i < mintSuccessTestCases.length; i++) {
         lendCases.push({
             assetIn: mintSuccessTestCases[i].assetIn,
             collateralIn: mintSuccessTestCases[i].collateralIn,
@@ -40,11 +41,24 @@ export async function lend(): Promise<Lend[]> {
             cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
             maturity: mintSuccessTestCases[i].maturity,
             currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
-            lendAssetIn:  (mintSuccessTestCases[i].assetIn)/10n,
-            lendInterestDecrease: (mintSuccessTestCases[i].interestIncrease)/10n,
-            lendCdpDecrease: (mintSuccessTestCases[i].cdpIncrease)/100n
+            lendAssetIn: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn) / 2n,
+            lendInterestDecrease: (mintSuccessTestCases[i].interestIncrease) / 10n,
+            lendCdpDecrease: pseudoRandomBigUint(MaxUint112)
+            // ((BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn)*(BigInt(Math.round(Math.random()+1)))) - (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn),  
         }
-            )
+        )
     }
+    let tempLC = [{
+        assetIn: 319779880192897455310000000000000n,
+        collateralIn: 2119284665317684574500000000000000n,
+        interestIncrease: 1895137789476211447000000000000000n,
+        cdpIncrease: 1205909613706401805700000000000000n,
+        maturity: 1856196510n,
+        currentTimeStamp: 1633512136n,
+        lendAssetIn: 2436258489170965086610248164610047n,
+        lendInterestDecrease: 189513778947621144700000000000000n,
+        lendCdpDecrease: 612433849593336638940000000000000n
+      }
+    ]
     return lendCases;
 }

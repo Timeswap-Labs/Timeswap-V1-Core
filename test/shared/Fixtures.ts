@@ -11,9 +11,9 @@ import MintMath, { min } from '../libraries/MintMath'
 import { FEE, PROTOCOL_FEE } from './Constants'
 import { now } from '../shared/Helper'
 import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
-
 import type { TestToken } from '../../typechain/TestToken'
 import { BigNumber } from '@ethersproject/bignumber'
+import { divUp } from '../libraries/Math'
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint128 = BigNumber.from(2).pow(128).sub(1);
@@ -31,27 +31,20 @@ export async function constructorFixture(
   cv = cv.mul(4);
   const assetToken = await testTokenNew('Ether', 'WETH', BigInt(av.toString()))
   const collateralToken = await testTokenNew('Matic', 'MATIC', BigInt(cv.toString()))
-
   const pair = await pairInit(assetToken, collateralToken, maturity)
   const factory = pair.factoryContract
   const factoryAddress = factory.address
-
   const owner = await factory.owner()
-
   // call the approve function in the test Tokens
   // for (let i=1;i<6;i++) {
   //   await assetToken.transfer(signers[i].address,5000n);
   //   await collateralToken.transfer(signers[i].address,10000n);
-
   //   await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 5000n);
   //   await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 10000n);
   // }
-
   await assetToken.approve(pair.pairContractCallee.address, assetValue);
   await collateralToken.approve(pair.pairContractCallee.address, collateralValue);
-
   const pairSim = new PairSim(assetToken.address, collateralToken.address, FEE, PROTOCOL_FEE, pair.pairContract.address, factoryAddress, owner)
-
   return { pair, pairSim, assetToken, collateralToken }
 }
 
@@ -72,7 +65,7 @@ export async function lendFixture(
   signer: SignerWithAddress,
   lendParams: LendParams
 ): Promise<Fixture> {
-  console.log(lendParams);
+  let signers = await ethers.getSigners();
   const { pair, pairSim, assetToken, collateralToken } = fixture;
   if (lendParams.assetIn <= 0) throw Error("Zero");
   const pairContractState = await pair.state();
@@ -90,57 +83,32 @@ export async function lendFixture(
   if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
   const interestAdjust = LendMath.adjust(lendParams.interestDecrease, pairContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
   if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint128 
-  //OKAY TILL HERE
-  
-  // const cdpAdjust = k_pairContract / ((pairContractState.asset + lendParams.assetIn) * interestAdjust)
-  // console.log("cdpAdjust", cdpAdjust);
-
-  // const cdpAdjusted11 = (((pairContractState.interest * pairContractState.cdp) << 32n)*pairContractState.asset)/(interestAdjust*xReserve); // this is to ensure that the constantProduct check goes through
-  // console.log("cdpAdjusted11", cdpAdjusted11);
-
-  const cdpDecrease = LendMath.readjust(lendParams.cdpDecrease, pairContractState.cdp, feeBase);
+  const cdpAdjust = divUp(k_pairContract,  ((pairContractState.asset + lendParams.assetIn) * interestAdjust));
+  const cdpDecrease = LendMath.readjust(cdpAdjust, pairContractState.cdp, feeBase);
   if (cdpDecrease < 0) throw Error("zAdjusted is neg; yDec is too large");
-  console.log("cdpDecreaseAdjusted", cdpDecrease);
-
 
   let minimum = lendParams.assetIn;
   minimum = minimum * pairContractState.interest;
-  minimum = minimum << 12n;
-  let denominator = pairContractState.asset;
-  denominator = denominator * feeBase
-  minimum = minimum / denominator;
+  let assetReserve = pairContractState.asset + lendParams.assetIn;
+  minimum /= assetReserve << 4n
   if (lendParams.interestDecrease < minimum) throw Error("Intrest Decrease is less than required"); //uint112;
-
 
   let _insuranceOut = pair.maturity;
   _insuranceOut -= await now();
   _insuranceOut *= pairContractState.interest;
   _insuranceOut += pairContractState.asset << 32n;
-
   let _denominator = pairContractState.asset;
   _denominator += lendParams.assetIn;
   _denominator *= pairContractState.asset;
   _denominator = _denominator << 32n;
-
   _insuranceOut = (_insuranceOut * lendParams.assetIn * pairContractState.cdp)
-  // if (_insuranceOut > BigInt(MaxUint256.toString())) throw Error("insuranceOut is greater than uint256 - A");
-  if (_insuranceOut > BigInt(MaxUint256.toString())) console.log("insuranceOut is greater than uint256 - A");
   _insuranceOut = _insuranceOut / _denominator;
-  if (_insuranceOut > BigInt(MaxUint256.toString())) console.log("insuranceOut is greater than uint256 - B");
-  
-  _insuranceOut += lendParams.cdpDecrease;
-  if (_insuranceOut > BigInt(MaxUint128.toString())) console.log("_insuranceOut > Uint128"); //uint128 
-
-  console.log("DOING THE TX");
-  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease);
-  console.log("TX DONE");
+  _insuranceOut += cdpAdjust;
+  if (_insuranceOut > BigInt(MaxUint128.toString())) throw Error("_insuranceOut > Uint128"); //uint128 
+  const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust>>32n));
   const block = await getBlock(txn.blockHash!)
-  pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, cdpDecrease, block)
-  console.log("PAIRSIM TX DONE");
+  pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust>>32n), block)
   return { pair, pairSim, assetToken, collateralToken }
-
-
-
 }
 
 export async function borrowFixture(
@@ -160,7 +128,6 @@ export async function borrowFixture(
     const feeBase = 0x10000n - FEE  // uint128 feeBase = 0x10000 - fee;
     const xReserve: bigint = pairContractState.asset - borrowParams.assetOut; // uint112 xReserve = state.x + xIncrease;
     if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > Uint112"); //uint112 xReserve = state.x + xIncrease;
-
     const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
     if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > Uint128"); //uint128 
     const cdpAdjust = k_pairSimContract / ((pairContractState.asset - borrowParams.assetOut) * interestAdjust)
@@ -188,7 +155,6 @@ export async function borrowFixture(
     if (_insuranceOut > BigInt(MaxUint256.toString())) throw Error("insuranceOut is greater than uint256 - B");
     _insuranceOut += borrowParams.cdpIncrease;
     if (_insuranceOut > BigInt(MaxUint128.toString())) throw Error("_insuranceOut > Uint128"); //uint128 
-
     console.log("DOING THE TX");
     const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, owner);
     console.log("TX DONE");
@@ -196,12 +162,9 @@ export async function borrowFixture(
     pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, block)
     console.log("PAIRSIM TX DONE");
     return { pair, pairSim, assetToken, collateralToken }
-
   } else {
     throw Error;
   }
-
-
   //  
   //   const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpIncrease, owner)
   //   const block = await getBlock(txn.blockHash!)
@@ -210,7 +173,6 @@ export async function borrowFixture(
   // } else {
   //   throw Error("There is an error in the borrow fixture");
   // }
-
 }
 
 export async function burnFixture(
@@ -219,11 +181,9 @@ export async function burnFixture(
   burnParams: BurnParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-
   const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
   const block = await getBlock(txnBurn.blockHash!)
   pairSim.burn(pair.maturity, signer.address, signer.address, burnParams.liquidityIn, signer.address, block)
-
   return { pair, pairSim, assetToken, collateralToken }
 }
 
@@ -234,10 +194,8 @@ export async function payFixture(
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
-
   const block = await getBlock(txn.blockHash!)
   pairSim.pay(pair.maturity, signer.address, signer.address, payParams.ids, payParams.debtIn, payParams.collateralOut, signer.address, block)
-
   return { pair, pairSim, assetToken, collateralToken }
 }
 
@@ -247,19 +205,13 @@ export async function withdrawFixture(
   withdrawParams: WithdrawParams
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-
   const txnWithdraw = await pair
     .upgrade(signer)
     .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
-
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
-
   pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
-
   return { pair, pairSim, assetToken, collateralToken }
 }
-
-
 
 export interface Fixture {
   pair: Pair
