@@ -53,6 +53,8 @@ describe('Borrow', () => {
             returnObj = await borrowFixture(mint, signers[0], borrowParams);
             
             if (returnObj.error==undefined) {
+              console.log(testCase);
+              console.log("testSuccess");
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
             } else {
