@@ -9,6 +9,8 @@ const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
+let totalCases: number;
+let FailureCases: number;
 
 describe('Borrow', () => {
   let tests: any;
@@ -16,7 +18,8 @@ describe('Borrow', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.borrow();
-    console.log(tests.length);
+    totalCases = tests.length;
+    FailureCases = 0;
 
   });
 
@@ -53,10 +56,12 @@ describe('Borrow', () => {
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
             } else {
+              FailureCases ++;
               testCase.borrowCdpIncrease = returnObj.cdpAdjust;
               throw Error(returnObj.error)
             }
           } catch (error) {
+            
             describe("Testing for Failure Cases", async () => {
               before(async () => {
                 const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
@@ -80,9 +85,6 @@ describe('Borrow', () => {
                   interestIncrease: testCase.borrowInterestIncrease,
                   cdpIncrease: testCase.borrowCdpIncrease
                 }
-                // await pair.pairContractCallee
-                //   .connect(signers[0])
-                //   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)
                 await expect(pair.pairContractCallee
                   .connect(signers[0])
                   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
