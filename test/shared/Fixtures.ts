@@ -128,23 +128,17 @@ export async function borrowFixture(
   const totalliquidity = await pair.totalLiquidity();
   if (totalliquidity <= 0) throw Error("Invalid");
   if (borrowParams.assetOut <= 0) throw Error("Invalid");
-
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
   const pairSimPool = pairSim.getPool(pair.maturity);
   const pairSimContractState = pairSimPool.state
   let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract != k_pairSimContract) throw Error("state of Pair and PairSim not same")
-
   const feeBase = 0x10000n - FEE  // uint128 feeBase = 0x10000 - fee;
-
   const xReserve = pairContractState.asset - borrowParams.assetOut;
   if (xReserve > BigInt(MaxUint112.toString())) throw Error("xReserve > MaxUint112");
-
   const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairContractState.interest, feeBase)  // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
   if (interestAdjust > BigInt(MaxUint128.toString())) throw Error("interestAdjust > MaxUint128");
-
   const cdpAdjust = divUp(k_pairContract, ((pairContractState.asset - borrowParams.assetOut) * interestAdjust)); // this is the number that will pass the cp check
-  
   if (cdpAdjust < 0) {
     return {
       cdpAdjust: cdpAdjust >> 32n,
@@ -158,77 +152,70 @@ export async function borrowFixture(
       error: value
     }
   }
+  const dueOutDebt = BorrowMath.getDebt(pair.maturity, borrowParams.assetOut, borrowParams.interestIncrease, await now());
+  if (dueOutDebt > BigInt(MaxUint112.toString())) {
+    return {
+      cdpAdjust: cdpAdjust >> 32n,
+      error: "dueOut.debt greater than Uint112"
+    }
+  };
+  const dueOutCollateral = BorrowMath.getCollateral(pair.maturity, pairContractState, borrowParams.assetOut, (cdpAdjust >> 32n), await now())
+  if (dueOutCollateral > BigInt(MaxUint112.toString())) {
+    return {
+      cdpAdjust: cdpAdjust >> 32n,
+      error: "dueOut.collateral greater than Uint112"
+    }
+  };
+  const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), owner);
+  const block = await getBlock(txn.blockHash!)
+  pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), block)
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
 
-    const dueOutDebt = BorrowMath.getDebt(pair.maturity, borrowParams.assetOut, borrowParams.interestIncrease, await now());
-    if (dueOutDebt > BigInt(MaxUint112.toString())) {
-      return {
-        cdpAdjust: cdpAdjust >> 32n,
-        error: "dueOut.debt greater than Uint112"
-      }
-    };
+export async function burnFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  burnParams: BurnParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+  const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
+  const block = await getBlock(txnBurn.blockHash!)
+  pairSim.burn(pair.maturity, signer.address, signer.address, burnParams.liquidityIn, signer.address, block)
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
-    const dueOutCollateral = BorrowMath.getCollateral(pair.maturity, pairContractState, borrowParams.assetOut, (cdpAdjust >> 32n), await now())
-    if (dueOutCollateral > BigInt(MaxUint112.toString())) {
-      return {
-        cdpAdjust: cdpAdjust >> 32n,
-        error: "dueOut.collateral greater than Uint112"
-      }
-    };
+export async function payFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  payParams: PayParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+  const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
+  const block = await getBlock(txn.blockHash!)
+  pairSim.pay(pair.maturity, signer.address, signer.address, payParams.ids, payParams.debtIn, payParams.collateralOut, signer.address, block)
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
-    console.log("DOING THE TX");
-    const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), owner);
-    console.log("TX DONE");
-    const block = await getBlock(txn.blockHash!)
-    pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), block)
-    console.log("PAIRSIM TX DONE");
-    return { pair, pairSim, assetToken, collateralToken }
-  }
+export async function withdrawFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  withdrawParams: WithdrawParams
+): Promise<Fixture> {
+  const { pair, pairSim, assetToken, collateralToken } = fixture
+  const txnWithdraw = await pair
+    .upgrade(signer)
+    .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
+  const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
+  pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
+  return { pair, pairSim, assetToken, collateralToken }
+}
 
+export interface Fixture {
+  pair: Pair
+  pairSim: PairSim
+  assetToken: TestToken
+  collateralToken: TestToken
+}
 
-  export async function burnFixture(
-    fixture: Fixture,
-    signer: SignerWithAddress,
-    burnParams: BurnParams
-  ): Promise<Fixture> {
-    const { pair, pairSim, assetToken, collateralToken } = fixture
-    const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
-    const block = await getBlock(txnBurn.blockHash!)
-    pairSim.burn(pair.maturity, signer.address, signer.address, burnParams.liquidityIn, signer.address, block)
-    return { pair, pairSim, assetToken, collateralToken }
-  }
-
-  export async function payFixture(
-    fixture: Fixture,
-    signer: SignerWithAddress,
-    payParams: PayParams
-  ): Promise<Fixture> {
-    const { pair, pairSim, assetToken, collateralToken } = fixture
-    const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut);
-    const block = await getBlock(txn.blockHash!)
-    pairSim.pay(pair.maturity, signer.address, signer.address, payParams.ids, payParams.debtIn, payParams.collateralOut, signer.address, block)
-    return { pair, pairSim, assetToken, collateralToken }
-  }
-
-  export async function withdrawFixture(
-    fixture: Fixture,
-    signer: SignerWithAddress,
-    withdrawParams: WithdrawParams
-  ): Promise<Fixture> {
-    const { pair, pairSim, assetToken, collateralToken } = fixture
-    const txnWithdraw = await pair
-      .upgrade(signer)
-      .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
-    const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
-    pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
-    return { pair, pairSim, assetToken, collateralToken }
-  }
-
-  export interface Fixture {
-    pair: Pair
-    pairSim: PairSim
-    assetToken: TestToken
-    collateralToken: TestToken
-  }
-
-  export default { constructorFixture, mintFixture }
+export default { constructorFixture, mintFixture }

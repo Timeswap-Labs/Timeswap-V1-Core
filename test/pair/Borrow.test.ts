@@ -16,7 +16,7 @@ describe('Borrow', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.borrow();
-    console.log(tests);
+    console.log(tests.length);
 
   });
 
@@ -57,7 +57,6 @@ describe('Borrow', () => {
               throw Error(returnObj.error)
             }
           } catch (error) {
-            console.log(error);
             describe("Testing for Failure Cases", async () => {
               before(async () => {
                 const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
@@ -74,7 +73,6 @@ describe('Borrow', () => {
                 pairSim = returnObj.pairSim;
               });
               it("Lend Tx should fail", async () => {
-                console.log(testCase.borrowCdpIncrease);
                 const borrowParams: BorrowParams =
                 {
                   assetOut: testCase.borrowAssetOut,
@@ -82,12 +80,12 @@ describe('Borrow', () => {
                   interestIncrease: testCase.borrowInterestIncrease,
                   cdpIncrease: testCase.borrowCdpIncrease
                 }
-                await pair.pairContractCallee
-                  .connect(signers[0])
-                  .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)
-                // await expect(pair.pairContractCallee
+                // await pair.pairContractCallee
                 //   .connect(signers[0])
-                //   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
+                //   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)
+                await expect(pair.pairContractCallee
+                  .connect(signers[0])
+                  .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
               });
             })
           }
