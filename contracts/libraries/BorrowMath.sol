@@ -7,6 +7,8 @@ import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
+import "hardhat/console.sol";
+
 library BorrowMath {
     using Math for uint256;
     using FullMath for uint256;
@@ -19,12 +21,13 @@ library BorrowMath {
         uint112 yIncrease,
         uint112 zIncrease,
         uint16 fee
-    ) internal pure {
+    ) internal view {
         uint128 feeBase = 0x10000 - fee;
         uint112 xReserve = state.x - xDecrease;
         uint128 yAdjusted = adjust(state.y, yIncrease, feeBase);
         uint128 zAdjusted = adjust(state.z, zIncrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
+        
 
         uint256 minimum = xDecrease;
         minimum *= state.y;
@@ -39,7 +42,7 @@ library BorrowMath {
         uint112 reserve,
         uint112 increase,
         uint128 feeBase
-    ) private pure returns (uint128 adjusted) {
+    ) private view returns (uint128 adjusted) {
         adjusted = reserve;
         adjusted <<= 16;
         adjusted += feeBase * increase;
@@ -74,6 +77,7 @@ library BorrowMath {
         denominator <<= 32;
         _collateralIn = _collateralIn.mulDivUp(uint256(xDecrease) * state.z, denominator);
         _collateralIn += zIncrease;
+        console.log("dues.collateral to be SafeCast to uint112");
         collateralIn = _collateralIn.toUint112();
     }
 }

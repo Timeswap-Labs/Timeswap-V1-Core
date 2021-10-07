@@ -40,14 +40,29 @@ export async function borrow(): Promise<Borrow[]> {
             cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
             maturity: mintSuccessTestCases[i].maturity,
             currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
-            borrowAssetOut: 100n,
-            borrowCollateralIn: 100n,
-            borrowInterestIncrease: 100n,
-            borrowCdpIncrease: 100n,
+            borrowAssetOut: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn) / 2n,
+            borrowCollateralIn: pseudoRandomBigUint(MaxUint112) / 2n,
+            borrowInterestIncrease: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].interestIncrease) / 2n,
+            borrowCdpIncrease: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].cdpIncrease) / 2n,
         }
         )
     }
-    return borrowCases;
+    const temp = [
+        {
+            assetIn: 1915747864637765215300000000000000n,
+            collateralIn: 1957892161864474110100000000000000n,
+            interestIncrease: 170163656054420394580000000000000n,
+            cdpIncrease: 1696137072483547986100000000000000n,
+            maturity: 3529305580n,
+            currentTimeStamp: 1633590166n,
+            borrowAssetOut: 1638274496948531206615248164610047n,
+            borrowCollateralIn: 1413753426319351357450000000000000n,
+            borrowInterestIncrease: 2511066601240203616975248164610047n,
+            borrowCdpIncrease: 1748079893025639821215248164610047n
+        } // reverted without a reason
+    
+    ]
+    return temp;
 }
 
 
