@@ -77,7 +77,6 @@ library BorrowMath {
         denominator <<= 32;
         _collateralIn = _collateralIn.mulDivUp(uint256(xDecrease) * state.z, denominator);
         _collateralIn += zIncrease;
-        console.log("dues.collateral to be SafeCast to uint112");
         collateralIn = _collateralIn.toUint112();
     }
 }
