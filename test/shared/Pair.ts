@@ -67,8 +67,8 @@ export class Pair {
     const totalDebtCreated  = await this.pairContract.totalDebtCreated(this.maturity)
     return BigInt(totalDebtCreated.toString())
   }
-  async duesOf(): Promise<Due[]> {
-    const dues = await this.pairContract.duesOf(this.maturity,this.pairContractCallee.address)
+  async duesOf(maturity:bigint = this.maturity, address:Address = this.pairContractCallee.address): Promise<Due[]> {
+    const dues = await this.pairContract.duesOf(maturity,address)
 
     return dues.map((value) => {
       return {
@@ -92,8 +92,8 @@ export class PairSigner extends Pair {
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .mint(
-        this.maturity, // maturity
-        this.signerWithAddress.address, // liquidityTo
+        this.maturity,
+        this.signerWithAddress.address,
         xIncrease,
         yIncrease,
         zIncrease
@@ -110,7 +110,7 @@ export class PairSigner extends Pair {
     return txn
   }
 
-  async lend(xIncrease: bigint, yDecrease: bigint, zDecrease: bigint): Promise<ContractTransaction> { 
+  async lend(xIncrease: bigint, yDecrease: bigint, zDecrease: bigint): Promise<ContractTransaction> {
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .lend(

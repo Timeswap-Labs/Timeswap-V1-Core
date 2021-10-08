@@ -1,10 +1,11 @@
 import { ethers, } from 'hardhat'
-import { constructorFixture, borrowFixture, mintFixture, Fixture, borrowError } from '../shared/Fixtures'
+import { constructorFixture, borrowFixture, mintFixture, Fixture, borrowError, payFixture } from '../shared/Fixtures'
 import * as TestCases from '../testCases'
 import { expect } from '../shared/Expect'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { Borrow, BorrowParams, MintParams } from '../testCases'
+import { Borrow, BorrowParams, MintParams, PayParams } from '../testCases'
+
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
@@ -18,14 +19,12 @@ describe('Pay', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.pay();
-    totalCases = tests.length;
-    FailureCases = 0;
-
+    
+    console.log(tests.length);
   });
 
   it('', () => {
     tests.forEach((testCase: Borrow) => {
-
       describe("", async () => {
         let pair: any;
         let pairSim: any;
@@ -33,13 +32,13 @@ describe('Pay', () => {
         before(async () => {
           try {
             const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-            const mintParameters: MintParams = {
+            const mintParameters: any = {
               assetIn: testCase.assetIn,
               collateralIn: testCase.collateralIn,
               interestIncrease: testCase.interestIncrease,
               cdpIncrease: testCase.cdpIncrease,
               maturity: testCase.maturity,
-              currentTimeStamp: testCase.currentTimeStamp
+              // currentTimeStamp: testCase.currentTimeStamp
             };
             const mint = await mintFixture(constructor, signers[0], mintParameters);
             const borrowParams: BorrowParams =
@@ -49,49 +48,47 @@ describe('Pay', () => {
               interestIncrease: testCase.borrowInterestIncrease,
               cdpIncrease: testCase.borrowCdpIncrease
             }
-            let returnObj: any
-            returnObj = await borrowFixture(mint, signers[0], borrowParams);
+            const borrowTxData = (await borrowFixture(mint, signers[0], borrowParams));
             
-            if (returnObj.error==undefined) {
-              console.log(testCase);
-              console.log("testSuccess");
-              pair = returnObj.pair;
-              pairSim = returnObj.pairSim;
-            } else {
-              FailureCases ++;
-              testCase.borrowCdpIncrease = returnObj.cdpAdjust;
-              throw Error(returnObj.error)
+            const debtData:PayParams = {
+              ids: [borrowTxData.debtObj.id],
+              debtIn: [borrowTxData.debtObj.dueOut.debt],
+              collateralOut: [borrowTxData.debtObj.dueOut.collateral]
             }
+            const returnValue = await payFixture(borrowTxData,signers[0],debtData);
+            pair = returnValue.pair;
+            pairSim = returnValue.pairSim;
+
           } catch (error) {
-            
-            describe("Testing for Failure Cases", async () => {
-              before(async () => {
-                const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-                const mintParameters: MintParams = {
-                  assetIn: testCase.assetIn,
-                  collateralIn: testCase.collateralIn,
-                  interestIncrease: testCase.interestIncrease,
-                  cdpIncrease: testCase.cdpIncrease,
-                  maturity: testCase.maturity,
-                  currentTimeStamp: testCase.currentTimeStamp
-                };
-                const returnObj = await mintFixture(constructor, signers[0], mintParameters);
-                pair = returnObj.pair;
-                pairSim = returnObj.pairSim;
-              });
-              it("Lend Tx should fail", async () => {
-                const borrowParams: BorrowParams =
-                {
-                  assetOut: testCase.borrowAssetOut,
-                  collateralIn: testCase.borrowCollateralIn,
-                  interestIncrease: testCase.borrowInterestIncrease,
-                  cdpIncrease: testCase.borrowCdpIncrease
-                }
-                await expect(pair.pairContractCallee
-                  .connect(signers[0])
-                  .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
-              });
-            })
+            console.log(error);
+            // describe("Testing for Failure Cases", async () => {
+            //   before(async () => {
+            //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+            //     const mintParameters: MintParams = {
+            //       assetIn: testCase.assetIn,
+            //       collateralIn: testCase.collateralIn,
+            //       interestIncrease: testCase.interestIncrease,
+            //       cdpIncrease: testCase.cdpIncrease,
+            //       maturity: testCase.maturity,
+            //       currentTimeStamp: testCase.currentTimeStamp
+            //     };
+            //     const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+            //     pair = returnObj.pair;
+            //     pairSim = returnObj.pairSim;
+            //   });
+            //   it("Lend Tx should fail", async () => {
+            //     const borrowParams: BorrowParams =
+            //     {
+            //       assetOut: testCase.borrowAssetOut,
+            //       collateralIn: testCase.borrowCollateralIn,
+            //       interestIncrease: testCase.borrowInterestIncrease,
+            //       cdpIncrease: testCase.borrowCdpIncrease
+            //     }
+            //     await expect(pair.pairContractCallee
+            //       .connect(signers[0])
+            //       .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
+            //   });
+            // })
           }
         });
 
@@ -158,187 +155,187 @@ describe('Pay', () => {
 });
 
 
-describe('Pay', () => {
-  //TODO: to work on the payTests
-  // const payTests = testCases.pay();
-  const tests = {
-    Success: [
-      {
-        mintParams:
-        {
-          assetIn: 2000n,
-          collateralIn: 800n,
-          interestIncrease: 20n,
-          cdpIncrease: 400n
-        },
-        borrowParams:
-        {
-          assetOut: 200n,
-          collateralIn: 72n,
-          interestIncrease: 1n,
-          cdpIncrease: 2n
-        },
-        payParams:
-          { ids: [0n], debtIn: [200n], collateralOut: [50n] } //FIXME: we have changed the collateralOut
-      }
-    ],
-  };
+// describe('Pay', () => {
+//   //TODO: to work on the payTests
+//   // const payTests = testCases.pay();
+//   const tests = {
+//     Success: [
+//       {
+//         mintParams:
+//         {
+//           assetIn: 2000n,
+//           collateralIn: 800n,
+//           interestIncrease: 20n,
+//           cdpIncrease: 400n
+//         },
+//         borrowParams:
+//         {
+//           assetOut: 200n,
+//           collateralIn: 72n,
+//           interestIncrease: 1n,
+//           cdpIncrease: 2n
+//         },
+//         payParams:
+//           { ids: [0n], debtIn: [200n], collateralOut: [50n] } //FIXME: we have changed the collateralOut
+//       }
+//     ],
+//   };
 
-  async function fixture(): Promise<Fixture> {
-    maturity = (await now()) + 31536000n
-    signers = await ethers.getSigners()
-    const constructor = await constructorFixture(100000n, 100000n, (await now()) + 31536000n)
-    //return { pair, pairSim, assetToken, collateralToken }
-    return constructor
-  }
-  //TODO: A hack around setting an ew state for failure test, a way has to be figured to re run the fixture by clearing the snapshot
-  async function fixture1(): Promise<Fixture> {
-    maturity = (await now()) + 31536000n
-    signers = await ethers.getSigners()
-    const constructor = await constructorFixture(100000n, 100000n, (await now()) + 31536000n)
-    //return { pair, pairSim, assetToken, collateralToken }
-    return constructor
-  }
+//   async function fixture(): Promise<Fixture> {
+//     maturity = (await now()) + 31536000n
+//     signers = await ethers.getSigners()
+//     const constructor = await constructorFixture(100000n, 100000n, (await now()) + 31536000n)
+//     //return { pair, pairSim, assetToken, collateralToken }
+//     return constructor
+//   }
+//   //TODO: A hack around setting an ew state for failure test, a way has to be figured to re run the fixture by clearing the snapshot
+//   async function fixture1(): Promise<Fixture> {
+//     maturity = (await now()) + 31536000n
+//     signers = await ethers.getSigners()
+//     const constructor = await constructorFixture(100000n, 100000n, (await now()) + 31536000n)
+//     //return { pair, pairSim, assetToken, collateralToken }
+//     return constructor
+//   }
 
-  // TODO: we are getting an object of mintCases, BorrowCases and payCases
-  // TODO: Need to restructure the testCases.pay to send in an array of the test cases
-  tests.Success.forEach((test, idx) => {
-    describe(`Success case ${idx + 1} for pay`, () => {
-      async function fixtureSuccess(): Promise<Fixture> {
-        const { mintParams, borrowParams, payParams } = test
+//   // TODO: we are getting an object of mintCases, BorrowCases and payCases
+//   // TODO: Need to restructure the testCases.pay to send in an array of the test cases
+//   tests.Success.forEach((test, idx) => {
+//     describe(`Success case ${idx + 1} for pay`, () => {
+//       async function fixtureSuccess(): Promise<Fixture> {
+//         const { mintParams, borrowParams, payParams } = test
 
-        const signers = await ethers.getSigners()
-        const constructor = await loadFixture(fixture)
+//         const signers = await ethers.getSigners()
+//         const constructor = await loadFixture(fixture)
 
-        const mint = await mintFixture(constructor, signers[0], mintParams)
+//         const mint = await mintFixture(constructor, signers[0], mintParams)
         
-        const borrow = await borrowFixture(mint, signers[0], borrowParams)
-        await advanceTimeAndBlock(31535000)  
-        const pay = await payFixture(
-          borrow,
-          signers[0],
-          payParams
-        )
-        return pay
-      }
-      it('Should have correct total reserves', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//         const borrow = await borrowFixture(mint, signers[0], borrowParams)
+//         await advanceTimeAndBlock(31535000)  
+//         const pay = await payFixture(
+//           borrow,
+//           signers[0],
+//           payParams
+//         )
+//         return pay
+//       }
+//       it('Should have correct total reserves', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const reserves = await pair.totalReserves()
-        const reservesSim = pairSim.getPool(maturity).state.reserves
+//         const reserves = await pair.totalReserves()
+//         const reservesSim = pairSim.getPool(maturity).state.reserves
 
-        checkBigIntEquality(reserves.asset,reservesSim.asset)
-        checkBigIntEquality(reserves.collateral,reservesSim.collateral)
-      })
+//         checkBigIntEquality(reserves.asset,reservesSim.asset)
+//         checkBigIntEquality(reserves.collateral,reservesSim.collateral)
+//       })
 
-      it('Should have correct state', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//       it('Should have correct state', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const state = await pair.state()
-        const stateSim = pairSim.getPool(maturity).state
+//         const state = await pair.state()
+//         const stateSim = pairSim.getPool(maturity).state
 
-        checkBigIntEquality(state.asset,stateSim.asset)
-        checkBigIntEquality(state.interest,stateSim.interest)
-        checkBigIntEquality(state.cdp,stateSim.cdp)
-      })
+//         checkBigIntEquality(state.asset,stateSim.asset)
+//         checkBigIntEquality(state.interest,stateSim.interest)
+//         checkBigIntEquality(state.cdp,stateSim.cdp)
+//       })
 
 
-      it('Should have correct total liquidity', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//       it('Should have correct total liquidity', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const liquidity = await pair.totalLiquidity()
-        const liquiditySim = pairSim.getPool(maturity).state.totalLiquidity
+//         const liquidity = await pair.totalLiquidity()
+//         const liquiditySim = pairSim.getPool(maturity).state.totalLiquidity
 
-        checkBigIntEquality(liquidity,liquiditySim)
-      })
+//         checkBigIntEquality(liquidity,liquiditySim)
+//       })
 
-      it('Should have correct liquidity of', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        const signers = await ethers.getSigners()
+//       it('Should have correct liquidity of', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//         const signers = await ethers.getSigners()
 
-        const liquidityOf = await pair.liquidityOf(signers[0])
-        const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(maturity), signers[0].address)
+//         const liquidityOf = await pair.liquidityOf(signers[0])
+//         const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(maturity), signers[0].address)
 
-        checkBigIntEquality(liquidityOf,liquidityOfSim)
-      })
-      it('Should have correct total debt', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        const signers = await ethers.getSigners()
+//         checkBigIntEquality(liquidityOf,liquidityOfSim)
+//       })
+//       it('Should have correct total debt', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//         const signers = await ethers.getSigners()
 
-        const totalDebtCreated = await pair.totalDebtCreated()
-        const totalDebtCreatedSim = pairSim.getPool(maturity).state.totalDebtCreated
+//         const totalDebtCreated = await pair.totalDebtCreated()
+//         const totalDebtCreatedSim = pairSim.getPool(maturity).state.totalDebtCreated
 
-        checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
-      })
-      it('Should have correct total claims', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//         checkBigIntEquality(totalDebtCreated,totalDebtCreatedSim)
+//       })
+//       it('Should have correct total claims', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
 
-        const claims = await pair.totalClaims()
-        const claimsSim = pairSim.getPool(maturity).state.totalClaims
+//         const claims = await pair.totalClaims()
+//         const claimsSim = pairSim.getPool(maturity).state.totalClaims
 
-        checkBigIntEquality(claims.bond,claimsSim.bond)
-        checkBigIntEquality(claims.insurance,claimsSim.insurance)
-      })
+//         checkBigIntEquality(claims.bond,claimsSim.bond)
+//         checkBigIntEquality(claims.insurance,claimsSim.insurance)
+//       })
 
-      it('Should have correct claims of', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        const signers = await ethers.getSigners()
+//       it('Should have correct claims of', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//         const signers = await ethers.getSigners()
 
-        const claimsOf = await pair.claimsOf(signers[0])
-        const claimsOfSim = pairSim.getClaims(pairSim.getPool(maturity),signers[0].address)
+//         const claimsOf = await pair.claimsOf(signers[0])
+//         const claimsOfSim = pairSim.getClaims(pairSim.getPool(maturity),signers[0].address)
 
-        checkBigIntEquality(claimsOf.bond,claimsOfSim.bond)
-        checkBigIntEquality(claimsOf.insurance,claimsOfSim.insurance)
-      })
+//         checkBigIntEquality(claimsOf.bond,claimsOfSim.bond)
+//         checkBigIntEquality(claimsOf.insurance,claimsOfSim.insurance)
+//       })
 
-      it('Should have correct dues of', async () => {
-        const { pair, pairSim } = await loadFixture(fixtureSuccess)
-        const signers = await ethers.getSigners()
+//       it('Should have correct dues of', async () => {
+//         const { pair, pairSim } = await loadFixture(fixtureSuccess)
+//         const signers = await ethers.getSigners()
 
-        const duesOf = await pair.duesOf()
-        const duesOfSim = pairSim.getDues(pairSim.getPool(maturity),signers[0].address).due
+//         const duesOf = await pair.duesOf()
+//         const duesOfSim = pairSim.getDues(pairSim.getPool(maturity),signers[0].address).due
 
-        expect(duesOf.length).to.equal(duesOfSim.length)
+//         expect(duesOf.length).to.equal(duesOfSim.length)
 
-        for (let i = 0; i < duesOf.length; i++) {
-          checkBigIntEquality(duesOf[i].collateral,duesOfSim[i].collateral)
-          checkBigIntEquality(duesOf[i].debt,duesOfSim[i].debt)
-          checkBigIntEquality(duesOf[i].startBlock,duesOfSim[i].startBlock)
-        }
-      })
-    })
+//         for (let i = 0; i < duesOf.length; i++) {
+//           checkBigIntEquality(duesOf[i].collateral,duesOfSim[i].collateral)
+//           checkBigIntEquality(duesOf[i].debt,duesOfSim[i].debt)
+//           checkBigIntEquality(duesOf[i].startBlock,duesOfSim[i].startBlock)
+//         }
+//       })
+//     })
 
-    // })
-  })
+//     // })
+//   })
   
-  describe(`Failure case`, () => {
-    it('Should fail with correct error', async () => {
+//   describe(`Failure case`, () => {
+//     it('Should fail with correct error', async () => {
   
-      const {mintParams, borrowParams, payParams} = tests.Success[0]
+//       const {mintParams, borrowParams, payParams} = tests.Success[0]
 
-      const constructor = await loadFixture(fixture1)
+//       const constructor = await loadFixture(fixture1)
 
-      const signers = await ethers.getSigners()
+//       const signers = await ethers.getSigners()
 
 
-      // This is passing, but won't fail for a wrong error message
-      // Think it is due to the `await txn.wait()`
-      // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
-      // await expect(result).to.be.revertedWith(test.errorMessage)
-      const mint = await mintFixture(constructor,signers[0],mintParams);
-      const {pair} =await borrowFixture(mint,signers[0],borrowParams,true)
-      await expect( pair.pairContractCallee
-      .connect(signers[0])
-      .pay(
-        pair.maturity,
-        signers[0].address,
-        signers[0].address,
-        payParams.ids,
-        payParams.debtIn,
-        payParams.collateralOut
-      )
-    ).to.be.revertedWith('Forbidden');
-  })
-})
+//       // This is passing, but won't fail for a wrong error message
+//       // Think it is due to the `await txn.wait()`
+//       // const result = pair.upgrade(signers[0]).mint(test.interestIncrease, test.cdpIncrease)
+//       // await expect(result).to.be.revertedWith(test.errorMessage)
+//       const mint = await mintFixture(constructor,signers[0],mintParams);
+//       const {pair} =await borrowFixture(mint,signers[0],borrowParams,true)
+//       await expect( pair.pairContractCallee
+//       .connect(signers[0])
+//       .pay(
+//         pair.maturity,
+//         signers[0].address,
+//         signers[0].address,
+//         payParams.ids,
+//         payParams.debtIn,
+//         payParams.collateralOut
+//       )
+//     ).to.be.revertedWith('Forbidden');
+//   })
+// })
 
-  })
+//   })

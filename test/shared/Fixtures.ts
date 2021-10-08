@@ -122,7 +122,7 @@ export async function borrowFixture(
   signer: SignerWithAddress,
   borrowParams: BorrowParams,
   owner = false
-): Promise<Fixture | borrowError> {
+): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state();
   const totalliquidity = await pair.totalLiquidity();
@@ -168,8 +168,8 @@ export async function borrowFixture(
   };
   const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), owner);
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), block)
-  return { pair, pairSim, assetToken, collateralToken }
+  const debtObj = pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), block)
+  return { pair, pairSim, assetToken, collateralToken, debtObj }
 }
 
 
@@ -208,6 +208,7 @@ export async function withdrawFixture(
     .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
   pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
+  console.log("tx successful");
   return { pair, pairSim, assetToken, collateralToken }
 }
 

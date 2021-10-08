@@ -145,14 +145,18 @@ contract TimeswapPair is IPair {
         require(yIncrease > 0 && zIncrease > 0, 'Invalid');
 
         Pool storage pool = pools[maturity];
+        console.log("Got the pool");
 
         if (pool.state.totalLiquidity == 0) {
+            console.log("totalLiquidity ==0");
             uint256 liquidityTotal = MintMath.getLiquidityTotal(xIncrease);
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.state.totalLiquidity += liquidityTotal;
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
+            console.log("pool.state.totalLiquidity is updated");
         } else {
+            console.log("totalLiquidity != 0");
             uint256 liquidityTotal = MintMath.getLiquidityTotal(
                 pool.state,
                 xIncrease,
@@ -160,18 +164,23 @@ contract TimeswapPair is IPair {
                 zIncrease
             );
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
+            console.log("MintMath.getLiquidity done");
 
             pool.state.totalLiquidity += liquidityTotal;
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         }
         require(liquidityOut > 0, 'Invalid');
         pool.liquidities[liquidityTo] += liquidityOut;
+        console.log("1");
 
         dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
+        console.log("1.1");
         
         dueOut.collateral = MintMath.getCollateral(maturity, xIncrease, yIncrease, zIncrease);
+        console.log("1.2");
         
         dueOut.startBlock = BlockNumber.get();
+        console.log("1.3");
         
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
         
