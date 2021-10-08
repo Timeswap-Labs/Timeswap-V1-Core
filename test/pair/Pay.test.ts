@@ -62,6 +62,7 @@ describe('Pay', () => {
 
           } catch (error) {
             console.log(error);
+            //TODO: to work on the failure cases
             // describe("Testing for Failure Cases", async () => {
             //   before(async () => {
             //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);

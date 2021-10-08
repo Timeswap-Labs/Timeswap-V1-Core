@@ -58,7 +58,8 @@ export async function mintFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
-  pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block)
+  pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block);
+  
   return { pair, pairSim, assetToken, collateralToken }
 }
 
@@ -207,7 +208,7 @@ export async function withdrawFixture(
     .upgrade(signer)
     .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
-  pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
+  console.log((pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw)));
   return { pair, pairSim, assetToken, collateralToken }
 }
 
