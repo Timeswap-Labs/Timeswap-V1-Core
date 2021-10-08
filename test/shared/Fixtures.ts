@@ -66,7 +66,7 @@ export async function lendFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
   lendParams: LendParams
-): Promise<Fixture> {
+): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture;
   if (lendParams.assetIn <= 0) throw Error("Zero");
   const pairContractState = await pair.state();
@@ -109,8 +109,7 @@ export async function lendFixture(
   const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n));
   const block = await getBlock(txn.blockHash!)
   const lendData = pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n), block)
-  console.log(lendData);
-  return { pair, pairSim, assetToken, collateralToken }
+  return { pair, pairSim, assetToken, collateralToken, lendData }
 }
 
 export interface borrowError {

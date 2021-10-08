@@ -1,10 +1,11 @@
 import { ethers, waffle } from 'hardhat'
-import { constructorFixture, lendFixture, mintFixture } from '../shared/Fixtures'
+import { constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
 import * as TestCases from '../testCases'
 import { expect } from '../shared/Expect'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Lend, LendParams, MintParams } from '../testCases'
+import { advanceTimeAndBlock } from '../shared/Helper'
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
@@ -16,7 +17,7 @@ describe('Withdraw', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.withdraw();
-    console.log("tests.length",tests.length);
+    console.log("tests.length", tests.length);
   });
 
   it('', () => {
@@ -43,7 +44,23 @@ describe('Withdraw', () => {
               interestDecrease: testCase.lendInterestDecrease,
               cdpDecrease: testCase.lendCdpDecrease
             }
-            await lendFixture(mint, signers[0], lendParams)
+            const lendTxData = await lendFixture(mint, signers[0], lendParams);
+            const lendData: any = {
+              claims: {
+                bond: lendTxData.bond,
+                insurance: lendTxData.insurance
+              }
+            }
+
+            await advanceTimeAndBlock(3908191631);
+
+            const withdraw = await withdrawFixture(
+              lendTxData,
+              signers[0],
+              lendData
+            )
+            console.log("withdraw success");
+            // return withdraw
             // const lendTxData = ();
 
             // const debtData:PayParams = {
