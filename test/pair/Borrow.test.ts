@@ -18,6 +18,7 @@ describe('Borrow', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.borrow();
+    tests = [tests[0], tests[1]]
     totalCases = tests.length;
     FailureCases = 0;
 
@@ -31,6 +32,7 @@ describe('Borrow', () => {
         let pairSim: any;
 
         before(async () => {
+          console.log("BORROW TEST STARTING");
           try {
             const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
             const mintParameters: MintParams = {
@@ -53,8 +55,6 @@ describe('Borrow', () => {
             returnObj = await borrowFixture(mint, signers[0], borrowParams);
             
             if (returnObj.error==undefined) {
-              console.log(testCase);
-              console.log("testSuccess");
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
             } else {
@@ -63,10 +63,12 @@ describe('Borrow', () => {
               throw Error(returnObj.error)
             }
           } catch (error) {
+            console.log(error);
             
             describe("Testing for Failure Cases", async () => {
               before(async () => {
                 const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+                console.log("constructor done");
                 const mintParameters: MintParams = {
                   assetIn: testCase.assetIn,
                   collateralIn: testCase.collateralIn,
@@ -76,6 +78,7 @@ describe('Borrow', () => {
                   currentTimeStamp: testCase.currentTimeStamp
                 };
                 const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+                console.log('returnObj got');
                 pair = returnObj.pair;
                 pairSim = returnObj.pairSim;
               });

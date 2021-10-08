@@ -49,8 +49,10 @@ describe('Burn', () => {
 
             pair = burn.pair;
             pairSim = burn.pairSim;
+            console.log("BURN TEST STARTING");
           } catch (error) {
             console.log(error);
+            //TODO: to work on failure cases
             // describe("Testing for Failure Cases", async () => {
             //   before(async () => {
             //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
