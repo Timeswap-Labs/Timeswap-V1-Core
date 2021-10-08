@@ -6,6 +6,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Lend, LendParams, MintParams } from '../testCases'
 import { advanceTimeAndBlock } from '../shared/Helper'
+import { now } from "../shared/Helper";
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
@@ -28,13 +29,14 @@ describe('Withdraw', () => {
 
         before(async () => {
           try {
-            const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+            let updatedMaturity = await now() + 2000000000n
+            const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             const mintParameters: any = {
               assetIn: testCase.assetIn,
               collateralIn: testCase.collateralIn,
               interestIncrease: testCase.interestIncrease,
               cdpIncrease: testCase.cdpIncrease,
-              maturity: testCase.maturity,
+              maturity: updatedMaturity,
               // currentTimeStamp: testCase.currentTimeStamp
             };
             const mint = await mintFixture(constructor, signers[0], mintParameters);
@@ -46,13 +48,13 @@ describe('Withdraw', () => {
             }
             const lendTxData = await lendFixture(mint, signers[0], lendParams);
             const lendData: any = {
-              claims: {
-                bond: lendTxData.bond,
-                insurance: lendTxData.insurance
+              claimsIn: {
+                bond: lendTxData.lendData.bond,
+                insurance: lendTxData.lendData.insurance
               }
             }
 
-            await advanceTimeAndBlock(3908191631);
+            await advanceTimeAndBlock(Number(testCase.maturity));
 
             const withdraw = await withdrawFixture(
               lendTxData,

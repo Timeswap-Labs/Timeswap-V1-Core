@@ -208,7 +208,6 @@ export async function withdrawFixture(
     .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
   pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
-  console.log("tx successful");
   return { pair, pairSim, assetToken, collateralToken }
 }
 
