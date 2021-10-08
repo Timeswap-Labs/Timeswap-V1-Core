@@ -1,8 +1,5 @@
-import { BigNumber } from "@ethersproject/bignumber";
 import { Borrow } from ".";
-import { now, pseudoRandomBigUint } from "../shared/Helper";
-
-const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
+import { now } from "../shared/Helper";
 
 export async function pay(): Promise<Borrow[]> {
     const nt = await now();

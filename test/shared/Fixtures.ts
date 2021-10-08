@@ -108,7 +108,8 @@ export async function lendFixture(
   if (_insuranceOut > BigInt(MaxUint128.toString())) throw Error("_insuranceOut > Uint128"); //uint128 
   const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n));
   const block = await getBlock(txn.blockHash!)
-  pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n), block)
+  const lendData = pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n), block)
+  console.log(lendData);
   return { pair, pairSim, assetToken, collateralToken }
 }
 

@@ -19,8 +19,6 @@ describe('Pay', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.pay();
-    
-    console.log(tests.length);
   });
 
   it('', () => {
@@ -50,6 +48,9 @@ describe('Pay', () => {
             }
             const borrowTxData = (await borrowFixture(mint, signers[0], borrowParams));
             
+            //TODO: pay the debt using other account
+            //TODO: check the amount of collateral received is proportionate
+
             const debtData:PayParams = {
               ids: [borrowTxData.debtObj.id],
               debtIn: [borrowTxData.debtObj.dueOut.debt],
