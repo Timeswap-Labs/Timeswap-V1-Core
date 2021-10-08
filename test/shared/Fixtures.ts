@@ -54,13 +54,13 @@ export async function mintFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
   mintParams: MintParams
-): Promise<Fixture> {
+): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
-  pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block);
+  const mintData = pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block);
   
-  return { pair, pairSim, assetToken, collateralToken }
+  return { pair, pairSim, assetToken, collateralToken, mintData }
 }
 
 export async function lendFixture(
@@ -177,7 +177,7 @@ export async function borrowFixture(
 export async function burnFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  burnParams: BurnParams
+  burnParams: any
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
@@ -208,7 +208,7 @@ export async function withdrawFixture(
     .upgrade(signer)
     .withdraw(withdrawParams.claimsIn.bond, withdrawParams.claimsIn.insurance);
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
-  console.log((pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw)));
+  pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams.claimsIn, signer.address, blockWithdraw);
   return { pair, pairSim, assetToken, collateralToken }
 }
 

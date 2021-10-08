@@ -41,30 +41,30 @@ describe('Withdraw', () => {
               // currentTimeStamp: testCase.currentTimeStamp
             };
             const mint = await mintFixture(constructor, signers[0], mintParameters);
-            // const lendParams: LendParams =
-            // {
-            //   assetIn: testCase.lendAssetIn,
-            //   interestDecrease: testCase.lendInterestDecrease,
-            //   cdpDecrease: testCase.lendCdpDecrease
-            // }
-            // const lendTxData = await lendFixture(mint, signers[0], lendParams);
-            // const lendData: any = {
-            //   claimsIn: {
-            //     bond: lendTxData.lendData.bond,
-            //     insurance: lendTxData.lendData.insurance
-            //   }
-            // }
+            const lendParams: LendParams =
+            {
+              assetIn: testCase.lendAssetIn,
+              interestDecrease: testCase.lendInterestDecrease,
+              cdpDecrease: testCase.lendCdpDecrease
+            }
+            const lendTxData = await lendFixture(mint, signers[0], lendParams);
+            const lendData: any = {
+              claimsIn: {
+                bond: lendTxData.lendData.bond,
+                insurance: lendTxData.lendData.insurance
+              }
+            }
 
-            // await advanceTimeAndBlock(Number(testCase.maturity));
+            await advanceTimeAndBlock(Number(updatedMaturity));
 
-            // const withdraw = await withdrawFixture(
-            //   lendTxData,
-            //   signers[0],
-            //   lendData
-            // )
+            const withdraw = await withdrawFixture(
+              lendTxData,
+              signers[0],
+              lendData
+            )
             
-            pair = mint.pair;
-            pairSim = mint.pairSim;
+            pair = withdraw.pair;
+            pairSim = withdraw.pairSim;
 
           } catch (error) {
             console.log(error);
