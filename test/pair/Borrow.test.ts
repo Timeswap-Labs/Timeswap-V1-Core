@@ -82,7 +82,7 @@ describe('Borrow', () => {
                 pair = returnObj.pair;
                 pairSim = returnObj.pairSim;
               });
-              it("Lend Tx should fail", async () => {
+              it("Testing For Borrow FailureCases", async () => {
                 const borrowParams: BorrowParams =
                 {
                   assetOut: testCase.borrowAssetOut,
@@ -98,7 +98,8 @@ describe('Borrow', () => {
           }
         });
 
-        it('', async () => {
+        it('Testing For Borrow SuccessCases', async () => {
+
           if (pair != undefined && pairSim != undefined) {
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()

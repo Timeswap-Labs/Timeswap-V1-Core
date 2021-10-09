@@ -14,21 +14,24 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString());
 
 describe('Burn', () => {
   let tests: any;
+  let iSuccess=0;
+  let iFailure=0;
 
   before(async () => {
     signers = await ethers.getSigners();
     const mintTests = await mint(); // an object with two keys Success and Failure
     const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
     tests = mintSuccessTestCases
-    console.log("tests.length",tests.length);
   });
 
   it('', () => {
     tests.forEach((testCase: MintParams) => {
+
       describe("", async () => {
         let pair: any;
         let pairSim: any;
         let updatedMaturity: any
+
 
         before(async () => {
           try {
@@ -49,7 +52,6 @@ describe('Burn', () => {
 
             pair = burn.pair;
             pairSim = burn.pairSim;
-            console.log("BURN TEST STARTING");
           } catch (error) {
             console.log(error);
             //TODO: to work on failure cases
@@ -83,7 +85,8 @@ describe('Burn', () => {
           }
         });
 
-        it('', async () => {
+        it(``, async () => {
+          console.log(`Testing for Burn Success Case: ${iSuccess+1}`);
           if (pair != undefined && pairSim != undefined) {
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
@@ -137,6 +140,7 @@ describe('Burn', () => {
               expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
+            iSuccess = iSuccess+1;
           }
         })
       })
