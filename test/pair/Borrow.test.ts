@@ -15,6 +15,8 @@ let FailureCases: number;
 
 describe('Borrow', () => {
   let tests: any;
+  let iSuccess = 0;
+  let iFailure = 0;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -61,13 +63,13 @@ describe('Borrow', () => {
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
             } else {
+              console.log(`Transaction Expected to Revert; to be Tested for Failure Case`);
               FailureCases ++;
               testCase.borrowCdpIncrease = returnObj.cdpAdjust;
               throw Error(returnObj.error)
             }
           } catch (error) {
-            
-            describe("Testing for Failure Cases", async () => {
+            describe("", async () => {
               before(async () => {
                 const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
                 const mintParameters: MintParams = {
@@ -82,7 +84,8 @@ describe('Borrow', () => {
                 pair = returnObj.pair;
                 pairSim = returnObj.pairSim;
               });
-              it("Testing For Borrow FailureCases", async () => {
+              it(``, async () => {
+                console.log(`Testing for Borrow Failure Case ${iFailure+1}`);
                 const borrowParams: BorrowParams =
                 {
                   assetOut: testCase.borrowAssetOut,
@@ -90,17 +93,19 @@ describe('Borrow', () => {
                   interestIncrease: testCase.borrowInterestIncrease,
                   cdpIncrease: testCase.borrowCdpIncrease
                 }
+                console.log("Transaction should revert");
                 await expect(pair.pairContractCallee
                   .connect(signers[0])
                   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
+                  iFailure = iFailure+1;
               });
             })
           }
         });
 
-        it('Testing For Borrow SuccessCases', async () => {
-
+        it(``, async () => {
           if (pair != undefined && pairSim != undefined) {
+            console.log(`Testing for Borrow Success Case ${iSuccess+1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -153,6 +158,7 @@ describe('Borrow', () => {
               expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
+            iSuccess++;
           }
         })
 
