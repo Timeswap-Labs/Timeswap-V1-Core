@@ -49,11 +49,9 @@ describe('Burn', () => {
             await advanceTimeAndBlock(Number(updatedMaturity));
             const burnParams = {liquidityIn:mint.mintData.liquidityOut};
             const burn = await burnFixture(mint,signers[0],burnParams);
-
             pair = burn.pair;
             pairSim = burn.pairSim;
           } catch (error) {
-            console.log(error);
             //TODO: to work on failure cases
             // describe("Testing for Failure Cases", async () => {
             //   before(async () => {

@@ -21,7 +21,6 @@ describe('Borrow', () => {
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.borrow();
-    tests = [tests[0], tests[1]]
     totalCases = tests.length;
     FailureCases = 0;
 

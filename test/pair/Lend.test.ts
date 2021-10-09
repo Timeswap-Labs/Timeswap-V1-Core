@@ -49,9 +49,15 @@ describe('Lend', () => {
               interestDecrease: testCase.lendInterestDecrease,
               cdpDecrease: testCase.lendCdpDecrease
             }
-            const returnObj = await lendFixture(mint, signers[0], lendParams);
-            pair = returnObj.pair;
-            pairSim = returnObj.pairSim;
+            try {
+              const returnObj = await lendFixture(mint, signers[0], lendParams);
+              pair = returnObj.pair;
+              pairSim = returnObj.pairSim;  
+            } catch (error) {
+              console.log(`Transaction expected to revert; check for failure`);
+              throw error;  
+            }
+            
           } catch (error) {
             describe("", async () => {
               before(async () => {
@@ -68,13 +74,15 @@ describe('Lend', () => {
                 pair = returnObj.pair;
                 pairSim = returnObj.pairSim;
               });
-              it(`Testing for Lend Failure Case ${iFailure+1}`, async () => {
+              it("", async () => {
+                console.log(`Testing for Lend Failure Case ${iFailure+1}`);
                 const lendParams: LendParams =
                 {
                   assetIn: testCase.lendAssetIn,
                   interestDecrease: testCase.lendInterestDecrease,
                   cdpDecrease: testCase.lendCdpDecrease
                 }
+                console.log("Transaction should revert");
                 await expect(pair.pairContractCallee
                   .connect(signers[0])
                   .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)).to.be.reverted;
@@ -85,8 +93,9 @@ describe('Lend', () => {
         });
 
         it('', async () => {
-          console.log(`Testing for Lend Success Case: ${iSuccess+1}`);
+          
           if (pair != undefined && pairSim != undefined) {
+            console.log(`Testing for Lend Success Case: ${iSuccess+1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
