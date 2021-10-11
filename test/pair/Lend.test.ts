@@ -14,8 +14,10 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString());
 
 describe('Lend', () => {
   let tests: any;
+  let caseNumber: any = 0;
   let iSuccess = 0;
   let iFailure = 0;
+  let totalFailureCases = 0;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -30,19 +32,29 @@ describe('Lend', () => {
         let updatedMaturity: any;
 
         before(async () => {
+          console.log(`Checking for Lend Test Case ${caseNumber + 1}`);
           const currentBlockTime = await now();
           updatedMaturity = currentBlockTime + 20000n;
+          let erm: any;
           try {
-            const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-            const mintParameters: MintParams = {
-              assetIn: testCase.assetIn,
-              collateralIn: testCase.collateralIn,
-              interestIncrease: testCase.interestIncrease,
-              cdpIncrease: testCase.cdpIncrease,
-              maturity: updatedMaturity,
-              currentTimeStamp: testCase.currentTimeStamp
-            };
-            const mint = await mintFixture(constructor, signers[0], mintParameters);
+            let mint: any;
+            try {
+              const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
+              const mintParameters: MintParams = {
+                assetIn: testCase.assetIn,
+                collateralIn: testCase.collateralIn,
+                interestIncrease: testCase.interestIncrease,
+                cdpIncrease: testCase.cdpIncrease,
+                maturity: updatedMaturity,
+                currentTimeStamp: testCase.currentTimeStamp
+              };
+              mint = await mintFixture(constructor, signers[0], mintParameters);
+            } catch (error) {
+              erm = "minting error";
+              console.log(`Ignored due to wrong miniting parameters`);
+              throw Error("minting error");
+            }
+            erm = undefined;
             const lendParams: LendParams =
             {
               assetIn: testCase.lendAssetIn,
@@ -52,50 +64,54 @@ describe('Lend', () => {
             try {
               const returnObj = await lendFixture(mint, signers[0], lendParams);
               pair = returnObj.pair;
-              pairSim = returnObj.pairSim;  
+              pairSim = returnObj.pairSim;
+              console.log(`Lend Test Case number: ${caseNumber + 1} expected to succeed`);
             } catch (error) {
-              console.log(`Transaction expected to revert; check for failure`);
-              throw error;  
+              totalFailureCases++;
+              console.log(`Lending transaction expected to revert; check for failure`);
+              console.log(`Total Failure Cases: ${totalFailureCases}`);
+              throw error;
             }
-            
-          } catch (error) {
-            describe("", async () => {
-              before(async () => {
-                const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-                const mintParameters: MintParams = {
-                  assetIn: testCase.assetIn,
-                  collateralIn: testCase.collateralIn,
-                  interestIncrease: testCase.interestIncrease,
-                  cdpIncrease: testCase.cdpIncrease,
-                  maturity: updatedMaturity,
-                  currentTimeStamp: testCase.currentTimeStamp
-                };
-                const returnObj = await mintFixture(constructor, signers[0], mintParameters);
-                pair = returnObj.pair;
-                pairSim = returnObj.pairSim;
-              });
-              it("", async () => {
-                console.log(`Testing for Lend Failure Case ${iFailure+1}`);
-                const lendParams: LendParams =
-                {
-                  assetIn: testCase.lendAssetIn,
-                  interestDecrease: testCase.lendInterestDecrease,
-                  cdpDecrease: testCase.lendCdpDecrease
-                }
-                console.log("Transaction should revert");
-                await expect(pair.pairContractCallee
-                  .connect(signers[0])
-                  .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)).to.be.reverted;
-                iFailure = iFailure+1;
-              });
-            })
+          } catch (err) {
+            if (erm != "minting error") {
+              describe("", async () => {
+                before(async () => {
+                  const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
+                  const mintParameters: MintParams = {
+                    assetIn: testCase.assetIn,
+                    collateralIn: testCase.collateralIn,
+                    interestIncrease: testCase.interestIncrease,
+                    cdpIncrease: testCase.cdpIncrease,
+                    maturity: updatedMaturity,
+                    currentTimeStamp: testCase.currentTimeStamp
+                  };
+                  const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+                  pair = returnObj.pair;
+                  pairSim = returnObj.pairSim;
+                });
+                it("", async () => {
+                  console.log(`Testing for Lend Failure Case ${iFailure + 1}`);
+                  const lendParams: LendParams =
+                  {
+                    assetIn: testCase.lendAssetIn,
+                    interestDecrease: testCase.lendInterestDecrease,
+                    cdpDecrease: testCase.lendCdpDecrease
+                  }
+                  console.log("Transaction should revert");
+                  await expect(pair.pairContractCallee
+                    .connect(signers[0])
+                    .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)).to.be.reverted;
+                  console.log("Transaction reverted");
+                  iFailure = iFailure + 1;
+                });
+              })
+            }
           }
         });
 
         it('', async () => {
-          
           if (pair != undefined && pairSim != undefined) {
-            console.log(`Testing for Lend Success Case: ${iSuccess+1}`);
+            console.log(`Testing for Lend Success Case: ${iSuccess + 1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -121,7 +137,7 @@ describe('Lend', () => {
             expect(liquidityOf).to.equalBigInt(liquidityOfSim)
 
             console.log("Should have correct total debt");
-            
+
             const totalDebtCreated = await pair.totalDebtCreated()
             const totalDebtCreatedSim = pairSim.getPool(updatedMaturity).state.totalDebtCreated
             expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim);
@@ -133,7 +149,7 @@ describe('Lend', () => {
             expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
 
             console.log("Should have correct claims of");
-            
+
             const claimsOf = await pair.claimsOf(signers[0])
             const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
             expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
@@ -148,8 +164,8 @@ describe('Lend', () => {
               expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
-            iSuccess=iSuccess+1;
-          }
+            iSuccess = iSuccess + 1;
+          }caseNumber++;
         })
       })
     })

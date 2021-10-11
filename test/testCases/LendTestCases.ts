@@ -30,20 +30,19 @@ export interface LendParams {
 }
 
 export async function lend(): Promise<Lend[]> {
-    const mintTests = await Mint.mint(); // an object with two keys Success and Failure
-    const mintSuccessTestCases = mintTests; // this is an array of SuccessCases
+    const mintTests = await Mint.mint();
     const lendCases: Lend[] = [];
     //TODO: the asset in the pull can be smaller than the lendAssetIn
-    for (let i = 0; i < mintSuccessTestCases.length; i++) {
+    for (let i = 0; i < mintTests.length; i++) {
         lendCases.push({
-            assetIn: mintSuccessTestCases[i].assetIn,
-            collateralIn: mintSuccessTestCases[i].collateralIn,
-            interestIncrease: mintSuccessTestCases[i].interestIncrease,
-            cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
-            maturity: mintSuccessTestCases[i].maturity,
-            currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
-            lendAssetIn: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn) / 2n,
-            lendInterestDecrease: (mintSuccessTestCases[i].interestIncrease) / 10n,
+            assetIn: mintTests[i].assetIn,
+            collateralIn: mintTests[i].collateralIn,
+            interestIncrease: mintTests[i].interestIncrease,
+            cdpIncrease: mintTests[i].cdpIncrease,
+            maturity: mintTests[i].maturity,
+            currentTimeStamp: mintTests[i].currentTimeStamp,
+            lendAssetIn: (BigInt(MaxUint112.toString()) - mintTests[i].assetIn) / 2n,
+            lendInterestDecrease: (mintTests[i].interestIncrease) / 10n,
             lendCdpDecrease: pseudoRandomBigUint(MaxUint112)  
         }
         )

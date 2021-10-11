@@ -38,7 +38,7 @@ describe('Mint', () => {
         before(async () => {
           const currentBlockTime = await now() + 20000n;
           updatedMaturity = currentBlockTime;
-          console.log(`Checking for Case ${caseNumber + 1}`);
+          console.log(`Checking for Mint Test Case ${caseNumber + 1}`);
           try {
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             const mint = await mintFixture(constructor, signers[0], mintParams);
@@ -70,6 +70,7 @@ describe('Mint', () => {
                     )
                 ).to.be.reverted;
                 iFailure++;
+                console.log("Transaction reverted");
               });
             })
           }
