@@ -44,11 +44,13 @@ describe('Mint', () => {
           erm = undefined;
           console.log(`Checking for Multiple Mint Test Case ${caseNumber + 1}`);
           const currentBlockTime = await now() + 20000n;
-          updatedMaturity = currentBlockTime;
+          updatedMaturity = 2n*currentBlockTime;
           try {
+            console.log('hey')
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             const mint1 = await mintFixture(constructor, signers[0], mintParams[0]);
             try {
+              console.log('hey1');
               const mint2 = await mintFixture(mint1, signers[0], mintParams[1]);
               pair = mint2.pair;
               pairSim = mint2.pairSim;
