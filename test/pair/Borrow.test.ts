@@ -38,16 +38,21 @@ describe('Borrow', () => {
           const currentBlockTime = await now();
           updatedMaturity = currentBlockTime + 20000n;
           try {
-            const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-            const mintParameters: MintParams = {
-              assetIn: testCase.assetIn,
-              collateralIn: testCase.collateralIn,
-              interestIncrease: testCase.interestIncrease,
-              cdpIncrease: testCase.cdpIncrease,
-              maturity: updatedMaturity,
-              currentTimeStamp: testCase.currentTimeStamp
-            };
-            const mint = await mintFixture(constructor, signers[0], mintParameters);
+            let mint: any
+            try {
+              const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
+              const mintParameters: MintParams = {
+                assetIn: testCase.assetIn,
+                collateralIn: testCase.collateralIn,
+                interestIncrease: testCase.interestIncrease,
+                cdpIncrease: testCase.cdpIncrease,
+                maturity: updatedMaturity,
+                currentTimeStamp: testCase.currentTimeStamp
+              };
+              mint = await mintFixture(constructor, signers[0], mintParameters);
+            } catch (error) {
+              console.log("minting error");
+            }
             const borrowParams: BorrowParams =
             {
               assetOut: testCase.borrowAssetOut,
@@ -57,13 +62,13 @@ describe('Borrow', () => {
             }
             let returnObj: any
             returnObj = await borrowFixture(mint, signers[0], borrowParams);
-            
-            if (returnObj.error==undefined) {
+
+            if (returnObj.error == undefined) {
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
             } else {
-              console.log(`Transaction Expected to Revert; to be Tested for Failure Case`);
-              FailureCases ++;
+              console.log(`Borrow Transaction Expected to Revert; to be Tested for Failure Case`);
+              FailureCases++;
               testCase.borrowCdpIncrease = returnObj.cdpAdjust;
               throw Error(returnObj.error)
             }
@@ -84,7 +89,7 @@ describe('Borrow', () => {
                 pairSim = returnObj.pairSim;
               });
               it(``, async () => {
-                console.log(`Testing for Borrow Failure Case ${iFailure+1}`);
+                console.log(`Testing for Borrow Failure Case ${iFailure + 1}`);
                 const borrowParams: BorrowParams =
                 {
                   assetOut: testCase.borrowAssetOut,
@@ -96,7 +101,7 @@ describe('Borrow', () => {
                 await expect(pair.pairContractCallee
                   .connect(signers[0])
                   .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
-                  iFailure = iFailure+1;
+                iFailure = iFailure + 1;
               });
             })
           }
@@ -104,7 +109,7 @@ describe('Borrow', () => {
 
         it(``, async () => {
           if (pair != undefined && pairSim != undefined) {
-            console.log(`Testing for Borrow Success Case ${iSuccess+1}`);
+            console.log(`Testing for Borrow Success Case ${iSuccess + 1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves

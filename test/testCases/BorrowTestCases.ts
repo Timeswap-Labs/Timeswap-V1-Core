@@ -30,20 +30,19 @@ export interface BorrowParams {
 
 export async function borrow(): Promise<Borrow[]> {
     const mintTests = await Mint.mint(); // an object with two keys Success and Failure
-    const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
     const borrowCases: Borrow[] = [];
-    for (let i = 0; i < mintSuccessTestCases.length; i++) {
+    for (let i = 0; i < mintTests.length; i++) {
         borrowCases.push({
-            assetIn: mintSuccessTestCases[i].assetIn,
-            collateralIn: mintSuccessTestCases[i].collateralIn,
-            interestIncrease: mintSuccessTestCases[i].interestIncrease,
-            cdpIncrease: mintSuccessTestCases[i].cdpIncrease,
-            maturity: mintSuccessTestCases[i].maturity,
-            currentTimeStamp: mintSuccessTestCases[i].currentTimeStamp,
-            borrowAssetOut: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].assetIn) / 2n,
+            assetIn: mintTests[i].assetIn,
+            collateralIn: mintTests[i].collateralIn,
+            interestIncrease: mintTests[i].interestIncrease,
+            cdpIncrease: mintTests[i].cdpIncrease,
+            maturity: mintTests[i].maturity,
+            currentTimeStamp: mintTests[i].currentTimeStamp,
+            borrowAssetOut: (BigInt(MaxUint112.toString()) - mintTests[i].assetIn) / 2n,
             borrowCollateralIn: pseudoRandomBigUint(MaxUint112) / 2n,
-            borrowInterestIncrease: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].interestIncrease) / 2n,
-            borrowCdpIncrease: (BigInt(MaxUint112.toString()) - mintSuccessTestCases[i].cdpIncrease) / 2n,
+            borrowInterestIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].interestIncrease) / 2n,
+            borrowCdpIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].cdpIncrease) / 2n,
         }
         )
     }

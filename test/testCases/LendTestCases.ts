@@ -31,7 +31,7 @@ export interface LendParams {
 
 export async function lend(): Promise<Lend[]> {
     const mintTests = await Mint.mint(); // an object with two keys Success and Failure
-    const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
+    const mintSuccessTestCases = mintTests; // this is an array of SuccessCases
     const lendCases: Lend[] = [];
     //TODO: the asset in the pull can be smaller than the lendAssetIn
     for (let i = 0; i < mintSuccessTestCases.length; i++) {
