@@ -15,10 +15,14 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString());
 
 describe('Withdraw', () => {
   let tests: any;
+  let caseNumber: any = 0;
+  let iSuccess = 0;
+  let iFailure = 0;
+  let totalFailureCases = 0;
+
   before(async () => {
     signers = await ethers.getSigners();
     tests = await TestCases.withdraw();
-    console.log("tests.length", tests.length);
   });
 
   it('', () => {
@@ -30,75 +34,84 @@ describe('Withdraw', () => {
 
         before(async () => {
           try {
-            updatedMaturity = await now() + 2000000000n
+            console.log(`Checking for Withdraw Test Case ${caseNumber + 1}`);
+            const currentBlockTime = await now();
+            updatedMaturity = currentBlockTime + 20000n;
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-            const mintParameters: any = {
-              assetIn: testCase.assetIn,
-              collateralIn: testCase.collateralIn,
-              interestIncrease: testCase.interestIncrease,
-              cdpIncrease: testCase.cdpIncrease,
-              maturity: updatedMaturity,
-              // currentTimeStamp: testCase.currentTimeStamp
-            };
-            const mint = await mintFixture(constructor, signers[0], mintParameters);
-            const lendParams: LendParams =
-            {
-              assetIn: testCase.lendAssetIn,
-              interestDecrease: testCase.lendInterestDecrease,
-              cdpDecrease: testCase.lendCdpDecrease
-            }
-            const lendTxData = await lendFixture(mint, signers[0], lendParams);
-            const lendData: any = {
-              claimsIn: {
-                bond: lendTxData.lendData.bond,
-                insurance: lendTxData.lendData.insurance
+            let erm: any;
+            let mint: any;
+              try {
+                const mintParameters: MintParams = {
+                  assetIn: testCase.assetIn,
+                  collateralIn: testCase.collateralIn,
+                  interestIncrease: testCase.interestIncrease,
+                  cdpIncrease: testCase.cdpIncrease,
+                  maturity: updatedMaturity,
+                  currentTimeStamp: testCase.currentTimeStamp
+                };
+                mint = await mintFixture(constructor, signers[0], mintParameters);
+              } catch (error) {
+                erm = "minting error";
+                console.log(`Ignored due to wrong miniting parameters`);
+                throw Error("minting error");
               }
+              const lendParams: LendParams =
+              {
+                assetIn: testCase.lendAssetIn,
+                interestDecrease: testCase.lendInterestDecrease,
+                cdpDecrease: testCase.lendCdpDecrease
+              }
+              const lendTxData = await lendFixture(mint, signers[0], lendParams);
+              const lendData: any = {
+                claimsIn: {
+                  bond: lendTxData.lendData.bond,
+                  insurance: lendTxData.lendData.insurance
+                }
+              }
+
+              await advanceTimeAndBlock(Number(updatedMaturity));
+
+              const withdraw = await withdrawFixture(
+                lendTxData,
+                signers[0],
+                lendData
+              )
+
+              pair = withdraw.pair;
+              pairSim = withdraw.pairSim;
+
+            } catch (error) {
+              //TODO: to work on the failure cases
+              // describe("Testing for Failure Cases", async () => {
+              //   before(async () => {
+              //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
+              //     const mintParameters: MintParams = {
+              //       assetIn: testCase.assetIn,
+              //       collateralIn: testCase.collateralIn,
+              //       interestIncrease: testCase.interestIncrease,
+              //       cdpIncrease: testCase.cdpIncrease,
+              //       maturity: testCase.maturity,
+              //       currentTimeStamp: testCase.currentTimeStamp
+              //     };
+              //     const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+              //     pair = returnObj.pair;
+              //     pairSim = returnObj.pairSim;
+              //   });
+              //   it("Lend Tx should fail", async () => {
+              //     const borrowParams: BorrowParams =
+              //     {
+              //       assetOut: testCase.borrowAssetOut,
+              //       collateralIn: testCase.borrowCollateralIn,
+              //       interestIncrease: testCase.borrowInterestIncrease,
+              //       cdpIncrease: testCase.borrowCdpIncrease
+              //     }
+              //     await expect(pair.pairContractCallee
+              //       .connect(signers[0])
+              //       .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
+              //   });
+              // })
             }
-
-            await advanceTimeAndBlock(Number(updatedMaturity));
-
-            const withdraw = await withdrawFixture(
-              lendTxData,
-              signers[0],
-              lendData
-            )
-            
-            pair = withdraw.pair;
-            pairSim = withdraw.pairSim;
-
-          } catch (error) {
-            console.log(error);
-            //TODO: to work on the failure cases
-            // describe("Testing for Failure Cases", async () => {
-            //   before(async () => {
-            //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-            //     const mintParameters: MintParams = {
-            //       assetIn: testCase.assetIn,
-            //       collateralIn: testCase.collateralIn,
-            //       interestIncrease: testCase.interestIncrease,
-            //       cdpIncrease: testCase.cdpIncrease,
-            //       maturity: testCase.maturity,
-            //       currentTimeStamp: testCase.currentTimeStamp
-            //     };
-            //     const returnObj = await mintFixture(constructor, signers[0], mintParameters);
-            //     pair = returnObj.pair;
-            //     pairSim = returnObj.pairSim;
-            //   });
-            //   it("Lend Tx should fail", async () => {
-            //     const borrowParams: BorrowParams =
-            //     {
-            //       assetOut: testCase.borrowAssetOut,
-            //       collateralIn: testCase.borrowCollateralIn,
-            //       interestIncrease: testCase.borrowInterestIncrease,
-            //       cdpIncrease: testCase.borrowCdpIncrease
-            //     }
-            //     await expect(pair.pairContractCallee
-            //       .connect(signers[0])
-            //       .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
-            //   });
-            // })
-          }
-        });
+          });
 
         it('', async () => {
           if (pair != undefined && pairSim != undefined) {
@@ -153,10 +166,10 @@ describe('Withdraw', () => {
               expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
               expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
-            }
+            } 
           }
+        caseNumber++;
         })
-
       })
     })
   })
