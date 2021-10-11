@@ -6,27 +6,29 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Lend, LendParams, Mint, mint, MintParams } from '../testCases'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
-
-const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
+const MaxUint224 = BigNumber.from(2).pow(224).sub(1);
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
+let totalCases: number;
+let FailureCases: number;
 
 describe('Burn', () => {
   let tests: any;
-  let iSuccess=0;
-  let iFailure=0;
+  let caseNumber: any = 0;
+  let iSuccess = 0;
+  let iFailure = 0;
+  let totalFailureCases = 0;
 
   before(async () => {
     signers = await ethers.getSigners();
-    const mintTests = await mint(); // an object with two keys Success and Failure
-    const mintSuccessTestCases = mintTests.Success; // this is an array of SuccessCases
-    tests = mintSuccessTestCases
+    tests = await mint();
+    totalCases = tests.length;
+    FailureCases = 0;
   });
 
-  it('', () => {
+  it('', async () => {
     tests.forEach((testCase: MintParams) => {
-
       describe("", async () => {
         let pair: any;
         let pairSim: any;
@@ -34,18 +36,29 @@ describe('Burn', () => {
 
 
         before(async () => {
+          console.log(`Checking for Burn Test Case ${caseNumber + 1}`);
+          const currentBlockTime = await now();
+          updatedMaturity = currentBlockTime + 20000n;
+          let erm: any;
           try {
-            updatedMaturity = await now() + 2000000n
-            const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-            const mintParameters: MintParams = {
-              assetIn: testCase.assetIn,
-              collateralIn: testCase.collateralIn,
-              interestIncrease: testCase.interestIncrease,
-              cdpIncrease: testCase.cdpIncrease,
-              maturity: updatedMaturity,
-              currentTimeStamp: testCase.currentTimeStamp
-            };
-            const mint = await mintFixture(constructor, signers[0], mintParameters);
+            let mint: any;
+            try {
+              const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
+              const mintParameters: MintParams = {
+                assetIn: testCase.assetIn,
+                collateralIn: testCase.collateralIn,
+                interestIncrease: testCase.interestIncrease,
+                cdpIncrease: testCase.cdpIncrease,
+                maturity: updatedMaturity,
+                currentTimeStamp: testCase.currentTimeStamp
+              };
+              mint = await mintFixture(constructor, signers[0], mintParameters);
+            } catch (error) {
+              erm = "minting error";
+              console.log(`Ignored due to wrong miniting parameters`);
+              throw Error("minting error");
+            }
+            erm = undefined;
             await advanceTimeAndBlock(Number(updatedMaturity));
             const burnParams = {liquidityIn:mint.mintData.liquidityOut};
             const burn = await burnFixture(mint,signers[0],burnParams);
@@ -84,8 +97,8 @@ describe('Burn', () => {
         });
 
         it(``, async () => {
-          console.log(`Testing for Burn Success Case: ${iSuccess+1}`);
           if (pair != undefined && pairSim != undefined) {
+            console.log(`Testing for Burn Success Case: ${iSuccess+1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -139,7 +152,7 @@ describe('Burn', () => {
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
             iSuccess = iSuccess+1;
-          }
+          } caseNumber++;
         })
       })
     })
