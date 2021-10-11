@@ -1,10 +1,10 @@
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { SafeTransferTest } from '../../../../typechain/SafeTransferTest'
-import { IERC20 } from '../../../../typechain/IERC20'
-import { testTokenNew } from '../../../../test/shared/TestToken'
-import { SafeBalanceTest } from '../../../../typechain/SafeBalanceTest'
+import { SafeTransferTest } from '../../typechain/SafeTransferTest'
+import { IERC20 } from '../../typechain/IERC20'
+import { testTokenNew } from '../shared/TestToken'
+import { SafeBalanceTest } from '../../typechain/SafeBalanceTest'
 
 let signers: SignerWithAddress[]
 
