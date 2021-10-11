@@ -7,7 +7,7 @@ export async function pay(): Promise<Borrow[]> {
         {
             assetIn: 4256603941076597821300000000000000n,
             collateralIn: 2043960857347999192700000000000000n,
-            interestIncrease: 2142084316492136513800000000000000n,
+            interestIncrease: 21420843164921365138000000000000n,
             cdpIncrease: 618966353867802076160000000000000n,
             maturity: 3291558876n,
             currentTimeStamp: nt,
@@ -19,7 +19,7 @@ export async function pay(): Promise<Borrow[]> {
         {
             assetIn: 3384965145655911321300000000000000n,
             collateralIn: 530704822014748925640000000000000n,
-            interestIncrease: 2616739854341432634300000000000000n,
+            interestIncrease: 26167398543414326343000000000000n,
             cdpIncrease: 732924719082945454830000000000000n,
             maturity: 3291558876n,
             currentTimeStamp: nt,
@@ -31,7 +31,7 @@ export async function pay(): Promise<Borrow[]> {
         {
             assetIn: 2278995182855247385000000000000000n,
             collateralIn: 1830318292264265316800000000000000n,
-            interestIncrease: 863049707657643236800000000000000n,
+            interestIncrease: 8630497076576432368000000000000n,
             cdpIncrease: 1775997773597187752700000000000000n,
             maturity: 3291558876n,
             currentTimeStamp: nt,
