@@ -30,12 +30,8 @@ describe('Checking SafeBalance', () => {
     token.transfer(safeBalTestContract.address, tokenTransfer)
   })
 
-  
   it('Should return the balance transferred', async () => {
     let safeBalance = await safeBalTestContract.safeBalance(token.address);
     expect(safeBalance).to.be.equal(tokenTransfer)
-  })
-  it('Should revert', async () => {
-    await expect(token.transfer(safeBalTestContract.address, tokenTransfer)).to.be.revertedWith("ERC20: transfer amount exceeds balance");
   })
 })
