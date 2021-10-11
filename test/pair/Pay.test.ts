@@ -72,7 +72,6 @@ describe('Pay', () => {
             pairSim = returnValue.pairSim;
 
           } catch (error) {
-            console.log(error);
             //TODO: to work on the failure cases
             // describe("Testing for Failure Cases", async () => {
             //   before(async () => {
