@@ -15,8 +15,10 @@ let FailureCases: number;
 
 describe('Borrow', () => {
   let tests: any;
+  let caseNumber: any = 0;
   let iSuccess = 0;
   let iFailure = 0;
+  let totalFailureCases = 0;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -28,15 +30,16 @@ describe('Borrow', () => {
 
   it('', () => {
     tests.forEach((testCase: Borrow) => {
-
       describe("", async () => {
         let pair: any;
         let pairSim: any;
         let updatedMaturity: any;
 
         before(async () => {
+          console.log(`Checking for Borrow Test Case ${caseNumber + 1}`);
           const currentBlockTime = await now();
           updatedMaturity = currentBlockTime + 20000n;
+          let erm: any;
           try {
             let mint: any
             try {
@@ -51,8 +54,11 @@ describe('Borrow', () => {
               };
               mint = await mintFixture(constructor, signers[0], mintParameters);
             } catch (error) {
-              console.log("minting error");
+              erm = "minting error";
+              console.log(`Ignored due to wrong miniting parameters`);
+              throw Error("minting error");
             }
+            erm = undefined;
             const borrowParams: BorrowParams =
             {
               assetOut: testCase.borrowAssetOut,
@@ -60,50 +66,51 @@ describe('Borrow', () => {
               interestIncrease: testCase.borrowInterestIncrease,
               cdpIncrease: testCase.borrowCdpIncrease
             }
-            let returnObj: any
-            returnObj = await borrowFixture(mint, signers[0], borrowParams);
-
-            if (returnObj.error == undefined) {
+            try {
+              const returnObj = await borrowFixture(mint, signers[0], borrowParams);
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
-            } else {
-              console.log(`Borrow Transaction Expected to Revert; to be Tested for Failure Case`);
-              FailureCases++;
-              testCase.borrowCdpIncrease = returnObj.cdpAdjust;
-              throw Error(returnObj.error)
+              console.log(`Borrow Test Case number: ${caseNumber + 1} expected to succeed`);
+            } catch (error) {
+              totalFailureCases++;
+              console.log(`Borrow transaction expected to revert; check for failure`);
+              console.log(`Total Failure Cases: ${totalFailureCases}`);
+              throw error;
             }
           } catch (error) {
-            describe("", async () => {
-              before(async () => {
-                const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-                const mintParameters: MintParams = {
-                  assetIn: testCase.assetIn,
-                  collateralIn: testCase.collateralIn,
-                  interestIncrease: testCase.interestIncrease,
-                  cdpIncrease: testCase.cdpIncrease,
-                  maturity: updatedMaturity,
-                  currentTimeStamp: testCase.currentTimeStamp
-                };
-                const returnObj = await mintFixture(constructor, signers[0], mintParameters);
-                pair = returnObj.pair;
-                pairSim = returnObj.pairSim;
-              });
-              it(``, async () => {
-                console.log(`Testing for Borrow Failure Case ${iFailure + 1}`);
-                const borrowParams: BorrowParams =
-                {
-                  assetOut: testCase.borrowAssetOut,
-                  collateralIn: testCase.borrowCollateralIn,
-                  interestIncrease: testCase.borrowInterestIncrease,
-                  cdpIncrease: testCase.borrowCdpIncrease
-                }
-                console.log("Transaction should revert");
-                await expect(pair.pairContractCallee
-                  .connect(signers[0])
-                  .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
-                iFailure = iFailure + 1;
-              });
-            })
+            if (erm != "minting error") {
+              describe("", async () => {
+                before(async () => {
+                  const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
+                  const mintParameters: MintParams = {
+                    assetIn: testCase.assetIn,
+                    collateralIn: testCase.collateralIn,
+                    interestIncrease: testCase.interestIncrease,
+                    cdpIncrease: testCase.cdpIncrease,
+                    maturity: updatedMaturity,
+                    currentTimeStamp: testCase.currentTimeStamp
+                  };
+                  const returnObj = await mintFixture(constructor, signers[0], mintParameters);
+                  pair = returnObj.pair;
+                  pairSim = returnObj.pairSim;
+                });
+                it(``, async () => {
+                  console.log(`Testing for Borrow Failure Case ${iFailure + 1}`);
+                  const borrowParams: BorrowParams =
+                  {
+                    assetOut: testCase.borrowAssetOut,
+                    collateralIn: testCase.borrowCollateralIn,
+                    interestIncrease: testCase.borrowInterestIncrease,
+                    cdpIncrease: testCase.borrowCdpIncrease
+                  }
+                  console.log("Transaction should revert");
+                  await expect(pair.pairContractCallee
+                    .connect(signers[0])
+                    .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
+                  iFailure = iFailure + 1;
+                });
+              })
+            }
           }
         });
 
@@ -163,7 +170,7 @@ describe('Borrow', () => {
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
             iSuccess++;
-          }
+          }caseNumber++;
         })
 
       })

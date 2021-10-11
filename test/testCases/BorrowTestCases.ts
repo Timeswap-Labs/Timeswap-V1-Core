@@ -29,7 +29,7 @@ export interface BorrowParams {
 }
 
 export async function borrow(): Promise<Borrow[]> {
-    const mintTests = await Mint.mint(); // an object with two keys Success and Failure
+    const mintTests = await Mint.mint();
     const borrowCases: Borrow[] = [];
     for (let i = 0; i < mintTests.length; i++) {
         borrowCases.push({
@@ -43,23 +43,8 @@ export async function borrow(): Promise<Borrow[]> {
             borrowCollateralIn: pseudoRandomBigUint(MaxUint112) / 2n,
             borrowInterestIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].interestIncrease) / 2n,
             borrowCdpIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].cdpIncrease) / 2n,
-        }
-        )
+        })
     }
-    const temp = [
-        {
-            assetIn: 1773228845427244530900000000000000n,
-            collateralIn: 1606248230034087416600000000000000n,
-            interestIncrease: 4568395488743510846900000000000000n,
-            cdpIncrease: 873277268664785053010000000000000n,
-            maturity: 1780393693n,
-            currentTimeStamp: 1633591127n,
-            borrowAssetOut: 1709534006553791548815248164610047n,
-            borrowCollateralIn: 1436569571540629858200000000000000n,
-            borrowInterestIncrease: 311950684895658390815248164610047n,
-            borrowCdpIncrease: 2159509794935021287760248164610047n
-        },
-    ]
     return borrowCases;
 }
 
