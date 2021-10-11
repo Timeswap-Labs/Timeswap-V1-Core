@@ -28,7 +28,7 @@ describe('Pay', () => {
     FailureCases = 0;
   });
 
-  it('', () => {
+  it('6.1', () => {
     tests.forEach((testCase: Borrow) => {
       describe("", async () => {
         let pair: any;
@@ -104,7 +104,7 @@ describe('Pay', () => {
           }
         });
 
-        it('', async () => {
+        it('6.2', async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()

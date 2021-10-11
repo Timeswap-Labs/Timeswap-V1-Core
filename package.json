@@ -3,7 +3,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:hardhat": "hardhat test --network hardhat",
-    "coverage": "hardhat coverage"
+    "coverage": "hardhat compile && hardhat coverage"
   },
   "version": "1.0.10",
   "name": "@timeswap-labs/timeswap-v1-core",

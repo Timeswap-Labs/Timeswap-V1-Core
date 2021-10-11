@@ -27,7 +27,7 @@ describe('Burn', () => {
     FailureCases = 0;
   });
 
-  it('', async () => {
+  it('2.1', async () => {
     tests.forEach((testCase: MintParams) => {
       describe("", async () => {
         let pair: any;
@@ -96,7 +96,7 @@ describe('Burn', () => {
           }
         });
 
-        it(``, async () => {
+        it(`2.2`, async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log(`Testing for Burn Success Case: ${iSuccess+1}`);
             console.log("Should have correct reserves");

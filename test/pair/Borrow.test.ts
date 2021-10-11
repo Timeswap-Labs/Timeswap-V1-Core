@@ -28,7 +28,7 @@ describe('Borrow', () => {
 
   });
 
-  it('', () => {
+  it('1.1', () => {
     tests.forEach((testCase: Borrow) => {
       describe("", async () => {
         let pair: any;
@@ -94,7 +94,7 @@ describe('Borrow', () => {
                   pair = returnObj.pair;
                   pairSim = returnObj.pairSim;
                 });
-                it(``, async () => {
+                it(`1.3`, async () => {
                   console.log(`Testing for Borrow Failure Case ${iFailure + 1}`);
                   const borrowParams: BorrowParams =
                   {
@@ -114,7 +114,7 @@ describe('Borrow', () => {
           }
         });
 
-        it(``, async () => {
+        it(`1.2`, async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log(`Testing for Borrow Success Case ${iSuccess + 1}`);
             console.log("Should have correct reserves");

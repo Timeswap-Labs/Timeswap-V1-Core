@@ -28,7 +28,7 @@ describe('Mint', () => {
     testCases = await TestCases.mint();
   });
 
-  it('', async () => {
+  it('4.1', async () => {
     testCases.forEach((mintParams: MintParams) => {
       describe("", async () => {
         let pair: any;
@@ -55,7 +55,7 @@ describe('Mint', () => {
                 pair = constructor.pair;
                 pairSim = constructor.pairSim;
               });
-              it(``, async () => {
+              it(`4.3`, async () => {
                 console.log(`Testing for Mint Failure Case: ${iFailure + 1}`);
                 console.log("Transaction expected to revert");
                 await expect(
@@ -76,7 +76,7 @@ describe('Mint', () => {
           }
         })
 
-        it(``, async () => {
+        it(`4.2`, async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log(`Testing for Mint Success Case ${iSuccess + 1}`);
             console.log("Should have correct reserves");

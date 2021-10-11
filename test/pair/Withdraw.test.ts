@@ -25,7 +25,7 @@ describe('Withdraw', () => {
     tests = await TestCases.withdraw();
   });
 
-  it('', () => {
+  it('7.1', () => {
     tests.forEach((testCase: Lend) => {
       describe("", async () => {
         let pair: any;
@@ -113,7 +113,7 @@ describe('Withdraw', () => {
             }
           });
 
-        it('', async () => {
+        it('7.2', async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()

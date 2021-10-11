@@ -24,7 +24,7 @@ describe('Lend', () => {
     tests = await TestCases.lend();
   });
 
-  it('', () => {
+  it('3.1', () => {
     tests.forEach((testCase: Lend) => {
       describe("", async () => {
         let pair: any;
@@ -89,7 +89,7 @@ describe('Lend', () => {
                   pair = returnObj.pair;
                   pairSim = returnObj.pairSim;
                 });
-                it("", async () => {
+                it("3.3", async () => {
                   console.log(`Testing for Lend Failure Case ${iFailure + 1}`);
                   const lendParams: LendParams =
                   {
@@ -109,7 +109,7 @@ describe('Lend', () => {
           }
         });
 
-        it('', async () => {
+        it('3.2', async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log(`Testing for Lend Success Case: ${iSuccess + 1}`);
             console.log("Should have correct reserves");

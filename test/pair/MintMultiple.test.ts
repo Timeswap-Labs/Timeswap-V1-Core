@@ -31,7 +31,7 @@ describe('Mint', () => {
     }
   });
 
-  it('', async () => {
+  it('5.1', async () => {
 
     testCases.forEach((mintParams: MintParams[]) => {
       describe("", async () => {
@@ -61,7 +61,7 @@ describe('Mint', () => {
                   pair = mint1.pair;
                   pairSim = mint1.pairSim;
                 });
-                it(``, async () => {
+                it(`5.3`, async () => {
                   console.log("Transaction expected to revert");
                   await expect(
                     pair.pairContractCallee
@@ -90,7 +90,7 @@ describe('Mint', () => {
           }
         })
 
-        it(``, async () => {
+        it(`5.2`, async () => {
           if (erm != "minting2 error" && erm != "minting1 error") {
             if (pair != undefined && pairSim != undefined) {
               console.log(`Testing for Mint Success Case ${iSuccess + 1}`);
