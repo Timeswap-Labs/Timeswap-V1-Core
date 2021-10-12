@@ -64,34 +64,6 @@ describe('Burn', () => {
             pair = burn.pair;
             pairSim = burn.pairSim;
           } catch (error) {
-            //TODO: to work on failure cases
-            // describe("Testing for Failure Cases", async () => {
-            //   before(async () => {
-            //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-            //     const mintParameters: MintParams = {
-            //       assetIn: testCase.assetIn,
-            //       collateralIn: testCase.collateralIn,
-            //       interestIncrease: testCase.interestIncrease,
-            //       cdpIncrease: testCase.cdpIncrease,
-            //       maturity: testCase.maturity,
-            //       currentTimeStamp: testCase.currentTimeStamp
-            //     };
-            //     const returnObj = await mintFixture(constructor, signers[0], mintParameters);
-            //     pair = returnObj.pair;
-            //     pairSim = returnObj.pairSim;
-            //   });
-            //   it("Lend Tx should fail", async () => {
-            //     const lendParams: LendParams =
-            //     {
-            //       assetIn: testCase.lendAssetIn,
-            //       interestDecrease: testCase.lendInterestDecrease,
-            //       cdpDecrease: testCase.lendCdpDecrease
-            //     }
-            //     await expect(pair.pairContractCallee
-            //       .connect(signers[0])
-            //       .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)).to.be.reverted;
-            //   });
-            // })
           }
         });
 

@@ -80,35 +80,6 @@ describe('Withdraw', () => {
               pairSim = withdraw.pairSim;
 
             } catch (error) {
-              //TODO: to work on the failure cases
-              // describe("Testing for Failure Cases", async () => {
-              //   before(async () => {
-              //     const constructor = await constructorFixture(assetInValue, collateralInValue, testCase.maturity);
-              //     const mintParameters: MintParams = {
-              //       assetIn: testCase.assetIn,
-              //       collateralIn: testCase.collateralIn,
-              //       interestIncrease: testCase.interestIncrease,
-              //       cdpIncrease: testCase.cdpIncrease,
-              //       maturity: testCase.maturity,
-              //       currentTimeStamp: testCase.currentTimeStamp
-              //     };
-              //     const returnObj = await mintFixture(constructor, signers[0], mintParameters);
-              //     pair = returnObj.pair;
-              //     pairSim = returnObj.pairSim;
-              //   });
-              //   it("Lend Tx should fail", async () => {
-              //     const borrowParams: BorrowParams =
-              //     {
-              //       assetOut: testCase.borrowAssetOut,
-              //       collateralIn: testCase.borrowCollateralIn,
-              //       interestIncrease: testCase.borrowInterestIncrease,
-              //       cdpIncrease: testCase.borrowCdpIncrease
-              //     }
-              //     await expect(pair.pairContractCallee
-              //       .connect(signers[0])
-              //       .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
-              //   });
-              // })
             }
           });
 
