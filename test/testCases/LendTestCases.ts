@@ -1,15 +1,13 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { now, pseudoRandomBigUint } from "../shared/Helper";
+import { pseudoRandomBigUint } from "../shared/Helper";
+import * as Mint from "./MintTestCases";
 
-import { shiftUp } from '../libraries/Math'
-import { mulDivUp } from "../libraries/FullMath";
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint64 = BigNumber.from(2).pow(64).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 const MaxUint16 = BigNumber.from(2).pow(16).sub(1);
 
-import * as Mint from "./MintTestCases"
 
 export interface Lend {
     assetIn: bigint;
@@ -32,7 +30,6 @@ export interface LendParams {
 export async function lend(): Promise<Lend[]> {
     const mintTests = await Mint.mint();
     const lendCases: Lend[] = [];
-    //TODO: the asset in the pull can be smaller than the lendAssetIn
     for (let i = 0; i < mintTests.length; i++) {
         lendCases.push({
             assetIn: mintTests[i].assetIn,
