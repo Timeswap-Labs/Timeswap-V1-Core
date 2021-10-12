@@ -1,12 +1,11 @@
-import { ethers, waffle } from 'hardhat'
-import { constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
-import * as TestCases from '../testCases'
-import { expect } from '../shared/Expect'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { ethers } from 'hardhat'
+import { expect } from '../shared/Expect'
+import { constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
+import { advanceTimeAndBlock, now } from '../shared/Helper'
+import * as TestCases from '../testCases'
 import { Lend, LendParams, MintParams } from '../testCases'
-import { advanceTimeAndBlock } from '../shared/Helper'
-import { now } from "../shared/Helper";
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
@@ -25,7 +24,7 @@ describe('Withdraw', () => {
     tests = await TestCases.withdraw();
   });
 
-  it('7.1', () => {
+  it('', () => {
     tests.forEach((testCase: Lend) => {
       describe("", async () => {
         let pair: any;
@@ -36,7 +35,7 @@ describe('Withdraw', () => {
           try {
             console.log(`Checking for Withdraw Test Case ${caseNumber + 1}`);
             const currentBlockTime = await now();
-            updatedMaturity = currentBlockTime + 20000n;
+            updatedMaturity = currentBlockTime + 10000000n;
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             let erm: any;
             let mint: any;
@@ -113,7 +112,7 @@ describe('Withdraw', () => {
             }
           });
 
-        it('7.2', async () => {
+        it('', async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()

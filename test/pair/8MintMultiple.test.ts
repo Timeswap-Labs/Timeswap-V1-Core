@@ -1,12 +1,12 @@
-import { Decimal } from 'decimal.js'
-import { ethers, waffle } from 'hardhat'
-import { now, pseudoRandomBigUint, pseudoRandomBigUint256 } from '../shared/Helper'
-import { expect } from '../shared/Expect'
-import * as TestCases from '../testCases'
-import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { Decimal } from 'decimal.js'
 import { BigNumber } from 'ethers'
-import { MintParams, mintSuccessCheck, mintFailureCheck } from '../testCases'
+import { ethers } from 'hardhat'
+import { expect } from '../shared/Expect'
+import { constructorFixture, mintFixture } from '../shared/Fixtures'
+import { now } from '../shared/Helper'
+import * as TestCases from '../testCases'
+import { MintParams } from '../testCases'
 
 Decimal.config({ toExpNeg: 0, toExpPos: 500 })
 
@@ -15,7 +15,7 @@ let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString()); // creating ERC20 with this number
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
 
-describe('Mint', () => {
+describe('MintMultiple', () => {
   let testCases: any = [];
   let caseNumber: any = 0;
   let iSuccess = 0;
@@ -31,7 +31,7 @@ describe('Mint', () => {
     }
   });
 
-  it('5.1', async () => {
+  it('', async () => {
 
     testCases.forEach((mintParams: MintParams[]) => {
       describe("", async () => {
@@ -43,14 +43,12 @@ describe('Mint', () => {
         before(async () => {
           erm = undefined;
           console.log(`Checking for Multiple Mint Test Case ${caseNumber + 1}`);
-          const currentBlockTime = await now() + 20000n;
-          updatedMaturity = 2n*currentBlockTime;
+          const currentBlockTime = await now() + 10000000n;
+          updatedMaturity = currentBlockTime;
           try {
-            console.log('hey')
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             const mint1 = await mintFixture(constructor, signers[0], mintParams[0]);
             try {
-              console.log('hey1');
               const mint2 = await mintFixture(mint1, signers[0], mintParams[1]);
               pair = mint2.pair;
               pairSim = mint2.pairSim;
@@ -63,7 +61,7 @@ describe('Mint', () => {
                   pair = mint1.pair;
                   pairSim = mint1.pairSim;
                 });
-                it(`5.3`, async () => {
+                it(``, async () => {
                   console.log("Transaction expected to revert");
                   await expect(
                     pair.pairContractCallee
@@ -92,7 +90,7 @@ describe('Mint', () => {
           }
         })
 
-        it(`5.2`, async () => {
+        it(``, async () => {
           if (erm != "minting2 error" && erm != "minting1 error") {
             if (pair != undefined && pairSim != undefined) {
               console.log(`Testing for Mint Success Case ${iSuccess + 1}`);

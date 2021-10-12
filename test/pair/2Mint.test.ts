@@ -1,12 +1,12 @@
-import { Decimal } from 'decimal.js'
-import { ethers, waffle } from 'hardhat'
-import { now, pseudoRandomBigUint, pseudoRandomBigUint256 } from '../shared/Helper'
-import { expect } from '../shared/Expect'
-import * as TestCases from '../testCases'
-import { constructorFixture, Fixture, mintFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { Decimal } from 'decimal.js'
 import { BigNumber } from 'ethers'
-import { MintParams, mintSuccessCheck, mintFailureCheck } from '../testCases'
+import { ethers } from 'hardhat'
+import { expect } from '../shared/Expect'
+import { constructorFixture, mintFixture } from '../shared/Fixtures'
+import { now } from '../shared/Helper'
+import * as TestCases from '../testCases'
+import { MintParams } from '../testCases'
 
 Decimal.config({ toExpNeg: 0, toExpPos: 500 })
 
@@ -28,7 +28,7 @@ describe('Mint', () => {
     testCases = await TestCases.mint();
   });
 
-  it('4.1', async () => {
+  it('', async () => {
     testCases.forEach((mintParams: MintParams) => {
       describe("", async () => {
         let pair: any;
@@ -36,7 +36,7 @@ describe('Mint', () => {
         let updatedMaturity: any;
 
         before(async () => {
-          const currentBlockTime = await now() + 20000n;
+          const currentBlockTime = await now() + 10000000n;
           updatedMaturity = currentBlockTime;
           console.log(`Checking for Mint Test Case ${caseNumber + 1}`);
           try {
@@ -55,7 +55,7 @@ describe('Mint', () => {
                 pair = constructor.pair;
                 pairSim = constructor.pairSim;
               });
-              it(`4.3`, async () => {
+              it(``, async () => {
                 console.log(`Testing for Mint Failure Case: ${iFailure + 1}`);
                 console.log("Transaction expected to revert");
                 await expect(
@@ -76,7 +76,7 @@ describe('Mint', () => {
           }
         })
 
-        it(`4.2`, async () => {
+        it(``, async () => {
           if (pair != undefined && pairSim != undefined) {
             console.log(`Testing for Mint Success Case ${iSuccess + 1}`);
             console.log("Should have correct reserves");

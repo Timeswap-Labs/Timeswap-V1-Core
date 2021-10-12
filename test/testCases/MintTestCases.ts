@@ -1,10 +1,6 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { now, pseudoRandomBigUint } from "../shared/Helper";
 
-import { shiftUp } from '../libraries/Math'
-import { mulDivUp } from "../libraries/FullMath";
-import MintMath from "../libraries/MintMath";
-import { PROTOCOL_FEE } from "../shared/Constants";
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
@@ -39,7 +35,7 @@ export async function mintTestCases(): Promise<MintParams[]> {
                 collateralIn: pseudoRandomBigUint(MaxUint112),
                 interestIncrease: pseudoRandomBigUint(MaxUint112)/10n,
                 cdpIncrease: pseudoRandomBigUint(MaxUint112),
-                maturity: nt + 20000n,
+                maturity: nt + 10000000n,
                 currentTimeStamp: nt
             }
         })

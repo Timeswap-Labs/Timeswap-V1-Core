@@ -1,19 +1,18 @@
-import { ethers, } from 'hardhat'
-import { constructorFixture, borrowFixture, mintFixture, Fixture, borrowError } from '../shared/Fixtures'
-import * as TestCases from '../testCases'
-import { expect } from '../shared/Expect'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from '@ethersproject/bignumber'
-import { Borrow, BorrowParams, MintParams } from '../testCases'
-import { advanceTimeAndBlock, now, setTime } from '../shared/Helper'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { ethers } from 'hardhat'
+import { expect } from '../shared/Expect'
+import { constructorFixture, lendFixture, mintFixture } from '../shared/Fixtures'
+import { now } from '../shared/Helper'
+import * as TestCases from '../testCases'
+import { Lend, LendParams, MintParams } from '../testCases'
+
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
-let totalCases: number;
-let FailureCases: number;
 
-describe('Borrow', () => {
+describe('Lend', () => {
   let tests: any;
   let caseNumber: any = 0;
   let iSuccess = 0;
@@ -22,26 +21,23 @@ describe('Borrow', () => {
 
   before(async () => {
     signers = await ethers.getSigners();
-    tests = await TestCases.borrow();
-    totalCases = tests.length;
-    FailureCases = 0;
-
+    tests = await TestCases.lend();
   });
 
-  it('1.1', () => {
-    tests.forEach((testCase: Borrow) => {
+  it('', () => {
+    tests.forEach((testCase: Lend) => {
       describe("", async () => {
         let pair: any;
         let pairSim: any;
         let updatedMaturity: any;
 
         before(async () => {
-          console.log(`Checking for Borrow Test Case ${caseNumber + 1}`);
+          console.log(`Checking for Lend Test Case ${caseNumber + 1}`);
           const currentBlockTime = await now();
-          updatedMaturity = currentBlockTime + 20000n;
+          updatedMaturity = currentBlockTime + 10000000n;
           let erm: any;
           try {
-            let mint: any
+            let mint: any;
             try {
               const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
               const mintParameters: MintParams = {
@@ -59,25 +55,24 @@ describe('Borrow', () => {
               throw Error("minting error");
             }
             erm = undefined;
-            const borrowParams: BorrowParams =
+            const lendParams: LendParams =
             {
-              assetOut: testCase.borrowAssetOut,
-              collateralIn: testCase.borrowCollateralIn,
-              interestIncrease: testCase.borrowInterestIncrease,
-              cdpIncrease: testCase.borrowCdpIncrease
+              assetIn: testCase.lendAssetIn,
+              interestDecrease: testCase.lendInterestDecrease,
+              cdpDecrease: testCase.lendCdpDecrease
             }
             try {
-              const returnObj = await borrowFixture(mint, signers[0], borrowParams);
+              const returnObj = await lendFixture(mint, signers[0], lendParams);
               pair = returnObj.pair;
               pairSim = returnObj.pairSim;
-              console.log(`Borrow Test Case number: ${caseNumber + 1} expected to succeed`);
+              console.log(`Lend Test Case number: ${caseNumber + 1} expected to succeed`);
             } catch (error) {
               totalFailureCases++;
-              console.log(`Borrow transaction expected to revert; check for failure`);
+              console.log(`Lending transaction expected to revert; check for failure`);
               console.log(`Total Failure Cases: ${totalFailureCases}`);
               throw error;
             }
-          } catch (error) {
+          } catch (err) {
             if (erm != "minting error") {
               describe("", async () => {
                 before(async () => {
@@ -94,19 +89,19 @@ describe('Borrow', () => {
                   pair = returnObj.pair;
                   pairSim = returnObj.pairSim;
                 });
-                it(`1.3`, async () => {
-                  console.log(`Testing for Borrow Failure Case ${iFailure + 1}`);
-                  const borrowParams: BorrowParams =
+                it("", async () => {
+                  console.log(`Testing for Lend Failure Case ${iFailure + 1}`);
+                  const lendParams: LendParams =
                   {
-                    assetOut: testCase.borrowAssetOut,
-                    collateralIn: testCase.borrowCollateralIn,
-                    interestIncrease: testCase.borrowInterestIncrease,
-                    cdpIncrease: testCase.borrowCdpIncrease
+                    assetIn: testCase.lendAssetIn,
+                    interestDecrease: testCase.lendInterestDecrease,
+                    cdpDecrease: testCase.lendCdpDecrease
                   }
                   console.log("Transaction should revert");
                   await expect(pair.pairContractCallee
                     .connect(signers[0])
-                    .borrow(pair.maturity, signers[0].address, signers[0].address, borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease)).to.be.reverted;
+                    .lend(pair.maturity, signers[0].address, signers[0].address, lendParams.assetIn, lendParams.interestDecrease, lendParams.cdpDecrease)).to.be.reverted;
+                  console.log("Transaction reverted");
                   iFailure = iFailure + 1;
                 });
               })
@@ -114,9 +109,9 @@ describe('Borrow', () => {
           }
         });
 
-        it(`1.2`, async () => {
+        it('', async () => {
           if (pair != undefined && pairSim != undefined) {
-            console.log(`Testing for Borrow Success Case ${iSuccess + 1}`);
+            console.log(`Testing for Lend Success Case: ${iSuccess + 1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -169,13 +164,10 @@ describe('Borrow', () => {
               expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
-            iSuccess++;
+            iSuccess = iSuccess + 1;
           }caseNumber++;
         })
-
       })
     })
   })
 });
-
-
