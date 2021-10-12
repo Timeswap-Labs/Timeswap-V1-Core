@@ -16,23 +16,19 @@ export function check(
   const assetReserve = state.asset + assetIn
   const interestAdjusted = adjust(interestDecrease, state.interest, feeBase)
   const cdpAdjusted = adjust(cdpDecrease, state.cdp, feeBase)
-
   if (!checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)) return false
-
   let minimum = assetIn
   minimum *= state.interest
   minimum /= assetReserve << 4n
   if (interestDecrease < minimum) return false
   return true
 }
-
 export function adjust(decrease: bigint, reserve: bigint, feeBase: bigint): bigint {
   let adjusted = reserve
   adjusted <<= 16n
   adjusted -= feeBase * decrease
   return adjusted
 }
-
 export function readjust(adjusted: bigint, reserve: bigint, feeBase: bigint): bigint {
   let decrease = reserve << 16n
   decrease -= adjusted

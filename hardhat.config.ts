@@ -33,4 +33,7 @@ export default {
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
   },
+  mocha: {
+    timeout: 60000
+  }
 }

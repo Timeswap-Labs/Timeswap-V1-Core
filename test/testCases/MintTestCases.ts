@@ -1,68 +1,63 @@
-export function mint(): Mint {
-    const testCases = mintTestCases();
+import { BigNumber } from "@ethersproject/bignumber";
+import { now, pseudoRandomBigUint } from "../shared/Helper";
 
-    const success = testCases.filter(mintSuccessCheck);
-    const failure = testCases.filter(mintFailureCheck).map(mintMessage);
 
-    return { Success: success, Failure: failure };
-}
+const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
+const MaxUint32 = BigNumber.from(2).pow(32).sub(1);
 
-export function mintTestCases(): MintParams[] {
-    const testCases = [
-        {
-            assetIn: 2000n,
-            collateralIn: 800n,
-            interestIncrease: 20n,
-            cdpIncrease: 400n,
-        },
-        {
-            assetIn: 2000n,
-            collateralIn: 2000n,
-            interestIncrease: 0n,
-            cdpIncrease: 0n,
-        },
-    ];
-
-    return testCases;
-}
-
-export interface Mint {
-    Success: MintParams[];
-    Failure: {
-        params: MintParams;
-        errorMessage: string;
-    }[];
-}
-
+//TODO: change this increase the test cases
+const count = 10;
 export interface MintParams {
     assetIn: bigint;
     collateralIn: bigint;
     interestIncrease: bigint;
     cdpIncrease: bigint;
+    maturity: bigint,
+    currentTimeStamp: bigint
+}
+export interface Mint {
+    Success: MintParams[];
+    Failure: MintParams[];
 }
 
-export function mintSuccessCheck({
+export async function mint(): Promise<MintParams[]> {
+    const testCases = await mintTestCases();
+    return testCases;
+}
+
+export async function mintTestCases(): Promise<MintParams[]> {
+    const nt = await now();
+    const testcases = Array(count)
+        .fill(null)
+        .map(() => {
+            return {
+                assetIn: pseudoRandomBigUint(MaxUint112),
+                collateralIn: pseudoRandomBigUint(MaxUint112),
+                interestIncrease: pseudoRandomBigUint(MaxUint112)/10n,
+                cdpIncrease: pseudoRandomBigUint(MaxUint112),
+                maturity: nt + 10000000n,
+                currentTimeStamp: nt
+            }
+        })
+    return testcases;
+}
+
+export async function mintSuccessCheck({
+    assetIn,
     interestIncrease,
     cdpIncrease,
-}: MintParams): boolean {
-    if (!(interestIncrease > 0n && cdpIncrease > 0n)) {
+    maturity,
+    currentTimeStamp
+}: MintParams): Promise<boolean> {
+   
+
+    if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) {
         return false;
     } else {
         return true;
     }
 }
 
-function mintFailureCheck(params: MintParams): boolean {
-    return !mintSuccessCheck(params);
-}
-
-export function mintMessage(params: MintParams): {
-    params: MintParams;
-    errorMessage: string;
-} {
-    if (!(params.interestIncrease > 0n && params.cdpIncrease > 0n)) {
-        return { params, errorMessage: "Invalid" };
-    } else {
-        return { params, errorMessage: "" };
-    }
+export async function mintFailureCheck(params: MintParams): Promise<boolean> {
+    return !(await mintSuccessCheck(params));
 }

@@ -12,19 +12,18 @@ export function check(
   interestIncrease: bigint,
   cdpIncrease: bigint,
   fee: bigint
-): boolean {
+): boolean | string {
   const feeBase = 0x10000n - fee
   const assetReserve = state.asset - assetOut
-  if (assetReserve < 0) return false
+  if (assetReserve < 0) return "assetReserve < 0"
   const interestAdjusted = adjust(interestIncrease, state.interest, feeBase)
   const cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase)
   const productCheck = checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)
-  if (!productCheck) return false
-
+  if (!productCheck) return "Invariance"
   let minimum = assetOut
   minimum *= state.interest
   minimum = divUp(minimum, assetReserve << 4n)
-  if (interestIncrease < minimum) return false
+  if (interestIncrease < minimum) return "interestIncrease < minimum"
   return true
 }
 
