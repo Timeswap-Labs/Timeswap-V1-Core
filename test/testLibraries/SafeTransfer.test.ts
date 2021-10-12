@@ -14,32 +14,32 @@ const { expect } = chai
 
 describe('Checking SafeTransfer', () => {
   let token: IERC20
-  let safeTransferTest: SafeTransferTest
-  let safeBalTest: SafeBalanceTest
+  let safeTransferTestContract: SafeTransferTest
+  let safeBalTestContract: SafeBalanceTest
 
-  let tokenMinted = 1000n
-  let tokenTransfer = 600n
+  let tokenMinted = 1000n // randomNumbers
+  let tokenTransfer = 600n // randomNumbers; but should be less than the token minted
   before(async () => {
     signers = await ethers.getSigners()
   })
   beforeEach(async () => {
     token = await testTokenNew('Ether', 'WETH', tokenMinted)
-    const safeTransfer = await ethers.getContractFactory('SafeTransferTest')
-    safeTransferTest = (await safeTransfer.deploy()) as SafeTransferTest
-    await safeTransferTest.deployed()
-    const safeBal = await ethers.getContractFactory('SafeBalanceTest')
-    safeBalTest = (await safeBal.deploy()) as SafeBalanceTest
-    await safeBalTest.deployed()
-    token.transfer(safeTransferTest.address, tokenTransfer)
-    safeTransferTest.safeTransfer(token.address, safeBalTest.address, tokenTransfer)
+    const SafeTransferFactory = await ethers.getContractFactory('SafeTransferTest')
+    safeTransferTestContract = (await SafeTransferFactory.deploy()) as SafeTransferTest
+    await safeTransferTestContract.deployed()
+    const SafeBalanceTestContactFactory = await ethers.getContractFactory('SafeBalanceTest')
+    safeBalTestContract = (await SafeBalanceTestContactFactory.deploy()) as SafeBalanceTest
+    await safeBalTestContract.deployed()
+    token.transfer(safeTransferTestContract.address, tokenTransfer)
+    safeTransferTestContract.safeTransfer(token.address, safeBalTestContract.address, tokenTransfer)
   })
   it('Should pass when token is transferred', async () => {
-    let safeBalance = await safeBalTest.safeBalance(token.address)
+    let safeBalance = await safeBalTestContract.safeBalance(token.address)
     expect(safeBalance).to.be.equal(tokenTransfer)
   })
   it('Should revert when amount exceeds balance', async () => {
-    safeTransferTest.safeTransfer(token.address, safeBalTest.address, tokenTransfer)
-    let safeBalance = await safeBalTest.safeBalance(token.address)
-    //TODO revert with error string "ERC20: transfer amount exceeds balance"
+    expect(
+      safeTransferTestContract.safeTransfer(token.address, safeBalTestContract.address, tokenTransfer)
+    ).to.be.revertedWith('ERC20: transfer amount exceeds balance')
   })
 })
