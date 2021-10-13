@@ -54,7 +54,7 @@ describe('Testing LendMath', () => {
   }
 
   const assetIn: bigint = 1000n //randomNumbers
-  const interestDecrease: bigint = 3n
+  const interestDecrease: bigint = 30n
   const cdpDecrease: bigint = 2n
   const fee: bigint = 2n
 
@@ -70,10 +70,13 @@ describe('Testing LendMath', () => {
     //pass parameters to contract and test library
     //compare both
   })
-  it('should not revert for check', () => {
-    // need to get correct state parameter
-    let lendMathContract = lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)
-    let lendMathTest = LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee)
-    expect(lendMathContract).to.be.equal(lendMathTest)
+  it('should not revert for check', async () => {
+    const txn = await lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)
+
+    let lendMathContract = await lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee) // no return value
+    console.log(txn, lendMathContract)
+
+    // expect(lendMathTest).to.be.true
+    // expect(lendMathTest).to.be.false
   })
 })

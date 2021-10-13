@@ -13,13 +13,14 @@ contract LendMathTest {
         uint112 yDecrease,
         uint112 zDecrease,
         uint16 fee
-    ) external view {
+    ) external pure returns (bool) {
         state.check(
             xIncrease,
             yDecrease,
             zDecrease,
             fee
         );
+        return true;
     }
 
     function getBond(
