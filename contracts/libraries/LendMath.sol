@@ -30,7 +30,7 @@ library LendMath {
         uint256 denominator = xReserve;
         denominator *= feeBase;
         minimum /= denominator;
-        require(yDecrease >= minimum, 'Minimum');
+        require(yDecrease >= minimum, 'E302');
     }
 
     function adjust(
