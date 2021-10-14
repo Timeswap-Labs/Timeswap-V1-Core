@@ -1,21 +1,20 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BorrowMathTest } from '../../typechain/BorrowMathTest'
-import { IERC20 } from '../../typechain/IERC20'
-import { testTokenNew } from '../shared/TestToken'
-import { State } from '../shared/PairInterface'
 
 let signers: SignerWithAddress[]
 
 const { solidity } = waffle
 chai.use(solidity)
 const { expect } = chai
+
 interface StateParams {
   asset: bigint
   interest: bigint
   cdp: bigint
 }
+
 describe('Testing BorrowMath', () => {
   let borrowMathTestContract: BorrowMathTest
   const state: StateParams = {
@@ -35,10 +34,7 @@ describe('Testing BorrowMath', () => {
     const BorrowMathTestContactFactory = await ethers.getContractFactory('BorrowMathTest')
     borrowMathTestContract = (await BorrowMathTestContactFactory.deploy()) as BorrowMathTest
     await borrowMathTestContract.deployed()
-    //deploy the contract ; done
-    //get random parameters ; done
-    //pass parameters to contract and test library
-    //compare both
+
   })
   it('should not revert for check', () => {
     // need to get correct state parameter
