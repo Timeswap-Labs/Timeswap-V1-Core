@@ -92,14 +92,20 @@ describe('MintMath', () => {
   })
 
   it('Getting LiquidityTotal for AssetIn', async () => {
-  expect((await MintMathTestContract.getLiquidityTotal2(state,assetIn,interestIncrease,cdpIncrease))).to.be.equal(MintMath.getLiquidityTotal2(stateTest,assetIn,interestIncrease,cdpIncrease));
+    expect((await MintMathTestContract.getLiquidityTotal2(state, assetIn, interestIncrease, cdpIncrease))).to.be.equal(MintMath.getLiquidityTotal2(stateTest, assetIn, interestIncrease, cdpIncrease));
   })
 
   it('Getting expected Liquidity', async () => {
-    const liquitidyTotal: BigNumberish = await MintMathTestContract.getLiquidityTotal2(state,assetIn,interestIncrease,cdpIncrease)
-    expect((await MintMathTestContract.getLiquidity(maturity,liquitidyTotal,PROTOCOL_FEE))).to.be.equalBigInt((await MintMath.getLiquidity(BigInt(maturity.toString()),BigInt(liquitidyTotal.toString()),PROTOCOL_FEE, (await now()))));
-    })
+    const liquitidyTotal: BigNumberish = await MintMathTestContract.getLiquidityTotal2(state, assetIn, interestIncrease, cdpIncrease)
+    expect((await MintMathTestContract.getLiquidity(maturity, liquitidyTotal, PROTOCOL_FEE))).to.be.equalBigInt((await MintMath.getLiquidity(BigInt(maturity.toString()), BigInt(liquitidyTotal.toString()), PROTOCOL_FEE, (await now()))));
+  })
+
+  it('Getting expected Debt', async () => {
+    expect((await MintMathTestContract.getDebt(maturity,assetIn,interestIncrease)).toString()).to.be.equalBigInt(await MintMath.getDebt(BigInt(maturity.toString()),assetIn,interestIncrease, (await now())));
+  })
 
   
+
+
 
 })
