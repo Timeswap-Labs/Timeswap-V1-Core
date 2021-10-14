@@ -53,7 +53,7 @@ let interestAdjusted: bigint = 100n
 let cdpAdjusted: bigint = 100n
 
 describe('constantProduct', () => {
-  before(async () => {
+  beforeEach(async () => {
     const constantProductTestContactFactory = await ethers.getContractFactory('ConstantProductTest')
     constantProductTestContract = (await constantProductTestContactFactory.deploy()) as ConstantProductTest
     await constantProductTestContract.deployed()
@@ -76,14 +76,16 @@ describe('constantProduct', () => {
       y: 10n,
       z: 1n,
     }
+    const stateTest: StateTestParams = {
+      asset: 20n,
+      interest: 10n,
+      cdp: 1n,
+    }
     assetReserve = 30n
-    interestAdjusted = 20n
-    cdpAdjusted = 5n
-    const constantProductTestContactFactory = await ethers.getContractFactory('ConstantProductTest')
-    constantProductTestContract = (await constantProductTestContactFactory.deploy()) as ConstantProductTest
-    await constantProductTestContract.deployed()
+    interestAdjusted = 10n
+    cdpAdjusted = 1n << 32n
     expect(await constantProductTestContract.checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted))
       .to.be.true
-    // expect(ConstantProduct.checkConstantProduct(stateTest, assetReserve, interestAdjusted, cdpAdjusted)).to.be.true
+    expect(ConstantProduct.checkConstantProduct(stateTest, assetReserve, interestAdjusted, cdpAdjusted)).to.be.true
   })
 })
