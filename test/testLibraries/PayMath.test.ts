@@ -35,13 +35,23 @@ describe('Pay Math', () => {
     await PayMathTestContract.deployed()
   })
 
-  it('Pay Proptional should return true', async () => {
+  it('Pay Proptional should return true with less than 50% collateral out', async () => {
     const returnValue1 = await PayMathTestContract.checkProportional(assetIn,collateralOut,due);
     const returnValue2 = await PayMath.checkProportional(assetIn,collateralOut,due);
     expect(returnValue1).to.be.true;
     expect(returnValue2).to.be.true;
     expect(returnValue1).to.equal(returnValue2);
   })
+
+  it('Pay Proptional should return true with exact 50% collateral out', async () => {
+    const collateralOut: bigint = 500n
+    const returnValue1 = await PayMathTestContract.checkProportional(assetIn,collateralOut,due);
+    const returnValue2 = await PayMath.checkProportional(assetIn,collateralOut,due);
+    expect(returnValue1).to.be.true;
+    expect(returnValue2).to.be.true;
+    expect(returnValue1).to.equal(returnValue2);
+  })
+
 
   it('Pay Proptional should return revert with Forbidden', async () => {
     const collateralOut: bigint = 600n
