@@ -4,7 +4,7 @@ pragma solidity =0.8.1;
 import {BurnMath} from '../../libraries/BurnMath.sol';
 import {IPair} from '../../interfaces/IPair.sol';
 
-library BurnMathTest {
+contract BurnMathTest {
     function getAsset(
         IPair.State memory state,
         uint256 liquidityIn
