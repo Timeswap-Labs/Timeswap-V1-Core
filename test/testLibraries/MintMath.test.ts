@@ -104,6 +104,9 @@ describe('MintMath', () => {
     expect((await MintMathTestContract.getDebt(maturity,assetIn,interestIncrease)).toString()).to.be.equalBigInt(await MintMath.getDebt(BigInt(maturity.toString()),assetIn,interestIncrease, (await now())));
   })
 
+  it('Getting expected Collateral', async () => {
+    expect((await MintMathTestContract.getCollateral(maturity,assetIn,interestIncrease,cdpIncrease)).toString()).to.be.equalBigInt(await MintMath.getCollateral(BigInt(maturity.toString()),assetIn,interestIncrease,cdpIncrease, (await now())));
+  })
   
 
 
