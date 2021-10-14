@@ -9,7 +9,8 @@ contract PayMathTest {
         uint112 assetIn,
         uint112 collateralOut,
         IPair.Due memory due
-    ) external pure {
+    ) external pure returns (bool) {
         PayMath.checkProportional(assetIn, collateralOut, due);
+        return true;
     }
 }
