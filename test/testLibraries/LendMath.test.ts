@@ -97,6 +97,8 @@ describe('LendMath', () => {
     lendMathTestContract = (await LendMathTestContactFactory.deploy()) as LendMathTest
     await lendMathTestContract.deployed()
     await expect(lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)).to.be.revertedWith("Minimum");
+    expect(await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee)).to.be.false;   
+
   })
 
 })

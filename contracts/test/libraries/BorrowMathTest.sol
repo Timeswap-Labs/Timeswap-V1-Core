@@ -20,6 +20,7 @@ contract BorrowMathTest {
             zIncrease,
             fee
         );
+        return true;
     }
 
     function getDebt(
