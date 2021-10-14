@@ -12,11 +12,12 @@ contract ConstantProductTest {
         uint112 xReserve,
         uint128 yAdjusted,
         uint128 zAdjusted
-    ) external pure {
+    ) external view returns(bool){
         state.checkConstantProduct(
             xReserve,
             yAdjusted,
             zAdjusted
         );
+        return true;
     }
 }
