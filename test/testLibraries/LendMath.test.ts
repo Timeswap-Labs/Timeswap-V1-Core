@@ -11,7 +11,6 @@ let signers: SignerWithAddress[]
 
 const { solidity } = waffle
 chai.use(solidity)
-// const { expect } = chai
 
 interface Token {
   asset: bigint
@@ -37,7 +36,6 @@ interface StateTestParams {
   cdp: bigint
 }
 
-let lendMathTestContract: LendMathTest
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 0n,
@@ -54,13 +52,13 @@ const stateTest: StateTestParams = {
   cdp: 100n,
 }
 
+let lendMathTestContract: LendMathTest
 let maturity: BigNumberish;
 
 const assetIn: bigint = 1000n
 const interestDecrease: bigint = 30n
 const cdpDecrease: bigint = 2n
 const fee: bigint = 2n
-
 
 describe('LendMath', () => {
 
@@ -74,6 +72,7 @@ describe('LendMath', () => {
 
   it('Check should return true', async () => {
     const returnValue1 = await lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)
+    console.log(returnValue1);
     let returnValue2 = await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee);
     expect(returnValue1).to.be.true;
     expect(returnValue2).to.be.true;
