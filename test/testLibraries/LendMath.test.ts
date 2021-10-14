@@ -4,13 +4,14 @@ import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { LendMathTest } from '../../typechain/LendMathTest'
 import LendMath from '../libraries/LendMath'
+import { expect } from '../shared/Expect'
 import { now } from '../shared/Helper'
 
 let signers: SignerWithAddress[]
 
 const { solidity } = waffle
 chai.use(solidity)
-const { expect } = chai
+// const { expect } = chai
 
 interface Token {
   asset: bigint
@@ -47,21 +48,25 @@ const state: StateParams = {
   z: 100n,
 }
 
-let
+const stateTest: StateTestParams = {
+  asset: 100n,
+  interest: 100n,
+  cdp: 100n,
+}
 
 let maturity: BigNumberish;
 
-describe('LendMath should succeed', () => {
+describe('LendMath', () => {
   const assetIn: bigint = 1000n
   const interestDecrease: bigint = 30n
   const cdpDecrease: bigint = 2n
   const fee: bigint = 2n
 
-
   before(async () => {
     signers = await ethers.getSigners()
     maturity = await now() + 10000n;
   })
+  
   beforeEach(async () => {
     const LendMathTestContactFactory = await ethers.getContractFactory('LendMathTest')
     lendMathTestContract = (await LendMathTestContactFactory.deploy()) as LendMathTest
@@ -69,21 +74,17 @@ describe('LendMath should succeed', () => {
 
   })
   it('Check should return true', async () => {
-    const txn = await lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)
-    let lendMathContract = await LendMath.check(state, assetIn, interestDecrease, cdpDecrease, fee);
-    expect(txn).to.be.true;
-    expect(lendMathContract).to.be.true;
-    expect(txn).to.equal(lendMathContract);
+    const returnValue1 = await lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)
+    let returnValue2 = await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee);
+    expect(returnValue1).to.be.true;
+    expect(returnValue2).to.be.true;
+    expect(returnValue1).to.equal(returnValue2);
   })
 
   it('GetBond should return bondOut', async () => {
-    const txn = await lendMathTestContract.getBond(maturity, assetIn, interestDecrease);
-    console.log(txn.toString());
-    let lendMathContract = await lendMathTestContract.getBond(maturity, assetIn, interestDecrease);
-    console.log(lendMathContract);
-    // expect(txn).to.be.true;
-    // expect(lendMathContract).to.be.true;
-    // expect(txn).to.equal(lendMathContract);
+    const returnValue1 = await lendMathTestContract.getBond(maturity, assetIn, interestDecrease);
+    let returnValue2 = await LendMath.getBond(BigInt(maturity.toString()), assetIn, interestDecrease, (await now()));
+    expect(returnValue1).to.be.equalBigInt(returnValue2);
   })
 })
 
