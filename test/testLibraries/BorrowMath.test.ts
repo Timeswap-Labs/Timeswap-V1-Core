@@ -60,7 +60,7 @@ const interestIncrease: bigint = 30n
 const cdpIncrease: bigint = 50n
 const fee: bigint = 2n
 
-describe('BorrowMath', () => {
+describe('Borrow Math', () => {
 
   before(async () => {
     signers = await ethers.getSigners()
@@ -78,13 +78,13 @@ describe('BorrowMath', () => {
     expect(returnValue1).to.equal(returnValue2);
   })
 
-  it('GetBond should return the expected bondOut', async () => {
+  it('GetDebt should return the expected debt out', async () => {
     const returnValue1 = await borrowMathTestContract.getDebt(maturity, assetOut, interestIncrease);
     let returnValue2 = await BorrowMath.getDebt(BigInt(maturity.toString()), assetOut, interestIncrease, (await now()));
     expect(returnValue1).to.be.equalBigInt(returnValue2);
   })
 
-  it('GetInsurance should return the expected InsuranceOut', async () => {
+  it('GetCollateral should return the expected Collateral In', async () => {
     const returnValue1 = await borrowMathTestContract.getCollateral(maturity, state, assetOut, interestIncrease);
     let returnValue2 = await BorrowMath.getCollateral(BigInt(maturity.toString()), stateTest, assetOut, interestIncrease, (await now()));
     expect(returnValue1).to.be.equalBigInt(returnValue2);

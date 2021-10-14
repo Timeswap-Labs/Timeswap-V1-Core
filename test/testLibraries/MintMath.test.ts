@@ -31,6 +31,10 @@ interface StateParams {
 }
 
 interface StateTestParams {
+  reserves: Token
+  totalLiquidity: bigint
+  totalClaims: Claims
+  totalDebtCreated: bigint
   asset: bigint
   interest: bigint
   cdp: bigint
@@ -38,26 +42,37 @@ interface StateTestParams {
 
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
-  totalLiquidity: 0n,
+  totalLiquidity: 50n,
   totalClaims: { bond: 0n, insurance: 0n },
   totalDebtCreated: 0n,
   x: 100n,
-  y: 100n,
-  z: 100n,
+  y: 10n,
+  z: 1n,
 }
 
 const stateTest: StateTestParams = {
+  reserves: { asset: 0n, collateral: 0n },
+  totalLiquidity: 50n,
+  totalClaims: { bond: 0n, insurance: 0n },
+  totalDebtCreated: 0n,
   asset: 100n,
-  interest: 100n,
-  cdp: 100n,
+  interest: 10n,
+  cdp: 1n,
 }
+
+// const stateTest: StateTestParams = {
+//   totalLiquidity:50n,
+//   asset: 100n,
+//   interest: 100n,
+//   cdp: 100n,
+// }
 
 let MintMathTestContract: MintMathTest
 let maturity: BigNumberish;
 
 const assetIn: bigint = 1000n
-const interestDecrease: bigint = 30n
-const cdpDecrease: bigint = 2n
+const interestIncrease: bigint = 30n
+const cdpIncrease: bigint = 2n
 const fee: bigint = 2n
 
 
@@ -73,6 +88,10 @@ describe('MintMath', () => {
 
   it('Getting LiquidityTotal for AssetIn', async () => {
     expect(await MintMathTestContract.getLiquidityTotal1(assetIn)).to.be.equalBigInt((await MintMath.getLiquidityTotal1(assetIn)));
+  })
+
+  it('Getting LiquidityTotal for AssetIn', async () => {
+  expect((await MintMathTestContract.getLiquidityTotal2(state,assetIn,interestIncrease,cdpIncrease))).to.be.equal(MintMath.getLiquidityTotal2(stateTest,assetIn,interestIncrease,cdpIncrease));
   })
 
   
