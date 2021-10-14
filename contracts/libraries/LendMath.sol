@@ -17,7 +17,7 @@ library LendMath {
         uint112 yDecrease,
         uint112 zDecrease,
         uint16 fee
-    ) internal pure {
+    ) internal view {
         uint128 feeBase = 0x10000 + fee;
         uint112 xReserve = state.x + xIncrease;
         uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);

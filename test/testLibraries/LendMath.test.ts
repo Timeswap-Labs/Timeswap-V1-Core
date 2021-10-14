@@ -72,8 +72,7 @@ describe('LendMath', () => {
 
   it('Check should return true', async () => {
     const returnValue1 = await lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)
-    console.log(returnValue1);
-    let returnValue2 = await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee);
+    const returnValue2 = await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee);
     expect(returnValue1).to.be.true;
     expect(returnValue2).to.be.true;
     expect(returnValue1).to.equal(returnValue2);

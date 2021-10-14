@@ -3,6 +3,7 @@ pragma solidity =0.8.1;
 
 import {LendMath} from '../../libraries/LendMath.sol';
 import {IPair} from '../../interfaces/IPair.sol';
+import 'hardhat/console.sol';
 
 contract LendMathTest {
     using LendMath for IPair.State;
@@ -13,7 +14,7 @@ contract LendMathTest {
         uint112 yDecrease,
         uint112 zDecrease,
         uint16 fee
-    ) external pure returns (bool) {
+    ) external view returns (bool) {
         state.check(
             xIncrease,
             yDecrease,

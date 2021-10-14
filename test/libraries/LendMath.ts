@@ -1,5 +1,5 @@
-import { mulDiv } from '../libraries/FullMath'
-import { checkConstantProduct } from '../libraries/ConstantProduct'
+import { checkConstantProduct } from '../libraries/ConstantProduct';
+import { mulDiv } from '../libraries/FullMath';
 
 export function check(
   state: {

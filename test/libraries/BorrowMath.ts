@@ -1,6 +1,6 @@
-import { divUp, shiftUp } from '../libraries/Math'
-import { mulDivUp } from '../libraries/FullMath'
-import { checkConstantProduct } from '../libraries/ConstantProduct'
+import { checkConstantProduct } from '../libraries/ConstantProduct';
+import { mulDivUp } from '../libraries/FullMath';
+import { divUp, shiftUp } from '../libraries/Math';
 
 export function check(
   state: {
@@ -14,10 +14,14 @@ export function check(
   fee: bigint
 ): boolean | string {
   const feeBase = 0x10000n - fee
+  console.log(feeBase);
   const assetReserve = state.asset - assetOut
+  console.log(assetReserve);
   if (assetReserve < 0) return "assetReserve < 0"
   const interestAdjusted = adjust(interestIncrease, state.interest, feeBase)
+  console.log(interestAdjusted);
   const cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase)
+  console.log(cdpAdjusted);
   const productCheck = checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)
   if (!productCheck) return "Invariance"
   let minimum = assetOut
