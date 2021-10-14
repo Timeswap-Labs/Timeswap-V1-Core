@@ -1,10 +1,8 @@
-import { BigNumberish } from '@ethersproject/bignumber'
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { WithdrawMathTest } from '../../typechain/WithdrawMathTest'
 import WithdrawMath from '../libraries/WithdrawMath'
 import { expect } from '../shared/Expect'
-import { now } from '../shared/Helper'
 
 const { solidity } = waffle
 chai.use(solidity)
@@ -58,7 +56,7 @@ const stateTest: StateTestParams = {
 }
 
 let WithdrawMathTestContract: WithdrawMathTest
-let maturity: BigNumberish;
+
 
 const bondIn: bigint = 10n
 const insuranceIn: bigint = 30n
@@ -67,7 +65,6 @@ const insuranceIn: bigint = 30n
 describe('Withdraw Math', () => {
 
   before(async () => {
-    maturity = await now() + 10000n;
     const WithdrawMathTestContractFactory = await ethers.getContractFactory('WithdrawMathTest')
     WithdrawMathTestContract = (await WithdrawMathTestContractFactory.deploy()) as WithdrawMathTest
     await WithdrawMathTestContract.deployed()

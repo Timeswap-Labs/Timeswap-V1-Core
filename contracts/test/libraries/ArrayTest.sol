@@ -15,7 +15,9 @@ contract ArrayTest {
     ) external returns (uint256 id) {
         for (uint256 i; i < duesStorage.length; i++) duesStorage.pop;
         
-        for (uint256 i; i < dues.length; i++) duesStorage[i] = dues[i];
+        for (uint256 i; i < dues.length; i++) {
+            duesStorage.push(dues[i]);
+        }
 
         return duesStorage.insert(dueOut);
     }
