@@ -5,13 +5,13 @@ import {MintMath} from '../../libraries/MintMath.sol';
 import {IPair} from '../../interfaces/IPair.sol';
 
 contract MintMathTest {
-    function getLiquidityTotal(
+    function getLiquidityTotal1(
         uint112 xIncrease
     ) external pure returns (uint256 liquidityTotal) {
         return MintMath.getLiquidityTotal(xIncrease);
     }
 
-    function getLiquidityTotal(
+    function getLiquidityTotal2(
         IPair.State memory state,
         uint112 xIncrease,
         uint112 yIncrease,

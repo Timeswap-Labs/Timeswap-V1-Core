@@ -42,7 +42,7 @@ library BorrowMath {
         uint112 reserve,
         uint112 increase,
         uint128 feeBase
-    ) private view returns (uint128 adjusted) {
+    ) private pure returns (uint128 adjusted) {
         adjusted = reserve;
         adjusted <<= 16;
         adjusted += feeBase * increase;
