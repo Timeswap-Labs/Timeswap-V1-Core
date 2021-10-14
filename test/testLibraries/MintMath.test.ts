@@ -3,6 +3,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { MintMathTest } from '../../typechain/MintMathTest'
+import MintMath from '../libraries/MintMath'
+import { expect } from '../shared/Expect'
 import { now } from '../shared/Helper'
 
 let signers: SignerWithAddress[]
@@ -69,8 +71,8 @@ describe('MintMath', () => {
     await MintMathTestContract.deployed();
   })
 
-  it('Check should return true', async () => {
-    console.log(MintMathTestContract.getLiquidityTotal1();
+  it('Getting LiquidityTotal for AssetIn', async () => {
+    expect(await MintMathTestContract.getLiquidityTotal1(assetIn)).to.be.equalBigInt((await MintMath.getLiquidityTotal1(assetIn)));
   })
 
   
