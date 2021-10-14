@@ -4,6 +4,7 @@ import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { MintMathTest } from '../../typechain/MintMathTest'
 import MintMath from '../libraries/MintMath'
+import { PROTOCOL_FEE } from '../shared/Constants'
 import { expect } from '../shared/Expect'
 import { now } from '../shared/Helper'
 
@@ -93,6 +94,11 @@ describe('MintMath', () => {
   it('Getting LiquidityTotal for AssetIn', async () => {
   expect((await MintMathTestContract.getLiquidityTotal2(state,assetIn,interestIncrease,cdpIncrease))).to.be.equal(MintMath.getLiquidityTotal2(stateTest,assetIn,interestIncrease,cdpIncrease));
   })
+
+  it('Getting expected Liquidity', async () => {
+    const liquitidyTotal: BigNumberish = await MintMathTestContract.getLiquidityTotal2(state,assetIn,interestIncrease,cdpIncrease)
+    expect((await MintMathTestContract.getLiquidity(maturity,liquitidyTotal,PROTOCOL_FEE))).to.be.equalBigInt((await MintMath.getLiquidity(BigInt(maturity.toString()),BigInt(liquitidyTotal.toString()),PROTOCOL_FEE, (await now()))));
+    })
 
   
 
