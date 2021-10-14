@@ -1,16 +1,15 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { ethers } from 'hardhat'
-import { ContractTransaction } from 'ethers'
-import { Address } from 'hardhat-deploy/dist/types'
-import { BigNumberish } from '@ethersproject/bignumber';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { ContractTransaction } from 'ethers';
+import { ethers } from 'hardhat';
+import { Address } from 'hardhat-deploy/dist/types';
+import type { TestToken } from '../../typechain/TestToken';
+import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory';
+import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair';
+import type { TimeswapPairCallee as PairContractCallee } from '../../typechain/TimeswapPairCallee';
+import { factoryInit } from './Factory';
+import { ConstantProduct, Due, Tokens, TotalClaims } from './PairInterface';
 
-import { factoryInit } from './Factory'
-import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
-import { TotalClaims, Due, State, Tokens, ConstantProduct } from './PairInterface'
 
-import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
-import type { TimeswapPairCallee as PairContractCallee } from '../../typechain/TimeswapPairCallee'
-import type { TestToken } from '../../typechain/TestToken'
 
 
 export class Pair {
