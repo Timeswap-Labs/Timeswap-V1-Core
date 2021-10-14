@@ -8,5 +8,6 @@ library Array {
         id = dues.length;   
         
         dues.push(dueOut);
+        
     }
 }

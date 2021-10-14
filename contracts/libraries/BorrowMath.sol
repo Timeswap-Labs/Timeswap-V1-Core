@@ -7,7 +7,6 @@ import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
 
-import "hardhat/console.sol";
 
 library BorrowMath {
     using Math for uint256;
@@ -21,13 +20,12 @@ library BorrowMath {
         uint112 yIncrease,
         uint112 zIncrease,
         uint16 fee
-    ) internal view {
+    ) internal pure {
         uint128 feeBase = 0x10000 - fee;
         uint112 xReserve = state.x - xDecrease;
         uint128 yAdjusted = adjust(state.y, yIncrease, feeBase);
         uint128 zAdjusted = adjust(state.z, zIncrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
-        
 
         uint256 minimum = xDecrease;
         minimum *= state.y;

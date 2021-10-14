@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
+
 import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from './SafeCast.sol';
-import 'hardhat/console.sol';
 
 library LendMath {
     using FullMath for uint256;
@@ -23,6 +23,7 @@ library LendMath {
         uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
         uint128 zAdjusted = adjust(state.z, zDecrease, feeBase);
         state.checkConstantProduct(xReserve, yAdjusted, zAdjusted);
+
         uint256 minimum = xIncrease;
         minimum *= state.y;
         minimum <<= 12;
@@ -37,11 +38,9 @@ library LendMath {
         uint112 decrease,
         uint128 feeBase
     ) private pure returns (uint128 adjusted) {
-        uint256 _adjusted = reserve;
-        _adjusted <<= 16;
-        uint256 _adjustedDecrease = uint256(feeBase) * decrease;
-        _adjusted -= _adjustedDecrease;
-        adjusted = _adjusted.toUint128();
+        adjusted = reserve;
+        adjusted <<= 16;
+        adjusted -= feeBase * decrease;
     }
 
     function getBond(

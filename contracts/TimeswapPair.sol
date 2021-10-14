@@ -14,7 +14,6 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
-import 'hardhat/console.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -168,16 +167,14 @@ contract TimeswapPair is IPair {
         pool.liquidities[liquidityTo] += liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
-        
         dueOut.collateral = MintMath.getCollateral(maturity, xIncrease, yIncrease, zIncrease);
-        
         dueOut.startBlock = BlockNumber.get();
-        
+
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
-        
 
         id = pool.dues[dueTo].insert(dueOut);
         
+
         pool.state.reserves.asset += xIncrease;
         pool.state.reserves.collateral += dueOut.collateral;
         pool.state.totalDebtCreated += dueOut.debt;
@@ -235,15 +232,16 @@ contract TimeswapPair is IPair {
         require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
         require(bondTo != address(this) && insuranceTo != address(this), 'Invalid');
         require(xIncrease > 0, 'Invalid');
+
         Pool storage pool = pools[maturity];
         require(pool.state.totalLiquidity > 0, 'Invalid');
+
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
 
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);
 
         Callback.lend(asset, xIncrease, data);
-        
 
         pool.state.totalClaims.bond += claimsOut.bond;
         pool.state.totalClaims.insurance += claimsOut.insurance;
@@ -348,6 +346,7 @@ contract TimeswapPair is IPair {
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
+        
         require(block.timestamp < maturity, 'Expired');
         require(ids.length == assetsIn.length, 'Invalid');
         require(ids.length == collateralsOut.length, 'Invalid');
@@ -358,7 +357,7 @@ contract TimeswapPair is IPair {
 
         Due[] storage dues = pool.dues[owner];
 
-        for (uint256 i; i < ids.length; i++) {
+        for (uint256 i = 0; i < ids.length; i++) {
             Due storage due = dues[ids[i]]; 
             require(due.startBlock != BlockNumber.get(), 'Invalid');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');

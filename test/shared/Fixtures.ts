@@ -54,19 +54,32 @@ export async function mintFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
   mintParams: MintParams
-): Promise<Fixture> {
+): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
+  const pairContractState = await pair.state();
+  const totalliquidity = await pair.totalLiquidity();
+  const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n;
+  const pairSimPool = pairSim.getPool(pair.maturity);
+  const pairSimContractState = pairSimPool.state // getting state from the contract
+  const k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n;
+  if (k_pairContract != k_pairSimContract) throw Error("state of Pair and PairSim not same")
+  const { assetIn, collateralIn, interestIncrease, cdpIncrease, maturity, currentTimeStamp} = mintParams
+  const dueOutDebt = MintMath.getDebt(maturity,assetIn,interestIncrease,currentTimeStamp);
+  if (dueOutDebt>BigInt(MaxUint112.toString())) throw Error("dueOut.debt > MaxUint112");
+  const dueOutCollateral = MintMath.getCollateral(maturity,assetIn,interestIncrease,cdpIncrease, currentTimeStamp);
+  if (dueOutCollateral>BigInt(MaxUint112.toString())) throw Error("dueOut.Collateral > MaxUint112");;
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
-  pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block)
-  return { pair, pairSim, assetToken, collateralToken }
+  const mintData = pairSim.mint(pair.maturity, signer.address, signer.address, BigInt(mintParams.assetIn), mintParams.interestIncrease, mintParams.cdpIncrease, block);
+  
+  return { pair, pairSim, assetToken, collateralToken, mintData }
 }
 
 export async function lendFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
   lendParams: LendParams
-): Promise<Fixture> {
+): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture;
   if (lendParams.assetIn <= 0) throw Error("Zero");
   const pairContractState = await pair.state();
@@ -108,8 +121,8 @@ export async function lendFixture(
   if (_insuranceOut > BigInt(MaxUint128.toString())) throw Error("_insuranceOut > Uint128"); //uint128 
   const txn = await pair.upgrade(signer).lend(lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n));
   const block = await getBlock(txn.blockHash!)
-  pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n), block)
-  return { pair, pairSim, assetToken, collateralToken }
+  const lendData = pairSim.lend(pair.maturity, signer.address, signer.address, lendParams.assetIn, lendParams.interestDecrease, (cdpAdjust >> 32n), block)
+  return { pair, pairSim, assetToken, collateralToken, lendData }
 }
 
 export interface borrowError {
@@ -122,7 +135,7 @@ export async function borrowFixture(
   signer: SignerWithAddress,
   borrowParams: BorrowParams,
   owner = false
-): Promise<Fixture | borrowError> {
+): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state();
   const totalliquidity = await pair.totalLiquidity();
@@ -168,15 +181,15 @@ export async function borrowFixture(
   };
   const txn = await pair.upgrade(signer).borrow(borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), owner);
   const block = await getBlock(txn.blockHash!)
-  pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), block)
-  return { pair, pairSim, assetToken, collateralToken }
+  const debtObj = pairSim.borrow(pair.maturity, signer.address, signer.address, borrowParams.assetOut, borrowParams.interestIncrease, (cdpAdjust >> 32n), block)
+  return { pair, pairSim, assetToken, collateralToken, debtObj }
 }
 
 
 export async function burnFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  burnParams: BurnParams
+  burnParams: any
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)

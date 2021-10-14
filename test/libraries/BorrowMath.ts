@@ -36,10 +36,7 @@ export function adjust(increase: bigint, reserve: bigint, feeBase: bigint): bigi
 
 export function readjust(adjusted: bigint, reserve: bigint, feeBase: bigint): bigint {
   let increase = adjusted
-  console.log("increase = adjusted", increase);
   increase -= reserve << 16n
-  console.log("reserve << 16n",reserve << 16n);
-  console.log("increase -= reserve << 16n", increase -= reserve << 16n);
   increase = divUp(increase, feeBase)
   return increase
 }
