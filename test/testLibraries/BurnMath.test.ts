@@ -60,8 +60,8 @@ const liquidityIn: bigint = 100n
 
 describe('BurnMath', () => {
   before(async () => {
-    const BurnMathTestContactFactory = await ethers.getContractFactory('BurnMathTest')
-    burnMathTestContract = (await BurnMathTestContactFactory.deploy()) as BurnMathTest
+    const BurnMathTestContractFactory = await ethers.getContractFactory('BurnMathTest')
+    burnMathTestContract = (await BurnMathTestContractFactory.deploy()) as BurnMathTest
     await burnMathTestContract.deployed()
   })
 

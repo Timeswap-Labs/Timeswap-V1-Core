@@ -1,10 +1,10 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { SafeTransferTest } from '../../typechain/SafeTransferTest'
 import { IERC20 } from '../../typechain/IERC20'
-import { testTokenNew } from '../shared/TestToken'
 import { SafeBalanceTest } from '../../typechain/SafeBalanceTest'
+import { SafeTransferTest } from '../../typechain/SafeTransferTest'
+import { testTokenNew } from '../shared/TestToken'
 
 let signers: SignerWithAddress[]
 
@@ -27,8 +27,8 @@ describe('Checking SafeTransfer', () => {
     const SafeTransferFactory = await ethers.getContractFactory('SafeTransferTest')
     safeTransferTestContract = (await SafeTransferFactory.deploy()) as SafeTransferTest
     await safeTransferTestContract.deployed()
-    const SafeBalanceTestContactFactory = await ethers.getContractFactory('SafeBalanceTest')
-    safeBalTestContract = (await SafeBalanceTestContactFactory.deploy()) as SafeBalanceTest
+    const SafeBalanceTestContractFactory = await ethers.getContractFactory('SafeBalanceTest')
+    safeBalTestContract = (await SafeBalanceTestContractFactory.deploy()) as SafeBalanceTest
     await safeBalTestContract.deployed()
     token.transfer(safeTransferTestContract.address, tokenTransfer)
     safeTransferTestContract.safeTransfer(token.address, safeBalTestContract.address, tokenTransfer)

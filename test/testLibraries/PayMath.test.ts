@@ -30,8 +30,8 @@ describe('Pay Math', () => {
 
   before(async () => {
     signers = await ethers.getSigners()
-    const PayMathTestContactFactory = await ethers.getContractFactory('PayMathTest')
-    PayMathTestContract = (await PayMathTestContactFactory.deploy()) as PayMathTest
+    const PayMathTestContractFactory = await ethers.getContractFactory('PayMathTest')
+    PayMathTestContract = (await PayMathTestContractFactory.deploy()) as PayMathTest
     await PayMathTestContract.deployed()
   })
 

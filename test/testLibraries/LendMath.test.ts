@@ -65,8 +65,8 @@ describe('LendMath', () => {
   before(async () => {
     signers = await ethers.getSigners()
     maturity = await now() + 10000n;
-    const LendMathTestContactFactory = await ethers.getContractFactory('LendMathTest')
-    lendMathTestContract = (await LendMathTestContactFactory.deploy()) as LendMathTest
+    const LendMathTestContractFactory = await ethers.getContractFactory('LendMathTest')
+    lendMathTestContract = (await LendMathTestContractFactory.deploy()) as LendMathTest
     await lendMathTestContract.deployed()
   })
 
@@ -93,8 +93,8 @@ describe('LendMath', () => {
   it('Check should be reverted', async () => {
     const interestDecrease: bigint = 3n
     maturity = await now() + 10000n;
-    const LendMathTestContactFactory = await ethers.getContractFactory('LendMathTest')
-    lendMathTestContract = (await LendMathTestContactFactory.deploy()) as LendMathTest
+    const LendMathTestContractFactory = await ethers.getContractFactory('LendMathTest')
+    lendMathTestContract = (await LendMathTestContractFactory.deploy()) as LendMathTest
     await lendMathTestContract.deployed()
     await expect(lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)).to.be.revertedWith("Minimum");
     expect(await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee)).to.be.false;   

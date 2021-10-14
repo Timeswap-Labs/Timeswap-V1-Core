@@ -82,8 +82,8 @@ describe('MintMath', () => {
   before(async () => {
     signers = await ethers.getSigners()
     maturity = await now() + 10000n;
-    const MintMathTestContactFactory = await ethers.getContractFactory('MintMathTest')
-    MintMathTestContract = (await MintMathTestContactFactory.deploy()) as MintMathTest
+    const MintMathTestContractFactory = await ethers.getContractFactory('MintMathTest')
+    MintMathTestContract = (await MintMathTestContractFactory.deploy()) as MintMathTest
     await MintMathTestContract.deployed();
   })
 

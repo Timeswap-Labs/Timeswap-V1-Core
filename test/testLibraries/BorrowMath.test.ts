@@ -1,13 +1,10 @@
 import { BigNumberish } from '@ethersproject/bignumber'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import chai from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { BorrowMathTest } from '../../typechain/BorrowMathTest'
 import BorrowMath from '../libraries/BorrowMath'
 import { expect } from '../shared/Expect'
 import { now } from '../shared/Helper'
-
-let signers: SignerWithAddress[]
 
 const { solidity } = waffle
 chai.use(solidity)
@@ -63,10 +60,9 @@ const fee: bigint = 2n
 describe('Borrow Math', () => {
 
   before(async () => {
-    signers = await ethers.getSigners()
     maturity = await now() + 10000n;
-    const BorrowMathTestContactFactory = await ethers.getContractFactory('BorrowMathTest')
-    borrowMathTestContract = (await BorrowMathTestContactFactory.deploy()) as BorrowMathTest
+    const BorrowMathTestContractFactory = await ethers.getContractFactory('BorrowMathTest')
+    borrowMathTestContract = (await BorrowMathTestContractFactory.deploy()) as BorrowMathTest
     await borrowMathTestContract.deployed()
   })
 
@@ -93,8 +89,8 @@ describe('Borrow Math', () => {
   it('Check should be reverted', async () => {
     const interestIncrease: bigint = 1n
     maturity = await now() + 10000n;
-    const BorrowMathTestContactFactory = await ethers.getContractFactory('BorrowMathTest')
-    borrowMathTestContract = (await BorrowMathTestContactFactory.deploy()) as BorrowMathTest
+    const BorrowMathTestContractFactory = await ethers.getContractFactory('BorrowMathTest')
+    borrowMathTestContract = (await BorrowMathTestContractFactory.deploy()) as BorrowMathTest
     await borrowMathTestContract.deployed()
     expect(await BorrowMath.check(stateTest, assetOut, interestIncrease, cdpIncrease, fee)).to.be.equal("interestIncrease < minimum");
     await expect(borrowMathTestContract.check(state, assetOut, interestIncrease, cdpIncrease, fee)).to.be.revertedWith("Minimum");
