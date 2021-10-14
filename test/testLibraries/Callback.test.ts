@@ -14,46 +14,6 @@ let signers: SignerWithAddress[]
 const { solidity } = waffle
 chai.use(solidity)
 
-interface Token {
-  asset: bigint
-  collateral: bigint
-}
-interface Claims {
-  bond: bigint
-  insurance: bigint
-}
-interface StateParams {
-  reserves: Token
-  totalLiquidity: bigint
-  totalClaims: Claims
-  totalDebtCreated: bigint
-  x: bigint
-  y: bigint
-  z: bigint
-}
-
-interface StateTestParams {
-  asset: bigint
-  interest: bigint
-  cdp: bigint
-}
-
-const state: StateParams = {
-  reserves: { asset: 0n, collateral: 0n },
-  totalLiquidity: 0n,
-  totalClaims: { bond: 0n, insurance: 0n },
-  totalDebtCreated: 0n,
-  x: 5000n,
-  y: 10000n,
-  z: 10000n,
-}
-
-const stateTest: StateTestParams = {
-  asset: 5000n,
-  interest: 10000n,
-  cdp: 10000n,
-}
-
 let CallbackTestContract: CallbackTest
 let CallbackTestCalleeContract: CallbackTestCallee
 let maturity: BigNumberish;
@@ -62,9 +22,6 @@ let collateralToken: IERC20
 
 const assetIn: bigint = 0n
 const collateralIn: bigint = 0n
-const interestIncrease: bigint = 30n
-const cdpIncrease: bigint = 50n
-const fee: bigint = 2n
 
 describe('Borrow Math', () => {
 
