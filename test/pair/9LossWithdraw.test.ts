@@ -66,6 +66,7 @@ describe('Withdraw', () => {
               }
             }
 
+            // do the borrowTxn
             const borrowParams: BorrowParams =
             {
               assetOut: testCase.borrowAssetOut,

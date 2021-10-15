@@ -14,19 +14,6 @@ export interface MintParams {
     maturity: bigint,
     currentTimeStamp: bigint
 }
-
-export interface MintBorrowParams {
-    assetIn: bigint;
-    collateralIn: bigint;
-    interestIncrease: bigint;
-    cdpIncrease: bigint;
-    maturity: bigint,
-    currentTimeStamp: bigint,
-    borrowAssetOut: bigint,
-    borrowCollateralIn: bigint,
-    borrowInterestIncrease: bigint,
-    borrowCdpIncrease: bigint
-}
 export interface Mint {
     Success: MintParams[];
     Failure: MintParams[];
@@ -45,7 +32,7 @@ export async function mintTestCases(): Promise<MintParams[]> {
             return {
                 assetIn: pseudoRandomBigUint(MaxUint112),
                 collateralIn: pseudoRandomBigUint(MaxUint112),
-                interestIncrease: pseudoRandomBigUint(MaxUint112) / 10n,
+                interestIncrease: pseudoRandomBigUint(MaxUint112)/10n,
                 cdpIncrease: pseudoRandomBigUint(MaxUint112),
                 maturity: nt + 500000000n,
                 currentTimeStamp: nt
@@ -61,7 +48,7 @@ export async function mintSuccessCheck({
     maturity,
     currentTimeStamp
 }: MintParams): Promise<boolean> {
-
+   
 
     if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) {
         return false;
@@ -72,23 +59,4 @@ export async function mintSuccessCheck({
 
 export async function mintFailureCheck(params: MintParams): Promise<boolean> {
     return !(await mintSuccessCheck(params));
-}
-
-export async function lossAndMint(): Promise<MintBorrowParams[]> {
-    const nt = await now();
-    const TestCases = [
-        {
-            assetIn: 1000n,
-            collateralIn: 5n,
-            interestIncrease: 2n,
-            cdpIncrease: 10n,
-            maturity: 3908191630n,
-            currentTimeStamp: nt,
-            borrowAssetOut: 900n,
-            borrowCollateralIn: 10n,
-            borrowInterestIncrease: 400n,
-            borrowCdpIncrease: 500n
-        }
-    ]
-    return TestCases;
 }
