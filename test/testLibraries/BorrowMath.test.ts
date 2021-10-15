@@ -93,7 +93,7 @@ describe('Borrow Math', () => {
     borrowMathTestContract = (await BorrowMathTestContractFactory.deploy()) as BorrowMathTest
     await borrowMathTestContract.deployed()
     expect(await BorrowMath.check(stateTest, assetOut, interestIncrease, cdpIncrease, fee)).to.be.equal("interestIncrease < minimum");
-    await expect(borrowMathTestContract.check(state, assetOut, interestIncrease, cdpIncrease, fee)).to.be.revertedWith("Minimum");
+    await expect(borrowMathTestContract.check(state, assetOut, interestIncrease, cdpIncrease, fee)).to.be.revertedWith("E302");
     
   })
 

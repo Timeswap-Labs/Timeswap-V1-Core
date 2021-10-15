@@ -13,7 +13,7 @@ contract BorrowMathTest {
         uint112 yIncrease,
         uint112 zIncrease,
         uint16 fee
-    ) external view returns (bool) {
+    ) external pure returns (bool) {
         state.check(
             xDecrease,
             yIncrease,

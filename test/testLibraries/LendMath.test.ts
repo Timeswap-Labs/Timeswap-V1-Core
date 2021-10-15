@@ -96,7 +96,7 @@ describe('LendMath', () => {
     const LendMathTestContractFactory = await ethers.getContractFactory('LendMathTest')
     lendMathTestContract = (await LendMathTestContractFactory.deploy()) as LendMathTest
     await lendMathTestContract.deployed()
-    await expect(lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)).to.be.revertedWith("Minimum");
+    await expect(lendMathTestContract.check(state, assetIn, interestDecrease, cdpDecrease, fee)).to.be.revertedWith("E302");
     expect(await LendMath.check(stateTest, assetIn, interestDecrease, cdpDecrease, fee)).to.be.false;   
 
   })

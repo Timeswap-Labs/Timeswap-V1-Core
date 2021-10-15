@@ -59,10 +59,10 @@ describe('constantProduct', () => {
     await constantProductTestContract.deployed()
   })
 
-  it('checkConstantProduct should revert with string Invariance', async () => {
+  it('checkConstantProduct should reverted', async () => {
     await expect(
       constantProductTestContract.checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)
-    ).to.be.revertedWith('Invariance')
+    ).to.be.revertedWith('E301')
     expect(ConstantProduct.checkConstantProduct(stateTest, assetReserve, interestAdjusted, cdpAdjusted)).to.be.false
   })
 

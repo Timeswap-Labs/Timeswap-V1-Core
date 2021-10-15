@@ -53,9 +53,9 @@ describe('Pay Math', () => {
   })
 
 
-  it('Pay Proptional should return revert with Forbidden', async () => {
+  it('Pay Proptional should return revert with E303', async () => {
     const collateralOut: bigint = 600n
-    await expect(PayMathTestContract.checkProportional(assetIn,collateralOut,due)).to.be.revertedWith("Forbidden");
+    await expect(PayMathTestContract.checkProportional(assetIn,collateralOut,due)).to.be.revertedWith("E303");
     expect(await PayMath.checkProportional(assetIn,collateralOut,due)).to.be.false
   })
 

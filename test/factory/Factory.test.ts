@@ -1,11 +1,11 @@
-import chai from 'chai'
-import { ethers, waffle } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
-
-import { pseudoRandomBigUint } from '../shared/Helper'
+import { Contract } from '@ethersproject/contracts';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import chai from 'chai';
+import { ethers, waffle } from 'hardhat';
 import { factoryInit } from '../shared/Factory';
+import { pseudoRandomBigUint } from '../shared/Helper';
+
 
 const { solidity } = waffle
 chai.use(solidity)
@@ -40,25 +40,25 @@ describe('Factory Contract', () => {
 
   it("Setting New Owner from non-owner account: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`);
-    await expect(factory.connect(signers[9]).setOwner(signers[1].address)).to.be.revertedWith("Forbidden");
+    await expect(factory.connect(signers[9]).setOwner(signers[1].address)).to.be.revertedWith("E102");
   });
 
   it("Setting New Owner to ZeroAddress: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`);
-    await expect(factory.connect(signers[10]).setOwner(ethers.constants.AddressZero)).to.be.revertedWith("Zero");
+    await expect(factory.connect(signers[10]).setOwner(ethers.constants.AddressZero)).to.be.revertedWith("E101");
   });
 
   it("Accept owner from third account: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`);
     await factory.connect(signers[10]).setOwner(signers[1].address);
-    await expect(factory.connect(signers[2]).acceptOwner()).to.be.revertedWith("Forbidden");
+    await expect(factory.connect(signers[2]).acceptOwner()).to.be.revertedWith("E102");
   })
 });
 
 describe("", async () => {
   it("Deploying factory with zero address: Reverted", async () => {
     console.log(`Deploying TimeSwap Factory with default fee and default protocolFee`);
-    await expect(factoryInit(ethers.constants.AddressZero)).to.be.revertedWith('Zero');
+    await expect(factoryInit(ethers.constants.AddressZero)).to.be.revertedWith('E101');
   });
 })
 

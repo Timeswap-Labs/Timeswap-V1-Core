@@ -13,7 +13,7 @@ contract LendMathTest {
         uint112 yDecrease,
         uint112 zDecrease,
         uint16 fee
-    ) external view returns (bool) {
+    ) external pure returns (bool) {
         state.check(
             xIncrease,
             yDecrease,

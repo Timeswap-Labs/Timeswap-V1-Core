@@ -51,16 +51,16 @@ describe('Deploying Pair Contract', () => {
   })
 
   it('Create pair with same collateral and asset address: Reverted', async () => {
-    await expect(factory.createPair(assetToken.address, assetToken.address)).to.be.revertedWith("Identical");
+    await expect(factory.createPair(assetToken.address, assetToken.address)).to.be.revertedWith("E103");
   })
 
   it('Create pair with same collateral or asset as zero address: Reverted', async () => {
-    await expect(factory.createPair(assetToken.address, ethers.constants.AddressZero)).to.be.revertedWith("Zero");
-    await expect(factory.createPair(ethers.constants.AddressZero, collateralToken.address)).to.be.revertedWith("Zero");
+    await expect(factory.createPair(assetToken.address, ethers.constants.AddressZero)).to.be.revertedWith("E101");
+    await expect(factory.createPair(ethers.constants.AddressZero, collateralToken.address)).to.be.revertedWith("E101");
   })
 
   it('Create pair twice: Reverted', async () => {
     await factory.createPair(assetToken.address, collateralToken.address);
-    await expect(factory.createPair(assetToken.address, collateralToken.address)).to.be.revertedWith("Exist");
+    await expect(factory.createPair(assetToken.address, collateralToken.address)).to.be.revertedWith("E104");
   })
 })
