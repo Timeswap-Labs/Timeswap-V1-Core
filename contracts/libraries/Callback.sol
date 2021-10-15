@@ -26,8 +26,8 @@ library Callback {
         ITimeswapMintCallback(msg.sender).timeswapMintCallback(assetIn, collateralIn, data);
         uint256 _assetReserve = asset.safeBalance();
         uint256 _collateralReserve = collateral.safeBalance();
-        require(_assetReserve >= assetReserve + assetIn, 'MO');
-        require(_collateralReserve >= collateralReserve + collateralIn, 'MO');
+        require(_assetReserve >= assetReserve + assetIn, 'E304');
+        require(_collateralReserve >= collateralReserve + collateralIn, 'E305');
     }
 
     function lend(
@@ -38,7 +38,7 @@ library Callback {
         uint256 assetReserve = asset.safeBalance();
         ITimeswapLendCallback(msg.sender).timeswapLendCallback(assetIn, data);
         uint256 _assetReserve = asset.safeBalance();
-        require(_assetReserve >= assetReserve + assetIn, 'M0');
+        require(_assetReserve >= assetReserve + assetIn, 'E304');
     }
 
     function borrow(
@@ -49,7 +49,7 @@ library Callback {
         uint256 collateralReserve = collateral.safeBalance();
         ITimeswapBorrowCallback(msg.sender).timeswapBorrowCallback(collateralIn, data);
         uint256 _collateralReserve = collateral.safeBalance();
-        require(_collateralReserve >= collateralReserve + collateralIn, 'MO');
+        require(_collateralReserve >= collateralReserve + collateralIn, 'E305');
     }
     
     function pay(
@@ -60,6 +60,6 @@ library Callback {
         uint256 assetReserve = asset.safeBalance();
         ITimeswapPayCallback(msg.sender).timeswapPayCallback(assetIn, data);
         uint256 _assetReserve = asset.safeBalance();
-        require(_assetReserve >= assetReserve + assetIn, 'M0');
+        require(_assetReserve >= assetReserve + assetIn, 'E304');
     }
 }

@@ -141,3 +141,11 @@ Invariance error. When the new constant product is greater than the old constant
 ### E303
 
 Product of `assetIn` and `due.collateral` must be greater than or equal to the product of `collateralOut` and `due.debt`.
+
+### E304
+
+Asset Safe Balance.
+
+### E305
+
+Collateral Safe Balance.
