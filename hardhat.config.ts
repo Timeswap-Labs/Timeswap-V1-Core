@@ -1,29 +1,31 @@
 import '@typechain/hardhat'
+import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-import '@nomiclabs/hardhat-truffle5'
-import '@nomiclabs/hardhat-web3'
-import { HardhatUserConfig } from 'hardhat/types'
-import * as dotenv from 'dotenv'
+import 'hardhat-contract-sizer'
+import 'hardhat-deploy'
+import "solidity-coverage"
+import { config } from 'dotenv'
 
-dotenv.config()
+const env: any = config()['parsed']
 
-const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID
-const PRIVATE_KEY = process.env.PRIVATE_KEY
-
-const config: HardhatUserConfig = {
+export default {
   solidity: {
     version: '0.8.1',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 200,
       },
     },
   },
+  namedAccounts: {
+    factoryDeployer: 0,
+    factoryOwner: 0,
+  },
   networks: {
     rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      url: `https://rinkeby.infura.io/v3/${env.INFURA_PROJECT_ID}`,
+      accounts: [`0x${env.PRIVATE_KEY}`],
     },
   },
   typechain: {
@@ -31,6 +33,7 @@ const config: HardhatUserConfig = {
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
   },
+  mocha: {
+    timeout: 60000
+  }
 }
-
-export default config

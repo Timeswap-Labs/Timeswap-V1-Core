@@ -18,21 +18,16 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
+          cache: 'yarn'
 
       - name: Create a dummy .env file
         run: mv .env.sample .env
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: yarn --frozen-lockfile
 
-      - name: Run unit tests
-        run: |
-          npx hardhat compile &&
-          npx hardhat test
+      - name: Compile
+        run: yarn compile
+
+      - name: Test
+        run: yarn test
