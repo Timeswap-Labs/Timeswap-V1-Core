@@ -8,7 +8,7 @@ export function divUp(
     return z;
 }
 
-export function shiftUp(
+export function shiftRightUp(
     x: bigint,
     y: bigint,
   ): bigint {
@@ -19,5 +19,5 @@ export function shiftUp(
 
 export default {
     divUp,
-    shiftUp,
+    shiftRightUp,
 }

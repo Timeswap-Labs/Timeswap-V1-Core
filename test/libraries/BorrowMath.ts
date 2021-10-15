@@ -1,6 +1,6 @@
 import { checkConstantProduct } from '../libraries/ConstantProduct';
 import { mulDivUp } from '../libraries/FullMath';
-import { divUp, shiftUp } from '../libraries/Math';
+import { divUp } from '../libraries/Math';
 
 export function check(
   state: {
@@ -45,7 +45,7 @@ export function getDebt(maturity: bigint, assetOut: bigint, interestIncrease: bi
   let _debtOut = maturity
   _debtOut -= now
   _debtOut *= interestIncrease
-  _debtOut = shiftUp(_debtOut, 32n)
+  _debtOut = shiftRightUp(_debtOut, 32n)
   _debtOut += assetOut
   return _debtOut
 }

@@ -8,7 +8,7 @@ contract MathTest {
         return Math.divUp(x, y);
     }
 
-    function shiftUp(uint256 x, uint8 y) external pure returns (uint256 z) {
-        return Math.shiftUp(x, y);
+    function shiftRightUp(uint256 x, uint8 y) external pure returns (uint256 z) {
+        return Math.shiftRightUp(x, y);
     }
 }
