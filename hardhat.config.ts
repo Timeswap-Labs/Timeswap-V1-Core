@@ -1,16 +1,16 @@
-import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
+import '@typechain/hardhat'
+import { config } from 'dotenv'
 import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
 import "solidity-coverage"
-import { config } from 'dotenv'
 
 const env: any = config()['parsed']
 
 export default {
   solidity: {
-    version: '0.8.1',
+    version: '0.8.4',
     settings: {
       optimizer: {
         enabled: true,

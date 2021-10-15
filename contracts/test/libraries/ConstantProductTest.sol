@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
 import {ConstantProduct} from '../../libraries/ConstantProduct.sol';
 import {IPair} from '../../interfaces/IPair.sol';

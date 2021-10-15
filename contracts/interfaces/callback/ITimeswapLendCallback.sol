@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
 /// @title Callback for ITimeswapPair#lend
 /// @notice Any contract that calls ITimeswapPair#lend must implement this interface
