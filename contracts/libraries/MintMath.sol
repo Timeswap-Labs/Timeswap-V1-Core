@@ -6,18 +6,25 @@ import {Math} from './Math.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
+/// @title MintMath library
+/// @author Timeswap Labs
 library MintMath {
     using Math for uint256;
     using FullMath for uint256;
     using SafeCast for uint256;
 
-    function getLiquidityTotal(
-        uint112 xIncrease
-    ) internal pure returns (uint256 liquidityTotal) {
+    /// @dev Get the total liquidity.
+    /// @dev Use this if the total liquidity in the pool is 0.
+    /// @param xIncrease The increase in the X state.
+    function getLiquidityTotal(uint112 xIncrease) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = xIncrease;
         liquidityTotal <<= 56;
     }
 
+    /// @dev Get the total liquidity.
+    /// @param xIncrease The increase in the X state.
+    /// @param yIncrease The increase in the Y state.
+    /// @param zIncrease The increase in the Z state.
     function getLiquidityTotal(
         IPair.State memory state,
         uint112 xIncrease,
@@ -31,6 +38,10 @@ library MintMath {
         );
     }
 
+    /// @dev Get the total liquidity factoring in the protocolFee.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param liquidityTotal The total liquidity without the protocolFee.
+    /// @param protocolFee The chosen protocol fee rate.
     function getLiquidity(
         uint256 maturity,
         uint256 liquidityTotal,
@@ -43,6 +54,7 @@ library MintMath {
         liquidityOut = liquidityTotal.mulDiv(0x10000000000, denominator);
     }
 
+    /// @dev Get the minimum of 3 numbers
     function min(
         uint256 x,
         uint256 y,
@@ -57,6 +69,10 @@ library MintMath {
         }
     }
 
+    /// @dev Get the debt that the lp has to pay back.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param xIncrease The increase in the X state.
+    /// @param yIncrease The increase in the Y state.
     function getDebt(
         uint256 maturity,
         uint112 xIncrease,
@@ -70,6 +86,11 @@ library MintMath {
         debtIn = _debtIn.toUint112();
     }
 
+    /// @dev Get the collateral that the lp has locked.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param xIncrease The increase in the X state.
+    /// @param yIncrease The increase in the Y state.
+    /// @param zIncrease The increase in the Z state.
     function getCollateral(
         uint256 maturity,
         uint112 xIncrease,

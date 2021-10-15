@@ -21,7 +21,7 @@ contract CallbackTestCallee {
         uint112 assetIn,
         uint112 collateralIn,
         bytes calldata data
-    ) external {
+    ) external returns (bool) {
         callbackTestContract.mint(
             asset,
             collateral,
@@ -29,42 +29,46 @@ contract CallbackTestCallee {
             collateralIn,
             data
         );
+        return true;
     }
 
     function lend(
         IERC20 asset,
         uint112 assetIn,
         bytes calldata data
-    ) external {
+    ) external returns (bool) {
         callbackTestContract.lend(
             asset,
             assetIn,
             data
         );
+        return true;
     }
 
     function borrow(
         IERC20 collateral,
         uint112 collateralIn,
         bytes calldata data
-    ) external {
+    ) external returns (bool) {
         callbackTestContract.borrow(
             collateral,
             collateralIn,
             data
         );
+        return true;
     }
 
     function pay(
         IERC20 asset,
         uint128 assetIn,
         bytes calldata data
-    ) external {
+    ) external returns (bool) {
         callbackTestContract.pay(
             asset,
             assetIn,
             data
         );
+        return true;
     }
     
     function timeswapMintCallback(

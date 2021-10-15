@@ -14,9 +14,9 @@ library ConstantProduct {
         uint128 zAdjusted
     ) internal pure {
         (uint256 prod0, uint256 prod1) = (uint256(yAdjusted) * zAdjusted).mul512(xReserve);
-        (uint256 _prod0, uint256 _prod1) = (uint256(state.y) * state.z << 32).mul512(state.x);
+        (uint256 _prod0, uint256 _prod1) = ((uint256(state.y) * state.z) << 32).mul512(state.x);
 
-        require(prod1 >= _prod1, 'Invariance');
-        if (prod1 == _prod1) require(prod0 >= _prod0, 'Invariance');
+        require(prod1 >= _prod1, 'E301');
+        if (prod1 == _prod1) require(prod0 >= _prod0, 'E301');
     }
 }

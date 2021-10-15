@@ -39,13 +39,22 @@ contract TimeswapPair is IPair {
     /// @dev Stores the individual states of each Pool.
     mapping(uint256 => Pool) private pools;
 
-    /// @dev Stores the access state for reentramcy guard.
+    /// @dev Stores the access state for reentrancy guard.
     uint256 private locked;
 
     /* ===== VIEW =====*/
 
     /// @inheritdoc IPair
-    function constantProduct(uint256 maturity) external view override returns (uint112 x, uint112 y, uint112 z) {
+    function constantProduct(uint256 maturity)
+        external
+        view
+        override
+        returns (
+            uint112 x,
+            uint112 y,
+            uint112 z
+        )
+    {
         State memory state = pools[maturity].state;
         return (state.x, state.y, state.z);
     }
@@ -110,7 +119,7 @@ contract TimeswapPair is IPair {
 
     /// @dev The modifier for reentrancy guard.
     modifier lock() {
-        require(locked == 0, 'Reentrancy');
+        require(locked == 0, 'E211');
         locked = 1;
         _;
         locked = 0;
@@ -137,11 +146,10 @@ contract TimeswapPair is IPair {
             Due memory dueOut
         )
     {
-        require(block.timestamp < maturity, 'Expired');
-        require(liquidityTo != address(0) && dueTo != address(0), 'Zero');
-        require(liquidityTo != address(this) && dueTo != address(this), 'Invalid');
-        require(xIncrease > 0, 'Invalid');
-        require(yIncrease > 0 && zIncrease > 0, 'Invalid');
+        require(block.timestamp < maturity, 'E202');
+        require(liquidityTo != address(0) && dueTo != address(0), 'E201');
+        require(liquidityTo != address(this) && dueTo != address(this), 'E204');
+        require(xIncrease > 0 && yIncrease > 0 && zIncrease > 0, 'E205');
 
         Pool storage pool = pools[maturity];
 
@@ -152,18 +160,13 @@ contract TimeswapPair is IPair {
             pool.state.totalLiquidity += liquidityTotal;
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         } else {
-            uint256 liquidityTotal = MintMath.getLiquidityTotal(
-                pool.state,
-                xIncrease,
-                yIncrease,
-                zIncrease
-            );
+            uint256 liquidityTotal = MintMath.getLiquidityTotal(pool.state, xIncrease, yIncrease, zIncrease);
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.state.totalLiquidity += liquidityTotal;
             pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         }
-        require(liquidityOut > 0, 'Invalid');
+        require(liquidityOut > 0, 'E212');
         pool.liquidities[liquidityTo] += liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
@@ -173,7 +176,6 @@ contract TimeswapPair is IPair {
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-        
 
         pool.state.reserves.asset += xIncrease;
         pool.state.reserves.collateral += dueOut.collateral;
@@ -194,10 +196,10 @@ contract TimeswapPair is IPair {
         address collateralTo,
         uint256 liquidityIn
     ) external override lock returns (Tokens memory tokensOut) {
-        require(block.timestamp >= maturity, 'Active');
-        require(assetTo != address(0) && collateralTo != address(0), 'Zero');
-        require(assetTo != address(this) && collateralTo != address(this), 'Invalid');
-        require(liquidityIn > 0, 'Invalid');
+        require(block.timestamp >= maturity, 'E203');
+        require(assetTo != address(0) && collateralTo != address(0), 'E201');
+        require(assetTo != address(this) && collateralTo != address(this), 'E204');
+        require(liquidityIn > 0, 'E205');
 
         Pool storage pool = pools[maturity];
 
@@ -228,13 +230,13 @@ contract TimeswapPair is IPair {
         uint112 zDecrease,
         bytes calldata data
     ) external override lock returns (Claims memory claimsOut) {
-        require(block.timestamp < maturity, 'Expired');
-        require(bondTo != address(0) && insuranceTo != address(0), 'Zero');
-        require(bondTo != address(this) && insuranceTo != address(this), 'Invalid');
-        require(xIncrease > 0, 'Invalid');
+        require(block.timestamp < maturity, 'E202');
+        require(bondTo != address(0) && insuranceTo != address(0), 'E201');
+        require(bondTo != address(this) && insuranceTo != address(this), 'E204');
+        require(xIncrease > 0, 'E205');
 
         Pool storage pool = pools[maturity];
-        require(pool.state.totalLiquidity > 0, 'Invalid');
+        require(pool.state.totalLiquidity > 0, 'E206');
 
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
 
@@ -266,10 +268,10 @@ contract TimeswapPair is IPair {
         address collateralTo,
         Claims memory claimsIn
     ) external override lock returns (Tokens memory tokensOut) {
-        require(block.timestamp >= maturity, 'Active');
-        require(assetTo != address(0) && collateralTo != address(0), 'Zero');
-        require(assetTo != address(this) && collateralTo != address(this), 'Invalid');
-        require(claimsIn.bond > 0 || claimsIn.insurance > 0, 'Invalid');
+        require(block.timestamp >= maturity, 'E203');
+        require(assetTo != address(0) && collateralTo != address(0), 'E201');
+        require(assetTo != address(this) && collateralTo != address(this), 'E204');
+        require(claimsIn.bond > 0 || claimsIn.insurance > 0, 'E205');
 
         Pool storage pool = pools[maturity];
 
@@ -304,24 +306,24 @@ contract TimeswapPair is IPair {
         uint112 zIncrease,
         bytes calldata data
     ) external override lock returns (uint256 id, Due memory dueOut) {
-        require(block.timestamp < maturity, 'Expired');
-        require(assetTo != address(0) && dueTo != address(0), 'Zero');
-        require(assetTo != address(this) && dueTo != address(this), 'Invalid');
-        require(xDecrease > 0, 'Invalid');
+        require(block.timestamp < maturity, 'E202');
+        require(assetTo != address(0) && dueTo != address(0), 'E201');
+        require(assetTo != address(this) && dueTo != address(this), 'E204');
+        require(xDecrease > 0, 'E205');
 
         Pool storage pool = pools[maturity];
-        require(pool.state.totalLiquidity > 0, 'Invalid');
+        require(pool.state.totalLiquidity > 0, 'E206');
 
         BorrowMath.check(pool.state, xDecrease, yIncrease, zIncrease, fee);
 
-        dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease); 
+        dueOut.debt = BorrowMath.getDebt(maturity, xDecrease, yIncrease);
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 
         Callback.borrow(collateral, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-        
+
         pool.state.reserves.asset -= xDecrease;
         pool.state.reserves.collateral += dueOut.collateral;
         pool.state.totalDebtCreated += dueOut.debt;
@@ -346,21 +348,19 @@ contract TimeswapPair is IPair {
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
-        
-        require(block.timestamp < maturity, 'Expired');
-        require(ids.length == assetsIn.length, 'Invalid');
-        require(ids.length == collateralsOut.length, 'Invalid');
-        require(to != address(0), 'Zero');
-        require(to != address(this), 'Invalid');
+        require(block.timestamp < maturity, 'E202');
+        require(ids.length == assetsIn.length && ids.length == collateralsOut.length, 'E205');
+        require(to != address(0), 'E201');
+        require(to != address(this), 'E204');
 
         Pool storage pool = pools[maturity];
 
         Due[] storage dues = pool.dues[owner];
 
         for (uint256 i = 0; i < ids.length; i++) {
-            Due storage due = dues[ids[i]]; 
-            require(due.startBlock != BlockNumber.get(), 'Invalid');
-            if (owner != msg.sender) require(collateralsOut[i] == 0, 'Forbidden');
+            Due storage due = dues[ids[i]];
+            require(due.startBlock != BlockNumber.get(), 'E207');
+            if (owner != msg.sender) require(collateralsOut[i] == 0, 'E213');
             PayMath.checkProportional(assetsIn[i], collateralsOut[i], due);
             due.debt -= assetsIn[i];
             due.collateral -= collateralsOut[i];

@@ -12,7 +12,7 @@ import {TimeswapPair} from './TimeswapPair.sol';
 /// @notice All error messages are coded and can be found in the documentation.
 contract TimeswapFactory is IFactory {
     /* ===== MODEL ===== */
-    
+
     /// @inheritdoc IFactory
     address public override owner;
     /// @inheritdoc IFactory
@@ -35,7 +35,7 @@ contract TimeswapFactory is IFactory {
         uint16 _fee,
         uint16 _protocolFee
     ) {
-        require(_owner != address(0), 'Zero');
+        require(_owner != address(0), 'E101');
         owner = _owner;
         fee = _fee;
         protocolFee = _protocolFee;
@@ -45,9 +45,9 @@ contract TimeswapFactory is IFactory {
 
     /// @inheritdoc IFactory
     function createPair(IERC20 asset, IERC20 collateral) external override returns (IPair pair) {
-        require(asset != collateral, 'Identical');
-        require(asset != IERC20(address(0)) && collateral != IERC20(address(0)), 'Zero');
-        require(getPair[asset][collateral] == IPair(address(0)), 'Exist');
+        require(asset != collateral, 'E103');
+        require(asset != IERC20(address(0)) && collateral != IERC20(address(0)), 'E101');
+        require(getPair[asset][collateral] == IPair(address(0)), 'E104');
 
         pair = new TimeswapPair{salt: keccak256(abi.encode(asset, collateral))}(asset, collateral, fee, protocolFee);
 
@@ -58,8 +58,8 @@ contract TimeswapFactory is IFactory {
 
     /// @inheritdoc IFactory
     function setOwner(address _pendingOwner) external override {
-        require(msg.sender == owner, 'Forbidden');
-        require(_pendingOwner != address(0), 'Zero');
+        require(msg.sender == owner, 'E102');
+        require(_pendingOwner != address(0), 'E101');
         pendingOwner = _pendingOwner;
 
         emit SetOwner(_pendingOwner);
@@ -67,7 +67,7 @@ contract TimeswapFactory is IFactory {
 
     /// @inheritdoc IFactory
     function acceptOwner() external override {
-        require(msg.sender == pendingOwner, 'Forbidden');
+        require(msg.sender == pendingOwner, 'E102');
         owner = msg.sender;
 
         emit AcceptOwner(msg.sender);

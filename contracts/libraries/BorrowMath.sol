@@ -33,7 +33,7 @@ library BorrowMath {
         uint256 denominator = xReserve;
         denominator *= feeBase;
         minimum = minimum.divUp(denominator);
-        require(yIncrease >= minimum, 'Minimum');
+        require(yIncrease >= minimum, 'E302');
     }
 
     function adjust(

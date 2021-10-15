@@ -13,13 +13,14 @@ contract BorrowMathTest {
         uint112 yIncrease,
         uint112 zIncrease,
         uint16 fee
-    ) external view {
+    ) external view returns (bool) {
         state.check(
             xDecrease,
             yIncrease,
             zIncrease,
             fee
         );
+        return true;
     }
 
     function getDebt(

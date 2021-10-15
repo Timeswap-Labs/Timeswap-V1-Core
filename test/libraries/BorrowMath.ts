@@ -1,6 +1,6 @@
-import { divUp, shiftUp } from '../libraries/Math'
-import { mulDivUp } from '../libraries/FullMath'
-import { checkConstantProduct } from '../libraries/ConstantProduct'
+import { checkConstantProduct } from '../libraries/ConstantProduct';
+import { mulDivUp } from '../libraries/FullMath';
+import { divUp, shiftUp } from '../libraries/Math';
 
 export function check(
   state: {
