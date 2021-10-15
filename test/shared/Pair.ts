@@ -35,11 +35,6 @@ export class Pair {
     return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
   }
 
-  // async totalLocked(): Promise<Tokens> {
-  //   const { asset, collateral } = await this.pairContractCallee.totalReserves(this.maturity)
-  //   return { asset: BigInt(asset.toString()), collateral: BigInt(collateral.toString()) }
-  // }
-
   async totalLiquidity(): Promise<bigint> {
     const resultBN = await this.pairContract.totalLiquidity(this.maturity)
     const result = BigInt(resultBN.toString())
@@ -137,13 +132,6 @@ export class PairSigner extends Pair {
     cdpIncrease: bigint,
     owner: boolean
   ): Promise<ContractTransaction> {
-    // uint256 maturity,
-    //     address assetTo,
-    //     address dueTo,
-    //     uint112 xDecrease,
-    //     uint112 yIncrease,
-    //     uint112 zIncrease,
-    //     bytes calldata data
     let dueTo = this.pairContractCallee.address
     if (owner) {
       dueTo = this.signerWithAddress.address

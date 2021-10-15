@@ -14,8 +14,8 @@ const { expect } = chai
 describe('Checking SafeBalance', () => {
   let token: IERC20
   let safeBalTestContract: SafeBalanceTest
-  let tokenMinted = 1000n // randomNumbers
-  let tokenTransfer = 600n // randomNumber; but should be less than the tokens minted
+  let tokenMinted = 1000n
+  let tokenTransfer = 600n
 
   before(async () => {
     signers = await ethers.getSigners()

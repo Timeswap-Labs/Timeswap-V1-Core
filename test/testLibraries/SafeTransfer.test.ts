@@ -17,8 +17,8 @@ describe('Checking SafeTransfer', () => {
   let safeTransferTestContract: SafeTransferTest
   let safeBalTestContract: SafeBalanceTest
 
-  let tokenMinted = 1000n // randomNumbers
-  let tokenTransfer = 600n // randomNumbers; but should be less than the token minted
+  let tokenMinted = 1000n
+  let tokenTransfer = 600n
   before(async () => {
     signers = await ethers.getSigners()
   })

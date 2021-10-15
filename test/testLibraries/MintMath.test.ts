@@ -61,13 +61,6 @@ const stateTest: StateTestParams = {
   cdp: 1n,
 }
 
-// const stateTest: StateTestParams = {
-//   totalLiquidity:50n,
-//   asset: 100n,
-//   interest: 100n,
-//   cdp: 100n,
-// }
-
 let MintMathTestContract: MintMathTest
 let maturity: BigNumberish
 

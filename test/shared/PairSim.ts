@@ -224,8 +224,7 @@ export class PairSim {
 
     pool.state.totalLiquidity -= liquidityIn
 
-    // pool.liquidities[msg.sender] -= liquidityIn;
-    // Implemented below
+    
     this.removeLiquidity(pool, liquidityIn, sender)
 
     pool.state.reserves.asset -= tokensOut.asset
@@ -382,8 +381,7 @@ export class PairSim {
 
     const pool = this.getPool(maturity)
 
-    // Due[] storage dues = pool.dues[owner];
-    // Implemented
+  
 
     let debtIn = 0n
     let collateralOut = 0n

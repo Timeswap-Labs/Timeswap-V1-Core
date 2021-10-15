@@ -14,11 +14,6 @@ describe('BlockNumber', () => {
     await blockNumberTestContract.deployed()
   })
   it('Should return blockNumber', async () => {
-    let blockNumber = await blockNumberTestContract.get()
-    expect(blockNumber).to.be.equalBigInt
-    // await advanceTimeAndBlock(1636876798)
-    // await ethers.provider.send('evm_mine', [1636876798])
-    // blockNumber = await blockNumberTestContract.get()
-    // expect(blockNumber).to.be.equal(2)
+    expect(await blockNumberTestContract.get()).to.be.equalBigInt
   })
 })

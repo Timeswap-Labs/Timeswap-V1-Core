@@ -49,6 +49,3 @@ export interface PayParams {
   debtIn: bigint[]
   collateralOut: bigint[]
 }
-
-// Other borrowSuccessCases that can be used for testing, only need to change the maturity and the currentTimeStamp
-//
