@@ -1,21 +1,18 @@
+import { BigNumber } from '@ethersproject/bignumber'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
-import { advanceTimeAndBlock, getBlock } from './Helper'
+import type { TestToken } from '../../typechain/TestToken'
+import BorrowMath from '../libraries/BorrowMath'
+import LendMath from '../libraries/LendMath'
+import { divUp } from '../libraries/Math'
+import MintMath from '../libraries/MintMath'
+import { now } from '../shared/Helper'
+import { BorrowParams, LendParams, MintParams, PayParams, WithdrawParams } from '../testCases'
+import { FEE, PROTOCOL_FEE } from './Constants'
+import { getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
 import { PairSim } from './PairSim'
 import { testTokenNew } from './TestToken'
-import { LendParams, BorrowParams, MintParams, BurnParams, WithdrawParams, PayParams } from '../testCases'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import LendMath from '../libraries/LendMath'
-import BorrowMath from '../libraries/BorrowMath'
-import MintMath, { min } from '../libraries/MintMath'
-import { FEE, PROTOCOL_FEE } from './Constants'
-import { now } from '../shared/Helper'
-import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory'
-import type { TestToken } from '../../typechain/TestToken'
-import { BigNumber } from '@ethersproject/bignumber'
-import { divUp } from '../libraries/Math'
-import ConstantProduct from '../libraries/ConstantProduct'
-import { stat } from 'fs'
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1);
 const MaxUint128 = BigNumber.from(2).pow(128).sub(1);
@@ -37,15 +34,12 @@ export async function constructorFixture(
   const factory = pair.factoryContract
   const factoryAddress = factory.address
   const owner = await factory.owner()
-  // call the approve function in the test Tokens
-  // for (let i=1;i<6;i++) {
-  //   await assetToken.transfer(signers[i].address,5000n);
-  //   await collateralToken.transfer(signers[i].address,10000n);
-  //   await assetToken.connect(signers[i]).approve(pair.pairContractCallee.address, 5000n);
-  //   await collateralToken.connect(signers[i]).approve(pair.pairContractCallee.address, 10000n);
-  // }
+  await assetToken.transfer(signers[1].address,10000n);
+  await collateralToken.transfer(signers[1].address,10000n);
   await assetToken.approve(pair.pairContractCallee.address, assetValue);
   await collateralToken.approve(pair.pairContractCallee.address, collateralValue);
+  await assetToken.connect(signers[1]).approve(pair.pairContractCallee.address, assetValue);
+  await collateralToken.connect(signers[1]).approve(pair.pairContractCallee.address, collateralValue);
   const pairSim = new PairSim(assetToken.address, collateralToken.address, FEE, PROTOCOL_FEE, pair.pairContract.address, factoryAddress, owner)
   return { pair, pairSim, assetToken, collateralToken }
 }

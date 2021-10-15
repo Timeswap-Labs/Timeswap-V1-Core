@@ -14,6 +14,22 @@ export interface MintParams {
     maturity: bigint,
     currentTimeStamp: bigint
 }
+
+export interface MintBorrowParams {
+    assetIn: bigint;
+    collateralIn: bigint;
+    interestIncrease: bigint;
+    cdpIncrease: bigint;
+    maturity: bigint,
+    currentTimeStamp: bigint,
+    lendAssetIn: bigint,
+    lendInterestDecrease: bigint,
+    lendCdpDecrease: bigint,
+    borrowAssetOut: bigint,
+    borrowCollateralIn: bigint,
+    borrowInterestIncrease: bigint,
+    borrowCdpIncrease: bigint
+}
 export interface Mint {
     Success: MintParams[];
     Failure: MintParams[];
@@ -32,7 +48,7 @@ export async function mintTestCases(): Promise<MintParams[]> {
             return {
                 assetIn: pseudoRandomBigUint(MaxUint112),
                 collateralIn: pseudoRandomBigUint(MaxUint112),
-                interestIncrease: pseudoRandomBigUint(MaxUint112)/10n,
+                interestIncrease: pseudoRandomBigUint(MaxUint112) / 10n,
                 cdpIncrease: pseudoRandomBigUint(MaxUint112),
                 maturity: nt + 500000000n,
                 currentTimeStamp: nt
@@ -48,7 +64,7 @@ export async function mintSuccessCheck({
     maturity,
     currentTimeStamp
 }: MintParams): Promise<boolean> {
-   
+
 
     if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) {
         return false;
@@ -59,4 +75,26 @@ export async function mintSuccessCheck({
 
 export async function mintFailureCheck(params: MintParams): Promise<boolean> {
     return !(await mintSuccessCheck(params));
+}
+
+export async function lossAndMint(): Promise<MintBorrowParams[]> {
+    const nt = await now();
+    const TestCases = [
+        {
+            assetIn: 10n,
+            collateralIn: 5n,
+            interestIncrease: 20n,
+            cdpIncrease: 10n,
+            maturity: 3908191630n,
+            lendAssetIn: 1000n,
+            lendInterestDecrease: 10n,
+            lendCdpDecrease: 2n,
+            currentTimeStamp: nt,
+            borrowAssetOut: 100n,
+            borrowCollateralIn: 100n,
+            borrowInterestIncrease: 40n,
+            borrowCdpIncrease: 500n
+        }
+    ]
+    return TestCases;
 }

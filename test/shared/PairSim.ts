@@ -1,12 +1,11 @@
-import MintMath from '../libraries/MintMath'
+import ethers from 'ethers'
+import BorrowMath from '../libraries/BorrowMath'
 import BurnMath from '../libraries/BurnMath'
 import LendMath from '../libraries/LendMath'
-import WithdrawMath from '../libraries/WithdrawMath'
-import BorrowMath from '../libraries/BorrowMath'
+import MintMath from '../libraries/MintMath'
 import PayMath from '../libraries/PayMath'
-import ethers from 'ethers'
-import { Claims, totalClaimsDefault, Due, dueDefault, Factory, Pool, poolDefault,  Tokens, tokensDefault, initFactory, TotalClaims } from './PairInterface'
-import { setUncaughtExceptionCaptureCallback } from 'process'
+import WithdrawMath from '../libraries/WithdrawMath'
+import { Due, dueDefault, Factory, initFactory, Pool, poolDefault, Tokens, tokensDefault, TotalClaims, totalClaimsDefault } from './PairInterface'
 
 const ZERO_ADDRESSS ="0x0000000000000000000000000000000000000000"
 export class PairSim {
@@ -59,6 +58,11 @@ export class PairSim {
     if(dues==undefined){
         dues = {borrower: borrower, due: []}
     }
+    return dues
+  }
+
+  getTotalDues(pool: Pool){
+    let dues = pool.dues;
     return dues
   }
 
