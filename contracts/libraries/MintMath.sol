@@ -81,7 +81,7 @@ library MintMath {
         uint256 _debtIn = maturity;
         _debtIn -= block.timestamp;
         _debtIn *= yIncrease;
-        _debtIn = _debtIn.shiftUp(32);
+        _debtIn = _debtIn.shiftRightUp(32);
         _debtIn += xIncrease;
         debtIn = _debtIn.toUint112();
     }

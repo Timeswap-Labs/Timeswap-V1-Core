@@ -1,5 +1,4 @@
 import { mulDiv, mulDivUp } from '../libraries/FullMath'
-import { shiftUp } from '../libraries/Math'
 import { State } from '../shared/PairInterface'
 
 export function getLiquidityTotal1(assetIn: bigint): bigint {
@@ -45,7 +44,7 @@ export function getDebt(maturity: bigint, assetIn: bigint, interestIncrease: big
   let _debtOut = maturity
   _debtOut -= now
   _debtOut *= interestIncrease
-  _debtOut = shiftUp(_debtOut, 32n)
+  _debtOut = shiftRightUp(_debtOut, 32n)
   _debtOut += assetIn
   const debtOut = _debtOut
   return debtOut
