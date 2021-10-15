@@ -21,6 +21,14 @@ describe('safeCast', () => {
     await safeCastTestContract.deployed()
   })
 
+  it('should return uint112', async () => {
+    let returnValue1 = await safeCastTestContract.toUint112(MaxUint32)
+    expect(returnValue1).to.be.equal(MaxUint32)
+  })
+  it('should return uint128', async () => {
+    let returnValue1 = await safeCastTestContract.toUint128(MaxUint128)
+    expect(returnValue1).to.be.equal(MaxUint128)
+  })
   it('should modUint32', async () => {
     let returnValue1 = await safeCastTestContract.modUint32(MaxUint256)
     let returnValue2 = returnValue1 % BigNumber.from(0x100000000).toNumber()
