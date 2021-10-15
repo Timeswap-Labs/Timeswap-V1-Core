@@ -43,7 +43,7 @@ describe('MintMultiple', () => {
         before(async () => {
           erm = undefined;
           console.log(`Checking for Multiple Mint Test Case ${caseNumber + 1}`);
-          const currentBlockTime = await now() + 200000000n;
+          const currentBlockTime = await now() + 500000000n;
           updatedMaturity = currentBlockTime;
           try {
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);

@@ -38,7 +38,7 @@ describe('Pay', () => {
         before(async () => {
           console.log(`Checking for Pay Test Case ${caseNumber + 1}`);
           const currentBlockTime = await now();
-          updatedMaturity = currentBlockTime + 200000000n;
+          updatedMaturity = currentBlockTime + 500000000n;
           try {
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             const mintParameters: any = {
