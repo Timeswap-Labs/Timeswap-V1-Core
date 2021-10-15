@@ -89,14 +89,14 @@ export async function lossWithdraw(): Promise<LendAndBorrow[]> {
     const TestCases = [
         {
             assetIn: 1000n,
-            collateralIn: 500n,
-            interestIncrease: 200n,
+            collateralIn: 5n,
+            interestIncrease: 2n,
             cdpIncrease: 2231034977219894488200000000000000n,
             maturity: 3908191630n,
             currentTimeStamp: nt,
             // lendAssetIn: 1186515612164666886115248164610047n,
             lendAssetIn: 200000n,
-            lendInterestDecrease: 40n,
+            lendInterestDecrease: 1n,
             lendCdpDecrease: 1000n,
             borrowAssetOut: 20500n,
             borrowCollateralIn: 1000n,
