@@ -1,12 +1,12 @@
-import MintMath from '../libraries/MintMath'
+import ethers from 'ethers'
+import BorrowMath from '../libraries/BorrowMath'
 import BurnMath from '../libraries/BurnMath'
 import LendMath from '../libraries/LendMath'
-import WithdrawMath from '../libraries/WithdrawMath'
-import BorrowMath from '../libraries/BorrowMath'
+import MintMath from '../libraries/MintMath'
 import PayMath from '../libraries/PayMath'
-import ethers from 'ethers'
-import { Claims, totalClaimsDefault, Due, dueDefault, Factory, Pool, poolDefault,  Tokens, tokensDefault, initFactory, TotalClaims } from './PairInterface'
-import { setUncaughtExceptionCaptureCallback } from 'process'
+import WithdrawMath from '../libraries/WithdrawMath'
+import { now } from './Helper'
+import { Due, dueDefault, Factory, initFactory, Pool, poolDefault, Tokens, tokensDefault, TotalClaims, totalClaimsDefault } from './PairInterface'
 
 const ZERO_ADDRESSS ="0x0000000000000000000000000000000000000000"
 export class PairSim {
@@ -198,14 +198,21 @@ export class PairSim {
     }
   }
 
-  burn(maturity: bigint, assetTo: string,collateralTo: string,liquidityIn: bigint, sender: string, block: ethers.providers.Block): Tokens | string {
-    const now = BigInt(block.timestamp)
+  async burn(maturity: bigint, assetTo: string,collateralTo: string,liquidityIn: bigint, sender: string, block?: ethers.providers.Block): Promise<Tokens | string> {
+    let now1;
+    
+    if (block !=undefined) {
+      now1 = BigInt(block.timestamp)
+    } else {
+      now1 = await now();
+    }
+    
 
-    if (now < maturity) return 'Active'
+    if (now1 < maturity) return 'Active'
     if( !(assetTo != ZERO_ADDRESSS && collateralTo != ZERO_ADDRESSS)) return 'Zero'
     if( !(assetTo != this.contractAddress && collateralTo != this.contractAddress)) return 'Invalid'
     if (liquidityIn <= 0) return 'Invalid'
-
+  
 
     let pool = this.getPool(maturity)
 
@@ -214,10 +221,12 @@ export class PairSim {
       pool.state,
       liquidityIn
     )
+    console.log("tokensOut.asset", tokensOut.asset);
     tokensOut.collateral = BurnMath.getCollateral(
       pool.state,
       liquidityIn,
     )
+    console.log("tokensOut.collateral", tokensOut.collateral);
 
     pool.state.totalLiquidity -= liquidityIn
 

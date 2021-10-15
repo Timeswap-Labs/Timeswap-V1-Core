@@ -84,10 +84,10 @@ export async function lossAndMint(): Promise<MintBorrowParams[]> {
             cdpIncrease: 10n,
             maturity: 3908191630n,
             currentTimeStamp: nt,
-            borrowAssetOut: 900n,
-            borrowCollateralIn: 10n,
-            borrowInterestIncrease: 400n,
-            borrowCdpIncrease: 500n
+            borrowAssetOut: 10n,
+            borrowCollateralIn: 1n,
+            borrowInterestIncrease: 4n,
+            borrowCdpIncrease: 5n
         }
     ]
     return TestCases;

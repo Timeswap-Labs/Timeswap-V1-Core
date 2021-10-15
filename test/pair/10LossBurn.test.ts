@@ -51,7 +51,7 @@ describe('Burn', () => {
                 maturity: updatedMaturity,
                 currentTimeStamp: testCase.currentTimeStamp
               };
-              mint = await mintFixture(constructor, signers[0], mintParameters);
+              mint = await mintFixture(constructor, signers[1], mintParameters);
             } catch (error) {
               console.log(error);
               erm = "minting error";
@@ -67,18 +67,23 @@ describe('Burn', () => {
             }
             let returnObj: any
             try {
-              returnObj = await borrowFixture(mint, signers[0], borrowParams);
+              returnObj = await borrowFixture(mint, signers[1], borrowParams);
               if (returnObj.error != undefined) throw Error(returnObj.error)
             } catch (error) {
+              console.log(error);
               throw error;
             }
             erm = undefined;
             await advanceTimeAndBlock(Number(updatedMaturity));
+            console.log(mint.mintData.liquidityOut);
             const burnParams = {liquidityIn:mint.mintData.liquidityOut};
+            console.log("going for burn");
             const burn = await burnFixture(returnObj,signers[0],burnParams);
+            console.log("burn done");
             pair = burn.pair;
             pairSim = burn.pairSim;
           } catch (error) {
+            console.log(error);
           }
         });
 
