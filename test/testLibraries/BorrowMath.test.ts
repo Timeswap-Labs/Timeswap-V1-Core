@@ -50,7 +50,7 @@ const stateTest: StateTestParams = {
 }
 
 let borrowMathTestContract: BorrowMathTest
-let maturity: BigNumberish;
+let maturity: BigNumberish
 
 const assetOut: bigint = 10n
 const interestIncrease: bigint = 30n
@@ -58,9 +58,8 @@ const cdpIncrease: bigint = 50n
 const fee: bigint = 2n
 
 describe('Borrow Math', () => {
-
   before(async () => {
-    maturity = await now() + 10000n;
+    maturity = (await now()) + 10000n
     const BorrowMathTestContractFactory = await ethers.getContractFactory('BorrowMathTest')
     borrowMathTestContract = (await BorrowMathTestContractFactory.deploy()) as BorrowMathTest
     await borrowMathTestContract.deployed()
@@ -68,33 +67,41 @@ describe('Borrow Math', () => {
 
   it('Check should return true', async () => {
     const returnValue1 = await borrowMathTestContract.check(state, assetOut, interestIncrease, cdpIncrease, fee)
-    let returnValue2 = await BorrowMath.check(stateTest, assetOut, interestIncrease, cdpIncrease, fee);
-    expect(returnValue1).to.be.true;
-    expect(returnValue2).to.be.true;
-    expect(returnValue1).to.equal(returnValue2);
+    let returnValue2 = await BorrowMath.check(stateTest, assetOut, interestIncrease, cdpIncrease, fee)
+    expect(returnValue1).to.be.true
+    expect(returnValue2).to.be.true
+    expect(returnValue1).to.equal(returnValue2)
   })
 
   it('GetDebt should return the expected debt out', async () => {
-    const returnValue1 = await borrowMathTestContract.getDebt(maturity, assetOut, interestIncrease);
-    let returnValue2 = await BorrowMath.getDebt(BigInt(maturity.toString()), assetOut, interestIncrease, (await now()));
-    expect(returnValue1).to.be.equalBigInt(returnValue2);
+    const returnValue1 = await borrowMathTestContract.getDebt(maturity, assetOut, interestIncrease)
+    let returnValue2 = await BorrowMath.getDebt(BigInt(maturity.toString()), assetOut, interestIncrease, await now())
+    expect(returnValue1).to.be.equalBigInt(returnValue2)
   })
 
   it('GetCollateral should return the expected Collateral In', async () => {
-    const returnValue1 = await borrowMathTestContract.getCollateral(maturity, state, assetOut, interestIncrease);
-    let returnValue2 = await BorrowMath.getCollateral(BigInt(maturity.toString()), stateTest, assetOut, interestIncrease, (await now()));
-    expect(returnValue1).to.be.equalBigInt(returnValue2);
+    const returnValue1 = await borrowMathTestContract.getCollateral(maturity, state, assetOut, interestIncrease)
+    let returnValue2 = await BorrowMath.getCollateral(
+      BigInt(maturity.toString()),
+      stateTest,
+      assetOut,
+      interestIncrease,
+      await now()
+    )
+    expect(returnValue1).to.be.equalBigInt(returnValue2)
   })
 
   it('Check should be reverted', async () => {
     const interestIncrease: bigint = 1n
-    maturity = await now() + 10000n;
+    maturity = (await now()) + 10000n
     const BorrowMathTestContractFactory = await ethers.getContractFactory('BorrowMathTest')
     borrowMathTestContract = (await BorrowMathTestContractFactory.deploy()) as BorrowMathTest
     await borrowMathTestContract.deployed()
-    expect(await BorrowMath.check(stateTest, assetOut, interestIncrease, cdpIncrease, fee)).to.be.equal("interestIncrease < minimum");
-    await expect(borrowMathTestContract.check(state, assetOut, interestIncrease, cdpIncrease, fee)).to.be.revertedWith("E302");
-    
+    expect(await BorrowMath.check(stateTest, assetOut, interestIncrease, cdpIncrease, fee)).to.be.equal(
+      'interestIncrease < minimum'
+    )
+    await expect(borrowMathTestContract.check(state, assetOut, interestIncrease, cdpIncrease, fee)).to.be.revertedWith(
+      'E302'
+    )
   })
-
 })

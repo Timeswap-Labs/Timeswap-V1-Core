@@ -1,4 +1,3 @@
-
 export interface Tokens {
   asset: bigint
   collateral: bigint
@@ -14,11 +13,24 @@ export interface Due {
   startBlock: bigint
 }
 
-export interface Liquidity {liquidityProvider: string, liquidity: bigint }
-export interface Claims {lender: string, claims: TotalClaims } 
-export interface Dues {borrower: string, due: Due[]}
+export interface Liquidity {
+  liquidityProvider: string
+  liquidity: bigint
+}
+export interface Claims {
+  lender: string
+  claims: TotalClaims
+}
+export interface Dues {
+  borrower: string
+  due: Due[]
+}
 
-export interface ConstantProduct {asset: bigint, interest: bigint, cdp: bigint}
+export interface ConstantProduct {
+  asset: bigint
+  interest: bigint
+  cdp: bigint
+}
 export interface State {
   reserves: Tokens
   totalLiquidity: bigint
@@ -36,13 +48,13 @@ export interface Pool {
   maturity: bigint
 }
 
-export interface Factory{
-  contractAddress: string,
+export interface Factory {
+  contractAddress: string
   owner: string
 }
 
-export function initFactory(factoryContract:string, owner:string): Factory{
-  return {contractAddress: factoryContract, owner:  owner}
+export function initFactory(factoryContract: string, owner: string): Factory {
+  return { contractAddress: factoryContract, owner: owner }
 }
 
 export function tokensDefault(): Tokens {
@@ -58,16 +70,24 @@ export function dueDefault(): Due {
 }
 
 export function stateDefault(): State {
-  return {reserves: tokensDefault(), totalLiquidity: 0n, totalClaims: totalClaimsDefault(),totalDebtCreated: 0n, asset: 0n, interest: 0n, cdp: 0n }
-} 
+  return {
+    reserves: tokensDefault(),
+    totalLiquidity: 0n,
+    totalClaims: totalClaimsDefault(),
+    totalDebtCreated: 0n,
+    asset: 0n,
+    interest: 0n,
+    cdp: 0n,
+  }
+}
 
-export function poolDefault(maturity=0n): Pool {
+export function poolDefault(maturity = 0n): Pool {
   return {
     state: stateDefault(),
     liquidities: [],
-    claims:[],
+    claims: [],
     dues: [],
-    maturity: maturity
+    maturity: maturity,
   }
 }
 

@@ -19,7 +19,7 @@ interface Due {
 const due: Due = {
   debt: 1000n,
   collateral: 1000n,
-  startBlock: 1631585272n
+  startBlock: 1631585272n,
 }
 
 let PayMathTestContract: PayMathTest
@@ -27,7 +27,6 @@ const assetIn: bigint = 500n
 const collateralOut: bigint = 400n
 
 describe('Pay Math', () => {
-
   before(async () => {
     signers = await ethers.getSigners()
     const PayMathTestContractFactory = await ethers.getContractFactory('PayMathTest')
@@ -36,27 +35,25 @@ describe('Pay Math', () => {
   })
 
   it('Pay Proptional should return true with less than 50% collateral out', async () => {
-    const returnValue1 = await PayMathTestContract.checkProportional(assetIn,collateralOut,due);
-    const returnValue2 = await PayMath.checkProportional(assetIn,collateralOut,due);
-    expect(returnValue1).to.be.true;
-    expect(returnValue2).to.be.true;
-    expect(returnValue1).to.equal(returnValue2);
+    const returnValue1 = await PayMathTestContract.checkProportional(assetIn, collateralOut, due)
+    const returnValue2 = await PayMath.checkProportional(assetIn, collateralOut, due)
+    expect(returnValue1).to.be.true
+    expect(returnValue2).to.be.true
+    expect(returnValue1).to.equal(returnValue2)
   })
 
   it('Pay Proptional should return true with exact 50% collateral out', async () => {
     const collateralOut: bigint = 500n
-    const returnValue1 = await PayMathTestContract.checkProportional(assetIn,collateralOut,due);
-    const returnValue2 = await PayMath.checkProportional(assetIn,collateralOut,due);
-    expect(returnValue1).to.be.true;
-    expect(returnValue2).to.be.true;
-    expect(returnValue1).to.equal(returnValue2);
+    const returnValue1 = await PayMathTestContract.checkProportional(assetIn, collateralOut, due)
+    const returnValue2 = await PayMath.checkProportional(assetIn, collateralOut, due)
+    expect(returnValue1).to.be.true
+    expect(returnValue2).to.be.true
+    expect(returnValue1).to.equal(returnValue2)
   })
-
 
   it('Pay Proptional should return revert with E303', async () => {
     const collateralOut: bigint = 600n
-    await expect(PayMathTestContract.checkProportional(assetIn,collateralOut,due)).to.be.revertedWith("E303");
-    expect(await PayMath.checkProportional(assetIn,collateralOut,due)).to.be.false
+    await expect(PayMathTestContract.checkProportional(assetIn, collateralOut, due)).to.be.revertedWith('E303')
+    expect(await PayMath.checkProportional(assetIn, collateralOut, due)).to.be.false
   })
-
 })

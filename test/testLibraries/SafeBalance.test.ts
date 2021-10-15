@@ -19,19 +19,18 @@ describe('Checking SafeBalance', () => {
 
   before(async () => {
     signers = await ethers.getSigners()
-
   })
 
   beforeEach(async () => {
     token = await testTokenNew('Ether', 'WETH', tokenMinted)
-    const SafeBalanceTestContractFactory = await ethers.getContractFactory('SafeBalanceTest');
+    const SafeBalanceTestContractFactory = await ethers.getContractFactory('SafeBalanceTest')
     safeBalTestContract = (await SafeBalanceTestContractFactory.deploy()) as SafeBalanceTest
     await safeBalTestContract.deployed()
     token.transfer(safeBalTestContract.address, tokenTransfer)
   })
 
   it('Should return the balance transferred', async () => {
-    let safeBalance = await safeBalTestContract.safeBalance(token.address);
+    let safeBalance = await safeBalTestContract.safeBalance(token.address)
     expect(safeBalance).to.be.equal(tokenTransfer)
   })
 })
