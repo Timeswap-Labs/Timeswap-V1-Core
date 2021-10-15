@@ -65,8 +65,6 @@ describe('Withdraw', () => {
                 insurance: lendTxData.lendData.insurance
               }
             }
-
-            // do the borrowTxn
             const borrowParams: BorrowParams =
             {
               assetOut: testCase.borrowAssetOut,
