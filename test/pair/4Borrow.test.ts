@@ -38,7 +38,7 @@ describe('Borrow', () => {
         before(async () => {
           console.log(`Checking for Borrow Test Case ${caseNumber + 1}`);
           const currentBlockTime = await now();
-          updatedMaturity = currentBlockTime + 10000000n;
+          updatedMaturity = currentBlockTime + 200000000n;
           let erm: any;
           try {
             let mint: any

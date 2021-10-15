@@ -35,7 +35,7 @@ describe('Withdraw', () => {
           try {
             console.log(`Checking for Withdraw Test Case ${caseNumber + 1}`);
             const currentBlockTime = await now();
-            updatedMaturity = currentBlockTime + 10000000n;
+            updatedMaturity = currentBlockTime + 200000000n;
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
             let erm: any;
             let mint: any;

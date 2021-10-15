@@ -34,7 +34,7 @@ export async function mintTestCases(): Promise<MintParams[]> {
                 collateralIn: pseudoRandomBigUint(MaxUint112),
                 interestIncrease: pseudoRandomBigUint(MaxUint112)/10n,
                 cdpIncrease: pseudoRandomBigUint(MaxUint112),
-                maturity: nt + 10000000n,
+                maturity: nt + 200000000n,
                 currentTimeStamp: nt
             }
         })
