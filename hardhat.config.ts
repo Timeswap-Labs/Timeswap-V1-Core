@@ -4,7 +4,7 @@ import '@typechain/hardhat'
 import { config } from 'dotenv'
 import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
-import "solidity-coverage"
+import 'solidity-coverage'
 
 const env: any = config()['parsed']
 
@@ -34,6 +34,6 @@ export default {
     alwaysGenerateOverloads: true,
   },
   mocha: {
-    timeout: 60000
-  }
+    timeout: 60000,
+  },
 }

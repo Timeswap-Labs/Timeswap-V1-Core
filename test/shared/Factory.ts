@@ -6,7 +6,6 @@ import type { TimeswapFactory as Factory } from '../../typechain/TimeswapFactory
 import constants from './Constants'
 
 let signers: SignerWithAddress[]
-
 ;(async () => {
   signers = await ethers.getSigners()
 })()
