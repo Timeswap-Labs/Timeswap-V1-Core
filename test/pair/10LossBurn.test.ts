@@ -2,9 +2,9 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { expect } from '../shared/Expect'
-import { borrowFixture, burnFixture, constructorFixture, mintFixture } from '../shared/Fixtures'
+import { borrowFixture, burnFixture, constructorFixture, lendFixture, mintFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
-import { BorrowParams, lossAndMint, MintBorrowParams, MintParams } from '../testCases'
+import { BorrowParams, LendParams, lossAndMint, MintBorrowParams, MintParams } from '../testCases'
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1);
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
@@ -53,11 +53,16 @@ describe('Burn', () => {
               };
               mint = await mintFixture(constructor, signers[0], mintParameters);
             } catch (error) {
-              console.log(error);
               erm = "minting error";
               console.log(`Ignored due to wrong miniting parameters`);
               throw Error("minting error");
+            } const lendParams: LendParams =
+            {
+              assetIn: testCase.lendAssetIn,
+              interestDecrease: testCase.lendInterestDecrease,
+              cdpDecrease: testCase.lendCdpDecrease
             }
+            const lendTxData = await lendFixture(mint, signers[0], lendParams);
             const borrowParams: BorrowParams =
             {
               assetOut: testCase.borrowAssetOut,
@@ -67,10 +72,9 @@ describe('Burn', () => {
             }
             let returnObj: any
             try {
-              returnObj = await borrowFixture(mint, signers[1], borrowParams);
+              returnObj = await borrowFixture(lendTxData, signers[1], borrowParams);
               if (returnObj.error != undefined) throw Error(returnObj.error)
             } catch (error) {
-              console.log(error);
               throw error;
             }
             erm = undefined;

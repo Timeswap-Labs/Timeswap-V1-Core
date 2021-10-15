@@ -22,6 +22,9 @@ export interface MintBorrowParams {
     cdpIncrease: bigint;
     maturity: bigint,
     currentTimeStamp: bigint,
+    lendAssetIn: bigint,
+    lendInterestDecrease: bigint,
+    lendCdpDecrease: bigint,
     borrowAssetOut: bigint,
     borrowCollateralIn: bigint,
     borrowInterestIncrease: bigint,
@@ -78,16 +81,19 @@ export async function lossAndMint(): Promise<MintBorrowParams[]> {
     const nt = await now();
     const TestCases = [
         {
-            assetIn: 1000n,
-            collateralIn: 500n,
-            interestIncrease: 200n,
-            cdpIncrease: 100n,
+            assetIn: 10n,
+            collateralIn: 5n,
+            interestIncrease: 20n,
+            cdpIncrease: 10n,
             maturity: 3908191630n,
+            lendAssetIn: 1000n,
+            lendInterestDecrease: 10n,
+            lendCdpDecrease: 2n,
             currentTimeStamp: nt,
-            borrowAssetOut: 10n,
+            borrowAssetOut: 100n,
             borrowCollateralIn: 100n,
-            borrowInterestIncrease: 4n,
-            borrowCdpIncrease: 50n
+            borrowInterestIncrease: 40n,
+            borrowCdpIncrease: 500n
         }
     ]
     return TestCases;
