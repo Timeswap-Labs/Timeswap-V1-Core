@@ -2,41 +2,47 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { expect } from '../shared/Expect'
-import { borrowFixture, constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
+import { borrowFixture, burnFixture, constructorFixture, mintFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
-import * as TestCases from '../testCases'
-import { BorrowParams, LendAndBorrow, LendParams, MintParams } from '../testCases'
-
-const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
+import { BorrowParams, lossAndMint, MintBorrowParams, MintParams } from '../testCases'
+const MaxUint224 = BigNumber.from(2).pow(224).sub(1);
 let signers: SignerWithAddress[];
 let assetInValue: bigint = BigInt(MaxUint224.toString());
 let collateralInValue: bigint = BigInt(MaxUint224.toString());
+let totalCases: number;
+let FailureCases: number;
 
-describe('Withdraw', () => {
+describe('Burn', () => {
   let tests: any;
   let caseNumber: any = 0;
+  let iSuccess = 0;
+  let iFailure = 0;
+  let totalFailureCases = 0;
 
   before(async () => {
     signers = await ethers.getSigners();
-    tests = await TestCases.lossWithdraw();
+    tests = await lossAndMint();
+    totalCases = tests.length;
+    FailureCases = 0;
   });
 
-  it('', () => {
-    tests.forEach((testCase: LendAndBorrow) => {
+  it('', async () => {
+    tests.forEach((testCase: MintBorrowParams) => {
       describe("", async () => {
         let pair: any;
         let pairSim: any;
-        let updatedMaturity: any;
+        let updatedMaturity: any
+
 
         before(async () => {
+          console.log(`Checking for Burn Test Case ${caseNumber + 1}`);
+          const currentBlockTime = await now();
+          updatedMaturity = currentBlockTime + 500000000n;
+          let erm: any;
           try {
-            console.log(`Checking for Loss Withdraw Test Case ${caseNumber + 1}`);
-            const currentBlockTime = await now();
-            updatedMaturity = currentBlockTime + 500000000n;
-            const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
-            let erm: any;
             let mint: any;
             try {
+              const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity);
               const mintParameters: MintParams = {
                 assetIn: testCase.assetIn,
                 collateralIn: testCase.collateralIn,
@@ -47,25 +53,11 @@ describe('Withdraw', () => {
               };
               mint = await mintFixture(constructor, signers[0], mintParameters);
             } catch (error) {
+              console.log(error);
               erm = "minting error";
-              console.log("error from minting: ", error);
               console.log(`Ignored due to wrong miniting parameters`);
               throw Error("minting error");
             }
-            const lendParams: LendParams =
-            {
-              assetIn: testCase.lendAssetIn,
-              interestDecrease: testCase.lendInterestDecrease,
-              cdpDecrease: testCase.lendCdpDecrease
-            }
-            const lendTxData = await lendFixture(mint, signers[0], lendParams);
-            const lendData: any = {
-              claimsIn: {
-                bond: lendTxData.lendData.bond,
-                insurance: lendTxData.lendData.insurance
-              }
-            }
-
             const borrowParams: BorrowParams =
             {
               assetOut: testCase.borrowAssetOut,
@@ -75,29 +67,24 @@ describe('Withdraw', () => {
             }
             let returnObj: any
             try {
-              returnObj = await borrowFixture(lendTxData, signers[0], borrowParams);
+              returnObj = await borrowFixture(mint, signers[0], borrowParams);
+              if (returnObj.error != undefined) throw Error(returnObj.error)
             } catch (error) {
               throw error;
             }
-
+            erm = undefined;
             await advanceTimeAndBlock(Number(updatedMaturity));
-
-            const withdraw = await withdrawFixture(
-              returnObj,
-              signers[0],
-              lendData
-            )
-
-            pair = withdraw.pair;
-            pairSim = withdraw.pairSim;
-
+            const burnParams = {liquidityIn:mint.mintData.liquidityOut};
+            const burn = await burnFixture(returnObj,signers[0],burnParams);
+            pair = burn.pair;
+            pairSim = burn.pairSim;
           } catch (error) {
-            console.log(error);
           }
         });
 
-        it('', async () => {
+        it(``, async () => {
           if (pair != undefined && pairSim != undefined) {
+            console.log(`Testing for Burn Success Case: ${iSuccess+1}`);
             console.log("Should have correct reserves");
             const reserves = await pair.totalReserves()
             const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -123,7 +110,7 @@ describe('Withdraw', () => {
             expect(liquidityOf).to.equalBigInt(liquidityOfSim)
 
             console.log("Should have correct total debt");
-
+            
             const totalDebtCreated = await pair.totalDebtCreated()
             const totalDebtCreatedSim = pairSim.getPool(updatedMaturity).state.totalDebtCreated
             expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim);
@@ -135,7 +122,7 @@ describe('Withdraw', () => {
             expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
 
             console.log("Should have correct claims of");
-
+            
             const claimsOf = await pair.claimsOf(signers[0])
             const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
             expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
@@ -150,10 +137,10 @@ describe('Withdraw', () => {
               expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
-          }
-          caseNumber++;
+            iSuccess = iSuccess+1;
+          } caseNumber++;
         })
       })
     })
   })
-})
+});
