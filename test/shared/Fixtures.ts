@@ -186,10 +186,9 @@ export async function burnFixture(
   burnParams: any
 ): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
-  // const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
-  // const block = await getBlock(txnBurn.blockHash!)
-  let abc = await pairSim.burn(pair.maturity, signer.address, signer.address, burnParams.liquidityIn, signer.address);
-  console.log(abc);
+  const txnBurn = await pair.upgrade(signer).burn(burnParams.liquidityIn)
+  const block = await getBlock(txnBurn.blockHash!)
+  pairSim.burn(pair.maturity, signer.address, signer.address, burnParams.liquidityIn, signer.address, block)
   return { pair, pairSim, assetToken, collateralToken }
 }
 

@@ -51,7 +51,7 @@ describe('Burn', () => {
                 maturity: updatedMaturity,
                 currentTimeStamp: testCase.currentTimeStamp
               };
-              mint = await mintFixture(constructor, signers[1], mintParameters);
+              mint = await mintFixture(constructor, signers[0], mintParameters);
             } catch (error) {
               console.log(error);
               erm = "minting error";
@@ -75,11 +75,8 @@ describe('Burn', () => {
             }
             erm = undefined;
             await advanceTimeAndBlock(Number(updatedMaturity));
-            console.log(mint.mintData.liquidityOut);
             const burnParams = {liquidityIn:mint.mintData.liquidityOut};
-            console.log("going for burn");
             const burn = await burnFixture(returnObj,signers[0],burnParams);
-            console.log("burn done");
             pair = burn.pair;
             pairSim = burn.pairSim;
           } catch (error) {
@@ -135,12 +132,12 @@ describe('Burn', () => {
 
             console.log("Should have correct dues of");
             const duesOf = await pair.duesOf()
-            const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
+            const duesOfSim = pairSim.getTotalDues(pairSim.getPool(updatedMaturity))
             expect(duesOf.length).to.equal(duesOfSim.length)
             for (let i = 0; i < duesOf.length; i++) {
-              expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
-              expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
-              expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
+              expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].due[0].collateral)
+              expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].due[0].debt)
+              expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].due[0].startBlock)
             }
             iSuccess = iSuccess+1;
           } caseNumber++;

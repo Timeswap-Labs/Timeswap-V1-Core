@@ -5,7 +5,6 @@ import LendMath from '../libraries/LendMath'
 import MintMath from '../libraries/MintMath'
 import PayMath from '../libraries/PayMath'
 import WithdrawMath from '../libraries/WithdrawMath'
-import { now } from './Helper'
 import { Due, dueDefault, Factory, initFactory, Pool, poolDefault, Tokens, tokensDefault, TotalClaims, totalClaimsDefault } from './PairInterface'
 
 const ZERO_ADDRESSS ="0x0000000000000000000000000000000000000000"
@@ -59,6 +58,14 @@ export class PairSim {
     if(dues==undefined){
         dues = {borrower: borrower, due: []}
     }
+    return dues
+  }
+
+  getTotalDues(pool: Pool){
+    let dues = pool.dues;
+    // if(dues==undefined){
+    //     dues = {borrower: borrower, due: []}
+    // }
     return dues
   }
 
@@ -198,21 +205,14 @@ export class PairSim {
     }
   }
 
-  async burn(maturity: bigint, assetTo: string,collateralTo: string,liquidityIn: bigint, sender: string, block?: ethers.providers.Block): Promise<Tokens | string> {
-    let now1;
-    
-    if (block !=undefined) {
-      now1 = BigInt(block.timestamp)
-    } else {
-      now1 = await now();
-    }
-    
+  burn(maturity: bigint, assetTo: string,collateralTo: string,liquidityIn: bigint, sender: string, block: ethers.providers.Block): Tokens | string {
+    const now = BigInt(block.timestamp)
 
-    if (now1 < maturity) return 'Active'
+    if (now < maturity) return 'Active'
     if( !(assetTo != ZERO_ADDRESSS && collateralTo != ZERO_ADDRESSS)) return 'Zero'
     if( !(assetTo != this.contractAddress && collateralTo != this.contractAddress)) return 'Invalid'
     if (liquidityIn <= 0) return 'Invalid'
-  
+
 
     let pool = this.getPool(maturity)
 
@@ -221,12 +221,10 @@ export class PairSim {
       pool.state,
       liquidityIn
     )
-    console.log("tokensOut.asset", tokensOut.asset);
     tokensOut.collateral = BurnMath.getCollateral(
       pool.state,
       liquidityIn,
     )
-    console.log("tokensOut.collateral", tokensOut.collateral);
 
     pool.state.totalLiquidity -= liquidityIn
 

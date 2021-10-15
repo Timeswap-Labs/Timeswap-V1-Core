@@ -79,15 +79,15 @@ export async function lossAndMint(): Promise<MintBorrowParams[]> {
     const TestCases = [
         {
             assetIn: 1000n,
-            collateralIn: 5n,
-            interestIncrease: 2n,
-            cdpIncrease: 10n,
+            collateralIn: 500n,
+            interestIncrease: 200n,
+            cdpIncrease: 100n,
             maturity: 3908191630n,
             currentTimeStamp: nt,
             borrowAssetOut: 10n,
-            borrowCollateralIn: 1n,
+            borrowCollateralIn: 100n,
             borrowInterestIncrease: 4n,
-            borrowCdpIncrease: 5n
+            borrowCdpIncrease: 50n
         }
     ]
     return TestCases;

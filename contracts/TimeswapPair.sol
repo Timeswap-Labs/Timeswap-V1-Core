@@ -205,11 +205,8 @@ contract TimeswapPair is IPair {
 
         tokensOut.asset = BurnMath.getAsset(pool.state, liquidityIn);
         tokensOut.collateral = BurnMath.getCollateral(pool.state, liquidityIn);
-
         pool.state.totalLiquidity -= liquidityIn;
-
         pool.liquidities[msg.sender] -= liquidityIn;
-
         pool.state.reserves.asset -= tokensOut.asset;
         pool.state.reserves.collateral -= tokensOut.collateral;
 
