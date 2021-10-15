@@ -11,7 +11,7 @@ export function getLiquidityTotal2(
   state: State,
   assetIn: bigint,
   interestIncrease: bigint,
-  cdpIncrease: bigint,
+  cdpIncrease: bigint
 ): bigint {
   const liquidityTotal = min(
     mulDiv(state.totalLiquidity, assetIn, state.asset),

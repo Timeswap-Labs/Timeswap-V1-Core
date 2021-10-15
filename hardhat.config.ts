@@ -3,7 +3,7 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
-import "solidity-coverage"
+import 'solidity-coverage'
 import { config } from 'dotenv'
 
 const env: any = config()['parsed']
@@ -34,6 +34,6 @@ export default {
     alwaysGenerateOverloads: true,
   },
   mocha: {
-    timeout: 60000
-  }
+    timeout: 60000,
+  },
 }

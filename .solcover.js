@@ -1,4 +1,4 @@
 module.exports = {
-    istanbulFolder: "./coverage",
-    istanbulReporter: ['html', 'lcov', 'text', 'json']
-};
+  istanbulFolder: './coverage',
+  istanbulReporter: ['html', 'lcov', 'text', 'json'],
+}

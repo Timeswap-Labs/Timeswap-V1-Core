@@ -1,17 +1,22 @@
 import { ethers } from 'hardhat'
-import { BigNumber } from "@ethersproject/bignumber";
-import Decimal from "decimal.js";
-import { constants } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber'
+import Decimal from 'decimal.js'
+import { constants } from 'ethers'
 
 Decimal.config({ toExpNeg: 0, toExpPos: 500 })
 
-
 export function pseudoRandomBigUint(maxUint: BigNumber): bigint {
-    return BigInt((BigNumber.from(new Decimal(maxUint.toString()).mul(Math.random().toString()).round().toString())).toString());
+  return BigInt(
+    BigNumber.from(new Decimal(maxUint.toString()).mul(Math.random().toString()).round().toString()).toString()
+  )
 }
 
 export function pseudoRandomBigUint256() {
-  return BigInt((BigNumber.from(new Decimal(constants.MaxUint256.toString()).mul(Math.random().toString()).round().toString())).toString());
+  return BigInt(
+    BigNumber.from(
+      new Decimal(constants.MaxUint256.toString()).mul(Math.random().toString()).round().toString()
+    ).toString()
+  )
 }
 
 async function advanceTime(time: number) {
@@ -54,5 +59,5 @@ export default {
   getTimestamp,
   setTime,
   pseudoRandomBigUint,
-  pseudoRandomBigUint256
+  pseudoRandomBigUint256,
 }

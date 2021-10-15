@@ -57,13 +57,10 @@ const stateTest: StateTestParams = {
 
 let WithdrawMathTestContract: WithdrawMathTest
 
-
 const bondIn: bigint = 10n
 const insuranceIn: bigint = 30n
 
-
 describe('Withdraw Math', () => {
-
   before(async () => {
     const WithdrawMathTestContractFactory = await ethers.getContractFactory('WithdrawMathTest')
     WithdrawMathTestContract = (await WithdrawMathTestContractFactory.deploy()) as WithdrawMathTest
@@ -71,17 +68,14 @@ describe('Withdraw Math', () => {
   })
 
   it('getAsset should return the expected asset out', async () => {
-    const returnValue1 = await WithdrawMathTestContract.getAsset(state, bondIn);
-    let returnValue2 = await WithdrawMath.getAsset(stateTest, bondIn);
-    expect(returnValue1).to.equalBigInt(returnValue2);
+    const returnValue1 = await WithdrawMathTestContract.getAsset(state, bondIn)
+    let returnValue2 = await WithdrawMath.getAsset(stateTest, bondIn)
+    expect(returnValue1).to.equalBigInt(returnValue2)
   })
 
   it('getCollateral should return the expected collateral out', async () => {
-    const returnValue1 = await WithdrawMathTestContract.getCollateral(state, insuranceIn);
-    let returnValue2 = await WithdrawMath.getCollateral(stateTest, insuranceIn);
-    expect(returnValue1).to.equalBigInt(returnValue2);
+    const returnValue1 = await WithdrawMathTestContract.getCollateral(state, insuranceIn)
+    let returnValue2 = await WithdrawMath.getCollateral(stateTest, insuranceIn)
+    expect(returnValue1).to.equalBigInt(returnValue2)
   })
-
-  
-
 })

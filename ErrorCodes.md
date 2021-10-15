@@ -8,7 +8,7 @@ Documents all the Error Codes in Timeswap-V1-Core.
 
 Address Zero error.
 
-The address (or the address of the ERC20 token) passed is 0. 
+The address (or the address of the ERC20 token) passed is 0.
 
 Can occur in `constructor`, `createPair` or `setOwner`.
 
@@ -50,7 +50,7 @@ Check the `asset` and the `collateral` passed, and verify that they are the inte
 
 Address Zero error.
 
-The address (or the address of the ERC20 token) passed is 0. 
+The address (or the address of the ERC20 token) passed is 0.
 
 Can occur in `mint`, `burn`, `lend`, `withdraw`, `borrow` or `pay`.
 
