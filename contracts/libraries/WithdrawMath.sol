@@ -5,14 +5,16 @@ import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
+/// @title BurnMath library
+/// @author Timeswap Labs
 library WithdrawMath {
     using FullMath for uint256;
     using SafeCast for uint256;
 
-    function getAsset(
-        IPair.State memory state,
-        uint128 bondIn
-    ) internal pure returns (uint128 assetOut) {
+    /// @dev Get the asset for the liquidity burned.
+    /// @param state The pool state.
+    /// @param bondIn The amount of bond balance balance burnt by the msg.sender.
+    function getAsset(IPair.State memory state, uint128 bondIn) internal pure returns (uint128 assetOut) {
         uint256 assetReserve = state.reserves.asset;
         if (assetReserve >= state.totalClaims.bond) return assetOut = bondIn;
         uint256 _assetOut = bondIn;
@@ -21,10 +23,14 @@ library WithdrawMath {
         assetOut = _assetOut.toUint128();
     }
 
-    function getCollateral(
-        IPair.State memory state,
-        uint128 insuranceIn
-    ) internal pure returns (uint128 collateralOut) {
+    /// @dev Get the collateral for the liquidity burned.
+    /// @param state The pool state.
+    /// @param insuranceIn The amount of insurance balance burnt by the msg.sender.
+    function getCollateral(IPair.State memory state, uint128 insuranceIn)
+        internal
+        pure
+        returns (uint128 collateralOut)
+    {
         uint256 assetReserve = state.reserves.asset;
         if (assetReserve >= state.totalClaims.bond) return collateralOut;
         uint256 _collateralOut = state.totalClaims.bond;
