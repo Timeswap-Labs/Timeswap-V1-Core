@@ -44,8 +44,10 @@ interface IPair {
 
     /// @dev Emits when the state gets updated.
     /// @param maturity The unix timestamp maturity of the Pool.
-    /// @param state The new state of the pool.
-    event Sync(uint256 indexed maturity, State state);
+    /// @param x The new x state of the pool.
+    /// @param y The new y state of the pool.
+    /// @param z The new z state of the pool.
+    event Sync(uint256 indexed maturity, uint112 x, uint112 y, uint112 z);
 
     /// @dev Emits when mint function is called.
     /// @param maturity The unix timestamp maturity of the Pool.

@@ -185,7 +185,7 @@ contract TimeswapPair is IPair {
         pool.state.y += yIncrease;
         pool.state.z += zIncrease;
 
-        emit Sync(maturity, pool.state);
+        emit Sync(maturity, pool.state.x, pool.state.y, pool.state.z);
         emit Mint(maturity, msg.sender, liquidityTo, dueTo, xIncrease, liquidityOut, id, dueOut);
     }
 
@@ -216,7 +216,6 @@ contract TimeswapPair is IPair {
         if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
-        emit Sync(maturity, pool.state);
         emit Burn(maturity, msg.sender, assetTo, collateralTo, liquidityIn, tokensOut);
     }
 
@@ -257,7 +256,7 @@ contract TimeswapPair is IPair {
         pool.state.y -= yDecrease;
         pool.state.z -= zDecrease;
 
-        emit Sync(maturity, pool.state);
+        emit Sync(maturity, pool.state.x, pool.state.y, pool.state.z);
         emit Lend(maturity, msg.sender, bondTo, insuranceTo, xIncrease, claimsOut);
     }
 
@@ -292,7 +291,6 @@ contract TimeswapPair is IPair {
         if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
         if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
-        emit Sync(maturity, pool.state);
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
     }
 
@@ -334,7 +332,7 @@ contract TimeswapPair is IPair {
 
         asset.safeTransfer(assetTo, xDecrease);
 
-        emit Sync(maturity, pool.state);
+        emit Sync(maturity, pool.state.x, pool.state.y, pool.state.z);
         emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
     }
 
@@ -374,7 +372,6 @@ contract TimeswapPair is IPair {
 
         if (collateralOut > 0) collateral.safeTransfer(to, collateralOut);
 
-        emit Sync(maturity, pool.state);
         emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }
 }
