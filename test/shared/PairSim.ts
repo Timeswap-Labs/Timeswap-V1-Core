@@ -224,7 +224,6 @@ export class PairSim {
 
     pool.state.totalLiquidity -= liquidityIn
 
-    
     this.removeLiquidity(pool, liquidityIn, sender)
 
     pool.state.reserves.asset -= tokensOut.asset
@@ -380,8 +379,6 @@ export class PairSim {
     if (!(to != this.contractAddress)) return 'Invalid'
 
     const pool = this.getPool(maturity)
-
-  
 
     let debtIn = 0n
     let collateralOut = 0n
