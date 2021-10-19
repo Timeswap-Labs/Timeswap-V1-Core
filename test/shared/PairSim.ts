@@ -15,7 +15,7 @@ import {
   Tokens,
   tokensDefault,
   TotalClaims,
-  totalClaimsDefault,
+  totalClaimsDefault
 } from './PairInterface'
 
 const ZERO_ADDRESSS = '0x0000000000000000000000000000000000000000'
@@ -385,7 +385,7 @@ export class PairSim {
 
     for (let i = 0; i < ids.length; i++) {
       const id = ids[i]
-      const dues = this.getDues(pool, sender).due
+      const dues = this.getDues(pool, owner).due
       const due = dues[Number(id)]
 
       if (!(due.startBlock != blockNumber)) return 'Invalid'

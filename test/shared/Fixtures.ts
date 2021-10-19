@@ -34,8 +34,8 @@ export async function constructorFixture(
   const factory = pair.factoryContract
   const factoryAddress = factory.address
   const owner = await factory.owner()
-  await assetToken.transfer(signers[1].address, 10000n)
-  await collateralToken.transfer(signers[1].address, 10000n)
+  await assetToken.transfer(signers[1].address, BigInt((av.div(2)).toString()))
+  await collateralToken.transfer(signers[1].address, BigInt((cv.div(2)).toString()))
   await assetToken.approve(pair.pairContractCallee.address, assetValue)
   await collateralToken.approve(pair.pairContractCallee.address, collateralValue)
   await assetToken.connect(signers[1]).approve(pair.pairContractCallee.address, assetValue)
@@ -232,10 +232,22 @@ export async function burnFixture(fixture: Fixture, signer: SignerWithAddress, b
   return { pair, pairSim, assetToken, collateralToken }
 }
 
-export async function payFixture(fixture: Fixture, signer: SignerWithAddress, payParams: PayParams): Promise<Fixture> {
+export async function payFixture(fixture: Fixture, signer: SignerWithAddress, payParams: PayParams, payor?:SignerWithAddress): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut)
   const block = await getBlock(txn.blockHash!)
+  if (payor != undefined) {
+    pairSim.pay(
+      pair.maturity,
+      signer.address,
+      signer.address,
+      payParams.ids,
+      payParams.debtIn,
+      payParams.collateralOut,
+      payor.address,
+      block
+    )
+  }
   pairSim.pay(
     pair.maturity,
     signer.address,
@@ -246,6 +258,7 @@ export async function payFixture(fixture: Fixture, signer: SignerWithAddress, pa
     signer.address,
     block
   )
+  
   return { pair, pairSim, assetToken, collateralToken }
 }
 

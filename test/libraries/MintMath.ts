@@ -1,5 +1,6 @@
 import { mulDiv, mulDivUp } from '../libraries/FullMath'
 import { State } from '../shared/PairInterface'
+import { shiftRightUp } from './Math'
 
 export function getLiquidityTotal1(assetIn: bigint): bigint {
   let liquidityTotal = assetIn
