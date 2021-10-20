@@ -212,6 +212,8 @@ export async function borrowFixture(
     .upgrade(signer)
     .borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpAdjust >> 32n, owner)
   const block = await getBlock(txn.blockHash!)
+  console.log("about to borrowSim");
+  console.log("signer.address: ", signer.address);
   const debtObj = pairSim.borrow(
     pair.maturity,
     signer.address,
@@ -232,8 +234,13 @@ export async function burnFixture(fixture: Fixture, signer: SignerWithAddress, b
   return { pair, pairSim, assetToken, collateralToken }
 }
 
+// const returnValue = await payFixture(borrowTxData, signers[0], debtData, signers[1])
+
 export async function payFixture(fixture: Fixture, signer: SignerWithAddress, payParams: PayParams, payor?:SignerWithAddress): Promise<Fixture> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
+  console.log("getting the details");
+  console.log(payParams.ids, payParams.debtIn, payParams.collateralOut);
+  console.log("got the details");
   const txn = await pair.upgrade(signer).pay(payParams.ids, payParams.debtIn, payParams.collateralOut)
   const block = await getBlock(txn.blockHash!)
   if (payor != undefined) {
@@ -247,17 +254,19 @@ export async function payFixture(fixture: Fixture, signer: SignerWithAddress, pa
       payor.address,
       block
     )
+  } else {
+    pairSim.pay(
+      pair.maturity,
+      signer.address,
+      signer.address,
+      payParams.ids,
+      payParams.debtIn,
+      payParams.collateralOut,
+      signer.address,
+      block
+    )
   }
-  pairSim.pay(
-    pair.maturity,
-    signer.address,
-    signer.address,
-    payParams.ids,
-    payParams.debtIn,
-    payParams.collateralOut,
-    signer.address,
-    block
-  )
+  
   
   return { pair, pairSim, assetToken, collateralToken }
 }

@@ -324,6 +324,7 @@ export class PairSim {
     cdpIncrease: bigint,
     block: ethers.providers.Block
   ): { id: bigint; dueOut: Due } | string {
+    console.log("dueTo from PairSim:", dueTo);
     const now = BigInt(block.timestamp)
     const blockNumber = BigInt(block.number)
 
@@ -344,9 +345,12 @@ export class PairSim {
     dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease, now)
     dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease, now)
     dueOut.startBlock = blockNumber
+    console.log(dueOut);
 
     const dues = this.getDues(pool, dueTo)
-    const id = BigInt(pool.dues.length)
+    console.log("1A", dues);
+    const id = BigInt(dues.due.length) //TODO: this may be an error //@dipesh 
+    console.log("1B", id);
     dues.due.push(dueOut)
     this.addDue(pool, dues.due, dueTo)
 

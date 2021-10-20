@@ -56,15 +56,17 @@ describe('Pay', () => {
               interestIncrease: testCase.borrowInterestIncrease,
               cdpIncrease: testCase.borrowCdpIncrease,
             }
-            const borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
+            console.log("signers[0].address",signers[0].address);
+            console.log("signers[1].address",signers[1].address);
+            const borrowTxData = await borrowFixture(mint, signers[1], borrowParams, true);
+            
             const debtData: PayParams = {
               ids: [borrowTxData.debtObj.id],
               debtIn: [borrowTxData.debtObj.dueOut.debt],
               collateralOut: [borrowTxData.debtObj.dueOut.collateral],
             }
-
             console.log(debtData);
-            const returnValue = await payFixture(borrowTxData, signers[0], debtData, signers[1])
+            const returnValue = await payFixture(borrowTxData, signers[0], debtData, signers[0])
             pair = returnValue.pair
             pairSim = returnValue.pairSim
           } catch (error) {

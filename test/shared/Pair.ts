@@ -135,10 +135,15 @@ export class PairSigner extends Pair {
     let dueTo = this.pairContractCallee.address
     if (owner) {
       dueTo = this.signerWithAddress.address
+      console.log("the owner is", this.signerWithAddress.address);
     }
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
       .borrow(this.maturity, this.signerWithAddress.address, dueTo, assetOut, interestIncrease, cdpIncrease)
+    console.log("(((((object)))))");
+    const rv = (await this.pairContract.duesOf(this.maturity,this.signerWithAddress.address));
+    console.log((rv[0].debt).toString());
+    console.log((rv[0].collateral).toString());
     await txn.wait()
     return txn
   }
@@ -147,7 +152,7 @@ export class PairSigner extends Pair {
     let owner = this.pairContractCallee.address
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, owner, ids, debtsIn, collateralsOut)
+      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut)
     await txn.wait()
     return txn
   }
