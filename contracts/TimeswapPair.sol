@@ -14,7 +14,7 @@ import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
-import 'hardhat/console.sol';
+
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
@@ -177,7 +177,6 @@ contract TimeswapPair is IPair {
         Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-        console.log("id from the mint function", id);
 
         pool.state.reserves.asset += xIncrease;
         pool.state.reserves.collateral += dueOut.collateral;
@@ -323,8 +322,6 @@ contract TimeswapPair is IPair {
         Callback.borrow(collateral, dueOut.collateral, data);
 
         id = pool.dues[dueTo].insert(dueOut);
-        console.log("dueTo: ", dueTo);
-        console.log("id from the borrow function", id);
 
         pool.state.reserves.asset -= xDecrease;
         pool.state.reserves.collateral += dueOut.collateral;
@@ -350,8 +347,6 @@ contract TimeswapPair is IPair {
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
-        console.log("msg.sender", msg.sender);
-        console.log("owner", owner);
         require(block.timestamp < maturity, 'E202');
         require(ids.length == assetsIn.length && ids.length == collateralsOut.length, 'E205');
         require(to != address(0), 'E201');
@@ -360,8 +355,6 @@ contract TimeswapPair is IPair {
         Pool storage pool = pools[maturity];
 
         Due[] storage dues = pool.dues[owner];
-        console.log(dues[0].debt);
-        console.log(dues[0].collateral);
 
         for (uint256 i = 0; i < ids.length; i++) {
             Due storage due = dues[ids[i]];

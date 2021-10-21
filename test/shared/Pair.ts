@@ -15,7 +15,7 @@ export class Pair {
     public pairContract: PairContract,
     public factoryContract: Factory,
     public maturity: bigint
-  ) {}
+  ) { }
 
   upgrade(signerWithAddress: SignerWithAddress): PairSigner {
     return new PairSigner(signerWithAddress, this)
@@ -135,26 +135,35 @@ export class PairSigner extends Pair {
     let dueTo = this.pairContractCallee.address
     if (owner) {
       dueTo = this.signerWithAddress.address
-      console.log("the owner is", this.signerWithAddress.address);
     }
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .borrow(this.maturity, this.signerWithAddress.address, dueTo, assetOut, interestIncrease, cdpIncrease)
-    console.log("(((((object)))))");
-    const rv = (await this.pairContract.duesOf(this.maturity,this.signerWithAddress.address));
-    console.log((rv[0].debt).toString());
-    console.log((rv[0].collateral).toString());
+      .borrow(this.maturity, this.signerWithAddress.address, dueTo, assetOut, interestIncrease, cdpIncrease);
     await txn.wait()
     return txn
   }
 
-  async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[]): Promise<ContractTransaction> {
-    let owner = this.pairContractCallee.address
-    const txn = await this.pairContractCallee
-      .connect(this.signerWithAddress)
-      .pay(this.maturity, this.signerWithAddress.address, this.signerWithAddress.address, ids, debtsIn, collateralsOut)
-    await txn.wait()
-    return txn
+  async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[], signer?: SignerWithAddress): Promise<ContractTransaction> {
+    if (signer != undefined) {
+      const txn = await this.pairContractCallee
+        .connect(this.signerWithAddress)
+        .pay(this.maturity, signer.address, signer.address, ids, debtsIn, collateralsOut)
+      await txn.wait()
+      return txn
+    } else {
+      let owner = this.pairContractCallee.address
+      const txn = await this.pairContractCallee
+        .connect(this.signerWithAddress)
+        .pay(
+          this.maturity, 
+          this.signerWithAddress.address, 
+          owner, 
+          ids, 
+          debtsIn, 
+          collateralsOut)
+      await txn.wait()
+      return txn
+    }
   }
 }
 

@@ -65,7 +65,8 @@ describe('Pay', () => {
             const returnValue = await payFixture(borrowTxData, signers[0], debtData)
             pair = returnValue.pair
             pairSim = returnValue.pairSim
-          } catch (error) {}
+          } catch (error) 
+          {console.log(error);}
         })
 
         it('', async () => {

@@ -9,8 +9,6 @@ import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallbac
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '../interfaces/callback/ITimeswapPayCallback.sol';
 
-import 'hardhat/console.sol';
-
 
 contract TimeswapPairCallee {
     IPair public immutable  pairContract;
