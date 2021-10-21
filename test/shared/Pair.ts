@@ -15,7 +15,7 @@ export class Pair {
     public pairContract: PairContract,
     public factoryContract: Factory,
     public maturity: bigint
-  ) { }
+  ) {}
 
   upgrade(signerWithAddress: SignerWithAddress): PairSigner {
     return new PairSigner(signerWithAddress, this)
@@ -138,12 +138,17 @@ export class PairSigner extends Pair {
     }
     const txn = await this.pairContractCallee
       .connect(this.signerWithAddress)
-      .borrow(this.maturity, this.signerWithAddress.address, dueTo, assetOut, interestIncrease, cdpIncrease);
+      .borrow(this.maturity, this.signerWithAddress.address, dueTo, assetOut, interestIncrease, cdpIncrease)
     await txn.wait()
     return txn
   }
 
-  async pay(ids: bigint[], debtsIn: bigint[], collateralsOut: bigint[], signer?: SignerWithAddress): Promise<ContractTransaction> {
+  async pay(
+    ids: bigint[],
+    debtsIn: bigint[],
+    collateralsOut: bigint[],
+    signer?: SignerWithAddress
+  ): Promise<ContractTransaction> {
     if (signer != undefined) {
       const txn = await this.pairContractCallee
         .connect(this.signerWithAddress)
@@ -154,13 +159,7 @@ export class PairSigner extends Pair {
       let owner = this.pairContractCallee.address
       const txn = await this.pairContractCallee
         .connect(this.signerWithAddress)
-        .pay(
-          this.maturity, 
-          this.signerWithAddress.address, 
-          owner, 
-          ids, 
-          debtsIn, 
-          collateralsOut)
+        .pay(this.maturity, this.signerWithAddress.address, owner, ids, debtsIn, collateralsOut)
       await txn.wait()
       return txn
     }

@@ -56,8 +56,8 @@ describe('Pay', () => {
               interestIncrease: testCase.borrowInterestIncrease,
               cdpIncrease: testCase.borrowCdpIncrease,
             }
-            const borrowTxData = await borrowFixture(mint, signers[1], borrowParams, true);
-            
+            const borrowTxData = await borrowFixture(mint, signers[1], borrowParams, true)
+
             const debtData: PayParams = {
               ids: [borrowTxData.debtObj.id],
               debtIn: [borrowTxData.debtObj.dueOut.debt],
@@ -67,7 +67,7 @@ describe('Pay', () => {
             pair = returnValue.pair
             pairSim = returnValue.pairSim
           } catch (error) {
-            console.log(error);
+            console.log(error)
           }
         })
 
