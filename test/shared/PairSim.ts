@@ -15,7 +15,7 @@ import {
   Tokens,
   tokensDefault,
   TotalClaims,
-  totalClaimsDefault
+  totalClaimsDefault,
 } from './PairInterface'
 
 const ZERO_ADDRESSS = '0x0000000000000000000000000000000000000000'
@@ -346,7 +346,7 @@ export class PairSim {
     dueOut.startBlock = blockNumber
 
     const dues = this.getDues(pool, dueTo)
-    const id = BigInt(dues.due.length) //TODO: this may be an error //@dipesh 
+    const id = BigInt(dues.due.length) //TODO: this may be an error //@dipesh
     dues.due.push(dueOut)
     this.addDue(pool, dues.due, dueTo)
 
