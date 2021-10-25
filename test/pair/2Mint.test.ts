@@ -40,7 +40,7 @@ describe('Mint', () => {
           console.log(`Checking for Mint Test Case ${caseNumber + 1}`)
           try {
             const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-            console.log(mintParams);
+            console.log(mintParams)
             const mint = await mintFixture(constructor, signers[0], mintParams)
             pair = mint.pair
             pairSim = mint.pairSim
