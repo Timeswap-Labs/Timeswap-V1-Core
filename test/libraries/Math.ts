@@ -10,20 +10,20 @@ export function shiftRightUp(x: bigint, y: bigint): bigint {
   return z
 }
 
-export function sqrt(val:bigint): bigint {
-  let z: bigint = 0n;
-  if (val>3){
-    z = val;
-    let x = (val / 2n) + 1n;
+export function sqrt(val: bigint): bigint {
+  let z: bigint = 0n
+  if (val > 3) {
+    z = val
+    let x = val / 2n + 1n
     while (x < z) {
-      z = x;
-      x = (val / x + x) / 2n;
-    } 
-    return z;
-  } else if (val !=0n) {
-    z = 1n;
+      z = x
+      x = (val / x + x) / 2n
+    }
+    return z
+  } else if (val != 0n) {
+    z = 1n
   }
-  return z;
+  return z
 }
 
 export default {

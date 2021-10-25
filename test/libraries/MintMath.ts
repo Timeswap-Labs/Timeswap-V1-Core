@@ -9,13 +9,12 @@ const MaxUint56 = BigNumber.from(2).pow(56).sub(1)
 //   return max(BigInt(MaxUint56.toString()), assetIn);
 // }
 
-export function getLiquidityTotal1(assetIn: bigint, interestIncrease: bigint,
-  cdpIncrease: bigint): bigint {
-  let val = assetIn*(interestIncrease);
-  val = sqrt(val);
-  val = val*cdpIncrease;
-  val = sqrt(val);
-  return val;
+export function getLiquidityTotal1(assetIn: bigint, interestIncrease: bigint, cdpIncrease: bigint): bigint {
+  let val = assetIn * interestIncrease
+  val = sqrt(val)
+  val = val * cdpIncrease
+  val = sqrt(val)
+  return val
 }
 
 export function getLiquidityTotal2(
