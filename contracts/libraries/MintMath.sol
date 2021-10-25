@@ -16,13 +16,6 @@ library MintMath {
     /// @dev Get the total liquidity.
     /// @dev Use this if the total liquidity in the pool is 0.
     /// @param xIncrease The increase in the X state.
-    function getLiquidityTotal(uint112 xIncrease) internal pure returns (uint256 liquidityTotal) {
-        liquidityTotal = max(type(uint56).max, xIncrease);
-    }
-
-    /// @dev Get the total liquidity.
-    /// @dev Use this if the total liquidity in the pool is 0.
-    /// @param xIncrease The increase in the X state.
     /// @param yIncrease The increase in the Y state.
     /// @param zIncrease The increase in the Z state.
     function getLiquidityTotal(
@@ -30,11 +23,10 @@ library MintMath {
         uint112 yIncrease,
         uint112 zIncrease
     ) internal pure returns (uint256 liquidityTotal) {
-        uint256 _val = uint256(xIncrease) * yIncrease;
-        _val = _val.sqrt();
-        _val = _val * zIncrease;
-        _val = _val.sqrt();
-        liquidityTotal = _val;
+        liquidityTotal = uint256(yIncrease) * zIncrease;
+        liquidityTotal = liquidityTotal.sqrt();
+        liquidityTotal *= xIncrease;
+        liquidityTotal = liquidityTotal.sqrt();
     }
 
     /// @dev Get the total liquidity.
@@ -82,15 +74,6 @@ library MintMath {
             w = y;
         } else {
             w = z;
-        }
-    }
-
-    /// @dev Get the max of 2 numbers
-    function max(uint256 x, uint256 y) private pure returns (uint256 w) {
-        if (x >= y) {
-            w = x;
-        } else {
-            w = y;
         }
     }
 
