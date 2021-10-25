@@ -24,9 +24,8 @@ library MintMath {
         uint112 zIncrease
     ) internal pure returns (uint256 liquidityTotal) {
         liquidityTotal = uint256(yIncrease) * zIncrease;
-        liquidityTotal = liquidityTotal.sqrt();
-        liquidityTotal *= xIncrease;
-        liquidityTotal = liquidityTotal.sqrt();
+        liquidityTotal = liquidityTotal.cbrt();
+        liquidityTotal *= uint256(xIncrease).cbrt();
     }
 
     /// @dev Get the total liquidity.
