@@ -2,7 +2,6 @@ import { mulDiv, mulDivUp } from '../libraries/FullMath'
 import { State } from '../shared/PairInterface'
 import { shiftRightUp, sqrt } from './Math'
 
-
 export function getLiquidityTotal1(assetIn: bigint, interestIncrease: bigint, cdpIncrease: bigint): bigint {
   let val = interestIncrease * cdpIncrease
   val = sqrt(val)
