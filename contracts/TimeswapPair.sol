@@ -154,7 +154,7 @@ contract TimeswapPair is IPair {
         Pool storage pool = pools[maturity];
 
         if (pool.state.totalLiquidity == 0) {
-            uint256 liquidityTotal = MintMath.getLiquidityTotal(xIncrease);
+            uint256 liquidityTotal = MintMath.getLiquidityTotal(xIncrease, yIncrease, zIncrease);
             liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
 
             pool.state.totalLiquidity += liquidityTotal;

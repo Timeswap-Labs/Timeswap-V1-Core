@@ -1,12 +1,21 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { mulDiv, mulDivUp } from '../libraries/FullMath'
 import { State } from '../shared/PairInterface'
-import { shiftRightUp } from './Math'
+import { shiftRightUp, sqrt } from './Math'
 
 const MaxUint56 = BigNumber.from(2).pow(56).sub(1)
 
-export function getLiquidityTotal1(assetIn: bigint): bigint {
-  return max(BigInt(MaxUint56.toString()), assetIn);
+// export function getLiquidityTotal1(assetIn: bigint): bigint {
+//   return max(BigInt(MaxUint56.toString()), assetIn);
+// }
+
+export function getLiquidityTotal1(assetIn: bigint, interestIncrease: bigint,
+  cdpIncrease: bigint): bigint {
+  let val = assetIn*(interestIncrease);
+  val = sqrt(val);
+  val = val*cdpIncrease;
+  val = sqrt(val);
+  return val;
 }
 
 export function getLiquidityTotal2(
