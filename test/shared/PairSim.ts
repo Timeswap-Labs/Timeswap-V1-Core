@@ -161,7 +161,7 @@ export class PairSim {
     let liquidityOut: bigint
 
     if (pool.state.totalLiquidity == 0n) {
-      const liquidityTotal = MintMath.getLiquidityTotal1(assetIn)
+      const liquidityTotal = MintMath.getLiquidityTotal1(assetIn, interestIncrease, cdpIncrease)
       liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
       pool.state.totalLiquidity += liquidityTotal
       pool = this.addLiquidity(pool, liquidityTotal - liquidityOut, this.factory.owner)

@@ -79,8 +79,8 @@ describe('MintMath', () => {
   })
 
   it('Getting LiquidityTotal for AssetIn', async () => {
-    expect(await MintMathTestContract.getLiquidityTotal1(assetIn)).to.be.equalBigInt(
-      await MintMath.getLiquidityTotal1(assetIn)
+    expect(await MintMathTestContract.getLiquidityTotal1(assetIn, interestIncrease, cdpIncrease)).to.be.equalBigInt(
+      await MintMath.getLiquidityTotal1(assetIn, interestIncrease, cdpIncrease)
     )
   })
 

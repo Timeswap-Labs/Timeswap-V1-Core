@@ -11,4 +11,20 @@ library Math {
         z = x >> y;
         if (x != z << y) z++;
     }
+
+    /**
+      * @dev Compute the largest integer smaller than or equal to the cubic root of `n`
+    */
+    function cbrt(uint256 n) internal pure returns (uint256 x) { 
+        unchecked {
+            for (uint256 y = 1 << 255; y > 0; y >>= 3) {
+                x <<= 1;
+                uint256 z = 3 * x * (x + 1) + 1;
+                if (n / y >= z) {
+                    n -= y * z;
+                    x += 1;
+                }
+            }
+        }
+    }
 }
