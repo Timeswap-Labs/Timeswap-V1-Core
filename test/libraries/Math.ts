@@ -10,22 +10,6 @@ export function shiftRightUp(x: bigint, y: bigint): bigint {
   return z
 }
 
-export function sqrt(val: bigint): bigint {
-  let z: bigint = 0n
-  if (val > 3) {
-    z = val
-    let x = val / 2n + 1n
-    while (x < z) {
-      z = x
-      x = (val / x + x) / 2n
-    }
-    return z
-  } else if (val != 0n) {
-    z = 1n
-  }
-  return z
-}
-
 export function cbrt(val: bigint): bigint {
   let x = 0n
   for (let y = 1n << 255n; y > 0n; y >>= 3n) {
@@ -42,5 +26,5 @@ export function cbrt(val: bigint): bigint {
 export default {
   divUp,
   shiftRightUp,
-  sqrt,
+  cbrt,
 }
