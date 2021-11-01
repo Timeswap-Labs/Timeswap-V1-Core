@@ -90,8 +90,8 @@ contract TimeswapPair is IPair {
     }
 
     /// @inheritdoc IPair
-    function duesOf(uint256 maturity, address owner) external view override returns (Due[] memory) {
-        return pools[maturity].dues[owner];
+    function dueOf(uint256 maturity, address owner, uint256 id) external view override returns (Due memory) {
+        return pools[maturity].dues[owner][id];
     }
 
     /* ===== INIT ===== */
