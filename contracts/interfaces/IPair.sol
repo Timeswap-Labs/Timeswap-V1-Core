@@ -226,11 +226,12 @@ interface IPair {
     /// @return The total asset ERC20 debt created.
     function totalDebtCreated(uint256 maturity) external view returns (uint120);
 
-    /// @dev Returns the collateralized debts of a user in a Pool.
+    /// @dev Returns a collateralized debt of a user in a Pool.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param owner The address of the user.
-    /// @return The collateralized debts balance listed in an array.
-    function duesOf(uint256 maturity, address owner) external view returns (Due[] memory);
+    /// @param id The index of the collateralized debt
+    /// @return The collateralized debt balance listed in an array.
+    function dueOf(uint256 maturity, address owner, uint256 id) external view returns (Due memory);
 
     /* ===== UPDATE ===== */
 

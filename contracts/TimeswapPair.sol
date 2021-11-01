@@ -90,8 +90,8 @@ contract TimeswapPair is IPair {
     }
 
     /// @inheritdoc IPair
-    function duesOf(uint256 maturity, address owner) external view override returns (Due[] memory) {
-        return pools[maturity].dues[owner];
+    function dueOf(uint256 maturity, address owner, uint256 id) external view override returns (Due memory) {
+        return pools[maturity].dues[owner][id];
     }
 
     /* ===== INIT ===== */
@@ -355,7 +355,7 @@ contract TimeswapPair is IPair {
 
         Due[] storage dues = pool.dues[owner];
 
-        for (uint256 i = 0; i < ids.length; i++) {
+        for (uint256 i; i < ids.length; i++) {
             Due storage due = dues[ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'E213');
