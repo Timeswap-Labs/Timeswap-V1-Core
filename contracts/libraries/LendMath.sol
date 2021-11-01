@@ -65,13 +65,15 @@ library LendMath {
         uint256 _insuranceOut = maturity;
         _insuranceOut -= block.timestamp;
         _insuranceOut *= state.y;
-        _insuranceOut += uint256(state.x) << 32;
+        _insuranceOut *= zDecrease;
+        uint256 addend = state.z;
+        addend *= xIncrease;
+        addend <<= 32;
+        _insuranceOut += addend;
         uint256 denominator = state.x;
         denominator += xIncrease;
-        denominator *= uint256(state.x);
         denominator <<= 32;
-        _insuranceOut = _insuranceOut.mulDiv(uint256(xIncrease) * state.z, denominator);
-        _insuranceOut += zDecrease;
+        _insuranceOut /= denominator;
         insuranceOut = _insuranceOut.toUint128();
     }
 }

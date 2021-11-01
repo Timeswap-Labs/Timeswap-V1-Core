@@ -68,13 +68,15 @@ library BorrowMath {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
         _collateralIn *= state.y;
-        _collateralIn += uint256(state.x) << 32;
+        _collateralIn *= zIncrease;
+        uint256 addend = state.z;
+        addend *= xDecrease;
+        addend <<= 32;
+        _collateralIn += addend;
         uint256 denominator = state.x;
         denominator -= xDecrease;
-        denominator *= uint256(state.x);
         denominator <<= 32;
-        _collateralIn = _collateralIn.mulDivUp(uint256(xDecrease) * state.z, denominator);
-        _collateralIn += zIncrease;
+        _collateralIn = _collateralIn.divUp(denominator);
         collateralIn = _collateralIn.toUint112();
     }
 }

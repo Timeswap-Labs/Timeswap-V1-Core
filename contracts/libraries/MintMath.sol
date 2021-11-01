@@ -107,8 +107,11 @@ library MintMath {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
         _collateralIn *= yIncrease;
-        _collateralIn += uint256(xIncrease) << 33;
-        _collateralIn = _collateralIn.mulDivUp(zIncrease, uint256(xIncrease) << 32);
+        _collateralIn *= zIncrease;
+        uint256 denominator = xIncrease;
+        denominator <<= 32;
+        _collateralIn = _collateralIn.divUp(denominator);
+        _collateralIn += zIncrease;
         collateralIn = _collateralIn.toUint112();
     }
 }
