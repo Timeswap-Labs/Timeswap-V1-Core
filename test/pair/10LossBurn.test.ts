@@ -126,20 +126,19 @@ describe('Burn', () => {
             expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
 
             console.log('Should have correct claims of')
-
             const claimsOf = await pair.claimsOf(signers[0])
             const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
             expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
             expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
 
             console.log('Should have correct dues of')
-            const duesOf = await pair.duesOf()
-            const duesOfSim = pairSim.getTotalDues(pairSim.getPool(updatedMaturity))
+            const duesOf = (await pair.dueOf(0n))
+            const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
             expect(duesOf.length).to.equal(duesOfSim.length)
             for (let i = 0; i < duesOf.length; i++) {
-              expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].due[0].collateral)
-              expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].due[0].debt)
-              expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].due[0].startBlock)
+              expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
+              expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
+              expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
             iSuccess = iSuccess + 1
           }

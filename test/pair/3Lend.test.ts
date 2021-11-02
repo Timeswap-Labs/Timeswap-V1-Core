@@ -156,14 +156,13 @@ describe('Lend', () => {
             expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
 
             console.log('Should have correct claims of')
-
             const claimsOf = await pair.claimsOf(signers[0])
             const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
             expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
             expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
 
             console.log('Should have correct dues of')
-            const duesOf = await pair.duesOf()
+            const duesOf = await pair.dueOf(0n)
             const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
             expect(duesOf.length).to.equal(duesOfSim.length)
             for (let i = 0; i < duesOf.length; i++) {

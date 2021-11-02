@@ -55,23 +55,23 @@ export async function mintTestCases(): Promise<MintParams[]> {
   return testcases
 }
 
-export async function mintSuccessCheck({
-  assetIn,
-  interestIncrease,
-  cdpIncrease,
-  maturity,
-  currentTimeStamp,
-}: MintParams): Promise<boolean> {
-  if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) {
-    return false
-  } else {
-    return true
-  }
-}
+// export async function mintSuccessCheck({
+//   assetIn,
+//   interestIncrease,
+//   cdpIncrease,
+//   maturity,
+//   currentTimeStamp,
+// }: MintParams): Promise<boolean> {
+//   if (!(assetIn > 0n && interestIncrease > 0n && cdpIncrease > 0n)) {
+//     return false
+//   } else {
+//     return true
+//   }
+// }
 
-export async function mintFailureCheck(params: MintParams): Promise<boolean> {
-  return !(await mintSuccessCheck(params))
-}
+// export async function mintFailureCheck(params: MintParams): Promise<boolean> {
+//   return !(await mintSuccessCheck(params))
+// }
 
 export async function lossAndMint(): Promise<MintBorrowParams[]> {
   const nt = await now()
