@@ -64,10 +64,10 @@ export function getCollateral(
   _collateralIn -= now
   _collateralIn *= state.interest
   _collateralIn *= cdpIncrease
-  let addend = state.cdp;
-  addend *=assetOut;
-  addend = addend<<32n;
-  _collateralIn += addend;
+  let addend = state.cdp
+  addend *= assetOut
+  addend = addend << 32n
+  _collateralIn += addend
   let denominator = state.asset
   denominator -= assetOut
   denominator <<= 32n

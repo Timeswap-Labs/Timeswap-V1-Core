@@ -73,7 +73,6 @@ describe('Borrow', () => {
               } else {
                 throw Error(returnObj.error)
               }
-              
             } catch (error) {
               totalFailureCases++
               console.log(`Borrow transaction expected to revert; check for failure`)
@@ -181,7 +180,7 @@ describe('Borrow', () => {
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
             iSuccess++
-          } 
+          }
           caseNumber++
         })
       })

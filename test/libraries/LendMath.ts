@@ -61,8 +61,8 @@ export function getInsurance(
   _insuranceOut *= cdpDecrease
   let addend = state.cdp
   addend *= assetIn
-  addend = addend<<32n;
-  _insuranceOut += addend;
+  addend = addend << 32n
+  _insuranceOut += addend
   let denominator = state.asset
   denominator += assetIn
   denominator <<= 32n

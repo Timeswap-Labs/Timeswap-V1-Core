@@ -112,7 +112,7 @@ describe('Burn', () => {
             expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
 
             console.log('Should have correct dues of')
-            const duesOf = (await pair.dueOf(0n))
+            const duesOf = await pair.dueOf(0n)
             const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
             expect(duesOf.length).to.equal(duesOfSim.length)
             for (let i = 0; i < duesOf.length; i++) {

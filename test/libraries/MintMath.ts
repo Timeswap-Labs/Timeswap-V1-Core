@@ -66,7 +66,7 @@ export function getCollateral(
   let denominator = assetIn
   denominator = denominator << 32n
   _collateralIn = divUp(_collateralIn, denominator)
-  _collateralIn += cdpIncrease;
+  _collateralIn += cdpIncrease
   return _collateralIn
 }
 
