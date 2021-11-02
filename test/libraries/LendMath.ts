@@ -1,5 +1,4 @@
 import { checkConstantProduct } from '../libraries/ConstantProduct'
-import { mulDiv } from '../libraries/FullMath'
 
 export function check(
   state: {
@@ -59,12 +58,15 @@ export function getInsurance(
   let _insuranceOut = maturity
   _insuranceOut -= now
   _insuranceOut *= state.interest
-  _insuranceOut += state.asset << 32n
+  _insuranceOut *= cdpDecrease
+  let addend = state.cdp
+  addend *= assetIn
+  addend = addend<<32n;
+  _insuranceOut += addend;
   let denominator = state.asset
   denominator += assetIn
-  denominator *= state.asset << 32n
-  _insuranceOut = mulDiv(_insuranceOut, assetIn * state.cdp, denominator)
-  _insuranceOut += cdpDecrease
+  denominator <<= 32n
+  _insuranceOut /= denominator
   return _insuranceOut
 }
 

@@ -66,9 +66,14 @@ describe('Borrow', () => {
             }
             try {
               const returnObj = await borrowFixture(mint, signers[0], borrowParams)
-              pair = returnObj.pair
-              pairSim = returnObj.pairSim
-              console.log(`Borrow Test Case number: ${caseNumber + 1} expected to succeed`)
+              if (returnObj.pair != undefined) {
+                pair = returnObj.pair
+                pairSim = returnObj.pairSim
+                console.log(`Borrow Test Case number: ${caseNumber + 1} expected to succeed`)
+              } else {
+                throw Error(returnObj.error)
+              }
+              
             } catch (error) {
               totalFailureCases++
               console.log(`Borrow transaction expected to revert; check for failure`)
@@ -167,7 +172,7 @@ describe('Borrow', () => {
             expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
 
             console.log('Should have correct dues of')
-            const duesOf = await pair.duesOf()
+            const duesOf = (await pair.dueOf(0n)).concat(await pair.dueOf(1n))
             const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
             expect(duesOf.length).to.equal(duesOfSim.length)
             for (let i = 0; i < duesOf.length; i++) {
@@ -176,7 +181,7 @@ describe('Borrow', () => {
               expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
             }
             iSuccess++
-          }
+          } 
           caseNumber++
         })
       })

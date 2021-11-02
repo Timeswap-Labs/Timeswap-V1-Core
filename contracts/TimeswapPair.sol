@@ -147,10 +147,11 @@ contract TimeswapPair is IPair {
         )
     {
         require(block.timestamp < maturity, 'E202');
+        require(maturity - block.timestamp < 0x100000000, 'Duration overflow');
         require(liquidityTo != address(0) && dueTo != address(0), 'E201');
         require(liquidityTo != address(this) && dueTo != address(this), 'E204');
         require(xIncrease > 0 && yIncrease > 0 && zIncrease > 0, 'E205');
-
+        
         Pool storage pool = pools[maturity];
 
         if (pool.state.totalLiquidity == 0) {

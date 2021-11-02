@@ -78,7 +78,6 @@ export async function mintFixture(fixture: Fixture, signer: SignerWithAddress, m
     mintParams.cdpIncrease,
     block
   )
-  console.log(mintData)
 
   return { pair, pairSim, assetToken, collateralToken, mintData }
 }

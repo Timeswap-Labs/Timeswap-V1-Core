@@ -1,5 +1,4 @@
 import { checkConstantProduct } from '../libraries/ConstantProduct'
-import { mulDivUp } from '../libraries/FullMath'
 import { divUp, shiftRightUp } from '../libraries/Math'
 
 export function check(
@@ -64,12 +63,15 @@ export function getCollateral(
   let _collateralIn = maturity
   _collateralIn -= now
   _collateralIn *= state.interest
-  _collateralIn += state.asset << 32n
+  _collateralIn *= cdpIncrease
+  let addend = state.cdp;
+  addend *=assetOut;
+  addend = addend<<32n;
+  _collateralIn += addend;
   let denominator = state.asset
   denominator -= assetOut
-  denominator *= state.asset << 32n
-  _collateralIn = mulDivUp(_collateralIn, assetOut * state.cdp, denominator)
-  _collateralIn += cdpIncrease
+  denominator <<= 32n
+  _collateralIn = divUp(_collateralIn, denominator)
   return _collateralIn
 }
 
