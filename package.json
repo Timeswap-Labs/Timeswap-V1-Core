@@ -3,9 +3,10 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:hardhat": "hardhat test --network hardhat",
-    "coverage": "hardhat compile && hardhat coverage"
+    "coverage": "hardhat compile && hardhat coverage",
+    "prepare": "hardhat compile"
   },
-  "version": "1.0.17",
+  "version": "1.0.18",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
