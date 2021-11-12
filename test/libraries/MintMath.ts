@@ -1,12 +1,11 @@
-import { mulDiv } from '../libraries/FullMath'
-import { State } from '../shared/PairInterface'
-import { cbrt, divUp, shiftRightUp } from './Math'
+import { mulDiv } from '../libraries/FullMath';
+import { State } from '../shared/PairInterface';
+import { divUp, shiftRightUp } from './Math';
 
-export function getLiquidityTotal1(assetIn: bigint, interestIncrease: bigint, cdpIncrease: bigint): bigint {
-  let val = interestIncrease * cdpIncrease
-  val = cbrt(val)
-  val *= cbrt(assetIn)
-  return val
+export function getLiquidityTotal1(assetIn: bigint): bigint {
+  let liquidityTotal = assetIn
+  liquidityTotal <<= 16n
+  return liquidityTotal
 }
 
 export function getLiquidityTotal2(

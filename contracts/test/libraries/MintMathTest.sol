@@ -6,11 +6,9 @@ import {IPair} from '../../interfaces/IPair.sol';
 
 contract MintMathTest {
     function getLiquidityTotal1(
-        uint112 xIncrease,
-        uint112 yIncrease,
-        uint112 zIncrease
+        uint112 xIncrease
     ) external pure returns (uint256 liquidityTotal) {
-        return MintMath.getLiquidityTotal(xIncrease, yIncrease, zIncrease);
+        return MintMath.getLiquidityTotal(xIncrease);
     }
 
     function getLiquidityTotal2(
