@@ -6,7 +6,7 @@
     "coverage": "hardhat compile && hardhat coverage",
     "prepare": "hardhat compile"
   },
-  "version": "1.0.18",
+  "version": "1.0.19",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
