@@ -15,7 +15,7 @@ import {
   Tokens,
   tokensDefault,
   TotalClaims,
-  totalClaimsDefault,
+  totalClaimsDefault
 } from './PairInterface'
 
 const ZERO_ADDRESSS = '0x0000000000000000000000000000000000000000'
@@ -161,7 +161,7 @@ export class PairSim {
     let liquidityOut: bigint
 
     if (pool.state.totalLiquidity == 0n) {
-      const liquidityTotal = MintMath.getLiquidityTotal1(assetIn, interestIncrease, cdpIncrease)
+      const liquidityTotal = MintMath.getLiquidityTotal1(assetIn)
       liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
       pool.state.totalLiquidity += liquidityTotal
       pool = this.addLiquidity(pool, liquidityTotal - liquidityOut, this.factory.owner)

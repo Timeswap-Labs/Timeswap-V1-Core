@@ -16,16 +16,9 @@ library MintMath {
     /// @dev Get the total liquidity.
     /// @dev Use this if the total liquidity in the pool is 0.
     /// @param xIncrease The increase in the X state.
-    /// @param yIncrease The increase in the Y state.
-    /// @param zIncrease The increase in the Z state.
-    function getLiquidityTotal(
-        uint112 xIncrease,
-        uint112 yIncrease,
-        uint112 zIncrease
-    ) internal pure returns (uint256 liquidityTotal) {
-        liquidityTotal = uint256(yIncrease) * zIncrease;
-        liquidityTotal = liquidityTotal.cbrt();
-        liquidityTotal *= uint256(xIncrease).cbrt();
+    function getLiquidityTotal(uint112 xIncrease) internal pure returns (uint256 liquidityTotal) {
+        liquidityTotal = xIncrease;
+        liquidityTotal <<= 16;
     }
 
     /// @dev Get the total liquidity.
