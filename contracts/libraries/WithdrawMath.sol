@@ -2,13 +2,11 @@
 pragma solidity =0.8.4;
 
 import {IPair} from '../interfaces/IPair.sol';
-import {FullMath} from './FullMath.sol';
 import {SafeCast} from './SafeCast.sol';
 
 /// @title BurnMath library
 /// @author Timeswap Labs
 library WithdrawMath {
-    using FullMath for uint256;
     using SafeCast for uint256;
 
     /// @dev Get the asset for the liquidity burned.
@@ -33,12 +31,17 @@ library WithdrawMath {
     {
         uint256 assetReserve = state.reserves.asset;
         if (assetReserve >= state.totalClaims.bond) return collateralOut;
-        uint256 _collateralOut = state.totalClaims.bond;
-        _collateralOut -= assetReserve;
-        _collateralOut *= state.totalClaims.insurance;
-        if (uint256(state.reserves.collateral) * state.totalClaims.bond >= _collateralOut)
-            return collateralOut = insuranceIn;
-        _collateralOut = _collateralOut.mulDiv(insuranceIn, state.totalClaims.bond * state.totalClaims.insurance);
-        collateralOut = _collateralOut.toUint128();
+        uint256 deficit = state.totalClaims.bond;
+        deficit -= assetReserve;
+        if (uint256(state.reserves.collateral) * state.totalClaims.bond >= deficit * state.totalClaims.insurance) {
+            uint256 _collateralOut = deficit;
+            _collateralOut *= insuranceIn;
+            _collateralOut /= state.totalClaims.bond;
+            return collateralOut = _collateralOut.toUint128();
+        }
+        uint256 __collateralOut = state.reserves.collateral;
+        __collateralOut *= insuranceIn;
+        __collateralOut /= state.totalClaims.insurance;
+        collateralOut = __collateralOut.toUint128();
     }
 }
