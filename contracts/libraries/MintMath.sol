@@ -88,22 +88,15 @@ library MintMath {
 
     /// @dev Get the collateral that the lp has locked.
     /// @param maturity The unix timestamp maturity of the Pool.
-    /// @param xIncrease The increase in the X state.
-    /// @param yIncrease The increase in the Y state.
     /// @param zIncrease The increase in the Z state.
     function getCollateral(
         uint256 maturity,
-        uint112 xIncrease,
-        uint112 yIncrease,
         uint112 zIncrease
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
-        _collateralIn *= yIncrease;
         _collateralIn *= zIncrease;
-        uint256 denominator = xIncrease;
-        denominator <<= 32;
-        _collateralIn = _collateralIn.divUp(denominator);
+        _collateralIn = _collateralIn.shiftRightUp(24);
         _collateralIn += zIncrease;
         collateralIn = _collateralIn.toUint112();
     }

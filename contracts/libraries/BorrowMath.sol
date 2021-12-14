@@ -67,16 +67,14 @@ library BorrowMath {
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
-        _collateralIn *= state.y;
         _collateralIn *= zIncrease;
-        uint256 addend = state.z;
-        addend *= xDecrease;
-        addend <<= 32;
-        _collateralIn += addend;
+        _collateralIn = _collateralIn.shiftRightUp(24);
+        uint256 minimum = state.z;
+        minimum *= xDecrease;
         uint256 denominator = state.x;
         denominator -= xDecrease;
-        denominator <<= 32;
-        _collateralIn = _collateralIn.divUp(denominator);
+        minimum = minimum.divUp(denominator);
+        _collateralIn += minimum;
         collateralIn = _collateralIn.toUint112();
     }
 }

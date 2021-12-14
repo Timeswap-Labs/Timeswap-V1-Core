@@ -64,16 +64,14 @@ library LendMath {
     ) internal view returns (uint128 insuranceOut) {
         uint256 _insuranceOut = maturity;
         _insuranceOut -= block.timestamp;
-        _insuranceOut *= state.y;
         _insuranceOut *= zDecrease;
-        uint256 addend = state.z;
-        addend *= xIncrease;
-        addend <<= 32;
-        _insuranceOut += addend;
+        _insuranceOut >>= 24;
+        uint256 minimum = state.z;
+        minimum *= xIncrease;
         uint256 denominator = state.x;
         denominator += xIncrease;
-        denominator <<= 32;
-        _insuranceOut /= denominator;
+        minimum /= denominator;
+        _insuranceOut += minimum;
         insuranceOut = _insuranceOut.toUint128();
     }
 }
