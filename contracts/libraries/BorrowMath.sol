@@ -68,7 +68,7 @@ library BorrowMath {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
         _collateralIn *= zIncrease;
-        _collateralIn = _collateralIn.shiftRightUp(24);
+        _collateralIn = _collateralIn.shiftRightUp(25);
         uint256 minimum = state.z;
         minimum *= xDecrease;
         uint256 denominator = state.x;

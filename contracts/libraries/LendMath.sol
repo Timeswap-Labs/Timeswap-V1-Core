@@ -65,7 +65,7 @@ library LendMath {
         uint256 _insuranceOut = maturity;
         _insuranceOut -= block.timestamp;
         _insuranceOut *= zDecrease;
-        _insuranceOut >>= 24;
+        _insuranceOut >>= 25;
         uint256 minimum = state.z;
         minimum *= xIncrease;
         uint256 denominator = state.x;

@@ -37,12 +37,13 @@ library BurnMath {
             _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
             return collateralOut = _collateralOut.toUint128();
         }
-        uint256 _reduce = state.totalClaims.bond;
-        _reduce -= assetReserve;
-        _reduce *= state.totalClaims.insurance;
-        if (uint256(state.reserves.collateral) * state.totalClaims.bond <= _reduce) return collateralOut;
+        uint256 deficit = state.totalClaims.bond;
+        deficit -= assetReserve;
+        if (uint256(state.reserves.collateral) * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
         _collateralOut *= state.totalClaims.bond;
-        _collateralOut -= _reduce;
+        uint subtrahend = deficit;
+        subtrahend *= state.totalClaims.insurance;
+        _collateralOut -= subtrahend;
         _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity * state.totalClaims.bond);
         collateralOut = _collateralOut.toUint128();
     }
