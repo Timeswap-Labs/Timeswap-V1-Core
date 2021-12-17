@@ -1,46 +1,25 @@
 yarn run v1.22.10
-$ hardhat test test/pair/10LossBurn.test.ts test/pair/1PairDeployment.test.ts test/pair/2Mint.test.ts test/pair/3Lend.test.ts test/pair/4Borrow.test.ts test/pair/5Pay.test.ts test/pair/6Withdraw.test.ts test/pair/7Burn.test.ts test/pair/8MintMultiple.test.ts test/pair/9LossWithdraw.test.ts
+$ hardhat test test/pair/1PairDeployment.test.ts
 No need to generate any newer typings.
 
 
-  Burn
-    ✓ 
-
   Deploying Pair Contract
-    ✓ Creat pair deploys a pair contract (52ms)
+    ✓ Creat pair deploys a pair contract (54ms)
     ✓ Create pair with same collateral and asset address: Reverted
     ✓ Create pair with same collateral or asset as zero address: Reverted
     ✓ Create pair twice: Reverted
 
+
+  4 passing (686ms)
+
+Done in 3.52s.
+yarn run v1.22.10
+$ hardhat test test/pair/2Mint.test.ts
+No need to generate any newer typings.
+
+
   Mint
     ✓ 
-
-  Lend
-    ✓ 
-
-  Borrow
-    ✓ 
-
-  Pay
-    ✓ 
-
-  Withdraw
-    ✓ 
-
-  Burn
-    ✓ 
-
-  MintMultiple
-    ✓ 
-
-  Withdraw
-    ✓ 
-
-  
-Checking for Burn Test Case 1
-Testing for Burn Success Case: 1
-Should have correct reserves
-    1) 
 
   
 Checking for Mint Test Case 1
@@ -100,263 +79,6 @@ Total Failure Cases = 9
 Checking for Mint Test Case 10
 Case number: 10 expected to fail
 Total Failure Cases = 10
-    ✓ 
-
-  
-Checking for Lend Test Case 1
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 2
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 3
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 4
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 5
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 6
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 7
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 8
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 9
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Lend Test Case 10
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 1
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 2
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 3
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 4
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 5
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 6
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 7
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 8
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 9
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Borrow Test Case 10
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Pay Test Case 1
-    ✓ 
-
-  
-Checking for Pay Test Case 1
-    ✓ 
-
-  
-Checking for Pay Test Case 1
-    ✓ 
-
-  
-Checking for Withdraw Test Case 1
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Withdraw Test Case 2
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Withdraw Test Case 3
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Withdraw Test Case 4
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Withdraw Test Case 5
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 1
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 2
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 3
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 4
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 5
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 6
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 7
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 8
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 9
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Burn Test Case 10
-Ignored due to wrong miniting parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 1
-Case number: 1 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 2
-Case number: 2 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 3
-Case number: 3 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 4
-Case number: 4 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 5
-Case number: 5 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 6
-Case number: 6 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 7
-Case number: 7 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 8
-Case number: 8 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 9
-Case number: 9 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 10
-Case number: 10 ignored due to wrong mint parameters
-    ✓ 
-
-  
-Checking for Loss Withdraw Test Case 1
-error from minting:  Error: dueOut.Collateral > MaxUint112
-    at mintFixture (/Users/dsukhani/Desktop/code/Timeswap-V1-Core/test/shared/Fixtures.ts:69:63)
-    at runMicrotasks (<anonymous>)
-    at processTicksAndRejections (internal/process/task_queues.js:95:5)
-    at runNextTicks (internal/process/task_queues.js:64:3)
-    at listOnTimeout (internal/timers.js:524:9)
-    at processTimers (internal/timers.js:498:7)
-    at async Context.<anonymous> (/Users/dsukhani/Desktop/code/Timeswap-V1-Core/test/pair/9LossWithdraw.test.ts:48:22)
-Ignored due to wrong miniting parameters
-Error: minting error
-    at Context.<anonymous> (/Users/dsukhani/Desktop/code/Timeswap-V1-Core/test/pair/9LossWithdraw.test.ts:53:21)
-    at runMicrotasks (<anonymous>)
-    at processTicksAndRejections (internal/process/task_queues.js:95:5)
-    at runNextTicks (internal/process/task_queues.js:64:3)
-    at listOnTimeout (internal/timers.js:524:9)
-    at processTimers (internal/timers.js:498:7)
     ✓ 
 
   
@@ -420,24 +142,154 @@ Transaction reverted
     ✓ 
 
 
-  82 passing (9s)
-  1 failing
+  21 passing (3s)
 
-  1) 
-       :
-
-      AssertionError: expected '94n' to be equal to '2885162292n'
-      + expected - actual
-
-      -2885162292n
-      +94n
-      
-      at Context.<anonymous> (test/pair/10LossBurn.test.ts:96:44)
-      at processTicksAndRejections (internal/process/task_queues.js:95:5)
-      at runNextTicks (internal/process/task_queues.js:64:3)
-      at listOnTimeout (internal/timers.js:524:9)
-      at processTimers (internal/timers.js:498:7)
+Done in 5.69s.
+yarn run v1.22.10
+$ hardhat test test/pair/3Lend.test.ts
+No need to generate any newer typings.
 
 
+  Lend
+    ✓ 
 
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+  
+Checking for Lend Test Case 1
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 2
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 3
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 4
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 5
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 6
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 7
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 8
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 9
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Lend Test Case 10
+Ignored due to wrong miniting parameters
+    ✓ 
+
+
+  11 passing (2s)
+
+Done in 4.52s.
+yarn run v1.22.10
+$ hardhat test test/pair/4Borrow.test.ts
+No need to generate any newer typings.
+
+
+  Borrow
+    ✓ 
+
+  
+Checking for Borrow Test Case 1
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 2
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 3
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 4
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 5
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 6
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 7
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 8
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 9
+Ignored due to wrong miniting parameters
+    ✓ 
+
+  
+Checking for Borrow Test Case 10
+Ignored due to wrong miniting parameters
+    ✓ 
+
+
+  11 passing (2s)
+
+Done in 4.41s.
+yarn run v1.22.10
+$ hardhat test test/pair/5Pay.test.ts
+No need to generate any newer typings.
+
+
+  Pay
+    ✓ 
+
+  
+Checking for Pay Test Case 1
+    ✓ 
+
+  
+Checking for Pay Test Case 1
+    ✓ 
+
+  
+Checking for Pay Test Case 1
+    ✓ 
+
+
+  4 passing (839ms)
+
+Done in 3.47s.
