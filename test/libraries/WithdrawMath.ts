@@ -1,17 +1,15 @@
 import { State } from '../shared/PairInterface'
 
 export function getAsset(state: State, bondIn: bigint): bigint {
-  let assetReserve = state.reserves.asset
-  if (assetReserve >= state.totalClaims.bond) return bondIn
+  if (state.reserves.asset >= state.totalClaims.bond) return bondIn
   let _assetOut = bondIn
-  _assetOut *= assetReserve
+  _assetOut *= state.reserves.asset;
   _assetOut /= state.totalClaims.bond
   return _assetOut
 }
 
 export function getCollateral(state: State, insuranceIn: bigint): bigint {
-  let assetReserve = state.reserves.asset
-  if (assetReserve >= state.totalClaims.bond) return 0n
+  if (state.reserves.asset >= state.totalClaims.bond) return 0n
   let deficit = state.totalClaims.bond;
   deficit -= state.reserves.asset
   if (
