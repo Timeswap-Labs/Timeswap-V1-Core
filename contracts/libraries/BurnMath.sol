@@ -3,12 +3,14 @@ pragma solidity =0.8.4;
 
 import {IPair} from '../interfaces/IPair.sol';
 import {FullMath} from './FullMath.sol';
+import {Math} from './Math.sol';
 import {SafeCast} from './SafeCast.sol';
 
 /// @title BurnMath library
 /// @author Timeswap Labs
 library BurnMath {
     using FullMath for uint256;
+    using Math for uint256;
     using SafeCast for uint256;
 
     /// @dev Get the asset for the liquidity burned.
@@ -38,11 +40,11 @@ library BurnMath {
         uint256 deficit = state.totalClaims.bond;
         deficit -= state.reserves.asset;
         if (uint256(state.reserves.collateral) * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
-        _collateralOut *= state.totalClaims.bond;
         uint256 subtrahend = deficit;
         subtrahend *= state.totalClaims.insurance;
+        subtrahend = subtrahend.divUp(state.totalClaims.bond);
         _collateralOut -= subtrahend;
-        _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity * state.totalClaims.bond);
+        _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
         // TODO: state.totalLiquidity * state.totalClaims.bond need to recast to uint256 first?
         collateralOut = _collateralOut.toUint128();
     }
