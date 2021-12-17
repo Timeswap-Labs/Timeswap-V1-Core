@@ -60,12 +60,9 @@ export function getCollateral(
 ): bigint {
   let _collateralIn = maturity
   _collateralIn -= now
-  _collateralIn *= interestIncrease
   _collateralIn *= cdpIncrease
-  let denominator = assetIn
-  denominator = denominator << 32n
-  _collateralIn = divUp(_collateralIn, denominator)
-  _collateralIn += cdpIncrease
+  _collateralIn *= shiftRightUp(cdpIncrease, 25n);
+  _collateralIn += cdpIncrease;
   return _collateralIn
 }
 
