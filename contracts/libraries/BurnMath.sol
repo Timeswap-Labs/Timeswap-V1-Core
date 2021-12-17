@@ -45,7 +45,6 @@ library BurnMath {
         subtrahend = subtrahend.divUp(state.totalClaims.bond);
         _collateralOut -= subtrahend;
         _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
-        // TODO: state.totalLiquidity * state.totalClaims.bond need to recast to uint256 first?
         collateralOut = _collateralOut.toUint128();
     }
 }
