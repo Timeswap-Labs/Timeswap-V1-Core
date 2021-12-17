@@ -13,10 +13,9 @@ library WithdrawMath {
     /// @param state The pool state.
     /// @param bondIn The amount of bond balance balance burnt by the msg.sender.
     function getAsset(IPair.State memory state, uint128 bondIn) internal pure returns (uint128 assetOut) {
-        uint256 assetReserve = state.reserves.asset;
-        if (assetReserve >= state.totalClaims.bond) return assetOut = bondIn;
+        if (state.reserves.asset >= state.totalClaims.bond) return assetOut = bondIn;
         uint256 _assetOut = bondIn;
-        _assetOut *= assetReserve;
+        _assetOut *= state.reserves.asset;
         _assetOut /= state.totalClaims.bond;
         assetOut = _assetOut.toUint128();
     }
@@ -29,10 +28,9 @@ library WithdrawMath {
         pure
         returns (uint128 collateralOut)
     {
-        uint256 assetReserve = state.reserves.asset;
-        if (assetReserve >= state.totalClaims.bond) return collateralOut;
+        if (state.reserves.asset >= state.totalClaims.bond) return collateralOut;
         uint256 deficit = state.totalClaims.bond;
-        deficit -= assetReserve;
+        deficit -= state.reserves.asset;
         if (uint256(state.reserves.collateral) * state.totalClaims.bond >= deficit * state.totalClaims.insurance) {
             uint256 _collateralOut = deficit;
             _collateralOut *= insuranceIn;

@@ -15,9 +15,8 @@ library BurnMath {
     /// @param state The pool state.
     /// @param liquidityIn The amount of liquidity balance burnt by the msg.sender.
     function getAsset(IPair.State memory state, uint256 liquidityIn) internal pure returns (uint128 assetOut) {
-        uint256 assetReserve = state.reserves.asset;
-        if (assetReserve <= state.totalClaims.bond) return assetOut;
-        uint256 _assetOut = assetReserve;
+        if (state.reserves.asset <= state.totalClaims.bond) return assetOut;
+        uint256 _assetOut = state.reserves.asset;
         _assetOut -= state.totalClaims.bond;
         _assetOut = _assetOut.mulDiv(liquidityIn, state.totalLiquidity);
         assetOut = _assetOut.toUint128();
@@ -31,17 +30,16 @@ library BurnMath {
         pure
         returns (uint128 collateralOut)
     {
-        uint256 assetReserve = state.reserves.asset;
         uint256 _collateralOut = state.reserves.collateral;
-        if (assetReserve >= state.totalClaims.bond) {
+        if (state.reserves.asset >= state.totalClaims.bond) {
             _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
             return collateralOut = _collateralOut.toUint128();
         }
         uint256 deficit = state.totalClaims.bond;
-        deficit -= assetReserve;
-        if (uint256(state.reserves.collateral) * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
+        deficit -= state.reserves.asset;
+        if (_collateralOut * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
         _collateralOut *= state.totalClaims.bond;
-        uint subtrahend = deficit;
+        uint256 subtrahend = deficit;
         subtrahend *= state.totalClaims.insurance;
         _collateralOut -= subtrahend;
         _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity * state.totalClaims.bond);
