@@ -37,7 +37,7 @@ library BurnMath {
         }
         uint256 deficit = state.totalClaims.bond;
         deficit -= state.reserves.asset;
-        if (_collateralOut * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
+        if (uint256(state.reserves.collateral) * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
         _collateralOut *= state.totalClaims.bond;
         uint256 subtrahend = deficit;
         subtrahend *= state.totalClaims.insurance;
