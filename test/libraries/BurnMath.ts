@@ -17,12 +17,14 @@ export function getCollateral(state: State, liquidityIn: bigint): bigint {
     _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
     return _collateralOut
   }
-  let _reduce = state.totalClaims.bond
-  _reduce -= assetReserve
-  _reduce *= state.totalClaims.insurance
-  if (state.reserves.collateral * state.totalClaims.bond <= _reduce) return 0n
+  let deficit = state.totalClaims.bond
+  deficit -= assetReserve
+  // _reduce *= state.totalClaims.insurance
+  if (state.reserves.collateral * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return 0n
   _collateralOut *= state.totalClaims.bond
-  _collateralOut -= _reduce
+  let subtrahend = deficit;
+  subtrahend *= state.totalClaims.insurance;
+  _collateralOut -= subtrahend;
   _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity * state.totalClaims.bond)
   return _collateralOut
 }
