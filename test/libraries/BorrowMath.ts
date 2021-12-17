@@ -60,18 +60,16 @@ export function getCollateral(
   cdpIncrease: bigint,
   now: bigint
 ): bigint {
-  let _collateralIn = maturity
-  _collateralIn -= now
-  _collateralIn *= state.interest
-  _collateralIn *= cdpIncrease
-  let addend = state.cdp
-  addend *= assetOut
-  addend = addend << 32n
-  _collateralIn += addend
+  let _collateralIn = maturity;
+  _collateralIn -= now;
+  _collateralIn *= cdpIncrease;
+  _collateralIn = shiftRightUp(_collateralIn,25n);
+  let minimum = state.cdp;
+  minimum *= assetOut;
   let denominator = state.asset
   denominator -= assetOut
-  denominator <<= 32n
-  _collateralIn = divUp(_collateralIn, denominator)
+  minimum = divUp(minimum,denominator);
+  _collateralIn += minimum;
   return _collateralIn
 }
 

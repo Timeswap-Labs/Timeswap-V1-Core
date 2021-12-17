@@ -1,4 +1,5 @@
 import { checkConstantProduct } from '../libraries/ConstantProduct'
+import { shiftRightUp } from './Math'
 
 export function check(
   state: {
@@ -57,16 +58,14 @@ export function getInsurance(
 ): bigint {
   let _insuranceOut = maturity
   _insuranceOut -= now
-  _insuranceOut *= state.interest
   _insuranceOut *= cdpDecrease
-  let addend = state.cdp
-  addend *= assetIn
-  addend = addend << 32n
-  _insuranceOut += addend
+  _insuranceOut = shiftRightUp(_insuranceOut, 25n); //TODO: to confirm
+  let minimum = state.cdp;
+  minimum *= assetIn;
   let denominator = state.asset
   denominator += assetIn
-  denominator <<= 32n
-  _insuranceOut /= denominator
+  minimum /= denominator
+  _insuranceOut += minimum
   return _insuranceOut
 }
 
