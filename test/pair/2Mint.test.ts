@@ -46,6 +46,7 @@ describe('Mint', () => {
             console.log(`Case number: ${caseNumber + 1} expected to succeed`)
           } catch (error) {
             totalFailureCases++
+            console.log(error);
             console.log(`Case number: ${caseNumber + 1} expected to fail`)
             console.log(`Total Failure Cases = ${totalFailureCases}`)
             describe('', async () => {
