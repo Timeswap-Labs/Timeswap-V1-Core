@@ -1,5 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { assert } from 'console'
 import { ethers } from 'hardhat'
 import { expect } from '../shared/Expect'
 import { borrowFixture, constructorFixture, mintFixture } from '../shared/Fixtures'
@@ -58,12 +59,14 @@ describe('Borrow', () => {
               throw Error('minting error')
             }
             erm = undefined
-            const borrowParams: BorrowParams = {
+            const borrowParams: BorrowParams = 
+            {
               assetOut: testCase.borrowAssetOut,
               collateralIn: testCase.borrowCollateralIn,
               interestIncrease: testCase.borrowInterestIncrease,
               cdpIncrease: testCase.borrowCdpIncrease,
             }
+            
             try {
               const returnObj = await borrowFixture(mint, signers[0], borrowParams)
               if (returnObj.pair != undefined) {
@@ -71,10 +74,12 @@ describe('Borrow', () => {
                 pairSim = returnObj.pairSim
                 console.log(`Borrow Test Case number: ${caseNumber + 1} expected to succeed`)
               } else {
+                console.log(returnObj);
                 throw Error(returnObj.error)
               }
             } catch (error) {
               totalFailureCases++
+              console.log(error);
               console.log(`Borrow transaction expected to revert; check for failure`)
               console.log(`Total Failure Cases: ${totalFailureCases}`)
               throw error
@@ -105,18 +110,25 @@ describe('Borrow', () => {
                     cdpIncrease: testCase.borrowCdpIncrease,
                   }
                   console.log('Transaction should revert')
-                  await expect(
-                    pair.pairContractCallee
-                      .connect(signers[0])
-                      .borrow(
-                        pair.maturity,
-                        signers[0].address,
-                        signers[0].address,
-                        borrowParams.assetOut,
-                        borrowParams.interestIncrease,
-                        borrowParams.cdpIncrease
-                      )
-                  ).to.be.reverted
+                  try {
+                    await expect(
+                      pair.pairContractCallee
+                        .connect(signers[0])
+                        .borrow(
+                          pair.maturity,
+                          signers[0].address,
+                          signers[0].address,
+                          borrowParams.assetOut,
+                          borrowParams.interestIncrease,
+                          borrowParams.cdpIncrease
+                        )
+                    ).to.be.reverted   
+                  } catch (error) {
+                    console.log(`Tx with the following did not revert`);
+                    console.log(testCase);
+                    expect.fail();
+                  }
+                 
                   iFailure = iFailure + 1
                 })
               })

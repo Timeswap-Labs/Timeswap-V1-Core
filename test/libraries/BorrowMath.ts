@@ -17,6 +17,7 @@ export function check(
   if (assetReserve < 0) return 'assetReserve < 0'
   const interestAdjusted = adjust(interestIncrease, state.interest, feeBase)
   const cdpAdjusted = adjust(cdpIncrease, state.cdp, feeBase)
+  console.log("cdpAdjusted from BorrowMath.ts L20", cdpAdjusted);
   const productCheck = checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)
   if (!productCheck) return 'Invariance'
   let minimum = assetOut
