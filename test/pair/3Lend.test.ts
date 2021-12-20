@@ -34,7 +34,7 @@ describe('Lend', () => {
         before(async () => {
           console.log(`Checking for Lend Test Case ${caseNumber + 1}`)
           const currentBlockTime = await now()
-          updatedMaturity = currentBlockTime + 500000000n
+          updatedMaturity = currentBlockTime + 31556952n
           let erm: any
           try {
             let mint: any

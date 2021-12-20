@@ -64,10 +64,9 @@ export async function mintFixture(fixture: Fixture, signer: SignerWithAddress, m
   if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
   const { assetIn, collateralIn, interestIncrease, cdpIncrease, maturity, currentTimeStamp } = mintParams
   const dueOutDebt = MintMath.getDebt(maturity, assetIn, interestIncrease, currentTimeStamp)
-  if (dueOutDebt > BigInt(MaxUint112.toString())) throw Error('dueOut.debt > MaxUint112')
+  if (dueOutDebt > BigInt(MaxUint112.toString())) throw Error('dueOut.debt > MaxUint112');
   const dueOutCollateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease, currentTimeStamp)
-  // if (dueOutCollateral > BigInt(MaxUint112.toString())) throw Error('dueOut.Collateral > MaxUint112')
-  if (dueOutCollateral > BigInt(MaxUint112.toString())) console.log("dueOutCollateral is greater than MaxUint112");
+  if (dueOutCollateral > BigInt(MaxUint112.toString())) throw Error('dueOut.Collateral > MaxUint112');
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
   const mintData = pairSim.mint(

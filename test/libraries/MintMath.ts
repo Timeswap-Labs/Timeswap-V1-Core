@@ -61,7 +61,7 @@ export function getCollateral(
   let _collateralIn = maturity
   _collateralIn -= now
   _collateralIn *= cdpIncrease
-  _collateralIn *= shiftRightUp(cdpIncrease, 25n);
+  _collateralIn = shiftRightUp(_collateralIn, 25n);
   _collateralIn += cdpIncrease;
   return _collateralIn
 }
@@ -73,3 +73,5 @@ export default {
   getDebt,
   getCollateral,
 }
+
+

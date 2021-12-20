@@ -35,7 +35,7 @@ describe('Mint', () => {
         let updatedMaturity: any
 
         before(async () => {
-          const currentBlockTime = (await now()) + 500000000n
+          const currentBlockTime = (await now()) + 31556952n
           updatedMaturity = currentBlockTime
           console.log(`Checking for Mint Test Case ${caseNumber + 1}`)
           try {

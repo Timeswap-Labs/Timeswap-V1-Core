@@ -94,10 +94,10 @@ library MintMath {
         uint112 zIncrease
     ) internal view returns (uint112 collateralIn) {
         uint256 _collateralIn = maturity;
-        _collateralIn -= block.timestamp;
+        _collateralIn -= block.timestamp; 
         _collateralIn *= zIncrease;
-        _collateralIn = _collateralIn.shiftRightUp(25);
-        _collateralIn += zIncrease;
+        _collateralIn = _collateralIn.shiftRightUp(25); 
+        _collateralIn += zIncrease; 
         collateralIn = _collateralIn.toUint112();
     }
 }

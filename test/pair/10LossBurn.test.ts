@@ -36,7 +36,7 @@ describe('Burn', () => {
         before(async () => {
           console.log(`Checking for Burn Test Case ${caseNumber + 1}`)
           const currentBlockTime = await now()
-          updatedMaturity = currentBlockTime + 500000000n
+          updatedMaturity = currentBlockTime + 31556952n
           let erm: any
           try {
             let mint: any
