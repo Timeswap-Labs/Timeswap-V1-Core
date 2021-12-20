@@ -43,3 +43,17 @@ export async function borrow(): Promise<Borrow[]> {
   }
   return borrowCases
 }
+
+//TODO: The following tx is not reverting.  However the typescript check shows that it will fail due to "Invariance".  Need to debug and clear
+// {
+//   assetIn: 1914586276518461540700000000000000n,
+//   collateralIn: 4558233692020528389400000000000000n,
+//   interestIncrease: 498141581172987214260000000000000n,
+//   cdpIncrease: 7587678945779449949200000000000n,
+//   maturity: 1671551003n,
+//   currentTimeStamp: 1639994051n,
+//   borrowAssetOut: 1638855291008183043915248164610047n,
+//   borrowCollateralIn: 1609105904574335078900000000000000n,
+//   borrowInterestIncrease: 2347077638680920207135248164610047n,
+//   borrowCdpIncrease: 2592354589794524089290648164610047n
+// }
