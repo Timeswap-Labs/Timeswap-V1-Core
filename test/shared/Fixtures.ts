@@ -153,12 +153,14 @@ export async function borrowFixture(
   const totalliquidity = await pair.totalLiquidity()
   if (totalliquidity <= 0) throw Error('Invalid')
   if (borrowParams.assetOut <= 0) throw Error('Invalid')
+  // checking the constantProduct is the same prior to the tx
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n
   const pairSimPool = pairSim.getPool(pair.maturity)
   const pairSimContractState = pairSimPool.state
   let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
-  const feeBase = 0x10000n - FEE // uint128 feeBase = 0x10000 - fee;
+  
+  const feeBase = 0x10000n - FEE 
   const xReserve = pairContractState.asset - borrowParams.assetOut
   if (xReserve > BigInt(MaxUint112.toString())) throw Error('xReserve > MaxUint112')
   const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairContractState.interest, feeBase) // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
