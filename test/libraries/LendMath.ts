@@ -59,7 +59,7 @@ export function getInsurance(
   let _insuranceOut = maturity
   _insuranceOut -= now
   _insuranceOut *= cdpDecrease
-  _insuranceOut = shiftRightUp(_insuranceOut, 25n); //TODO: to confirm
+  _insuranceOut =_insuranceOut>> 25n; //TODO: to confirm
   let minimum = state.cdp;
   minimum *= assetIn;
   let denominator = state.asset
