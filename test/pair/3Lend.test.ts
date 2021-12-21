@@ -49,7 +49,7 @@ describe('Lend', () => {
           mint = await mintFixture(constructor, signers[0], mintParameters)
         } catch (error) {
           erm = 'minting error'
-          console.log(`Ignored due to wrong miniting parameters`)
+          console.log(`Ignored due to wrong minting parameters`)
           throw Error('minting error')
         }
         erm = undefined
