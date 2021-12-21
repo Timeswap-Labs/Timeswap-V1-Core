@@ -1,5 +1,6 @@
 import { mulDiv } from '../libraries/FullMath'
 import { State } from '../shared/PairInterface'
+import { divUp } from './Math'
 
 export function getAsset(state: State, liquidityIn: bigint): bigint {
   if (state.reserves.asset <= state.totalClaims.bond) return 0n
@@ -17,13 +18,12 @@ export function getCollateral(state: State, liquidityIn: bigint): bigint {
   }
   let deficit = state.totalClaims.bond
   deficit -= state.reserves.asset
-  // _reduce *= state.totalClaims.insurance
-  if (_collateralOut * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return 0n
-  _collateralOut *= state.totalClaims.bond
-  let subtrahend = deficit;
-  subtrahend *= state.totalClaims.insurance;
-  _collateralOut -= subtrahend;
-  _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity * state.totalClaims.bond)
+  if (state.reserves.collateral * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return 0n
+  let subtrahend = deficit
+  subtrahend *= state.totalClaims.insurance
+  subtrahend = divUp(subtrahend, state.totalClaims.bond)
+  _collateralOut -= subtrahend
+  _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
   return _collateralOut
 }
 

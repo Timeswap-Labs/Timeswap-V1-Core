@@ -1,5 +1,6 @@
 import { checkConstantProduct } from '../libraries/ConstantProduct'
 import { shiftRightUp } from './Math'
+import { min } from './MintMath'
 
 export function check(
   state: {
@@ -19,7 +20,10 @@ export function check(
   if (!checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)) return false
   let minimum = assetIn
   minimum *= state.interest
-  minimum /= assetReserve << 4n
+  minimum = minimum << 12n
+  let denominator = assetReserve
+  denominator *= feeBase
+  minimum /= denominator
   if (interestDecrease < minimum) return false
   return true
 }

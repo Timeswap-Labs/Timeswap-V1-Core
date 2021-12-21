@@ -1,3 +1,4 @@
+import { doesNotMatch } from 'assert'
 import { checkConstantProduct } from '../libraries/ConstantProduct'
 import { divUp, shiftRightUp } from '../libraries/Math'
 
@@ -21,7 +22,10 @@ export function check(
   if (!productCheck) return 'Invariance'
   let minimum = assetOut
   minimum *= state.interest
-  minimum = divUp(minimum, assetReserve << 4n)
+  minimum = minimum << 12n
+  let denominator = assetOut
+  denominator *= feeBase
+  minimum = divUp(minimum, denominator)
   if (interestIncrease < minimum) return 'interestIncrease < minimum'
   return true
 }
@@ -60,16 +64,16 @@ export function getCollateral(
   cdpIncrease: bigint,
   now: bigint
 ): bigint {
-  let _collateralIn = maturity;
-  _collateralIn -= now;
-  _collateralIn *= cdpIncrease;
-  _collateralIn = shiftRightUp(_collateralIn,25n);
-  let minimum = state.cdp;
-  minimum *= assetOut;
+  let _collateralIn = maturity
+  _collateralIn -= now
+  _collateralIn *= cdpIncrease
+  _collateralIn = shiftRightUp(_collateralIn, 25n)
+  let minimum = state.cdp
+  minimum *= assetOut
   let denominator = state.asset
   denominator -= assetOut
-  minimum = divUp(minimum,denominator);
-  _collateralIn += minimum;
+  minimum = divUp(minimum, denominator)
+  _collateralIn += minimum
   return _collateralIn
 }
 
