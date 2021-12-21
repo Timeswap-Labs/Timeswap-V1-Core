@@ -66,7 +66,6 @@ describe('Borrow', () => {
               interestIncrease: testCase.borrowInterestIncrease,
               cdpIncrease: testCase.borrowCdpIncrease,
             }
-            
             try {
               const returnObj = await borrowFixture(mint, signers[0], borrowParams)
               if (returnObj.pair != undefined) {
@@ -74,12 +73,10 @@ describe('Borrow', () => {
                 pairSim = returnObj.pairSim
                 console.log(`Borrow Test Case number: ${caseNumber + 1} expected to succeed`)
               } else {
-                console.log(returnObj);
                 throw Error(returnObj.error)
               }
             } catch (error) {
               totalFailureCases++
-              console.log(error);
               console.log(`Borrow transaction expected to revert; check for failure`)
               console.log(`Total Failure Cases: ${totalFailureCases}`)
               throw error
