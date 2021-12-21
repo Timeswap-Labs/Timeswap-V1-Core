@@ -22,6 +22,10 @@ describe('Pay', () => {
   let totalFailureCases = 0
 
   before(async () => {
+    await ethers.provider.send(
+      "hardhat_reset",
+      [],
+    ); 
     signers = await ethers.getSigners()
     tests = await TestCases.pay()
     totalCases = tests.length
@@ -65,7 +69,10 @@ describe('Pay', () => {
             const returnValue = await payFixture(borrowTxData, signers[0], debtData)
             pair = returnValue.pair
             pairSim = returnValue.pairSim
-          } catch (error) {}
+          } catch (error) {
+            console.log("THERE IS AN ERROR IN PAY");
+            console.log(error);
+          }
         })
 
         it('', async () => {

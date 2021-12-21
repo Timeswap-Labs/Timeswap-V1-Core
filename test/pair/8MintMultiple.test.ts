@@ -23,6 +23,10 @@ describe('MintMultiple', () => {
   let failureCases = 0
 
   before(async () => {
+    await ethers.provider.send(
+      "hardhat_reset",
+      [],
+    ); 
     signers = await ethers.getSigners()
     let testCases1 = await TestCases.mint()
     let testCases2 = await TestCases.mint()

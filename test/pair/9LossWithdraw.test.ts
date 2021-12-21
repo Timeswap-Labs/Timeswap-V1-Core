@@ -2,10 +2,12 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { expect } from '../shared/Expect'
+import { HardhatRuntimeEnvironment } from 'hardhat/types'
 import { borrowFixture, constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import * as TestCases from '../testCases'
 import { BorrowParams, LendAndBorrow, LendParams, MintParams } from '../testCases'
+
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[]
@@ -17,6 +19,10 @@ describe('Withdraw', () => {
   let caseNumber: any = 0
 
   before(async () => {
+    await ethers.provider.send(
+      "hardhat_reset",
+      [],
+    ); 
     signers = await ethers.getSigners()
     tests = await TestCases.lossWithdraw()
   })

@@ -20,6 +20,10 @@ describe('Lend', () => {
   let totalFailureCases = 0
 
   before(async () => {
+    await ethers.provider.send(
+      "hardhat_reset",
+      [],
+    ); 
     signers = await ethers.getSigners()
     tests = await TestCases.lend()
   })
