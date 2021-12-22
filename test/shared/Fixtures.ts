@@ -167,10 +167,12 @@ export async function borrowFixture(
     FEE
   )
   if (value != true) {
-    return {
+    return Error(
+      JSON.stringify({
       cdpAdjust: undefined,
       error: value,
-    }
+      })
+    )
   }
   const dueOutDebt = BorrowMath.getDebt(
     pair.maturity,
@@ -179,10 +181,14 @@ export async function borrowFixture(
     await now()
   )
   if (dueOutDebt > BigInt(MaxUint112.toString())) {
-    return {
-      cdpAdjust: undefined,
-      error: 'dueOut.debt greater than Uint112',
-    }
+    return Error (
+      JSON.stringify(
+        {
+          cdpAdjust: undefined,
+          error: 'dueOut.debt greater than Uint112',
+        }
+      )
+    )
   }
   const dueOutCollateral = BorrowMath.getCollateral(
     pair.maturity,

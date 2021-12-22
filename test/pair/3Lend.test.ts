@@ -71,9 +71,9 @@ describe('Lend', () => {
           console.log('Transaction reverted')
           continue;
         } catch (error) {
-          console.log("There was an error in the revert");
-          console.log(error);
-          continue;
+          console.log("Borrowing Tx with the following params did not revert (expected revert)");
+          console.log(testCase);
+          expect.fail();
         }
       }
       pair = lendTxData.pair

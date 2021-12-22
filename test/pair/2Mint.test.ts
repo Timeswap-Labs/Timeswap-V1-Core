@@ -43,62 +43,10 @@ describe('Mint', () => {
         maturity: updatedMaturity,
         currentTimeStamp: testCase.currentTimeStamp,
       }
+      let mint: any
       try {
-        const mint = await mintFixture(constructor, signers[0], mintParams)
-        pair = mint.pair
-        pairSim = mint.pairSim
+        mint = await mintFixture(constructor, signers[0], mintParams)
         console.log('\n', `Case number: ${i + 1} expected to succeed`)
-        console.log('Should have correct reserves')
-        const reserves = await pair.totalReserves()
-        const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
-        expect(reserves.asset).to.equalBigInt(reservesSim.asset)
-        expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
-
-        console.log('Should have correct state')
-        const state = await pair.state()
-        const stateSim = pairSim.getPool(updatedMaturity).state
-        expect(state.asset).to.equalBigInt(stateSim.asset)
-        expect(state.interest).to.equalBigInt(stateSim.interest)
-        expect(state.cdp).to.equalBigInt(stateSim.cdp)
-
-        console.log('Should have correct total liquidity')
-        const liquidity = await pair.totalLiquidity()
-        const liquiditySim = pairSim.getPool(updatedMaturity).state.totalLiquidity
-        expect(liquidity).to.equalBigInt(liquiditySim)
-
-        console.log('Should have correct liquidity of')
-        const liquidityOf = await pair.liquidityOf(signers[0])
-        const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(updatedMaturity), signers[0].address)
-        expect(liquidityOf).to.equalBigInt(liquidityOfSim)
-
-        console.log('Should have correct total debt')
-
-        const totalDebtCreated = await pair.totalDebtCreated()
-        const totalDebtCreatedSim = pairSim.getPool(updatedMaturity).state.totalDebtCreated
-        expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim)
-
-        console.log('Should have correct total claims')
-        const claims = await pair.totalClaims()
-        const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-        expect(claims.bond).to.equalBigInt(claimsSim.bond)
-        expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
-
-        console.log('Should have correct claims of')
-
-        const claimsOf = await pair.claimsOf(signers[0])
-        const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-        expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-        expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
-
-        console.log('Should have correct dues of')
-        const duesOf = await pair.dueOf(0n)
-        const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
-        expect(duesOf.length).to.equal(duesOfSim.length)
-        for (let i = 0; i < duesOf.length; i++) {
-          expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
-          expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
-          expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
-        }
       } catch (error) {
         totalFailureCases++
         console.log(`Case number: ${i + 1} expected to fail`)
@@ -115,10 +63,61 @@ describe('Mint', () => {
               mintParams.cdpIncrease
             )
         ).to.be.reverted;
+        continue;
+      }
+      pair = mint.pair
+      pairSim = mint.pairSim
 
+      console.log('Should have correct reserves')
+      const reserves = await pair.totalReserves()
+      const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
+      expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+      expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
 
+      console.log('Should have correct state')
+      const state = await pair.state()
+      const stateSim = pairSim.getPool(updatedMaturity).state
+      expect(state.asset).to.equalBigInt(stateSim.asset)
+      expect(state.interest).to.equalBigInt(stateSim.interest)
+      expect(state.cdp).to.equalBigInt(stateSim.cdp)
 
+      console.log('Should have correct total liquidity')
+      const liquidity = await pair.totalLiquidity()
+      const liquiditySim = pairSim.getPool(updatedMaturity).state.totalLiquidity
+      expect(liquidity).to.equalBigInt(liquiditySim)
 
+      console.log('Should have correct liquidity of')
+      const liquidityOf = await pair.liquidityOf(signers[0])
+      const liquidityOfSim = pairSim.getLiquidity(pairSim.getPool(updatedMaturity), signers[0].address)
+      expect(liquidityOf).to.equalBigInt(liquidityOfSim)
+
+      console.log('Should have correct total debt')
+
+      const totalDebtCreated = await pair.totalDebtCreated()
+      const totalDebtCreatedSim = pairSim.getPool(updatedMaturity).state.totalDebtCreated
+      expect(totalDebtCreated).to.equalBigInt(totalDebtCreatedSim)
+
+      console.log('Should have correct total claims')
+      const claims = await pair.totalClaims()
+      const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
+      expect(claims.bond).to.equalBigInt(claimsSim.bond)
+      expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+
+      console.log('Should have correct claims of')
+
+      const claimsOf = await pair.claimsOf(signers[0])
+      const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
+      expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
+      expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+
+      console.log('Should have correct dues of')
+      const duesOf = await pair.dueOf(0n)
+      const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
+      expect(duesOf.length).to.equal(duesOfSim.length)
+      for (let i = 0; i < duesOf.length; i++) {
+        expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)
+        expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
+        expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
       }
     }
   })
