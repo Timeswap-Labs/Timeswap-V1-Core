@@ -35,62 +35,19 @@ describe('Mint', () => {
       const currentBlockTime = (await now()) + 31556952n
       updatedMaturity = currentBlockTime
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-      try {
-        const mintParams: MintParams = {
-          assetIn: testCase.assetIn,
-          collateralIn: testCase.collateralIn,
-          interestIncrease: testCase.interestIncrease,
-          cdpIncrease: testCase.cdpIncrease,
-          maturity: updatedMaturity,
-          currentTimeStamp: testCase.currentTimeStamp,
-        }
-        try {
-          const mint = await mintFixture(constructor, signers[0], mintParams)
-          pair = mint.pair
-          pairSim = mint.pairSim
-          console.log('\n', `Case number: ${caseNumber + 1} expected to succeed`)
-        } catch (error) {
-          totalFailureCases++
-          console.log(error)
-          console.log(`Case number: ${caseNumber + 1} expected to fail`)
-          console.log(`Total Failure Cases = ${totalFailureCases}`)
-        }
-      } catch (err) {
-        describe('', async () => {
-          before(async () => {
-            const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-            pair = constructor.pair
-            pairSim = constructor.pairSim
-          })
-          it(``, async () => {
-            console.log(`Testing for Mint Failure Case: ${iFailure + 1}`)
-            const mintParams: MintParams = {
-              assetIn: testCase.assetIn,
-              collateralIn: testCase.collateralIn,
-              interestIncrease: testCase.interestIncrease,
-              cdpIncrease: testCase.cdpIncrease,
-              maturity: updatedMaturity,
-              currentTimeStamp: testCase.currentTimeStamp,
-            }
-            console.log('Transaction expected to revert')
-            await expect(
-              pair.pairContractCallee
-                .connect(signers[0])
-                .mint(
-                  pair.maturity,
-                  signers[0].address,
-                  mintParams.assetIn,
-                  mintParams.interestIncrease,
-                  mintParams.cdpIncrease
-                )
-            ).to.be.reverted
-            iFailure++
-            console.log('Transaction reverted')
-          })
-        })
+      const mintParams: MintParams = {
+        assetIn: testCase.assetIn,
+        collateralIn: testCase.collateralIn,
+        interestIncrease: testCase.interestIncrease,
+        cdpIncrease: testCase.cdpIncrease,
+        maturity: updatedMaturity,
+        currentTimeStamp: testCase.currentTimeStamp,
       }
-
-      if (pair != undefined && pairSim != undefined) {
+      try {
+        const mint = await mintFixture(constructor, signers[0], mintParams)
+        pair = mint.pair
+        pairSim = mint.pairSim
+        console.log('\n', `Case number: ${caseNumber + 1} expected to succeed`)
         console.log('Should have correct reserves')
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -142,9 +99,27 @@ describe('Mint', () => {
           expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
           expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         }
-        iSuccess = iSuccess + 1
+      } catch (error) {
+        totalFailureCases++
+        console.log(`Case number: ${caseNumber + 1} expected to fail`)
+        console.log(`Total Failure Cases = ${totalFailureCases}`)
+        console.log('Transaction expected to revert')
+        await expect(
+          pair.pairContractCallee
+            .connect(signers[0])
+            .mint(
+              pair.maturity,
+              signers[0].address,
+              mintParams.assetIn,
+              mintParams.interestIncrease,
+              mintParams.cdpIncrease
+            )
+        ).to.be.reverted;
+
+
+
+
       }
-      caseNumber++
     }
   })
 })
