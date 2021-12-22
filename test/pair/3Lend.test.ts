@@ -40,6 +40,8 @@ describe('Lend', () => {
       }
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters);
+        pair = mint.pair;
+        pairSim = mint.pairSim;
       } catch (error) {
         console.log(`Ignored due to wrong minting parameters`)
         continue;
@@ -52,10 +54,11 @@ describe('Lend', () => {
       let lendTxData: any;
       try {
         lendTxData = await lendFixture(mint, signers[0], lendParams)
+        pair = lendTxData.pair
+        pairSim = lendTxData.pairSim
       } catch {
         console.log(`Lending transaction expected to revert; check for failure`)
         try {
-          pair = mint.pair
           await expect(
             pair.pairContractCallee
               .connect(signers[0])
@@ -76,8 +79,7 @@ describe('Lend', () => {
           expect.fail();
         }
       }
-      pair = lendTxData.pair
-      pairSim = lendTxData.pairSim
+
       console.log(`Lend Test Case number: ${i + 1} expected to succeed`)
       console.log('Should have correct reserves')
       const reserves = await pair.totalReserves()
