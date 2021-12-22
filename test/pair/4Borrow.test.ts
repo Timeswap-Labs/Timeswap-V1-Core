@@ -27,8 +27,6 @@ describe('Borrow', () => {
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-      let erm: any
-      let mint: any
       const mintParameters: MintParams = {
         assetIn: testCase.assetIn,
         collateralIn: testCase.collateralIn,
@@ -37,12 +35,12 @@ describe('Borrow', () => {
         maturity: updatedMaturity,
         currentTimeStamp: testCase.currentTimeStamp,
       }
+      let mint: any
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters)
         pair = mint.pair;
         pairSim = mint.pairSim;
       } catch (error) {
-        erm = 'minting error'
         console.log(`Ignored due to wrong miniting parameters`)
         continue;
       }
