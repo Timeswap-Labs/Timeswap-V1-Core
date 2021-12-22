@@ -22,16 +22,6 @@ describe('MintMultiple', () => {
   let iFailure = 0
   let failureCases = 0
 
-  // before(async () => {
-  //   await ethers.provider.send('hardhat_reset', [])
-  //   signers = await ethers.getSigners()
-  //   let testCases1 = await TestCases.mint()
-  //   let testCases2 = await TestCases.mint()
-  //   for (let i = 0; i < testCases1.length; i++) {
-  //     testCases[i] = [testCases1[i], testCases2[i]]
-  //   }
-  // })
-
   it('', async () => {
     let testCases1 = await TestCases.mint()
     let testCases2 = await TestCases.mint()
@@ -46,7 +36,6 @@ describe('MintMultiple', () => {
       let updatedMaturity: any
       let erm: any
 
-      // before(async () => {
       console.log(`Checking for Multiple Mint Test Case ${caseNumber + 1}`)
       const currentBlockTime = (await now()) + 31556952n
       updatedMaturity = currentBlockTime
@@ -114,7 +103,6 @@ describe('MintMultiple', () => {
         }
       }
 
-      // it(``, async () => {
       if (erm != 'minting2 error' && erm != 'minting1 error') {
         if (pair != undefined && pairSim != undefined) {
           console.log(`Testing for Mint Success Case ${iSuccess + 1}`)
