@@ -1,336 +1,246 @@
 yarn run v1.22.10
-$ hardhat test test/pair/10LossBurn.test.ts test/pair/1PairDeployment.test.ts test/pair/2Mint.test.ts test/pair/3Lend.test.ts test/pair/4Borrow.test.ts test/pair/5Pay.test.ts test/pair/6Withdraw.test.ts test/pair/7Burn.test.ts test/pair/8MintMultiple.test.ts test/pair/9LossWithdraw.test.ts
+$ hardhat test test/pair/1PairDeployment.test.ts test/pair/2Mint.test.ts test/pair/3Lend.test.ts test/pair/4Borrow.test.ts test/pair/5Pay.test.ts test/pair/6Withdraw.test.ts test/pair/7Burn.test.ts test/pair/8MintMultiple.test.ts test/pair/9LossWithdraw.test.ts test/pair/9_1LossBurn.test.ts
 No need to generate any newer typings.
 
 
-  Burn
-    ✓ 
-
   Deploying Pair Contract
-    ✓ Creat pair deploys a pair contract (52ms)
+    ✓ Creat pair deploys a pair contract (55ms)
     ✓ Create pair with same collateral and asset address: Reverted
     ✓ Create pair with same collateral or asset as zero address: Reverted
     ✓ Create pair twice: Reverted
 
   Mint
-    ✓ 
+
+ Checking the Mint Test for testCase: 1
+
+ Case number: 1 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 2
+
+ Case number: 2 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 3
+
+ Case number: 3 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 4
+
+ Case number: 4 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 5
+
+ Case number: 5 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 6
+
+ Case number: 6 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 7
+
+ Case number: 7 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 8
+
+ Case number: 8 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 9
+
+ Case number: 9 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking the Mint Test for testCase: 10
+
+ Case number: 10 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (2679ms)
 
   Lend
-    ✓ 
+
+ Checking for Lend Test Case 1
+Lend Test Case number: 1 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 2
+Lend Test Case number: 2 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 3
+Lend Test Case number: 3 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 4
+Lend Test Case number: 4 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 5
+Lend Test Case number: 5 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 6
+Lend Test Case number: 6 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 7
+Lending transaction expected to revert; check for failure
+Transaction reverted
+
+ Checking for Lend Test Case 8
+Lend Test Case number: 8 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 9
+Lend Test Case number: 9 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Lend Test Case 10
+Lend Test Case number: 10 expected to succeed
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (2517ms)
 
   Borrow
-    ✓ 
 
-  Pay
-    ✓ 
-
-  Withdraw
-    ✓ 
-
-  Burn
-    ✓ 
-
-  MintMultiple
-    ✓ 
-
-  Withdraw
-    ✓ 
-
-  
-Checking for Burn Test Case 1
-Testing for Burn Success Case: 1
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 1
-Case number: 1 expected to succeed
-Testing for Mint Success Case 1
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 2
-Case number: 2 expected to succeed
-Testing for Mint Success Case 2
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 3
-Case number: 3 expected to succeed
-Testing for Mint Success Case 3
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 4
-Case number: 4 expected to succeed
-Testing for Mint Success Case 4
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 5
-Case number: 5 expected to succeed
-Testing for Mint Success Case 5
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 6
-Case number: 6 expected to succeed
-Testing for Mint Success Case 6
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 7
-Case number: 7 expected to succeed
-Testing for Mint Success Case 7
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 8
-Case number: 8 expected to succeed
-Testing for Mint Success Case 8
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 9
-Case number: 9 expected to succeed
-Testing for Mint Success Case 9
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Mint Test Case 10
-Case number: 10 expected to succeed
-Testing for Mint Success Case 10
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 1
-Lend Test Case number: 1 expected to succeed
-Testing for Lend Success Case: 1
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 2
-Lend Test Case number: 2 expected to succeed
-Testing for Lend Success Case: 2
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 3
-Lend Test Case number: 3 expected to succeed
-Testing for Lend Success Case: 3
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 4
-Lend Test Case number: 4 expected to succeed
-Testing for Lend Success Case: 4
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 5
-Lend Test Case number: 5 expected to succeed
-Testing for Lend Success Case: 5
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 6
-Lend Test Case number: 6 expected to succeed
-Testing for Lend Success Case: 6
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 7
-Lend Test Case number: 7 expected to succeed
-Testing for Lend Success Case: 7
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 8
-Lend Test Case number: 8 expected to succeed
-Testing for Lend Success Case: 8
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 9
-Lend Test Case number: 9 expected to succeed
-Testing for Lend Success Case: 9
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Lend Test Case 10
-Lend Test Case number: 10 expected to succeed
-Testing for Lend Success Case: 10
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Borrow Test Case 1
+ Checking for Borrow Test Case 1
 Borrow Test Case number: 1 expected to succeed
 Testing for Borrow Success Case 1
 Should have correct reserves
@@ -341,31 +251,13 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Borrow Test Case 2
-Borrow Test Case number: 2 expected to succeed
-Testing for Borrow Success Case 2
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
+ Checking for Borrow Test Case 2
+Borrow Test Case number: 2 expected to revert
+Transaction Reverted
 
-  
-Checking for Borrow Test Case 3
-Borrow transaction expected to revert; check for failure
-Total Failure Cases: 1
-    ✓ 
-
-  
-Checking for Borrow Test Case 4
-Borrow Test Case number: 4 expected to succeed
+ Checking for Borrow Test Case 3
+Borrow Test Case number: 3 expected to succeed
 Testing for Borrow Success Case 3
 Should have correct reserves
 Should have correct state
@@ -375,17 +267,9 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Borrow Test Case 5
-Borrow transaction expected to revert; check for failure
-Total Failure Cases: 2
-    ✓ 
-
-  
-Checking for Borrow Test Case 6
-Borrow Test Case number: 6 expected to succeed
+ Checking for Borrow Test Case 4
+Borrow Test Case number: 4 expected to succeed
 Testing for Borrow Success Case 4
 Should have correct reserves
 Should have correct state
@@ -395,11 +279,9 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Borrow Test Case 7
-Borrow Test Case number: 7 expected to succeed
+ Checking for Borrow Test Case 5
+Borrow Test Case number: 5 expected to succeed
 Testing for Borrow Success Case 5
 Should have correct reserves
 Should have correct state
@@ -409,31 +291,13 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Borrow Test Case 8
-Borrow Test Case number: 8 expected to succeed
-Testing for Borrow Success Case 6
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
+ Checking for Borrow Test Case 6
+Borrow Test Case number: 6 expected to revert
+Transaction Reverted
 
-  
-Checking for Borrow Test Case 9
-Borrow transaction expected to revert; check for failure
-Total Failure Cases: 3
-    ✓ 
-
-  
-Checking for Borrow Test Case 10
-Borrow Test Case number: 10 expected to succeed
+ Checking for Borrow Test Case 7
+Borrow Test Case number: 7 expected to succeed
 Testing for Borrow Success Case 7
 Should have correct reserves
 Should have correct state
@@ -443,22 +307,18 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Pay Test Case 1
-    ✓ 
+ Checking for Borrow Test Case 8
+Borrow Test Case number: 8 expected to revert
+Transaction Reverted
 
-  
-Checking for Pay Test Case 1
-    ✓ 
+ Checking for Borrow Test Case 9
+Borrow Test Case number: 9 expected to revert
+Transaction Reverted
 
-  
-Checking for Pay Test Case 1
-    ✓ 
-
-  
-Checking for Withdraw Test Case 1
+ Checking for Borrow Test Case 10
+Borrow Test Case number: 10 expected to succeed
+Testing for Borrow Success Case 10
 Should have correct reserves
 Should have correct state
 Should have correct total liquidity
@@ -467,15 +327,11 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
+    ✓  (2489ms)
 
-  
-Checking for Withdraw Test Case 2
-Ignored due to wrong miniting parameters
-    ✓ 
+  Pay
 
-  
-Checking for Withdraw Test Case 3
+ Checking for Pay Test Case 1
 Should have correct reserves
 Should have correct state
 Should have correct total liquidity
@@ -484,10 +340,8 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Withdraw Test Case 4
+ Checking for Pay Test Case 2
 Should have correct reserves
 Should have correct state
 Should have correct total liquidity
@@ -496,72 +350,188 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Withdraw Test Case 5
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking for Pay Test Case 3
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (708ms)
 
-  
-Checking for Burn Test Case 1
-Ignored due to wrong miniting parameters
-    ✓ 
+  Withdraw
 
-  
-Checking for Burn Test Case 2
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking the Withdraw Test for testCase: 1
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Burn Test Case 3
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking the Withdraw Test for testCase: 2
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Burn Test Case 4
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking the Withdraw Test for testCase: 3
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Burn Test Case 5
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking the Withdraw Test for testCase: 4
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Burn Test Case 6
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking the Withdraw Test for testCase: 5
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (1301ms)
 
-  
-Checking for Burn Test Case 7
-Ignored due to wrong miniting parameters
-    ✓ 
+  Burn
 
-  
-Checking for Burn Test Case 8
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking for Burn Test Case 1
+Testing for Burn Success Case: 1
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Burn Test Case 9
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking for Burn Test Case 2
+Testing for Burn Success Case: 2
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Burn Test Case 10
-Ignored due to wrong miniting parameters
-    ✓ 
+ Checking for Burn Test Case 3
+Testing for Burn Success Case: 3
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Multiple Mint Test Case 1
-Case number: 1 expected to fail at second mint
-Total Failure Cases = 1
-    ✓ 
+ Checking for Burn Test Case 4
+Testing for Burn Success Case: 4
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
 
-  
-Checking for Multiple Mint Test Case 2
-Case number: 2 expected to succeed
+ Checking for Burn Test Case 5
+Testing for Burn Success Case: 5
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Burn Test Case 6
+Testing for Burn Success Case: 6
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Burn Test Case 7
+Testing for Burn Success Case: 7
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Burn Test Case 8
+Testing for Burn Success Case: 8
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Burn Test Case 9
+Testing for Burn Success Case: 9
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+
+ Checking for Burn Test Case 10
+Testing for Burn Success Case: 10
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (2427ms)
+
+  MintMultiple
+
+ Checking for Multiple Mint Test Case 1
+Case number: 1 expected to succeed
 Testing for Mint Success Case 1
 Should have correct reserves
 Should have correct state
@@ -571,51 +541,17 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Multiple Mint Test Case 3
-Case number: 3 expected to succeed
-Testing for Mint Success Case 2
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
+ Checking for Multiple Mint Test Case 2
+Case number: 2 expected to fail at second mint
+Tx reverted successfully
 
-  
-Checking for Multiple Mint Test Case 4
+ Checking for Multiple Mint Test Case 3
+Case number: 3 expected to fail at second mint
+Tx reverted successfully
+
+ Checking for Multiple Mint Test Case 4
 Case number: 4 expected to succeed
-Testing for Mint Success Case 3
-Should have correct reserves
-Should have correct state
-Should have correct total liquidity
-Should have correct liquidity of
-Should have correct total debt
-Should have correct total claims
-Should have correct claims of
-Should have correct dues of
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 5
-Case number: 5 expected to fail at second mint
-Total Failure Cases = 2
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 6
-Case number: 6 expected to fail at second mint
-Total Failure Cases = 3
-    ✓ 
-
-  
-Checking for Multiple Mint Test Case 7
-Case number: 7 expected to succeed
 Testing for Mint Success Case 4
 Should have correct reserves
 Should have correct state
@@ -625,11 +561,9 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Multiple Mint Test Case 8
-Case number: 8 expected to succeed
+ Checking for Multiple Mint Test Case 5
+Case number: 5 expected to succeed
 Testing for Mint Success Case 5
 Should have correct reserves
 Should have correct state
@@ -639,18 +573,14 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
-Checking for Multiple Mint Test Case 9
-Case number: 9 expected to fail at second mint
-Total Failure Cases = 4
-    ✓ 
+ Checking for Multiple Mint Test Case 6
+Case number: 6 expected to fail at second mint
+Tx reverted successfully
 
-  
-Checking for Multiple Mint Test Case 10
-Case number: 10 expected to succeed
-Testing for Mint Success Case 6
+ Checking for Multiple Mint Test Case 7
+Case number: 7 expected to succeed
+Testing for Mint Success Case 7
 Should have correct reserves
 Should have correct state
 Should have correct total liquidity
@@ -659,107 +589,46 @@ Should have correct total debt
 Should have correct total claims
 Should have correct claims of
 Should have correct dues of
-    ✓ 
 
-  
+ Checking for Multiple Mint Test Case 8
+Case number: 8 expected to fail at second mint
+Tx reverted successfully
+
+ Checking for Multiple Mint Test Case 9
+Case number: 9 expected to fail at second mint
+Tx reverted successfully
+
+ Checking for Multiple Mint Test Case 10
+Case number: 10 expected to fail at second mint
+Tx reverted successfully
+    ✓  (2518ms)
+
+  Withdraw
 Checking for Loss Withdraw Test Case 1
-error from minting:  Error: dueOut.Collateral > MaxUint112
-    at mintFixture (/Users/dsukhani/Desktop/code/Timeswap-V1-Core/test/shared/Fixtures.ts:69:63)
-    at runMicrotasks (<anonymous>)
-    at processTicksAndRejections (internal/process/task_queues.js:95:5)
-    at runNextTicks (internal/process/task_queues.js:64:3)
-    at listOnTimeout (internal/timers.js:524:9)
-    at processTimers (internal/timers.js:498:7)
-    at async Context.<anonymous> (/Users/dsukhani/Desktop/code/Timeswap-V1-Core/test/pair/9LossWithdraw.test.ts:48:22)
-Ignored due to wrong miniting parameters
-Error: minting error
-    at Context.<anonymous> (/Users/dsukhani/Desktop/code/Timeswap-V1-Core/test/pair/9LossWithdraw.test.ts:53:21)
-    at runMicrotasks (<anonymous>)
-    at processTicksAndRejections (internal/process/task_queues.js:95:5)
-    at runNextTicks (internal/process/task_queues.js:64:3)
-    at listOnTimeout (internal/timers.js:524:9)
-    at processTimers (internal/timers.js:498:7)
-    ✓ 
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (309ms)
 
-  
-    1) "before all" hook for ""
-
-  
-    2) "before all" hook for ""
-
-  
-    3) "before all" hook for ""
-
-  
-Testing for Multiple Mint Failure Case: 1
-Transaction expected to revert
-Transaction reverted
-    ✓ 
-
-  
-Testing for Multiple Mint Failure Case: 2
-Transaction expected to revert
-Transaction reverted
-    ✓ 
-
-  
-Testing for Multiple Mint Failure Case: 3
-Transaction expected to revert
-Transaction reverted
-    ✓ 
-
-  
-Testing for Multiple Mint Failure Case: 4
-Transaction expected to revert
-Transaction reverted
-    ✓ 
+  Loss Burn
+Checking for Burn Test Case 1
+Testing for Burn Success Case: 1
+Should have correct reserves
+Should have correct state
+Should have correct total liquidity
+Should have correct liquidity of
+Should have correct total debt
+Should have correct total claims
+Should have correct claims of
+Should have correct dues of
+    ✓  (274ms)
 
 
-  77 passing (10s)
-  3 failing
+  13 passing (16s)
 
-  1) 
-       "before all" hook for "":
-     Error: VM Exception while processing transaction: reverted with reason string 'E202'
-      at TimeswapPair.lock (contracts/TimeswapPair.sol:122)
-      at TimeswapPair.verifyCallResult (@openzeppelin/contracts/utils/Address.sol:212)
-      at TimeswapPairCallee.mint (contracts/test/TimeswapPairCallee.sol:58)
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:95:5)
-      at runNextTicks (internal/process/task_queues.js:64:3)
-      at listOnTimeout (internal/timers.js:524:9)
-      at processTimers (internal/timers.js:498:7)
-      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1582:23)
-      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
-
-  2) 
-       "before all" hook for "":
-     Error: VM Exception while processing transaction: reverted with reason string 'E202'
-      at TimeswapPair.lock (contracts/TimeswapPair.sol:122)
-      at TimeswapPair.verifyCallResult (@openzeppelin/contracts/utils/Address.sol:212)
-      at TimeswapPairCallee.mint (contracts/test/TimeswapPairCallee.sol:58)
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:95:5)
-      at runNextTicks (internal/process/task_queues.js:64:3)
-      at listOnTimeout (internal/timers.js:524:9)
-      at processTimers (internal/timers.js:498:7)
-      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1582:23)
-      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
-
-  3) 
-       "before all" hook for "":
-     Error: VM Exception while processing transaction: reverted with reason string 'E202'
-      at TimeswapPair.lock (contracts/TimeswapPair.sol:122)
-      at TimeswapPair.verifyCallResult (@openzeppelin/contracts/utils/Address.sol:212)
-      at TimeswapPairCallee.mint (contracts/test/TimeswapPairCallee.sol:58)
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:95:5)
-      at runNextTicks (internal/process/task_queues.js:64:3)
-      at listOnTimeout (internal/timers.js:524:9)
-      at processTimers (internal/timers.js:498:7)
-      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1582:23)
-      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
-
-
-
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+Done in 18.94s.

@@ -10,7 +10,7 @@ let signers: SignerWithAddress[]
 let assetInValue: bigint = BigInt(MaxUint224.toString())
 let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
-describe('Burn', () => {
+describe('Loss Burn', () => {
   let tests: any
   let caseNumber: any = 0
   let iSuccess = 0
