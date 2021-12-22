@@ -55,18 +55,26 @@ export async function constructorFixture(
 export async function mintFixture(fixture: Fixture, signer: SignerWithAddress, mintParams: MintParams): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state()
-  const totalliquidity = await pair.totalLiquidity()
   const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n
   const pairSimPool = pairSim.getPool(pair.maturity)
   const pairSimContractState = pairSimPool.state // getting state from the contract
   const k_pairSimContract =
     (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
-  if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
+  if (k_pairContract != k_pairSimContract) {
+
+    throw Error('state of Pair and PairSim not same')
+  }
   const { assetIn, collateralIn, interestIncrease, cdpIncrease, maturity, currentTimeStamp } = mintParams
   const dueOutDebt = MintMath.getDebt(maturity, assetIn, interestIncrease, currentTimeStamp)
-  if (dueOutDebt > BigInt(MaxUint112.toString())) throw Error('dueOut.debt > MaxUint112');
+  if (dueOutDebt > BigInt(MaxUint112.toString())) {
+
+    throw Error('dueOut.debt > MaxUint112')
+  };
   const dueOutCollateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease, currentTimeStamp)
-  if (dueOutCollateral > BigInt(MaxUint112.toString())) throw Error('dueOut.Collateral > MaxUint112');
+  if (dueOutCollateral > BigInt(MaxUint112.toString())) {
+
+    throw Error('dueOut.Collateral > MaxUint112')
+  };
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
   const mintData = pairSim.mint(

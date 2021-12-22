@@ -17,9 +17,6 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Mint', () => {
   let tests: any
-  let caseNumber: any = 0
-  let iSuccess = 0
-  let iFailure = 0
   let totalFailureCases = 0
 
   it('', async () => {
