@@ -47,7 +47,7 @@ describe('Mint', () => {
         const mint = await mintFixture(constructor, signers[0], mintParams)
         pair = mint.pair
         pairSim = mint.pairSim
-        console.log('\n', `Case number: ${caseNumber + 1} expected to succeed`)
+        console.log('\n', `Case number: ${i + 1} expected to succeed`)
         console.log('Should have correct reserves')
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -101,7 +101,7 @@ describe('Mint', () => {
         }
       } catch (error) {
         totalFailureCases++
-        console.log(`Case number: ${caseNumber + 1} expected to fail`)
+        console.log(`Case number: ${i + 1} expected to fail`)
         console.log(`Total Failure Cases = ${totalFailureCases}`)
         console.log('Transaction expected to revert')
         await expect(
