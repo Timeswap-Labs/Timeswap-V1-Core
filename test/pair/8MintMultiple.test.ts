@@ -17,6 +17,11 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('MintMultiple', () => {
   let testCases: any = []
+  let snapshot: any;
+
+  before(async () => {
+    snapshot = await ethers.provider.send('evm_snapshot', []);
+  });
 
 
   it('', async () => {
@@ -26,7 +31,8 @@ describe('MintMultiple', () => {
       testCases[i] = [testCases1[i], testCases2[i]]
       let testCase1: any = testCases[i][0]
       let testCase2: any = testCases[i][1]
-      await ethers.provider.send('hardhat_reset', [])
+      await ethers.provider.send('evm_revert', [snapshot]);
+      await ethers.provider.send('evm_snapshot', []); 
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any

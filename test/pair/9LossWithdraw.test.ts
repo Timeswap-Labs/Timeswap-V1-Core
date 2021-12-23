@@ -5,7 +5,7 @@ import { expect } from '../shared/Expect'
 import { borrowFixture, constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import * as TestCases from '../testCases'
-import { BorrowParams, lend, LendParams, MintParams } from '../testCases'
+import { BorrowParams, LendParams, MintParams } from '../testCases'
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[]
@@ -14,13 +14,20 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Withdraw', () => {
   let tests: any
+  let snapshot: any;
+
+  before(async () => {
+    snapshot = await ethers.provider.send('evm_snapshot', []);
+  });
+
 
   it('', async () => {
     tests = await TestCases.lossWithdraw()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log(`Checking for Loss Withdraw Test Case ${i + 1}`)
-      await ethers.provider.send('hardhat_reset', [])
+      await ethers.provider.send('evm_revert', [snapshot]);
+      await ethers.provider.send('evm_snapshot', []); 
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any

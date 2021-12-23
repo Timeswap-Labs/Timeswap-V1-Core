@@ -13,13 +13,19 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Borrow', () => {
   let tests: any
+  let snapshot: any;
+
+  before(async () => {
+    snapshot = await ethers.provider.send('evm_snapshot', []);
+  });
 
   it('', async () => {
     tests = await TestCases.borrow();
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log('\n', `Checking for Borrow Test Case ${i + 1}`)
-      await ethers.provider.send('hardhat_reset', [])
+      await ethers.provider.send('evm_revert', [snapshot]);
+      await ethers.provider.send('evm_snapshot', []);
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any

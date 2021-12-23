@@ -12,15 +12,19 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Loss Burn', () => {
   let tests: any
-  let caseNumber: any = 0
-  let iSuccess = 0
+  let snapshot: any;
+
+  before(async () => {
+    snapshot = await ethers.provider.send('evm_snapshot', []);
+  });
 
   it('', async () => {
     tests = await lossAndMint()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
-      console.log(`Checking for Burn Test Case ${caseNumber + 1}`)
-      await ethers.provider.send('hardhat_reset', [])
+      console.log(`Checking for Burn Test Case ${i + 1}`)
+      await ethers.provider.send('evm_revert', [snapshot]);
+      await ethers.provider.send('evm_snapshot', []); 
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -76,7 +80,7 @@ describe('Loss Burn', () => {
       }
 
       if (pair != undefined && pairSim != undefined) {
-        console.log(`Testing for Burn Success Case: ${iSuccess + 1}`)
+        console.log(`Testing for Burn Success Case: ${i + 1}`)
         console.log('Should have correct reserves')
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -128,9 +132,7 @@ describe('Loss Burn', () => {
           expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
           expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         }
-        iSuccess = iSuccess + 1
       }
-      caseNumber++
     }
   })
 })
