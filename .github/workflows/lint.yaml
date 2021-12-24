@@ -19,6 +19,9 @@ jobs:
       - name: Check the env
         run: echo ${{secrets.INFURA_PROJECT_ID}}
         
+      - name: Create a dummy .env file
+        run: mv .env.sample .env
+        
       - name: Use Node.js 14
         uses: actions/setup-node@v2
         with:
