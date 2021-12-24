@@ -7,6 +7,7 @@ import 'hardhat-deploy'
 import 'solidity-coverage'
 
 const env: any = config()['parsed']
+console.log(env)
 
 export default {
   solidity: {
