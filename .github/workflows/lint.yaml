@@ -1,8 +1,5 @@
 name: Lint
 
-env: 
-  INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
-  
 on:
   push:
     branches:
@@ -24,6 +21,8 @@ jobs:
         with:
           node-version: 14
           cache: 'yarn'
+      - name: Check the env
+        run: echo ${{secrets.INFURA_PROJECT_ID}}
 
       - name: Install dependencies
         run: yarn --frozen-lockfile
