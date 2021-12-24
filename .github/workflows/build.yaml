@@ -19,7 +19,10 @@ jobs:
         with:
           node-version: 14
           cache: 'yarn'
-          
+
+      - name: Create a dummy .env file
+        run: mv .env.sample .env
+
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
