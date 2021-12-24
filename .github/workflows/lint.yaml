@@ -6,11 +6,10 @@ on:
   pull_request:
     branches:
       - main
-jobs:
+jobs:    
   lint:
     runs-on: ubuntu-latest
-    env:
-    INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
+    
 
     steps:
       - name: Git checkout
@@ -23,6 +22,8 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
+        env:
+          INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
         run: yarn --frozen-lockfile
 
       - name: Run prettier
@@ -32,3 +33,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: applies prettier lint changes
+  
