@@ -15,19 +15,18 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 describe('Lend', () => {
   let tests: any
   let snapshot: any
-  
-  before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
 
+  before(async () => {
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
   it('', async () => {
     tests = await TestCases.lend()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log('\n', `Checking for Lend Test Case ${i + 1}`)
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []);
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -45,19 +44,19 @@ describe('Lend', () => {
         currentTimeStamp: testCase.currentTimeStamp,
       }
       try {
-        mint = await mintFixture(constructor, signers[0], mintParameters);
-        pair = mint.pair;
-        pairSim = mint.pairSim;
+        mint = await mintFixture(constructor, signers[0], mintParameters)
+        pair = mint.pair
+        pairSim = mint.pairSim
       } catch (error) {
         console.log(`Ignored due to wrong minting parameters`)
-        continue;
+        continue
       }
       const lendParams: LendParams = {
         assetIn: testCase.lendAssetIn,
         interestDecrease: testCase.lendInterestDecrease,
         cdpDecrease: testCase.lendCdpDecrease,
       }
-      let lendTxData: any;
+      let lendTxData: any
       try {
         lendTxData = await lendFixture(mint, signers[0], lendParams)
         pair = lendTxData.pair
@@ -78,11 +77,11 @@ describe('Lend', () => {
               )
           ).to.be.reverted
           console.log('Transaction reverted')
-          continue;
+          continue
         } catch (error) {
-          console.log("Borrowing Tx with the following params did not revert (expected revert)");
-          console.log(testCase);
-          expect.fail();
+          console.log('Borrowing Tx with the following params did not revert (expected revert)')
+          console.log(testCase)
+          expect.fail()
         }
       }
 

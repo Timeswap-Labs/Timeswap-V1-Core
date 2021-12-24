@@ -43,17 +43,17 @@ export async function borrow(): Promise<Borrow[]> {
       //     borrowCdpIncrease: 2592354589794524089290648164610047n
       //   }
       {
-      assetIn: mintTests[i].assetIn,
-      collateralIn: mintTests[i].collateralIn,
-      interestIncrease: mintTests[i].interestIncrease,
-      cdpIncrease: mintTests[i].cdpIncrease,
-      maturity: mintTests[i].maturity,
-      currentTimeStamp: mintTests[i].currentTimeStamp,
-      borrowAssetOut: (BigInt(MaxUint112.toString()) - mintTests[i].assetIn) / 2n,
-      borrowCollateralIn: pseudoRandomBigUint(MaxUint112) / 2n,
-      borrowInterestIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].interestIncrease) / 2n,
-      borrowCdpIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].cdpIncrease) / 2n,
-    }
+        assetIn: mintTests[i].assetIn,
+        collateralIn: mintTests[i].collateralIn,
+        interestIncrease: mintTests[i].interestIncrease,
+        cdpIncrease: mintTests[i].cdpIncrease,
+        maturity: mintTests[i].maturity,
+        currentTimeStamp: mintTests[i].currentTimeStamp,
+        borrowAssetOut: (BigInt(MaxUint112.toString()) - mintTests[i].assetIn) / 2n,
+        borrowCollateralIn: pseudoRandomBigUint(MaxUint112) / 2n,
+        borrowInterestIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].interestIncrease) / 2n,
+        borrowCdpIncrease: (BigInt(MaxUint112.toString()) - mintTests[i].cdpIncrease) / 2n,
+      }
     )
   }
   return borrowCases

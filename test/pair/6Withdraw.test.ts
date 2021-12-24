@@ -14,23 +14,23 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Withdraw', () => {
   let tests: any
-  let snapshot: any;
+  let snapshot: any
 
   before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
-  it("", async () => {
-    tests = await TestCases.withdraw();
-    for (let i =0; i <tests.length; i++) {
-      console.log('\n', `Checking the Withdraw Test for testCase: ${i + 1}`);
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []); 
-      signers = await ethers.getSigners();
+  it('', async () => {
+    tests = await TestCases.withdraw()
+    for (let i = 0; i < tests.length; i++) {
+      console.log('\n', `Checking the Withdraw Test for testCase: ${i + 1}`)
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
+      signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
       let updatedMaturity: any
-      const currentBlockTime = await now();
+      const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
       let erm: any
@@ -48,7 +48,7 @@ describe('Withdraw', () => {
       } catch (error) {
         erm = 'minting error'
         console.log(`Ignored due to wrong miniting parameters`)
-        continue;
+        continue
       }
       const lendParams: LendParams = {
         assetIn: tests[i].lendAssetIn,
@@ -123,4 +123,3 @@ describe('Withdraw', () => {
     }
   })
 })
-

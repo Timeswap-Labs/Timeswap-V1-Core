@@ -61,20 +61,17 @@ export async function mintFixture(fixture: Fixture, signer: SignerWithAddress, m
   const k_pairSimContract =
     (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract != k_pairSimContract) {
-
     throw Error('state of Pair and PairSim not same')
   }
   const { assetIn, collateralIn, interestIncrease, cdpIncrease, maturity, currentTimeStamp } = mintParams
   const dueOutDebt = MintMath.getDebt(maturity, assetIn, interestIncrease, currentTimeStamp)
   if (dueOutDebt > BigInt(MaxUint112.toString())) {
-
     throw Error('dueOut.debt > MaxUint112')
-  };
+  }
   const dueOutCollateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease, currentTimeStamp)
   if (dueOutCollateral > BigInt(MaxUint112.toString())) {
-
     throw Error('dueOut.Collateral > MaxUint112')
-  };
+  }
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
   const mintData = pairSim.mint(
@@ -177,8 +174,8 @@ export async function borrowFixture(
   if (value != true) {
     return Error(
       JSON.stringify({
-      cdpAdjust: undefined,
-      error: value,
+        cdpAdjust: undefined,
+        error: value,
       })
     )
   }
@@ -189,13 +186,11 @@ export async function borrowFixture(
     await now()
   )
   if (dueOutDebt > BigInt(MaxUint112.toString())) {
-    return Error (
-      JSON.stringify(
-        {
-          cdpAdjust: undefined,
-          error: 'dueOut.debt greater than Uint112',
-        }
-      )
+    return Error(
+      JSON.stringify({
+        cdpAdjust: undefined,
+        error: 'dueOut.debt greater than Uint112',
+      })
     )
   }
   const dueOutCollateral = BorrowMath.getCollateral(

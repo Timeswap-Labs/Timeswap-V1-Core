@@ -1,6 +1,6 @@
-import { mulDiv } from '../libraries/FullMath';
-import { State } from '../shared/PairInterface';
-import { divUp, shiftRightUp } from './Math';
+import { mulDiv } from '../libraries/FullMath'
+import { State } from '../shared/PairInterface'
+import { divUp, shiftRightUp } from './Math'
 
 export function getLiquidityTotal1(assetIn: bigint): bigint {
   let liquidityTotal = assetIn
@@ -61,8 +61,8 @@ export function getCollateral(
   let _collateralIn = maturity
   _collateralIn -= now
   _collateralIn *= cdpIncrease
-  _collateralIn = shiftRightUp(_collateralIn, 25n);
-  _collateralIn += cdpIncrease;
+  _collateralIn = shiftRightUp(_collateralIn, 25n)
+  _collateralIn += cdpIncrease
   return _collateralIn
 }
 
@@ -73,5 +73,3 @@ export default {
   getDebt,
   getCollateral,
 }
-
-

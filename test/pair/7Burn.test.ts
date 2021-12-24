@@ -12,19 +12,19 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Burn', () => {
   let tests: any
-  let snapshot: any;
+  let snapshot: any
 
   before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
   it('', async () => {
     tests = await mint()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log('\n', `Checking for Burn Test Case ${i + 1}`)
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []); 
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -42,12 +42,12 @@ describe('Burn', () => {
         currentTimeStamp: testCase.currentTimeStamp,
       }
       try {
-        mint = await mintFixture(constructor, signers[0], mintParameters);
-        pair = mint.pair;
-        pairSim = mint.pairSim;
+        mint = await mintFixture(constructor, signers[0], mintParameters)
+        pair = mint.pair
+        pairSim = mint.pairSim
       } catch (error) {
         console.log(`Ignored due to wrong minting parameters`)
-        continue;
+        continue
       }
       await advanceTimeAndBlock(Number(updatedMaturity))
       const burnParams = { liquidityIn: mint.mintData.liquidityOut }
@@ -56,10 +56,8 @@ describe('Burn', () => {
         pair = burn.pair
         pairSim = burn.pairSim
       } catch (error) {
-        console.log("There was an error in the burn transaction, expecting revert");
-        await expect(
-          await pair.upgrade(signers[0]).burn(burnParams.liquidityIn)
-        ).to.be.reverted
+        console.log('There was an error in the burn transaction, expecting revert')
+        await expect(await pair.upgrade(signers[0]).burn(burnParams.liquidityIn)).to.be.reverted
         console.log('Transaction reverted')
       }
       console.log(`Testing for Burn Success Case: ${i + 1}`)
@@ -117,4 +115,3 @@ describe('Burn', () => {
     }
   })
 })
-

@@ -17,12 +17,11 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('MintMultiple', () => {
   let testCases: any = []
-  let snapshot: any;
+  let snapshot: any
 
   before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
-
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
   it('', async () => {
     let testCases1 = await TestCases.mint()
@@ -31,8 +30,8 @@ describe('MintMultiple', () => {
       testCases[i] = [testCases1[i], testCases2[i]]
       let testCase1: any = testCases[i][0]
       let testCase2: any = testCases[i][1]
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []); 
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -65,12 +64,12 @@ describe('MintMultiple', () => {
         pair = mint1.pair
         pairSim = mint1.pairSim
       } catch (error) {
-        console.log("there was an error in Mint 1");
+        console.log('there was an error in Mint 1')
         continue
       }
       let mint2: any
       try {
-        mint2 = await mintFixture(mint1, signers[0], mintParams[1]);
+        mint2 = await mintFixture(mint1, signers[0], mintParams[1])
         pair = mint2.pair
         pairSim = mint2.pairSim
       } catch (error) {
@@ -86,8 +85,8 @@ describe('MintMultiple', () => {
               mintParams[1].cdpIncrease
             )
         ).to.be.reverted
-        console.log("Tx reverted successfully");
-        continue;
+        console.log('Tx reverted successfully')
+        continue
       }
       console.log(`Case number: ${i + 1} expected to succeed`)
       console.log(`Testing for Mint Success Case ${i + 1}`)
@@ -142,8 +141,6 @@ describe('MintMultiple', () => {
         expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
         expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
       }
-
-
     }
   })
 })

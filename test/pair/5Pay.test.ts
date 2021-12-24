@@ -14,19 +14,19 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Pay', () => {
   let tests: any
-  let snapshot: any;
+  let snapshot: any
 
   before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
   it('', async () => {
     tests = await TestCases.pay()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log('\n', `Checking for Pay Test Case ${i + 1}`)
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []);
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -46,11 +46,11 @@ describe('Pay', () => {
       let mint: any
       try {
         const mint = await mintFixture(constructor, signers[0], mintParameters)
-        pair = mint.pair;
-        pairSim = mint.pairSim;
+        pair = mint.pair
+        pairSim = mint.pairSim
       } catch (error) {
         console.log(`Ignored due to wrong miniting parameters`)
-        continue;
+        continue
       }
       const borrowParams: BorrowParams = {
         assetOut: testCase.borrowAssetOut,
@@ -58,10 +58,10 @@ describe('Pay', () => {
         interestIncrease: testCase.borrowInterestIncrease,
         cdpIncrease: testCase.borrowCdpIncrease,
       }
-      let debtData: PayParams;
-      let borrowTxData: any;
+      let debtData: PayParams
+      let borrowTxData: any
       try {
-        borrowTxData = await borrowFixture(mint, signers[0], borrowParams);
+        borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
         if (borrowTxData.pair != undefined) {
           pair = borrowTxData.pair
           pairSim = borrowTxData.pairSim
@@ -79,12 +79,11 @@ describe('Pay', () => {
             console.log(error)
           }
         } else {
-          console.log("There was an error in the Borrow Transaction with the following parameters:");
-          console.log(testCase);
-          continue;
+          console.log('There was an error in the Borrow Transaction with the following parameters:')
+          console.log(testCase)
+          continue
         }
-      } catch {
-      }
+      } catch {}
       console.log('Should have correct reserves')
       const reserves = await pair.totalReserves()
       const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -129,7 +128,7 @@ describe('Pay', () => {
 
       console.log('Should have correct dues of')
       const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
-      const duesOf = (await pair.dueOf(0n))
+      const duesOf = await pair.dueOf(0n)
       expect(duesOf.length).to.equal(duesOfSim.length)
       for (let i = 0; i < duesOf.length; i++) {
         expect(duesOf[i].collateral).to.equalBigInt(duesOfSim[i].collateral)

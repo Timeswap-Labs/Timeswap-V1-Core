@@ -14,20 +14,19 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Withdraw', () => {
   let tests: any
-  let snapshot: any;
+  let snapshot: any
 
   before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
-
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
   it('', async () => {
     tests = await TestCases.lossWithdraw()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log(`Checking for Loss Withdraw Test Case ${i + 1}`)
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []); 
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -49,29 +48,29 @@ describe('Withdraw', () => {
         pair = mint.pair
         pairSim = mint.pairSim
       } catch (error) {
-        console.log("Case ignored due to wrong minting parameters");
-        continue;
+        console.log('Case ignored due to wrong minting parameters')
+        continue
       }
       const lendParams: LendParams = {
         assetIn: testCase.lendAssetIn,
         interestDecrease: testCase.lendInterestDecrease,
         cdpDecrease: testCase.lendCdpDecrease,
       }
-      let lendData: any;
-      let lendTxData: any;
+      let lendData: any
+      let lendTxData: any
       try {
-        lendTxData = await lendFixture(mint, signers[0], lendParams);
-        pair = lendTxData.pair;
-        pairSim = lendTxData.pairSim;
+        lendTxData = await lendFixture(mint, signers[0], lendParams)
+        pair = lendTxData.pair
+        pairSim = lendTxData.pairSim
         lendData = {
           claimsIn: {
             bond: lendTxData.lendData.bond,
             insurance: lendTxData.lendData.insurance,
-          }
+          },
         }
       } catch (error) {
-        console.log("Case ignored due to error in lending");
-        continue;
+        console.log('Case ignored due to error in lending')
+        continue
       }
       const borrowParams: BorrowParams = {
         assetOut: testCase.borrowAssetOut,
@@ -83,18 +82,18 @@ describe('Withdraw', () => {
       try {
         returnObj = await borrowFixture(lendTxData, signers[0], borrowParams)
       } catch (error) {
-        console.log("Case ignored due to error in borrowing");
-        continue;
+        console.log('Case ignored due to error in borrowing')
+        continue
       }
       await advanceTimeAndBlock(Number(updatedMaturity))
-      let withdraw;
+      let withdraw
       try {
         withdraw = await withdrawFixture(returnObj, signers[0], lendData)
         pair = withdraw.pair
         pairSim = withdraw.pairSim
       } catch (error) {
-        console.log("Case ignored due to error in Withdraw");
-        continue;
+        console.log('Case ignored due to error in Withdraw')
+        continue
       }
       console.log('Should have correct reserves')
       const reserves = await pair.totalReserves()
@@ -150,4 +149,3 @@ describe('Withdraw', () => {
     }
   })
 })
-

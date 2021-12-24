@@ -13,19 +13,19 @@ let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
 describe('Borrow', () => {
   let tests: any
-  let snapshot: any;
+  let snapshot: any
 
   before(async () => {
-    snapshot = await ethers.provider.send('evm_snapshot', []);
-  });
+    snapshot = await ethers.provider.send('evm_snapshot', [])
+  })
 
   it('', async () => {
-    tests = await TestCases.borrow();
+    tests = await TestCases.borrow()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log('\n', `Checking for Borrow Test Case ${i + 1}`)
-      await ethers.provider.send('evm_revert', [snapshot]);
-      await ethers.provider.send('evm_snapshot', []);
+      await ethers.provider.send('evm_revert', [snapshot])
+      await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
       let pair: any
       let pairSim: any
@@ -44,11 +44,11 @@ describe('Borrow', () => {
       let mint: any
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters)
-        pair = mint.pair;
-        pairSim = mint.pairSim;
+        pair = mint.pair
+        pairSim = mint.pairSim
       } catch (error) {
         console.log(`Ignored due to wrong miniting parameters`)
-        continue;
+        continue
       }
       const borrowParams: BorrowParams = {
         assetOut: testCase.borrowAssetOut,
@@ -57,7 +57,7 @@ describe('Borrow', () => {
         cdpIncrease: testCase.borrowCdpIncrease,
       }
       try {
-        const borrowTxData = await borrowFixture(mint, signers[0], borrowParams);
+        const borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
         if (borrowTxData.pair != undefined) {
           pair = borrowTxData.pair
           pairSim = borrowTxData.pairSim
@@ -77,7 +77,7 @@ describe('Borrow', () => {
                   borrowParams.cdpIncrease
                 )
             ).to.be.reverted
-            console.log("Transaction Reverted");
+            console.log('Transaction Reverted')
           } catch (error) {
             console.log(`Borrowing Tx with the following params did not revert (expected revert)`)
             console.log(testCase)
@@ -85,9 +85,7 @@ describe('Borrow', () => {
           }
           continue
         }
-      } catch (err) {
-
-      }
+      } catch (err) {}
       console.log(`Testing for Borrow Success Case ${i + 1}`)
       console.log('Should have correct reserves')
       const reserves = await pair.totalReserves()
@@ -140,6 +138,6 @@ describe('Borrow', () => {
         expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
         expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
       }
-    } 
+    }
   })
 })

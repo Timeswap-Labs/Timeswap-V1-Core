@@ -14,7 +14,7 @@ export async function withdraw(): Promise<Lend[]> {
       currentTimeStamp: 1640073906n,
       lendAssetIn: 1267133363464364948415248164610047n,
       lendInterestDecrease: 31893773540337554145000000000000n,
-      lendCdpDecrease: 1937690730251033304000000000000000n
+      lendCdpDecrease: 1937690730251033304000000000000000n,
     },
     {
       assetIn: 3801966304736218554100000000000000n,
@@ -25,7 +25,7 @@ export async function withdraw(): Promise<Lend[]> {
       currentTimeStamp: 1640073906n,
       lendAssetIn: 695165276899304537215248164610047n,
       lendInterestDecrease: 6908130849825911973700000000000n,
-      lendCdpDecrease: 5143599301800517587600000000000000n
+      lendCdpDecrease: 5143599301800517587600000000000000n,
     },
     {
       assetIn: 3798822415789779506800000000000000n,
@@ -36,7 +36,7 @@ export async function withdraw(): Promise<Lend[]> {
       currentTimeStamp: 1640073906n,
       lendAssetIn: 696737221372524060865248164610047n,
       lendInterestDecrease: 50313257985647858344000000000000n,
-      lendCdpDecrease: 3012536589789303791900000000000000n
+      lendCdpDecrease: 3012536589789303791900000000000000n,
     },
     {
       assetIn: 289815292528466169360000000000000n,
@@ -47,7 +47,7 @@ export async function withdraw(): Promise<Lend[]> {
       currentTimeStamp: 1640073906n,
       lendAssetIn: 2451240783003180729585248164610047n,
       lendInterestDecrease: 6126284381633056452100000000000n,
-      lendCdpDecrease: 3641221283262960976200000000000000n
+      lendCdpDecrease: 3641221283262960976200000000000000n,
     },
     {
       assetIn: 1652311766053962108100000000000000n,
@@ -58,8 +58,8 @@ export async function withdraw(): Promise<Lend[]> {
       currentTimeStamp: 1640073906n,
       lendAssetIn: 1769992546240432760215248164610047n,
       lendInterestDecrease: 10513828411982836737000000000000n,
-      lendCdpDecrease: 3286627487497870276200000000000000n
-    }
+      lendCdpDecrease: 3286627487497870276200000000000000n,
+    },
   ]
   return TestCases
 }

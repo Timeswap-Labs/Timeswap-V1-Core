@@ -118,7 +118,7 @@ Check the transactions.
 
 ### E208
 
-Difference between now and maturity is greater than 2**32.
+Difference between now and maturity is greater than 2\*\*32.
 
 ### E211
 

@@ -13,7 +13,7 @@ export function check(
   cdpIncrease: bigint,
   fee: bigint
 ): boolean | string {
-  const feeBase = 0x10000n - fee;
+  const feeBase = 0x10000n - fee
   const assetReserve = state.asset - assetOut
   if (assetReserve < 0) return 'assetReserve < 0'
   const interestAdjusted = adjust(interestIncrease, state.interest, feeBase)
