@@ -26,7 +26,7 @@ jobs:
           cache: 'yarn'
 
       - name: Create a dummy .env file
-        run: mv .env.sample .env
+        run: mv .env
 
       - name: Install dependencies
         run: yarn --frozen-lockfile
