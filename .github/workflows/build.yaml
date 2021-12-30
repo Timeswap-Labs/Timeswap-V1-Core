@@ -14,14 +14,16 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v2
 
+      - name: Set the env
+        env:
+          INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
       - name: Use Node.js 14
         uses: actions/setup-node@v2
         with:
           node-version: 14
           cache: 'yarn'
-
-      - name: Create a dummy .env file
-        run: mv .env.sample .env
 
       - name: Install dependencies
         run: yarn --frozen-lockfile
