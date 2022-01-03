@@ -55,18 +55,23 @@ export async function constructorFixture(
 export async function mintFixture(fixture: Fixture, signer: SignerWithAddress, mintParams: MintParams): Promise<any> {
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state()
-  const totalliquidity = await pair.totalLiquidity()
   const k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n
   const pairSimPool = pairSim.getPool(pair.maturity)
   const pairSimContractState = pairSimPool.state // getting state from the contract
   const k_pairSimContract =
     (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
-  if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
+  if (k_pairContract != k_pairSimContract) {
+    throw Error('state of Pair and PairSim not same')
+  }
   const { assetIn, collateralIn, interestIncrease, cdpIncrease, maturity, currentTimeStamp } = mintParams
   const dueOutDebt = MintMath.getDebt(maturity, assetIn, interestIncrease, currentTimeStamp)
-  if (dueOutDebt > BigInt(MaxUint112.toString())) throw Error('dueOut.debt > MaxUint112')
+  if (dueOutDebt > BigInt(MaxUint112.toString())) {
+    throw Error('dueOut.debt > MaxUint112')
+  }
   const dueOutCollateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease, currentTimeStamp)
-  if (dueOutCollateral > BigInt(MaxUint112.toString())) throw Error('dueOut.Collateral > MaxUint112')
+  if (dueOutCollateral > BigInt(MaxUint112.toString())) {
+    throw Error('dueOut.Collateral > MaxUint112')
+  }
   const txn = await pair.upgrade(signer).mint(mintParams.assetIn, mintParams.interestIncrease, mintParams.cdpIncrease)
   const block = await getBlock(txn.blockHash!)
   const mintData = pairSim.mint(
@@ -151,37 +156,28 @@ export async function borrowFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state()
   const totalliquidity = await pair.totalLiquidity()
-  if (totalliquidity <= 0) throw Error('Invalid')
+  if (totalliquidity <= 0) throw Error('Invalid') // require(pool.state.totalLiquidity > 0, 'E206');
   if (borrowParams.assetOut <= 0) throw Error('Invalid')
+  // checking the constantProduct is the same prior to the tx
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n
   const pairSimPool = pairSim.getPool(pair.maturity)
   const pairSimContractState = pairSimPool.state
   let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
-  const feeBase = 0x10000n - FEE // uint128 feeBase = 0x10000 - fee;
-  const xReserve = pairContractState.asset - borrowParams.assetOut
-  if (xReserve > BigInt(MaxUint112.toString())) throw Error('xReserve > MaxUint112')
-  const interestAdjust = BorrowMath.adjust(borrowParams.interestIncrease, pairContractState.interest, feeBase) // uint128 yAdjusted = adjust(state.y, yDecrease, feeBase);
-  if (interestAdjust > BigInt(MaxUint128.toString())) throw Error('interestAdjust > MaxUint128')
-  const cdpAdjust = divUp(k_pairContract, (pairContractState.asset - borrowParams.assetOut) * interestAdjust) // this is the number that will pass the cp check
-  if (cdpAdjust < 0) {
-    return {
-      cdpAdjust: cdpAdjust >> 32n,
-      error: 'cdpAdjust < 0',
-    }
-  }
   const value: any = BorrowMath.check(
     pairContractState,
     borrowParams.assetOut,
     borrowParams.interestIncrease,
-    cdpAdjust >> 32n,
+    borrowParams.cdpIncrease,
     FEE
   )
   if (value != true) {
-    return {
-      cdpAdjust: cdpAdjust >> 32n,
-      error: value,
-    }
+    return Error(
+      JSON.stringify({
+        cdpAdjust: undefined,
+        error: value,
+      })
+    )
   }
   const dueOutDebt = BorrowMath.getDebt(
     pair.maturity,
@@ -190,27 +186,29 @@ export async function borrowFixture(
     await now()
   )
   if (dueOutDebt > BigInt(MaxUint112.toString())) {
-    return {
-      cdpAdjust: cdpAdjust >> 32n,
-      error: 'dueOut.debt greater than Uint112',
-    }
+    return Error(
+      JSON.stringify({
+        cdpAdjust: undefined,
+        error: 'dueOut.debt greater than Uint112',
+      })
+    )
   }
   const dueOutCollateral = BorrowMath.getCollateral(
     pair.maturity,
     pairContractState,
     borrowParams.assetOut,
-    cdpAdjust >> 32n,
+    borrowParams.cdpIncrease,
     await now()
   )
   if (dueOutCollateral > BigInt(MaxUint112.toString())) {
     return {
-      cdpAdjust: cdpAdjust >> 32n,
+      cdpAdjust: undefined,
       error: 'dueOut.collateral greater than Uint112',
     }
   }
   const txn = await pair
     .upgrade(signer)
-    .borrow(borrowParams.assetOut, borrowParams.interestIncrease, cdpAdjust >> 32n, owner)
+    .borrow(borrowParams.assetOut, borrowParams.interestIncrease, borrowParams.cdpIncrease, owner)
   const block = await getBlock(txn.blockHash!)
   const debtObj = pairSim.borrow(
     pair.maturity,
@@ -218,7 +216,7 @@ export async function borrowFixture(
     signer.address,
     borrowParams.assetOut,
     borrowParams.interestIncrease,
-    cdpAdjust >> 32n,
+    borrowParams.cdpIncrease,
     block
   )
   return { pair, pairSim, assetToken, collateralToken, debtObj }

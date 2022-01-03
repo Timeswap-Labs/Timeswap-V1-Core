@@ -12,5 +12,5 @@ export function shiftRightUp(x: bigint, y: bigint): bigint {
 
 export default {
   divUp,
-  shiftRightUp
+  shiftRightUp,
 }

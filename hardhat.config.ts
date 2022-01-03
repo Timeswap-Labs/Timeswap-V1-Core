@@ -1,12 +1,12 @@
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
-import { config } from 'dotenv'
+import * as dotenv from 'dotenv'
 import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
 import 'solidity-coverage'
 
-const env: any = config()['parsed']
+dotenv.config()
 
 export default {
   solidity: {
@@ -24,8 +24,8 @@ export default {
   },
   networks: {
     rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${env.INFURA_PROJECT_ID}`,
-      accounts: [`0x${env.PRIVATE_KEY}`],
+      url: `https://rinkeby.infura.io/v3/${process.env['INFURA_PROJECT_ID']}`,
+      accounts: [`0x${process.env['PRIVATE_KEY']}`],
     },
   },
   typechain: {

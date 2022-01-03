@@ -51,14 +51,10 @@ contract MintMathTest {
 
     function getCollateral(
         uint256 maturity,
-        uint112 xIncrease,
-        uint112 yIncrease,
         uint112 zIncrease
     ) external view returns (uint112 collateralIn) {
         return MintMath.getCollateral(
             maturity,
-            xIncrease,
-            yIncrease,
             zIncrease
         );
     }

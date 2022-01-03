@@ -1,4 +1,6 @@
 import { checkConstantProduct } from '../libraries/ConstantProduct'
+import { shiftRightUp } from './Math'
+import { min } from './MintMath'
 
 export function check(
   state: {
@@ -18,7 +20,10 @@ export function check(
   if (!checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)) return false
   let minimum = assetIn
   minimum *= state.interest
-  minimum /= assetReserve << 4n
+  minimum = minimum << 12n
+  let denominator = assetReserve
+  denominator *= feeBase
+  minimum /= denominator
   if (interestDecrease < minimum) return false
   return true
 }
@@ -57,16 +62,14 @@ export function getInsurance(
 ): bigint {
   let _insuranceOut = maturity
   _insuranceOut -= now
-  _insuranceOut *= state.interest
   _insuranceOut *= cdpDecrease
-  let addend = state.cdp
-  addend *= assetIn
-  addend = addend << 32n
-  _insuranceOut += addend
+  _insuranceOut = _insuranceOut >> 25n //TODO: to confirm
+  let minimum = state.cdp
+  minimum *= assetIn
   let denominator = state.asset
   denominator += assetIn
-  denominator <<= 32n
-  _insuranceOut /= denominator
+  minimum /= denominator
+  _insuranceOut += minimum
   return _insuranceOut
 }
 

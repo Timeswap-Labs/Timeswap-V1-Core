@@ -2,17 +2,15 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { expect } from '../shared/Expect'
-import { constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
+import { borrowFixture, burnFixture, constructorFixture, lendFixture, mintFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
-import * as TestCases from '../testCases'
-import { Lend, LendParams, MintParams } from '../testCases'
-
+import { BorrowParams, LendParams, lossAndMint, MintParams } from '../testCases'
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[]
 let assetInValue: bigint = BigInt(MaxUint224.toString())
 let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
-describe('Withdraw', () => {
+describe('Loss Burn', () => {
   let tests: any
   let snapshot: any
 
@@ -21,9 +19,10 @@ describe('Withdraw', () => {
   })
 
   it('', async () => {
-    tests = await TestCases.withdraw()
+    tests = await lossAndMint()
     for (let i = 0; i < tests.length; i++) {
-      console.log('\n', `Checking the Withdraw Test for testCase: ${i + 1}`)
+      let testCase: any = tests[i]
+      console.log(`Checking for Burn Test Case ${i + 1}`)
       await ethers.provider.send('evm_revert', [snapshot])
       await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
@@ -32,41 +31,56 @@ describe('Withdraw', () => {
       let updatedMaturity: any
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
-      const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
       let erm: any
-      let mint: any
       try {
-        const mintParameters: MintParams = {
-          assetIn: tests[i].assetIn,
-          collateralIn: tests[i].collateralIn,
-          interestIncrease: tests[i].interestIncrease,
-          cdpIncrease: tests[i].cdpIncrease,
-          maturity: updatedMaturity,
-          currentTimeStamp: tests[i].currentTimeStamp,
+        let mint: any
+        try {
+          const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
+          const mintParameters: MintParams = {
+            assetIn: testCase.assetIn,
+            collateralIn: testCase.collateralIn,
+            interestIncrease: testCase.interestIncrease,
+            cdpIncrease: testCase.cdpIncrease,
+            maturity: updatedMaturity,
+            currentTimeStamp: testCase.currentTimeStamp,
+          }
+          mint = await mintFixture(constructor, signers[0], mintParameters)
+        } catch (error) {
+          erm = 'minting error'
+          console.log(`Ignored due to wrong miniting parameters`)
+          throw Error('minting error')
         }
-        mint = await mintFixture(constructor, signers[0], mintParameters)
+        const lendParams: LendParams = {
+          assetIn: testCase.lendAssetIn,
+          interestDecrease: testCase.lendInterestDecrease,
+          cdpDecrease: testCase.lendCdpDecrease,
+        }
+        const lendTxData = await lendFixture(mint, signers[0], lendParams)
+        const borrowParams: BorrowParams = {
+          assetOut: testCase.borrowAssetOut,
+          collateralIn: testCase.borrowCollateralIn,
+          interestIncrease: testCase.borrowInterestIncrease,
+          cdpIncrease: testCase.borrowCdpIncrease,
+        }
+        let returnObj: any
+        try {
+          returnObj = await borrowFixture(lendTxData, signers[1], borrowParams)
+          if (returnObj.error != undefined) throw Error(returnObj.error)
+        } catch (error) {
+          throw error
+        }
+        erm = undefined
+        await advanceTimeAndBlock(Number(updatedMaturity))
+        const burnParams = { liquidityIn: mint.mintData.liquidityOut }
+        const burn = await burnFixture(returnObj, signers[0], burnParams)
+        pair = burn.pair
+        pairSim = burn.pairSim
       } catch (error) {
-        erm = 'minting error'
-        console.log(`Ignored due to wrong miniting parameters`)
-        continue
+        console.log(error)
       }
-      const lendParams: LendParams = {
-        assetIn: tests[i].lendAssetIn,
-        interestDecrease: tests[i].lendInterestDecrease,
-        cdpDecrease: tests[i].lendCdpDecrease,
-      }
-      const lendTxData = await lendFixture(mint, signers[0], lendParams)
-      const lendData: any = {
-        claimsIn: {
-          bond: lendTxData.lendData.bond,
-          insurance: lendTxData.lendData.insurance,
-        },
-      }
-      await advanceTimeAndBlock(Number(updatedMaturity))
-      const withdraw = await withdrawFixture(lendTxData, signers[0], lendData)
-      pair = withdraw.pair
-      pairSim = withdraw.pairSim
+
       if (pair != undefined && pairSim != undefined) {
+        console.log(`Testing for Burn Success Case: ${i + 1}`)
         console.log('Should have correct reserves')
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -104,7 +118,6 @@ describe('Withdraw', () => {
         expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
 
         console.log('Should have correct claims of')
-
         const claimsOf = await pair.claimsOf(signers[0])
         const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
         expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)

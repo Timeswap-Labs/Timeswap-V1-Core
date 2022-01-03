@@ -15,7 +15,7 @@ import {
   Tokens,
   tokensDefault,
   TotalClaims,
-  totalClaimsDefault
+  totalClaimsDefault,
 } from './PairInterface'
 
 const ZERO_ADDRESSS = '0x0000000000000000000000000000000000000000'
