@@ -53,7 +53,7 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param sender The address of the caller.
     /// @param liquidityTo The address of the receiver of liquidity balance.
-    /// @param dueTo The addres of the receiver of collateralized debt balance.
+    /// @param dueTo The address of the receiver of collateralized debt balance.
     /// @param xIncrease The increase in the X state.
     /// @param liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @param id The array index of the collateralized debt received by dueTo.
@@ -74,7 +74,7 @@ interface IPair {
     /// @param sender The address of the caller.
     /// @param assetTo The address of the receiver of asset ERC20.
     /// @param collateralTo The addres of the receiver of collateral ERC20.
-    /// @param liquidityIn The amount of liquidity balance burnt by the msg.sender.
+    /// @param liquidityIn The amount of liquidity balance burnt by the sender.
     /// @param tokensOut The amount of asset ERC20 and collateral ERC20 received.
     event Burn(
         uint256 maturity,
@@ -105,8 +105,8 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param sender The address of the caller.
     /// @param assetTo The address of the receiver of asset ERC20.
-    /// @param collateralTo The addres of the receiver of collateral ERC20.
-    /// @param claimsIn The amount of bond balance and insurance balance burnt by the msg.sender.
+    /// @param collateralTo The address of the receiver of collateral ERC20.
+    /// @param claimsIn The amount of bond balance and insurance balance burnt by the sender.
     /// @param tokensOut The amount of asset ERC20 and collateral ERC20 received.
     event Withdraw(
         uint256 maturity,
@@ -121,7 +121,7 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param sender The address of the caller.
     /// @param assetTo The address of the receiver of asset ERC20.
-    /// @param dueTo The addres of the receiver of collateralized debt.
+    /// @param dueTo The address of the receiver of collateralized debt.
     /// @param xDecrease The amount of asset ERC20 received by assetTo.
     /// @param id The array index of the collateralized debt received by dueTo.
     /// @param dueOut The collateralized debt received by dueTo.
@@ -139,10 +139,10 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param sender The address of the caller.
     /// @param to The address of the receiver of collateral ERC20.
-    /// @param owner The addres of the owner of collateralized debt.
+    /// @param owner The address of the owner of collateralized debt.
     /// @param ids The array indexes of collateralized debts.
     /// @param assetsIn The amount of asset ERC20 paid per collateralized debts.
-    /// @param collateralsOut The amount of collateral ERC20 withdrawn per collaterlaized debts.
+    /// @param collateralsOut The amount of collateral ERC20 withdrawn per collaterelized debts.
     /// @param assetIn The total amount of asset ERC20 paid.
     /// @param collateralOut The total amount of collateral ERC20 received.
     event Pay(
@@ -230,7 +230,7 @@ interface IPair {
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param owner The address of the user.
     /// @param id The index of the collateralized debt
-    /// @return The collateralized debt balance listed in an array.
+    /// @return The collateralized debt balance.
     function dueOf(uint256 maturity, address owner, uint256 id) external view returns (Due memory);
 
     /* ===== UPDATE ===== */

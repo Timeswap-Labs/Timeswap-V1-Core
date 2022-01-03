@@ -17,7 +17,7 @@ interface IFactory {
     /// @param pendingOwner The address of the new pending owner.
     event SetOwner(address indexed pendingOwner);
 
-    /// @dev Emis when the pending owner has accepted being the new owner.
+    /// @dev Emits when the pending owner has accepted being the new owner.
     /// @param owner The address of the new owner.
     event AcceptOwner(address indexed owner);
 
