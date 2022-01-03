@@ -6,7 +6,7 @@
     "coverage": "hardhat compile && hardhat coverage",
     "prepare": "hardhat compile"
   },
-  "version": "1.0.21",
+  "version": "1.0.22",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",
@@ -52,6 +52,6 @@
     "registry": "https://npm.pkg.github.com"
   },
   "volta": {
-    "node": "14.17.6"
+    "node": "16.13.1"
   }
 }
