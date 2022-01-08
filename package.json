@@ -45,7 +45,8 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "hardhat-gas-reporter": "^1.0.6"
   },
   "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Core.git",
   "publishConfig": {

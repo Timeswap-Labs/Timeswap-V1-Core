@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv'
 import 'hardhat-contract-sizer'
 import 'hardhat-deploy'
 import 'solidity-coverage'
-
+import "hardhat-gas-reporter"
 dotenv.config()
 
 export default {
