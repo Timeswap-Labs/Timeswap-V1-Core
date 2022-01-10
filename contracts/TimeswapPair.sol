@@ -154,19 +154,15 @@ contract TimeswapPair is IPair {
         
         Pool storage pool = pools[maturity];
 
-        if (pool.state.totalLiquidity == 0) {
-            uint256 liquidityTotal = MintMath.getLiquidityTotal(xIncrease);
-            liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
-
-            pool.state.totalLiquidity += liquidityTotal;
-            pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
-        } else {
-            uint256 liquidityTotal = MintMath.getLiquidityTotal(pool.state, xIncrease, yIncrease, zIncrease);
-            liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
-
-            pool.state.totalLiquidity += liquidityTotal;
-            pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
+        { // Avoid stacks too deep error      
+        uint256 liquidityTotal = pool.state.totalLiquidity == 0 ?
+            MintMath.getLiquidityTotal(xIncrease) : 
+            MintMath.getLiquidityTotal(pool.state, xIncrease, yIncrease, zIncrease);
+        liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, protocolFee);
+        pool.state.totalLiquidity += liquidityTotal;
+        pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         }
+
         require(liquidityOut > 0, 'E212');
         pool.liquidities[liquidityTo] += liquidityOut;
 
