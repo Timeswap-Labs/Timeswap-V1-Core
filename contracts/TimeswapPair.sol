@@ -163,7 +163,7 @@ contract TimeswapPair is IPair {
         pool.liquidities[factory.owner()] += liquidityTotal - liquidityOut;
         }
 
-        require(liquidityOut > 0, 'E212');
+        require(liquidityOut != 0, 'E212');
         pool.liquidities[liquidityTo] += liquidityOut;
 
         dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
@@ -196,7 +196,7 @@ contract TimeswapPair is IPair {
         require(block.timestamp >= maturity, 'E203');
         require(assetTo != address(0) && collateralTo != address(0), 'E201');
         require(assetTo != address(this) && collateralTo != address(this), 'E204');
-        require(liquidityIn > 0, 'E205');
+        require(liquidityIn != 0, 'E205');
 
         Pool storage pool = pools[maturity];
 
@@ -229,10 +229,10 @@ contract TimeswapPair is IPair {
         require(block.timestamp < maturity, 'E202');
         require(bondTo != address(0) && insuranceTo != address(0), 'E201');
         require(bondTo != address(this) && insuranceTo != address(this), 'E204');
-        require(xIncrease > 0, 'E205');
+        require(xIncrease != 0, 'E205');
 
         Pool storage pool = pools[maturity];
-        require(pool.state.totalLiquidity > 0, 'E206');
+        require(pool.state.totalLiquidity != 0, 'E206');
 
         LendMath.check(pool.state, xIncrease, yDecrease, zDecrease, fee);
 
@@ -267,7 +267,7 @@ contract TimeswapPair is IPair {
         require(block.timestamp >= maturity, 'E203');
         require(assetTo != address(0) && collateralTo != address(0), 'E201');
         require(assetTo != address(this) && collateralTo != address(this), 'E204');
-        require(claimsIn.bond > 0 || claimsIn.insurance > 0, 'E205');
+        require(claimsIn.bond != 0 || claimsIn.insurance != 0, 'E205');
 
         Pool storage pool = pools[maturity];
 
@@ -285,8 +285,8 @@ contract TimeswapPair is IPair {
         pool.state.reserves.asset -= tokensOut.asset;
         pool.state.reserves.collateral -= tokensOut.collateral;
 
-        if (tokensOut.asset > 0) asset.safeTransfer(assetTo, tokensOut.asset);
-        if (tokensOut.collateral > 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
+        if (tokensOut.asset != 0) asset.safeTransfer(assetTo, tokensOut.asset);
+        if (tokensOut.collateral != 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
 
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
     }
@@ -304,10 +304,10 @@ contract TimeswapPair is IPair {
         require(block.timestamp < maturity, 'E202');
         require(assetTo != address(0) && dueTo != address(0), 'E201');
         require(assetTo != address(this) && dueTo != address(this), 'E204');
-        require(xDecrease > 0, 'E205');
+        require(xDecrease != 0, 'E205');
 
         Pool storage pool = pools[maturity];
-        require(pool.state.totalLiquidity > 0, 'E206');
+        require(pool.state.totalLiquidity != 0, 'E206');
 
         BorrowMath.check(pool.state, xDecrease, yIncrease, zIncrease, fee);
 
@@ -362,12 +362,12 @@ contract TimeswapPair is IPair {
             assetIn += assetsIn[i];
             collateralOut += collateralsOut[i];
         }
-        if (assetIn > 0) Callback.pay(asset, assetIn, data);
+        if (assetIn != 0) Callback.pay(asset, assetIn, data);
 
         pool.state.reserves.asset += assetIn;
         pool.state.reserves.collateral -= collateralOut;
 
-        if (collateralOut > 0) collateral.safeTransfer(to, collateralOut);
+        if (collateralOut != 0) collateral.safeTransfer(to, collateralOut);
 
         emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }
