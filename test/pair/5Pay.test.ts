@@ -45,7 +45,7 @@ describe('Pay', () => {
       }
       let mint: any
       try {
-        const mint = await mintFixture(constructor, signers[0], mintParameters)
+        mint = await mintFixture(constructor, signers[0], mintParameters)
         pair = mint.pair
         pairSim = mint.pairSim
       } catch (error) {
@@ -127,7 +127,7 @@ describe('Pay', () => {
       expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
 
       console.log('Should have correct dues of')
-      const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due
+      const duesOfSim = [(pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due[0])]
       const duesOf = await pair.dueOf(0n)
       expect(duesOf.length).to.equal(duesOfSim.length)
       for (let i = 0; i < duesOf.length; i++) {

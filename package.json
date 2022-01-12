@@ -37,6 +37,7 @@
     "hardhat": "^2.6.5",
     "hardhat-contract-sizer": "^2.0.3",
     "hardhat-deploy": "^0.8.11",
+    "hardhat-gas-reporter": "^1.0.7",
     "mocha": "^9.0.3",
     "solidity-coverage": "^0.7.17",
     "ts-node": "^10.1.0",
