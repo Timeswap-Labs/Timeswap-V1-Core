@@ -348,12 +348,14 @@ contract TimeswapPair is IPair {
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
         require(block.timestamp < maturity, 'E202');
         require(ids.length == assetsIn.length && ids.length == collateralsOut.length, 'E205');
+        require(owner != address(0), 'E201');
         require(to != address(0), 'E201');
         require(to != address(this), 'E204');
 
         Pool storage pool = pools[maturity];
 
         Due[] storage dues = pool.dues[owner];
+        require(dues.length >= ids.length, 'E205');
 
         for (uint256 i; i < ids.length; i++) {
             Due storage due = dues[ids[i]];
