@@ -62,7 +62,7 @@ library MintMath {
     ) private pure returns (uint256 w) {
         if (x <= y && x <= z) {
             w = x;
-        } else if (y <= x && y <= z) {
+        } else if (y <= z) {
             w = y;
         } else {
             w = z;
