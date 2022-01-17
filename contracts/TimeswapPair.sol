@@ -147,9 +147,13 @@ contract TimeswapPair is IPair {
     {
         require(block.timestamp < maturity, 'E202');
         unchecked { require(maturity - block.timestamp < 0x100000000, 'E208'); }
-        require(liquidityTo != address(0) && dueTo != address(0), 'E201');
-        require(liquidityTo != address(this) && dueTo != address(this), 'E204');
-        require(xIncrease != 0 && yIncrease != 0 && zIncrease != 0, 'E205');
+        require(liquidityTo != address(0), 'E201');
+        require(dueTo != address(0), 'E201');
+        require(liquidityTo != address(this), 'E204');
+        require(dueTo != address(this), 'E204');
+        require(xIncrease != 0, 'E205');
+        require(yIncrease != 0, 'E205');
+        require(zIncrease != 0, 'E205');
         
         Pool storage pool = pools[maturity];
 
@@ -194,8 +198,10 @@ contract TimeswapPair is IPair {
         uint256 liquidityIn
     ) external override lock returns (Tokens memory tokensOut) {
         require(block.timestamp >= maturity, 'E203');
-        require(assetTo != address(0) && collateralTo != address(0), 'E201');
-        require(assetTo != address(this) && collateralTo != address(this), 'E204');
+        require(assetTo != address(0), 'E201');
+        require(collateralTo != address(0), 'E201');
+        require(assetTo != address(this), 'E204');
+        require(collateralTo != address(this), 'E204');
         require(liquidityIn != 0, 'E205');
 
         Pool storage pool = pools[maturity];
@@ -231,8 +237,10 @@ contract TimeswapPair is IPair {
         bytes calldata data
     ) external override lock returns (Claims memory claimsOut) {
         require(block.timestamp < maturity, 'E202');
-        require(bondTo != address(0) && insuranceTo != address(0), 'E201');
-        require(bondTo != address(this) && insuranceTo != address(this), 'E204');
+        require(bondTo != address(0), 'E201');
+        require(insuranceTo != address(0), 'E201');
+        require(bondTo != address(this), 'E204');
+        require(insuranceTo != address(this), 'E204');
         require(xIncrease != 0, 'E205');
 
         Pool storage pool = pools[maturity];
@@ -269,8 +277,10 @@ contract TimeswapPair is IPair {
         Claims memory claimsIn
     ) external override lock returns (Tokens memory tokensOut) {
         require(block.timestamp >= maturity, 'E203');
-        require(assetTo != address(0) && collateralTo != address(0), 'E201');
-        require(assetTo != address(this) && collateralTo != address(this), 'E204');
+        require(assetTo != address(0), 'E201');
+        require(collateralTo != address(0), 'E201');
+        require(assetTo != address(this), 'E204');
+        require(collateralTo != address(this), 'E204');
         require(claimsIn.bond != 0 || claimsIn.insurance != 0, 'E205');
 
         Pool storage pool = pools[maturity];
@@ -306,8 +316,10 @@ contract TimeswapPair is IPair {
         bytes calldata data
     ) external override lock returns (uint256 id, Due memory dueOut) {
         require(block.timestamp < maturity, 'E202');
-        require(assetTo != address(0) && dueTo != address(0), 'E201');
-        require(assetTo != address(this) && dueTo != address(this), 'E204');
+        require(assetTo != address(0), 'E201');
+        require(dueTo != address(0), 'E201');
+        require(assetTo != address(this), 'E204');
+        require(dueTo != address(this), 'E204');
         require(xDecrease != 0, 'E205');
 
         Pool storage pool = pools[maturity];
@@ -348,7 +360,8 @@ contract TimeswapPair is IPair {
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
         require(block.timestamp < maturity, 'E202');
-        require(ids.length == assetsIn.length && ids.length == collateralsOut.length, 'E205');
+        require(ids.length == assetsIn.length, 'E205');
+        require(ids.length == collateralsOut.length, 'E205');
         require(owner != address(0), 'E201');
         require(to != address(0), 'E201');
         require(to != address(this), 'E204');
