@@ -379,7 +379,7 @@ contract TimeswapPair is IPair {
             due.collateral -= collateralsOut[i];
             assetIn += assetsIn[i];
             collateralOut += collateralsOut[i];
-            unchecked { i++; }
+            unchecked { ++i; }
         }
         if (assetIn != 0) Callback.pay(asset, assetIn, data);
 
