@@ -9,7 +9,6 @@ import {BurnMath} from './libraries/BurnMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
-import {PayMath} from './libraries/PayMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
@@ -360,7 +359,7 @@ contract TimeswapPair is IPair {
             Due storage due = dues[ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'E213');
-            PayMath.checkProportional(assetsIn[i], collateralsOut[i], due);
+            require(uint256(assetIn) * due.collateral >= uint256(collateralOut) * due.debt, 'E303');
             due.debt -= assetsIn[i];
             due.collateral -= collateralsOut[i];
             assetIn += assetsIn[i];
