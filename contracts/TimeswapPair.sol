@@ -356,11 +356,11 @@ contract TimeswapPair is IPair {
         bytes calldata data
     ) external override lock returns (uint128 assetIn, uint128 collateralOut) {
         require(block.timestamp < maturity, 'E202');
-        require(ids.length == assetsIn.length, 'E205');
-        require(ids.length == collateralsOut.length, 'E205');
         require(owner != address(0), 'E201');
         require(to != address(0), 'E201');
         require(to != address(this), 'E204');
+        require(ids.length == assetsIn.length, 'E205');
+        require(ids.length == collateralsOut.length, 'E205');
 
         Pool storage pool = pools[maturity];
 
