@@ -199,6 +199,7 @@ contract TimeswapPair is IPair {
         require(liquidityIn != 0, 'E205');
 
         Pool storage pool = pools[maturity];
+        require(pool.state.totalLiquidity > 0, 'E206');
 
         tokensOut.asset = BurnMath.getAsset(pool.state, liquidityIn);
         tokensOut.collateral = BurnMath.getCollateral(pool.state, liquidityIn);
