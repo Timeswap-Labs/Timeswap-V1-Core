@@ -48,11 +48,7 @@ contract TimeswapPair is IPair {
         external
         view
         override
-        returns (
-            uint112 x,
-            uint112 y,
-            uint112 z
-        )
+        returns (uint112, uint112, uint112)
     {
         State memory state = pools[maturity].state;
         return (state.x, state.y, state.z);
