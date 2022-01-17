@@ -292,11 +292,14 @@ contract TimeswapPair is IPair {
         sender.bond -= claimsIn.bond;
         sender.insurance -= claimsIn.insurance;
 
-        pool.state.reserves.asset -= tokensOut.asset;
-        pool.state.reserves.collateral -= tokensOut.collateral;
-
-        if (tokensOut.asset != 0) asset.safeTransfer(assetTo, tokensOut.asset);
-        if (tokensOut.collateral != 0) collateral.safeTransfer(collateralTo, tokensOut.collateral);
+        if (tokensOut.asset != 0) {
+            pool.state.reserves.asset -= tokensOut.asset;
+            asset.safeTransfer(assetTo, tokensOut.asset);
+        }
+        if (tokensOut.collateral != 0) {
+            pool.state.reserves.collateral -= tokensOut.collateral;
+            collateral.safeTransfer(collateralTo, tokensOut.collateral);
+        }
 
         emit Withdraw(maturity, msg.sender, assetTo, collateralTo, claimsIn, tokensOut);
     }
