@@ -30,7 +30,7 @@ library WithdrawMath {
     {
         if (state.reserves.asset >= state.totalClaims.bond) return collateralOut;
         uint256 deficit = state.totalClaims.bond;
-        deficit -= state.reserves.asset;
+        unchecked { deficit -= state.reserves.asset; }
         if (uint256(state.reserves.collateral) * state.totalClaims.bond >= deficit * state.totalClaims.insurance) {
             uint256 _collateralOut = deficit;
             _collateralOut *= insuranceIn;

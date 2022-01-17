@@ -146,7 +146,7 @@ contract TimeswapPair is IPair {
         )
     {
         require(block.timestamp < maturity, 'E202');
-        require(maturity - block.timestamp < 0x100000000, 'E208');
+        unchecked { require(maturity - block.timestamp < 0x100000000, 'E208'); }
         require(liquidityTo != address(0) && dueTo != address(0), 'E201');
         require(liquidityTo != address(this) && dueTo != address(this), 'E204');
         require(xIncrease != 0 && yIncrease != 0 && zIncrease != 0, 'E205');
