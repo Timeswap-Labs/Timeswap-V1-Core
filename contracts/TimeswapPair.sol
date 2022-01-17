@@ -39,7 +39,7 @@ contract TimeswapPair is IPair {
     mapping(uint256 => Pool) private pools;
 
     /// @dev Stores the access state for reentrancy guard.
-    uint256 private locked;
+    uint256 private locked = 1;
 
     /* ===== VIEW =====*/
 
@@ -118,10 +118,10 @@ contract TimeswapPair is IPair {
 
     /// @dev The modifier for reentrancy guard.
     modifier lock() {
-        require(locked == 0, 'E211');
-        locked = 1;
+        require(locked == 1, 'E211');
+        locked = 2;
         _;
-        locked = 0;
+        locked = 1;
     }
 
     /* ===== UPDATE ===== */
