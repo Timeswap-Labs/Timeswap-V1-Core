@@ -60,6 +60,7 @@ interface IFactory {
     function setOwner(address _pendingOwner) external;
 
     /// @dev Set the pending owner as the owner of the factory.
+    /// @dev Reset the pending owner to zero.
     /// @dev Can only be called by the pending owner.
     function acceptOwner() external;
 }

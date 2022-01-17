@@ -69,6 +69,7 @@ contract TimeswapFactory is IFactory {
     function acceptOwner() external override {
         require(msg.sender == pendingOwner, 'E102');
         owner = msg.sender;
+        pendingOwner = address(0);
 
         emit AcceptOwner(msg.sender);
     }
