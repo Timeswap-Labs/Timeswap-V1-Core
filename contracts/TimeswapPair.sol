@@ -370,7 +370,7 @@ contract TimeswapPair is IPair {
         Due[] storage dues = pool.dues[owner];
         require(dues.length >= ids.length, 'E205');
 
-        for (uint256 i; i < ids.length; i++) {
+        for (uint256 i; i < ids.length;) {
             Due storage due = dues[ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
             if (owner != msg.sender) require(collateralsOut[i] == 0, 'E213');
@@ -379,6 +379,7 @@ contract TimeswapPair is IPair {
             due.collateral -= collateralsOut[i];
             assetIn += assetsIn[i];
             collateralOut += collateralsOut[i];
+            unchecked { i++; }
         }
         if (assetIn != 0) Callback.pay(asset, assetIn, data);
 
