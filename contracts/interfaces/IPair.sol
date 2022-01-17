@@ -316,8 +316,8 @@ interface IPair {
     /// @dev Must be called by a contract implementing the ITimeswapBorrowCallback interface.
     /// @param maturity The unix timestamp maturity of the Pool.
     /// @param assetTo The address of the receiver of asset ERC20.
-    /// @param dueTo The addres of the receiver of collateralized debt.
-    /// @param xDecrease The dcrease in x state and amount of asset ERC20 received by assetTo.
+    /// @param dueTo The address of the receiver of collateralized debt.
+    /// @param xDecrease The decrease in x state and amount of asset ERC20 received by assetTo.
     /// @param yIncrease The increase in y state.
     /// @param zIncrease The increase in z state.
     /// @param data The data for callback.

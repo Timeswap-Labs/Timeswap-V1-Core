@@ -8,7 +8,7 @@ import {TimeswapPair} from './TimeswapPair.sol';
 
 /// @title Timeswap Factory
 /// @author Timeswap Labs
-/// @notice It is recommnded to use Timeswap Convenience to interact with this contract.
+/// @notice It is recommended to use Timeswap Convenience to interact with this contract.
 /// @notice All error messages are coded and can be found in the documentation.
 contract TimeswapFactory is IFactory {
     /* ===== MODEL ===== */
