@@ -330,8 +330,6 @@ contract TimeswapPair is IPair {
         dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, xDecrease, zIncrease);
         dueOut.startBlock = BlockNumber.get();
 
-        Callback.borrow(collateral, dueOut.collateral, data);
-
         id = pool.dues[dueTo].insert(dueOut);
 
         pool.state.reserves.asset -= xDecrease;
@@ -343,6 +341,8 @@ contract TimeswapPair is IPair {
         pool.state.z += zIncrease;
 
         asset.safeTransfer(assetTo, xDecrease);
+
+        Callback.borrow(collateral, dueOut.collateral, data);
 
         emit Sync(maturity, pool.state.x, pool.state.y, pool.state.z);
         emit Borrow(maturity, msg.sender, assetTo, dueTo, xDecrease, id, dueOut);
