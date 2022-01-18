@@ -17,9 +17,12 @@ library BurnMath {
     /// @param state The pool state.
     /// @param liquidityIn The amount of liquidity balance burnt by the msg.sender.
     function getAsset(IPair.State memory state, uint256 liquidityIn) internal pure returns (uint128 assetOut) {
-        if (state.reserves.asset <= state.totalClaims.bond) return assetOut;
-        uint256 _assetOut = state.reserves.asset;
-        unchecked { _assetOut -= state.totalClaims.bond; }
+        uint256 totalAsset = state.reserves.asset;
+        uint256 totalBond = state.totalClaims.bond;
+        
+        if (totalAsset <= totalBond) return assetOut;
+        uint256 _assetOut = totalAsset;
+        unchecked { _assetOut -= totalBond; }
         _assetOut = _assetOut.mulDiv(liquidityIn, state.totalLiquidity);
         assetOut = _assetOut.toUint128();
     }
@@ -32,17 +35,22 @@ library BurnMath {
         pure
         returns (uint128 collateralOut)
     {
-        uint256 _collateralOut = state.reserves.collateral;
-        if (state.reserves.asset >= state.totalClaims.bond) {
+        uint256 totalAsset = state.reserves.asset;
+        uint256 totalCollateral = state.reserves.collateral;
+        uint256 totalBond = state.totalClaims.bond;
+        uint256 totalInsurance = state.totalClaims.insurance;
+
+        uint256 _collateralOut = totalCollateral;
+        if (totalAsset >= totalBond) {
             _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
             return collateralOut = _collateralOut.toUint128();
         }
-        uint256 deficit = state.totalClaims.bond;
-        unchecked { deficit -= state.reserves.asset; }
-        if (uint256(state.reserves.collateral) * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
+        uint256 deficit = totalBond;
+        unchecked { deficit -= totalAsset; }
+        if (totalCollateral * totalBond <= deficit * totalInsurance) return collateralOut;
         uint256 subtrahend = deficit;
-        subtrahend *= state.totalClaims.insurance;
-        subtrahend = subtrahend.divUp(state.totalClaims.bond);
+        subtrahend *= totalInsurance;
+        subtrahend = subtrahend.divUp(totalBond);
         _collateralOut -= subtrahend;
         _collateralOut = _collateralOut.mulDiv(liquidityIn, state.totalLiquidity);
         collateralOut = _collateralOut.toUint128();

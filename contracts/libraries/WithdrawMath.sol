@@ -13,10 +13,13 @@ library WithdrawMath {
     /// @param state The pool state.
     /// @param bondIn The amount of bond balance balance burnt by the msg.sender.
     function getAsset(IPair.State memory state, uint128 bondIn) internal pure returns (uint128 assetOut) {
-        if (state.reserves.asset >= state.totalClaims.bond) return assetOut = bondIn;
+        uint256 totalAsset = state.reserves.asset;
+        uint256 totalBond = state.totalClaims.bond;
+        
+        if (totalAsset >= totalBond) return assetOut = bondIn;
         uint256 _assetOut = bondIn;
-        _assetOut *= state.reserves.asset;
-        _assetOut /= state.totalClaims.bond;
+        _assetOut *= totalAsset;
+        _assetOut /= totalBond;
         assetOut = _assetOut.toUint128();
     }
 
@@ -28,18 +31,23 @@ library WithdrawMath {
         pure
         returns (uint128 collateralOut)
     {
-        if (state.reserves.asset >= state.totalClaims.bond) return collateralOut;
-        uint256 deficit = state.totalClaims.bond;
-        unchecked { deficit -= state.reserves.asset; }
-        if (uint256(state.reserves.collateral) * state.totalClaims.bond >= deficit * state.totalClaims.insurance) {
+        uint256 totalAsset = state.reserves.asset;
+        uint256 totalCollateral = state.reserves.collateral;
+        uint256 totalBond = state.totalClaims.bond;
+        uint256 totalInsurance = state.totalClaims.insurance;
+
+        if (totalAsset >= totalBond) return collateralOut;
+        uint256 deficit = totalBond;
+        unchecked { deficit -= totalAsset; }
+        if (totalCollateral * totalBond >= deficit * totalInsurance) {
             uint256 _collateralOut = deficit;
             _collateralOut *= insuranceIn;
-            _collateralOut /= state.totalClaims.bond;
+            _collateralOut /= totalBond;
             return collateralOut = _collateralOut.toUint128();
         }
         uint256 __collateralOut = state.reserves.collateral;
         __collateralOut *= insuranceIn;
-        __collateralOut /= state.totalClaims.insurance;
+        __collateralOut /= totalInsurance;
         collateralOut = __collateralOut.toUint128();
     }
 }
