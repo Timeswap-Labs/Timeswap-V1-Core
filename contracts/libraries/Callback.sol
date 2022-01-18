@@ -2,7 +2,6 @@
 pragma solidity =0.8.4;
 
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {IPair} from '../interfaces/IPair.sol';
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapBorrowCallback} from '../interfaces/callback/ITimeswapBorrowCallback.sol';
