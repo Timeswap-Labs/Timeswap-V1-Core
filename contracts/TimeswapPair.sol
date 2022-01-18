@@ -50,7 +50,7 @@ contract TimeswapPair is IPair {
         override
         returns (uint112, uint112, uint112)
     {
-        State memory state = pools[maturity].state;
+        State storage state = pools[maturity].state;
         return (state.x, state.y, state.z);
     }
 
