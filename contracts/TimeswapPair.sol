@@ -9,7 +9,7 @@ import {BurnMath} from './libraries/BurnMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {WithdrawMath} from './libraries/WithdrawMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
-import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
@@ -19,7 +19,7 @@ import {BlockNumber} from './libraries/BlockNumber.sol';
 /// @notice It is recommended to use Timeswap Convenience to interact with this contract.
 /// @notice All error messages are coded and can be found in the documentation.
 contract TimeswapPair is IPair {
-    using SafeTransfer for IERC20;
+    using SafeERC20 for IERC20;
     using Array for Due[];
 
     /* ===== MODEL ===== */
