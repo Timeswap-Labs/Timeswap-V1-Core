@@ -247,8 +247,6 @@ contract TimeswapPair is IPair {
         claimsOut.bond = LendMath.getBond(maturity, xIncrease, yDecrease);
         claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, xIncrease, zDecrease);
 
-        Callback.lend(asset, xIncrease, data);
-
         pool.state.totalClaims.bond += claimsOut.bond;
         pool.state.totalClaims.insurance += claimsOut.insurance;
 
@@ -260,6 +258,8 @@ contract TimeswapPair is IPair {
         pool.state.x += xIncrease;
         pool.state.y -= yDecrease;
         pool.state.z -= zDecrease;
+
+        Callback.lend(asset, xIncrease, data);
 
         emit Sync(maturity, pool.state.x, pool.state.y, pool.state.z);
         emit Lend(maturity, msg.sender, bondTo, insuranceTo, xIncrease, claimsOut);
