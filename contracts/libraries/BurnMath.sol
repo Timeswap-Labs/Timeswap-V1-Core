@@ -19,7 +19,7 @@ library BurnMath {
     function getAsset(IPair.State memory state, uint256 liquidityIn) internal pure returns (uint128 assetOut) {
         if (state.reserves.asset <= state.totalClaims.bond) return assetOut;
         uint256 _assetOut = state.reserves.asset;
-        _assetOut -= state.totalClaims.bond;
+        unchecked { _assetOut -= state.totalClaims.bond; }
         _assetOut = _assetOut.mulDiv(liquidityIn, state.totalLiquidity);
         assetOut = _assetOut.toUint128();
     }
@@ -38,7 +38,7 @@ library BurnMath {
             return collateralOut = _collateralOut.toUint128();
         }
         uint256 deficit = state.totalClaims.bond;
-        deficit -= state.reserves.asset;
+        unchecked { deficit -= state.reserves.asset; }
         if (uint256(state.reserves.collateral) * state.totalClaims.bond <= deficit * state.totalClaims.insurance) return collateralOut;
         uint256 subtrahend = deficit;
         subtrahend *= state.totalClaims.insurance;
