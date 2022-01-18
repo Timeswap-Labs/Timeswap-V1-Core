@@ -381,12 +381,13 @@ contract TimeswapPair is IPair {
             collateralOut += collateralsOut[i];
             unchecked { ++i; }
         }
-        if (assetIn != 0) Callback.pay(asset, assetIn, data);
 
         pool.state.reserves.asset += assetIn;
         pool.state.reserves.collateral -= collateralOut;
 
         if (collateralOut != 0) collateral.safeTransfer(to, collateralOut);
+
+        if (assetIn != 0) Callback.pay(asset, assetIn, data);
 
         emit Pay(maturity, msg.sender, to, owner, ids, assetsIn, collateralsOut, assetIn, collateralOut);
     }
