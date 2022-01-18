@@ -153,12 +153,6 @@ contract TimeswapPair is IPair {
         
         Pool storage pool = pools[maturity];
 
-        dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
-        dueOut.collateral = MintMath.getCollateral(maturity, zIncrease);
-        dueOut.startBlock = BlockNumber.get();
-
-        Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
-
         { // Avoid stack too deep error
         uint256 liquidityTotal = pool.state.totalLiquidity == 0 ?
             MintMath.getLiquidityTotal(xIncrease) :
@@ -172,6 +166,10 @@ contract TimeswapPair is IPair {
         require(liquidityOut != 0, 'E212');
         pool.liquidities[liquidityTo] += liquidityOut;
 
+        dueOut.debt = MintMath.getDebt(maturity, xIncrease, yIncrease);
+        dueOut.collateral = MintMath.getCollateral(maturity, zIncrease);
+        dueOut.startBlock = BlockNumber.get();
+
         id = pool.dues[dueTo].insert(dueOut);
 
         pool.state.reserves.asset += xIncrease;
@@ -181,6 +179,8 @@ contract TimeswapPair is IPair {
         pool.state.x += xIncrease;
         pool.state.y += yIncrease;
         pool.state.z += zIncrease;
+
+        Callback.mint(asset, collateral, xIncrease, dueOut.collateral, data);
 
         emit Sync(maturity, pool.state.x, pool.state.y, pool.state.z);
         emit Mint(maturity, msg.sender, liquidityTo, dueTo, xIncrease, liquidityOut, id, dueOut);
