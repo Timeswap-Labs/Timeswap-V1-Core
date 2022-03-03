@@ -1,12 +1,12 @@
 {
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test",
+    "test": "hardhat test test/pair/*",
     "test:hardhat": "hardhat test --network hardhat",
     "coverage": "hardhat compile && hardhat coverage",
     "prepare": "hardhat compile"
   },
-  "version": "1.0.22",
+  "version": "1.0.31",
   "name": "@timeswap-labs/timeswap-v1-core",
   "files": [
     "contracts/interfaces",

@@ -9,7 +9,6 @@ import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallbac
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '../interfaces/callback/ITimeswapPayCallback.sol';
 
-import 'hardhat/console.sol';
 
 
 contract TimeswapPairCallee {
@@ -50,18 +49,22 @@ contract TimeswapPairCallee {
     )
         external 
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
-    {
+    {   
         return pairContract.mint(
-            maturity,
-            liquidityTo,
-            address(this),
-            xIncrease,
-            yIncrease,
-            zIncrease,getDataMint(msg.sender)
+            IPair.MintParam(
+                maturity,
+                liquidityTo,
+                address(this),
+                xIncrease,
+                yIncrease,
+                zIncrease,
+                getDataMint(msg.sender)
+            )
         );
     }
 
@@ -72,15 +75,17 @@ contract TimeswapPairCallee {
         uint112 xIncrease,
         uint112 yDecrease,
         uint112 zDecrease
-    ) external returns (IPair.Claims memory claimsOut){
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut){
         return pairContract.lend(
-            maturity,
-            bondTo,
-            insuranceTo,
-            xIncrease,
-            yDecrease,
-            zDecrease,
-            getData(msg.sender)
+            IPair.LendParam(
+                maturity,
+                bondTo,
+                insuranceTo,
+                xIncrease,
+                yDecrease,
+                zDecrease,
+                getData(msg.sender)
+            )
         );
     }
 
@@ -91,15 +96,17 @@ contract TimeswapPairCallee {
         uint112 xDecrease,
         uint112 yIncrease,
         uint112 zIncrease
-    ) external returns (uint256 id, IPair.Due memory dueOut){
+    ) external returns (uint256 assetOut, uint256 id, IPair.Due memory dueOut){
         return pairContract.borrow(
-            maturity,
-            assetTo,
-            dueTo,
-            xDecrease,
-            yIncrease,
-            zIncrease,
-            getData(msg.sender)
+            IPair.BorrowParam(
+                maturity,
+                assetTo,
+                dueTo,
+                xDecrease,
+                yIncrease,
+                zIncrease,
+                getData(msg.sender)
+            )
         );
     }
 
@@ -112,18 +119,20 @@ contract TimeswapPairCallee {
         uint112[] memory collateralsOut
     ) external returns (uint128 assetIn, uint128 collateralOut){
         return pairContract.pay(
-            maturity,
-            to,
-            owner,
-            ids,
-            assetsIn,
-            collateralsOut,
-            getData(msg.sender)
+            IPair.PayParam(
+                maturity,
+                to,
+                owner,
+                ids,
+                assetsIn,
+                collateralsOut,
+                getData(msg.sender)
+            )
         );
     }
 
     function timeswapMintCallback(
-        uint112 assetIn,
+        uint256 assetIn,
         uint112 collateralIn,
         bytes calldata data
     ) external {
@@ -138,7 +147,7 @@ contract TimeswapPairCallee {
         collateral.transferFrom(collateralFrom, address(pair), collateralIn);
     }
 
-    function timeswapLendCallback(uint112 assetIn, bytes calldata data) external {
+    function timeswapLendCallback(uint256 assetIn, bytes calldata data) external {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(
             data,
             (IERC20, IERC20, address)

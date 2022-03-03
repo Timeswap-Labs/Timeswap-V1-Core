@@ -116,15 +116,15 @@ describe('Pay', () => {
       console.log('Should have correct total claims')
       const claims = await pair.totalClaims()
       const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-      expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      expect(claims.bondPrincipal).to.equalBigInt(claimsSim.bondPrincipal)
+      expect(claims.insurancePrincipal).to.equalBigInt(claimsSim.insurancePrincipal)
 
       console.log('Should have correct claims of')
 
       const claimsOf = await pair.claimsOf(signers[0])
       const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-      expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-      expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+      expect(claimsOf.bondPrincipal).to.equalBigInt(claimsOfSim.bondPrincipal)
+      expect(claimsOf.insurancePrincipal).to.equalBigInt(claimsOfSim.insurancePrincipal)
 
       console.log('Should have correct dues of')
       const duesOfSim = pairSim.getDues(pairSim.getPool(updatedMaturity), signers[0].address).due

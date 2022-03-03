@@ -17,8 +17,10 @@ interface Token {
   collateral: bigint
 }
 interface Claims {
-  bond: bigint
-  insurance: bigint
+  bondPrincipal: bigint
+  bondInterest: bigint
+  insurancePrincipal: bigint
+  insuranceInterest: bigint
 }
 interface StateParams {
   reserves: Token
@@ -39,7 +41,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 0n,
-  totalClaims: { bond: 0n, insurance: 0n },
+  totalClaims: { bondPrincipal: 1n, bondInterest: 9n,insurancePrincipal: 1n, insuranceInterest:  9n},
   totalDebtCreated: 0n,
   x: 100n,
   y: 100n,
@@ -76,16 +78,15 @@ describe('LendMath', () => {
     expect(returnValue2).to.be.true
     expect(returnValue1).to.equal(returnValue2)
   })
-
-  it('GetBond should return the expected bondOut', async () => {
-    const returnValue1 = await lendMathTestContract.getBond(maturity, assetIn, interestDecrease)
-    let returnValue2 = await LendMath.getBond(BigInt(maturity.toString()), assetIn, interestDecrease, await now())
+  it('GetBondInterest should return the expected bondOut', async () => {
+    const returnValue1 = await lendMathTestContract.getBondInterest(maturity,  interestDecrease)
+    let returnValue2 = await LendMath.getBondInterest(BigInt(maturity.toString()), assetIn, interestDecrease, await now())
     expect(returnValue1).to.be.equalBigInt(returnValue2)
   })
 
-  it('GetInsurance should return the expected InsuranceOut', async () => {
-    const returnValue1 = await lendMathTestContract.getInsurance(maturity, state, assetIn, interestDecrease)
-    let returnValue2 = await LendMath.getInsurance(
+  it('GetInsurancePrincipal should return the expected InsuranceOut', async () => {
+    const returnValue1 = await lendMathTestContract.getInsurancePrincipal(state, assetIn)
+    let returnValue2 = await LendMath.getInsurancePrincipal(
       BigInt(maturity.toString()),
       stateTest,
       assetIn,
@@ -94,7 +95,17 @@ describe('LendMath', () => {
     )
     expect(returnValue1).to.be.equalBigInt(returnValue2)
   })
-
+  it('GetInsuranceInterest should return the expected InsuranceOut', async () => {
+    const returnValue1 = await lendMathTestContract.getInsuranceInterest(maturity, cdpDecrease)
+    let returnValue2 = await LendMath.getInsuranceInterest(
+      BigInt(maturity.toString()),
+      stateTest,
+      assetIn,
+      interestDecrease,
+      await now()
+    )
+    expect(returnValue1).to.be.equalBigInt(returnValue2)
+  })
   it('Check should be reverted', async () => {
     const interestDecrease: bigint = 3n
     maturity = (await now()) + 10000n

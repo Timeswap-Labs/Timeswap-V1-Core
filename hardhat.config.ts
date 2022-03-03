@@ -9,6 +9,7 @@ import 'solidity-coverage'
 dotenv.config()
 
 export default {
+  allowUnlimitedContractSize: true,
   solidity: {
     version: '0.8.4',
     settings: {
@@ -23,6 +24,9 @@ export default {
     factoryOwner: 0,
   },
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true
+    },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${process.env['INFURA_PROJECT_ID']}`,
       accounts: [`0x${process.env['PRIVATE_KEY']}`],
@@ -36,4 +40,10 @@ export default {
   mocha: {
     timeout: 60000,
   },
+  // contractSizer: {
+  //   alphaSort: true,
+  //   disambiguatePaths: false,
+  //   runOnCompile: true,
+  //   strict: true,
+  // },
 }

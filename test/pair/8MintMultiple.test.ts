@@ -74,6 +74,7 @@ describe('MintMultiple', () => {
         pairSim = mint2.pairSim
       } catch (error) {
         console.log(`Case number: ${i + 1} expected to fail at second mint`)
+        console.log((error as TypeError).message);
         await expect(
           pair.pairContractCallee
             .connect(signers[0])
@@ -122,15 +123,19 @@ describe('MintMultiple', () => {
       console.log('Should have correct total claims')
       const claims = await pair.totalClaims()
       const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-      expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      expect(claims.bondPrincipal).to.equalBigInt(claimsSim.bondPrincipal)
+      expect(claims.insurancePrincipal).to.equalBigInt(claimsSim.insurancePrincipal)
+      expect(claims.bondInterest).to.equalBigInt(claimsSim.bondInterest)
+      expect(claims.insuranceInterest).to.equalBigInt(claimsSim.insuranceInterest)
 
       console.log('Should have correct claims of')
 
       const claimsOf = await pair.claimsOf(signers[0])
       const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-      expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-      expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+      expect(claimsOf.bondPrincipal).to.equalBigInt(claimsOfSim.bondPrincipal)
+      expect(claimsOf.insurancePrincipal).to.equalBigInt(claimsOfSim.insurancePrincipal)
+      expect(claimsOf.bondInterest).to.equalBigInt(claimsOfSim.bondInterest)
+      expect(claimsOf.insuranceInterest).to.equalBigInt(claimsOfSim.insuranceInterest)
 
       console.log('Should have correct dues of')
       const duesOf = (await pair.dueOf(0n)).concat(await pair.dueOf(1n))

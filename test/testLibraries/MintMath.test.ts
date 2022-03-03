@@ -18,8 +18,10 @@ interface Token {
   collateral: bigint
 }
 interface Claims {
-  bond: bigint
-  insurance: bigint
+  bondPrincipal: bigint
+  bondInterest: bigint
+  insurancePrincipal: bigint
+  insuranceInterest: bigint
 }
 interface StateParams {
   reserves: Token
@@ -44,7 +46,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 50n,
-  totalClaims: { bond: 0n, insurance: 0n },
+  totalClaims: { bondPrincipal: 0n, bondInterest:0n,insuranceInterest: 0n, insurancePrincipal:0n },
   totalDebtCreated: 0n,
   x: 100n,
   y: 10n,
@@ -54,7 +56,7 @@ const state: StateParams = {
 const stateTest: StateTestParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 50n,
-  totalClaims: { bond: 0n, insurance: 0n },
+  totalClaims: { bondPrincipal: 0n, bondInterest:0n,insuranceInterest: 0n, insurancePrincipal:0n },
   totalDebtCreated: 0n,
   asset: 100n,
   interest: 10n,
@@ -79,33 +81,25 @@ describe('MintMath', () => {
   })
 
   it('Getting LiquidityTotal for AssetIn', async () => {
-    expect(await MintMathTestContract.getLiquidityTotal1(assetIn)).to.be.equalBigInt(
-      await MintMath.getLiquidityTotal1(assetIn)
+    expect(await MintMathTestContract.getLiquidity1(assetIn)).to.be.equalBigInt(
+      await MintMath.getLiquidity1(assetIn)
     )
   })
 
-  it('Getting LiquidityTotal for AssetIn', async () => {
-    expect(await MintMathTestContract.getLiquidityTotal2(state, assetIn, interestIncrease, cdpIncrease)).to.be.equal(
-      MintMath.getLiquidityTotal2(stateTest, assetIn, interestIncrease, cdpIncrease)
-    )
-  })
 
-  it('Getting expected Liquidity', async () => {
-    const liquitidyTotal: BigNumberish = await MintMathTestContract.getLiquidityTotal2(
-      state,
-      assetIn,
-      interestIncrease,
-      cdpIncrease
-    )
-    expect(await MintMathTestContract.getLiquidity(maturity, liquitidyTotal, PROTOCOL_FEE)).to.be.equalBigInt(
-      await MintMath.getLiquidity(
-        BigInt(maturity.toString()),
-        BigInt(liquitidyTotal.toString()),
-        PROTOCOL_FEE,
-        await now()
-      )
-    )
-  })
+  // it('Getting expected Liquidity', async () => {
+
+  //   const expectedLiquidity =await MintMath.getLiquidity2(
+  //     state,
+  //     assetIn,
+  //     interestIncrease,
+  //     cdpIncrease
+  //   )
+
+  //   expect(await MintMathTestContract.getLiquidity2(state,maturity, liquitidyTotal, PROTOCOL_FEE)).to.be.equalBigInt(
+  //     expectedLiquidity
+  //   )
+  // })
 
   it('Getting expected Debt', async () => {
     expect((await MintMathTestContract.getDebt(maturity, assetIn, interestIncrease)).toString()).to.be.equalBigInt(

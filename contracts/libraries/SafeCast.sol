@@ -7,11 +7,13 @@ library SafeCast {
     }
     
     function toUint112(uint256 x) internal pure returns (uint112 y) {
-        require((y = uint112(x)) == x);
+        require(x <= type(uint112).max);
+        y = uint112(x);
     }
 
     function toUint128(uint256 x) internal pure returns (uint128 y) {
-        require((y = uint128(x)) == x);
+        require(x <= type(uint128).max);
+        y = uint128(x);
     }
 
     function truncateUint112(uint256 x) internal pure returns (uint112 y) {

@@ -1,19 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { pseudoRandomBigUint } from '../shared/Helper'
-import * as Mint from './MintTestCases'
+import { ConstantProduct } from '../shared/PairInterface'
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1)
-const MaxUint64 = BigNumber.from(2).pow(64).sub(1)
-const MaxUint32 = BigNumber.from(2).pow(32).sub(1)
-const MaxUint16 = BigNumber.from(2).pow(16).sub(1)
-
+const MaxUint24 = BigNumber.from(2).pow(24).sub(1)
 export interface Lend {
-  assetIn: bigint
-  collateralIn: bigint
-  interestIncrease: bigint
-  cdpIncrease: bigint
-  maturity: bigint
-  currentTimeStamp: bigint
   lendAssetIn: bigint
   lendInterestDecrease: bigint
   lendCdpDecrease: bigint
@@ -25,21 +16,27 @@ export interface LendParams {
   cdpDecrease: bigint
 }
 
-export async function lend(): Promise<Lend[]> {
-  const mintTests = await Mint.mint()
-  const lendCases: Lend[] = []
-  for (let i = 0; i < mintTests.length; i++) {
-    lendCases.push({
-      assetIn: mintTests[i].assetIn,
-      collateralIn: mintTests[i].collateralIn,
-      interestIncrease: mintTests[i].interestIncrease,
-      cdpIncrease: mintTests[i].cdpIncrease,
-      maturity: mintTests[i].maturity,
-      currentTimeStamp: mintTests[i].currentTimeStamp,
-      lendAssetIn: (BigInt(MaxUint112.toString()) - mintTests[i].assetIn) / 2n,
-      lendInterestDecrease: mintTests[i].interestIncrease / 10n,
-      lendCdpDecrease: pseudoRandomBigUint(MaxUint112),
-    })
+export async function lend(state: ConstantProduct): Promise<Lend> {
+  const currentProduct = BigInt(((state.interest * state.cdp)) * state.asset);
+  let lendAssetIn = pseudoRandomBigUint(MaxUint112.sub(BigNumber.from(String(state.asset))));
+  while(lendAssetIn<state.asset)
+  { 
+    let diff = state.asset - lendAssetIn;
+    lendAssetIn += diff + pseudoRandomBigUint(BigNumber.from(2**10));
   }
-  return lendCases
+  let lendInterestDecrease: bigint = pseudoRandomBigUint(BigNumber.from(state.interest));
+  let lendCdpDecrease: bigint = pseudoRandomBigUint(BigNumber.from(state.cdp));
+  let newProduct = (state.asset + lendAssetIn)*(state.interest - lendInterestDecrease)*(state.cdp - lendCdpDecrease);
+  while(
+    newProduct<currentProduct
+  ){
+    lendInterestDecrease =  pseudoRandomBigUint(MaxUint24);
+    lendCdpDecrease = pseudoRandomBigUint(MaxUint24);
+    newProduct = (state.asset + lendAssetIn)*(state.interest - lendInterestDecrease)*(state.cdp - lendCdpDecrease);
+  }
+  return ({
+    lendAssetIn,
+    lendInterestDecrease,
+    lendCdpDecrease
+  })
 }

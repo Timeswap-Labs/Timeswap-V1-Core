@@ -4,6 +4,8 @@ import { ethers } from 'hardhat'
 import { expect } from '../shared/Expect'
 import { constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
+import { Pair } from '../shared/Pair'
+import { PairSim } from '../shared/PairSim'
 import * as TestCases from '../testCases'
 import { Lend, LendParams, MintParams } from '../testCases'
 
@@ -21,14 +23,14 @@ describe('Withdraw', () => {
   })
 
   it('', async () => {
-    tests = await TestCases.withdraw()
+    tests = await TestCases.mint()
     for (let i = 0; i < tests.length; i++) {
       console.log('\n', `Checking the Withdraw Test for testCase: ${i + 1}`)
       await ethers.provider.send('evm_revert', [snapshot])
       await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
-      let pair: any
-      let pairSim: any
+      let pair: Pair
+      let pairSim: PairSim
       let updatedMaturity: any
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
@@ -36,31 +38,24 @@ describe('Withdraw', () => {
       let erm: any
       let mint: any
       try {
-        const mintParameters: MintParams = {
-          assetIn: tests[i].assetIn,
-          collateralIn: tests[i].collateralIn,
-          interestIncrease: tests[i].interestIncrease,
-          cdpIncrease: tests[i].cdpIncrease,
-          maturity: updatedMaturity,
-          currentTimeStamp: tests[i].currentTimeStamp,
-        }
+        const mintParameters: MintParams = tests[i]
         mint = await mintFixture(constructor, signers[0], mintParameters)
+        pair = mint.pair;
+        pairSim = mint.pairSim;
       } catch (error) {
         erm = 'minting error'
         console.log(`Ignored due to wrong miniting parameters`)
         continue
       }
-      const lendParams: LendParams = {
-        assetIn: tests[i].lendAssetIn,
-        interestDecrease: tests[i].lendInterestDecrease,
-        cdpDecrease: tests[i].lendCdpDecrease,
-      }
-      const lendTxData = await lendFixture(mint, signers[0], lendParams)
-      const lendData: any = {
-        claimsIn: {
-          bond: lendTxData.lendData.bond,
-          insurance: lendTxData.lendData.insurance,
-        },
+      let lendTxData
+      let lendData;
+      try {
+        const lendParam = await TestCases.lend(await pair.state())  
+        lendTxData = await lendFixture(mint, signers[0], lendParam)
+        lendData = lendTxData.lendData;
+      } catch (error) {
+        console.log("error in lending hence ignored: ", (error as TypeError).message);
+        continue;
       }
       await advanceTimeAndBlock(Number(updatedMaturity))
       const withdraw = await withdrawFixture(lendTxData, signers[0], lendData)
@@ -68,8 +63,8 @@ describe('Withdraw', () => {
       pairSim = withdraw.pairSim
       if (pair != undefined && pairSim != undefined) {
         console.log('Should have correct reserves')
-        const reserves = await pair.totalReserves()
-        const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
+        const reserves = await withdraw.pair.totalReserves()
+        const reservesSim = withdraw.pairSim.getPool(updatedMaturity).state.reserves
         expect(reserves.asset).to.equalBigInt(reservesSim.asset)
         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
 
@@ -100,15 +95,15 @@ describe('Withdraw', () => {
         console.log('Should have correct total claims')
         const claims = await pair.totalClaims()
         const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-        expect(claims.bond).to.equalBigInt(claimsSim.bond)
-        expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+        expect(claims.bondPrincipal).to.equalBigInt(claimsSim.bondPrincipal)
+        expect(claims.insurancePrincipal).to.equalBigInt(claimsSim.insurancePrincipal)
 
         console.log('Should have correct claims of')
 
         const claimsOf = await pair.claimsOf(signers[0])
         const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-        expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-        expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+        expect(claimsOf.bondPrincipal).to.equalBigInt(claimsOfSim.bondPrincipal)
+        expect(claimsOf.insurancePrincipal).to.equalBigInt(claimsOfSim.insurancePrincipal)
 
         console.log('Should have correct dues of')
         const duesOf = await pair.dueOf(0n)

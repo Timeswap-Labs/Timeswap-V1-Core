@@ -2,7 +2,6 @@
 pragma solidity =0.8.4;
 
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {IPair} from '../interfaces/IPair.sol';
 import {ITimeswapMintCallback} from '../interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapLendCallback} from '../interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapBorrowCallback} from '../interfaces/callback/ITimeswapBorrowCallback.sol';
@@ -17,7 +16,7 @@ library Callback {
     function mint(
         IERC20 asset,
         IERC20 collateral,
-        uint112 assetIn,
+        uint256 assetIn,
         uint112 collateralIn,
         bytes calldata data
     ) internal {
@@ -32,7 +31,7 @@ library Callback {
 
     function lend(
         IERC20 asset,
-        uint112 assetIn,
+        uint256 assetIn,
         bytes calldata data
     ) internal {
         uint256 assetReserve = asset.safeBalance();

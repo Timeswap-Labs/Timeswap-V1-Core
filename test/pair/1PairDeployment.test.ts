@@ -22,10 +22,13 @@ describe('Deploying Pair Contract', () => {
   let assetValue: bigint = pseudoRandomBigUint256()
   let collateralValue: bigint = pseudoRandomBigUint256()
   let pairContractAddress: Address
+  let timeSwapMathContractAddresss: Address
 
   before(async () => {
     signers = await ethers.getSigners()
-    factory = (await factoryInit(signers[0].address)) as IFactory
+    let timeSwapMathFactory = await ethers.getContractFactory("TimeswapMath")
+    timeSwapMathContractAddresss= (await (await timeSwapMathFactory.deploy()).address);
+    factory = (await factoryInit(signers[0].address, undefined, undefined, timeSwapMathContractAddresss)) as IFactory
   })
 
   beforeEach(async () => {
@@ -39,7 +42,12 @@ describe('Deploying Pair Contract', () => {
     await expect(await factory.createPair(assetToken.address, collateralToken.address))
       .to.emit(factory, 'CreatePair')
       .withArgs(assetToken.address, collateralToken.address, pairContractAddress)
-    const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
+      console.log("pairContractFactoryYYYYY");
+    const pairContractFactory = await ethers.getContractFactory('TimeswapPair', {
+      libraries: {
+        TimeswapMath: timeSwapMathContractAddresss
+      }
+    })
     const pairContract = pairContractFactory.attach(pairContractAddress) as TimeswapPair
     expect(await pairContract.factory()).to.be.equal(factory.address)
     expect(await pairContract.asset()).to.be.equal(assetToken.address)

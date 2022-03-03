@@ -126,21 +126,29 @@ Reentrancy guard error.
 
 ### E212
 
-`MintMat.getLiquidity` returned 0.
+`MintMath.getLiquidity` returned 0.
 
 ### E213
 
-`collateralsOut[i]` is not equal to 0 for the owner who is not the one to call the function
+`collateralsOut[i]` is not equal to 0 for the owner who is not the one to call the function.
+
+### E214
+
+y parameter is increased than the max y increase.
+
+### E215
+
+z parameter is increased than the max z increase.
+
+## E216
+
+Can only be called by the factory owner.
 
 ## Libraries
 
 ### E301
 
 Invariance error. When the new constant product is greater than the old constant product.
-
-### E302
-
-`yDecrease` / `yIncrease` is greater than the `minimum` calculated.
 
 ### E303
 

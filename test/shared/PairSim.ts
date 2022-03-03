@@ -2,8 +2,8 @@ import ethers from 'ethers'
 import BorrowMath from '../libraries/BorrowMath'
 import BurnMath from '../libraries/BurnMath'
 import LendMath from '../libraries/LendMath'
-import MintMath from '../libraries/MintMath'
 import PayMath from '../libraries/PayMath'
+import MintMath from '../libraries/MintMath'
 import WithdrawMath from '../libraries/WithdrawMath'
 import {
   Due,
@@ -24,6 +24,7 @@ export class PairSim {
   public collateral: string
   public protocolFee: bigint
   public fee: bigint
+  public protocolFeeStored: bigint
   public pools: Pool[]
   public contractAddress: string
   public factory: Factory
@@ -41,11 +42,15 @@ export class PairSim {
     this.collateral = collateral
     this.fee = fee
     this.protocolFee = protocolFee
+    this.protocolFeeStored = 0n
     this.pools = []
     this.contractAddress = contractAddress
     this.factory = initFactory(factoryAddress, owner)
   }
 
+  feeStored(pool:Pool){
+    return pool.state.feeStored
+  }
   getPool(maturity: bigint): Pool {
     let pool = this.pools.find((x) => x.maturity == maturity)
     if (pool == undefined) {
@@ -116,8 +121,10 @@ export class PairSim {
   addClaim(pool: Pool, claim: TotalClaims, lender: string) {
     const maybeClaim = pool.claims.find((x) => x.lender == lender)
     if (maybeClaim != undefined) {
-      maybeClaim.claims.bond += claim.bond
-      maybeClaim.claims.insurance += claim.insurance
+      maybeClaim.claims.bondPrincipal += claim.bondPrincipal
+      maybeClaim.claims.bondInterest += claim.bondInterest
+      maybeClaim.claims.insurancePrincipal += claim.insurancePrincipal
+      maybeClaim.claims.insuranceInterest += claim.insuranceInterest
     } else {
       pool.claims.push({ lender: lender, claims: claim })
     }
@@ -125,9 +132,11 @@ export class PairSim {
   }
   removeClaim(pool: Pool, claim: TotalClaims, lender: string) {
     const maybeClaim = pool.claims.find((x) => x.lender == lender)
-    if (maybeClaim != undefined) {
-      maybeClaim.claims.bond -= claim.bond
-      maybeClaim.claims.insurance -= claim.insurance
+    if (maybeClaim != undefined) {    
+      maybeClaim.claims.bondPrincipal -= claim.bondPrincipal
+      maybeClaim.claims.bondInterest -= claim.bondInterest
+      maybeClaim.claims.insurancePrincipal -= claim.insurancePrincipal
+      maybeClaim.claims.insuranceInterest -= claim.insuranceInterest
     }
     return pool
   }
@@ -158,23 +167,26 @@ export class PairSim {
 
     let pool = this.getPool(maturity)
 
-    let liquidityOut: bigint
+    let liquidityOut: bigint 
 
-    if (pool.state.totalLiquidity == 0n) {
-      const liquidityTotal = MintMath.getLiquidityTotal1(assetIn)
-      liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
-      pool.state.totalLiquidity += liquidityTotal
-      pool = this.addLiquidity(pool, liquidityTotal - liquidityOut, this.factory.owner)
-    } else {
-      const liquidityTotal = MintMath.getLiquidityTotal2(pool.state, assetIn, interestIncrease, cdpIncrease)
-      liquidityOut = MintMath.getLiquidity(maturity, liquidityTotal, this.protocolFee, now)
-      pool.state.totalLiquidity += liquidityTotal
-      pool = this.addLiquidity(pool, liquidityTotal - liquidityOut, this.factory.owner)
+    if(pool.state.totalLiquidity == 0n){
+      liquidityOut = MintMath.getLiquidity1(assetIn)
+    } else{ 
+      const _liquidityOut = MintMath.getLiquidity2(pool.state,assetIn,interestIncrease,cdpIncrease)
+      if(typeof _liquidityOut == "string"){
+        return "Invalid"
+      }
+      else{
+        liquidityOut = _liquidityOut
+      }
     }
-
+    const feeStoredIncrease =  MintMath.getFee(pool.state,liquidityOut) 
+   
     if (!(liquidityOut > 0)) return 'Invalid'
 
     pool = this.addLiquidity(pool, liquidityOut, liquidityTo)
+    pool.state.totalLiquidity += liquidityOut
+    pool.state.feeStored += feeStoredIncrease
 
     let dueOut = dueDefault()
 
@@ -221,12 +233,12 @@ export class PairSim {
     let tokensOut = tokensDefault()
     tokensOut.asset = BurnMath.getAsset(pool.state, liquidityIn)
     tokensOut.collateral = BurnMath.getCollateral(pool.state, liquidityIn)
-
+    let feeOut = BurnMath.getFee(pool.state,liquidityIn)
     pool.state.totalLiquidity -= liquidityIn
-
+    tokensOut.asset +=feeOut
     this.removeLiquidity(pool, liquidityIn, sender)
 
-    pool.state.reserves.asset -= tokensOut.asset
+    pool.state.reserves.asset -= (tokensOut.asset+feeOut)
     pool.state.reserves.collateral -= tokensOut.collateral
 
     return tokensOut
@@ -260,16 +272,29 @@ export class PairSim {
 
     if (pool.state.totalLiquidity <= 0) return 'Invalid'
 
-    if (!LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease, this.fee)) return 'lend math check fail'
+    if (!LendMath.check(pool.state, assetIn, interestDecrease, cdpDecrease)) return 'lend math check fail'
+
+    const {feeStoredIncrease,protocolFeeStoredIncrease}=LendMath.getFees(
+      maturity,
+      assetIn,
+      this.fee,
+      this.protocolFee,
+      now)
 
     let claimsOut = totalClaimsDefault()
+    claimsOut.bondPrincipal = assetIn
+    claimsOut.bondInterest = LendMath.getBondInterest(maturity, interestDecrease, now)
+    claimsOut.insurancePrincipal = LendMath.getInsurancePrincipal(pool.state, assetIn)
+    claimsOut.insuranceInterest = LendMath.getInsuranceInterest(maturity, cdpDecrease, now)
 
-    claimsOut.bond = LendMath.getBond(maturity, assetIn, interestDecrease, now)
+    pool.state.feeStored +=feeStoredIncrease
+    this.protocolFeeStored += protocolFeeStoredIncrease
 
-    claimsOut.insurance = LendMath.getInsurance(maturity, pool.state, assetIn, cdpDecrease, now)
+    pool.state.totalClaims.bondPrincipal += claimsOut.bondPrincipal
+    pool.state.totalClaims.bondInterest += claimsOut.bondInterest
+    pool.state.totalClaims.insurancePrincipal += claimsOut.insurancePrincipal
+    pool.state.totalClaims.insuranceInterest += claimsOut.insuranceInterest
 
-    pool.state.totalClaims.bond += claimsOut.bond
-    pool.state.totalClaims.insurance += claimsOut.insurance
 
     this.addClaim(pool, claimsOut, bondTo)
 
@@ -278,7 +303,6 @@ export class PairSim {
     pool.state.asset += assetIn
     pool.state.interest -= interestDecrease
     pool.state.cdp -= cdpDecrease
-
     return claimsOut
   }
 
@@ -294,18 +318,17 @@ export class PairSim {
 
     if (now < maturity) return 'Active'
     if (!(assetTo != ZERO_ADDRESSS && collateralTo != ZERO_ADDRESSS)) return 'Zero'
-    if (!(assetTo != this.contractAddress && collateralTo != this.contractAddress)) return 'Invalid'
-    if (claimsIn.bond <= 0 || claimsIn.insurance <= 0) return 'Invalid'
+    if (!(assetTo != this.contractAddress || collateralTo != this.contractAddress)) return 'Invalid'
+    if (claimsIn.bondPrincipal <=0 || claimsIn.bondInterest <= 0 || claimsIn.insurancePrincipal <=0 ||claimsIn.insuranceInterest <= 0) return 'Invalid'
 
     const pool = this.getPool(maturity)
-    let tokensOut = tokensDefault()
+    const tokensOut = WithdrawMath.getTokensOut(pool.state, claimsIn);
 
-    tokensOut.asset = WithdrawMath.getAsset(pool.state, claimsIn.bond)
+    pool.state.totalClaims.bondPrincipal -= claimsIn.bondPrincipal
+    pool.state.totalClaims.bondInterest -= claimsIn.bondInterest
+    pool.state.totalClaims.insurancePrincipal -= claimsIn.insurancePrincipal
+    pool.state.totalClaims.insuranceInterest -= claimsIn.insuranceInterest
 
-    tokensOut.collateral = WithdrawMath.getCollateral(pool.state, claimsIn.insurance)
-
-    pool.state.totalClaims.bond -= claimsIn.bond
-    pool.state.totalClaims.insurance -= claimsIn.insurance
 
     this.removeClaim(pool, claimsIn, sender)
 
@@ -337,7 +360,7 @@ export class PairSim {
 
     if (pool.state.totalLiquidity <= 0) return 'Invalid'
 
-    if (!BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease, this.fee))
+    if (!BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease))
       return 'constant product check'
     let dueOut = dueDefault()
 

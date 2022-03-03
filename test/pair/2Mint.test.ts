@@ -22,7 +22,7 @@ describe('Mint', () => {
   before(async () => {
     snapshot = await ethers.provider.send('evm_snapshot', [])
   })
-
+  
   it('', async () => {
     tests = await TestCases.mint()
     for (let i = 0; i < tests.length; i++) {
@@ -50,13 +50,14 @@ describe('Mint', () => {
         mint = await mintFixture(constructor, signers[0], mintParams)
         console.log('\n', `Case number: ${i + 1} expected to succeed`)
       } catch (error) {
+        console.log(error);
         console.log(`Case number: ${i + 1} expected to fail`)
         console.log('Transaction expected to revert')
         await expect(
-          pair.pairContractCallee
+          constructor.pair.pairContractCallee
             .connect(signers[0])
             .mint(
-              pair.maturity,
+              constructor.pair.maturity,
               signers[0].address,
               mintParams.assetIn,
               mintParams.interestIncrease,
@@ -100,15 +101,15 @@ describe('Mint', () => {
       console.log('Should have correct total claims')
       const claims = await pair.totalClaims()
       const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-      expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      expect(claims.bondPrincipal).to.equalBigInt(claimsSim.bondPrincipal)
+      expect(claims.insurancePrincipal).to.equalBigInt(claimsSim.insurancePrincipal)
 
       console.log('Should have correct claims of')
 
       const claimsOf = await pair.claimsOf(signers[0])
       const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-      expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-      expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+      expect(claimsOf.bondPrincipal).to.equalBigInt(claimsOfSim.bondPrincipal)
+      expect(claimsOf.insurancePrincipal).to.equalBigInt(claimsOfSim.insurancePrincipal)
 
       console.log('Should have correct dues of')
       const duesOf = await pair.dueOf(0n)

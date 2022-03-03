@@ -1,34 +1,61 @@
-import { mulDiv } from '../libraries/FullMath'
+import { mulDiv, mulDivUp } from '../libraries/FullMath'
 import { State } from '../shared/PairInterface'
 import { divUp, shiftRightUp } from './Math'
+import { now as blockTimestamp } from '../shared/Helper';
+export interface Tokens {
+  asset: bigint
+  collateral: bigint
+}
+export interface TotalClaims {
+  bondPrincipal: bigint
+  bondInterest: bigint
+  insurancePrincipal: bigint
+  insuranceInterest: bigint
+}
+export interface Claims {
+  lender: string
+  claims: TotalClaims
+}
+interface StateParams {
+  reserves: Tokens
+  totalLiquidity: bigint
+  totalClaims: Claims
+  totalDebtCreated: bigint
+  x: bigint
+  y: bigint
+  z: bigint
+  feeStored: bigint
+}
 
-export function getLiquidityTotal1(assetIn: bigint): bigint {
+export function getLiquidity1(assetIn: bigint): bigint {
   let liquidityTotal = assetIn
   liquidityTotal <<= 16n
   return liquidityTotal
 }
 
-export function getLiquidityTotal2(
+export function getLiquidity2(
   state: State,
   assetIn: bigint,
   interestIncrease: bigint,
   cdpIncrease: bigint
-): bigint {
-  const liquidityTotal = min(
-    mulDiv(state.totalLiquidity, assetIn, state.asset),
-    mulDiv(state.totalLiquidity, interestIncrease, state.interest),
-    mulDiv(state.totalLiquidity, cdpIncrease, state.cdp)
-  )
-  return liquidityTotal
+): bigint | string{
+  const fromX = mulDiv(state.totalLiquidity,assetIn,state.asset)
+  const fromY = mulDiv(state.totalLiquidity,interestIncrease,state.interest)
+  const fromZ = mulDiv(state.totalLiquidity,cdpIncrease,state.cdp)
+
+  if(fromY> fromX) return 'E214'
+  if(fromZ>fromX) return 'E215'
+
+  return (fromY <= fromZ ? fromY : fromZ)
 }
 
-export function getLiquidity(maturity: bigint, liquidityTotal: bigint, protocolFee: bigint, now: bigint): bigint {
-  let denominator = maturity
-  denominator -= now
-  denominator *= BigInt(protocolFee)
-  denominator += 0x10000000000n
-  const liquidityOut = mulDiv(liquidityTotal, 0x10000000000n, denominator)
-  return liquidityOut
+
+
+export function getFee(
+  state: State,
+  liquidityOut: bigint
+){
+  return (state.totalLiquidity == 0n ? 0n : mulDivUp(state.feeStored,liquidityOut,state.totalLiquidity))
 }
 
 export function min(w: bigint, x: bigint, y: bigint): bigint {
@@ -67,9 +94,9 @@ export function getCollateral(
 }
 
 export default {
-  getLiquidityTotal1,
-  getLiquidityTotal2,
-  getLiquidity,
+  getLiquidity1,
+  getLiquidity2,
   getDebt,
   getCollateral,
+  getFee
 }

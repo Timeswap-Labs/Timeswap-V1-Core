@@ -21,10 +21,10 @@ describe('Withdraw', () => {
   })
 
   it('', async () => {
-    tests = await TestCases.lossWithdraw()
+    tests = await TestCases.mint()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
-      console.log(`Checking for Loss Withdraw Test Case ${i + 1}`)
+      console.log("\n", `Checking for Loss Withdraw Test Case ${i + 1}`)
       await ethers.provider.send('evm_revert', [snapshot])
       await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
@@ -34,14 +34,7 @@ describe('Withdraw', () => {
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-      const mintParameters: MintParams = {
-        assetIn: testCase.assetIn,
-        collateralIn: testCase.collateralIn,
-        interestIncrease: testCase.interestIncrease,
-        cdpIncrease: testCase.cdpIncrease,
-        maturity: updatedMaturity,
-        currentTimeStamp: testCase.currentTimeStamp,
-      }
+      const mintParameters: MintParams = testCase;
       let mint: any
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters)
@@ -51,37 +44,27 @@ describe('Withdraw', () => {
         console.log('Case ignored due to wrong minting parameters')
         continue
       }
-      const lendParams: LendParams = {
-        assetIn: testCase.lendAssetIn,
-        interestDecrease: testCase.lendInterestDecrease,
-        cdpDecrease: testCase.lendCdpDecrease,
-      }
-      let lendData: any
+      const lendParam = await TestCases.lend(await pair.state())
       let lendTxData: any
+      let lendData;
       try {
-        lendTxData = await lendFixture(mint, signers[0], lendParams)
+        lendTxData = await lendFixture(mint, signers[0], lendParam)
+        // console.log(lendParam);
         pair = lendTxData.pair
         pairSim = lendTxData.pairSim
-        lendData = {
-          claimsIn: {
-            bond: lendTxData.lendData.bond,
-            insurance: lendTxData.lendData.insurance,
-          },
-        }
+        lendData = lendTxData.lendData
       } catch (error) {
+        // console.log("lending error: ", (error as TypeError).message);
         console.log('Case ignored due to error in lending')
         continue
       }
-      const borrowParams: BorrowParams = {
-        assetOut: testCase.borrowAssetOut,
-        collateralIn: testCase.borrowCollateralIn,
-        interestIncrease: testCase.borrowInterestIncrease,
-        cdpIncrease: testCase.borrowCdpIncrease,
-      }
+      const borrowParams= await TestCases.borrow(await pair.state(), await pair.totalReserves());
       let returnObj: any
       try {
         returnObj = await borrowFixture(lendTxData, signers[0], borrowParams)
+        // console.log(borrowParams);
       } catch (error) {
+        // console.log("borrowing error: ", error);
         console.log('Case ignored due to error in borrowing')
         continue
       }
@@ -89,6 +72,7 @@ describe('Withdraw', () => {
       let withdraw
       try {
         withdraw = await withdrawFixture(returnObj, signers[0], lendData)
+        // console.log("withdraw done");
         pair = withdraw.pair
         pairSim = withdraw.pairSim
       } catch (error) {
@@ -127,15 +111,15 @@ describe('Withdraw', () => {
       console.log('Should have correct total claims')
       const claims = await pair.totalClaims()
       const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-      expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      expect(claims.bondPrincipal).to.equalBigInt(claimsSim.bondPrincipal)
+      expect(claims.insurancePrincipal).to.equalBigInt(claimsSim.insurancePrincipal)
 
       console.log('Should have correct claims of')
 
       const claimsOf = await pair.claimsOf(signers[0])
       const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-      expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-      expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+      expect(claimsOf.bondPrincipal).to.equalBigInt(claimsOfSim.bondPrincipal)
+      expect(claimsOf.insurancePrincipal).to.equalBigInt(claimsOfSim.insurancePrincipal)
 
       console.log('Should have correct dues of')
       const duesOf = (await pair.dueOf(0n)).concat(await pair.dueOf(1n))

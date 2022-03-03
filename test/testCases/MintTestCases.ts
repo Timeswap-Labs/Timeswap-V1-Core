@@ -4,7 +4,7 @@ import { now, pseudoRandomBigUint } from '../shared/Helper'
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1)
 const MaxUint105 = BigNumber.from(2).pow(105).sub(1)
 
-const count = 10
+const count = 20
 export interface MintParams {
   assetIn: bigint
   collateralIn: bigint
@@ -47,7 +47,7 @@ export async function mintTestCases(): Promise<MintParams[]> {
       return {
         assetIn: pseudoRandomBigUint(MaxUint112),
         collateralIn: pseudoRandomBigUint(MaxUint112),
-        interestIncrease: pseudoRandomBigUint(MaxUint112) / 10n,
+        interestIncrease: pseudoRandomBigUint(MaxUint112),
         cdpIncrease: pseudoRandomBigUint(MaxUint105),
         maturity: nt + 31556952n,
         currentTimeStamp: nt,

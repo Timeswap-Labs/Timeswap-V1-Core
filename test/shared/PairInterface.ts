@@ -3,8 +3,10 @@ export interface Tokens {
   collateral: bigint
 }
 export interface TotalClaims {
-  bond: bigint
-  insurance: bigint
+  bondPrincipal: bigint
+  bondInterest: bigint
+  insurancePrincipal: bigint
+  insuranceInterest: bigint
 }
 
 export interface Due {
@@ -39,6 +41,7 @@ export interface State {
   asset: bigint
   interest: bigint
   cdp: bigint
+  feeStored: bigint
 }
 export interface Pool {
   state: State
@@ -62,7 +65,7 @@ export function tokensDefault(): Tokens {
 }
 
 export function totalClaimsDefault(): TotalClaims {
-  return { bond: 0n, insurance: 0n }
+  return { bondPrincipal: 0n, bondInterest: 0n, insurancePrincipal: 0n , insuranceInterest: 0n}
 }
 
 export function dueDefault(): Due {
@@ -78,6 +81,7 @@ export function stateDefault(): State {
     asset: 0n,
     interest: 0n,
     cdp: 0n,
+    feeStored: 0n
   }
 }
 

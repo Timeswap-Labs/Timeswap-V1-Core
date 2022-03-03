@@ -11,7 +11,7 @@ interface ITimeswapMintCallback {
     /// @param collateralIn The amount of collateral tokens owed due to the pool for the min transaction.
     /// @param data Any data passed through by the caller via the ITimeswapPair#mint call
     function timeswapMintCallback(
-        uint112 assetIn,
+        uint256 assetIn,
         uint112 collateralIn,
         bytes calldata data
     ) external;

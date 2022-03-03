@@ -31,7 +31,7 @@ library FullMath {
 
             // Handle non-overflow cases, 256 by 256 division
             if (prod1 == 0) {
-                require(denominator > 0);
+                require(denominator != 0);
                 assembly {
                     result := div(prod0, denominator)
                 }
@@ -121,6 +121,6 @@ library FullMath {
         uint256 denominator
     ) internal pure returns (uint256 result) {
         result = mulDiv(a, b, denominator);
-        if (mulmod(a, b, denominator) > 0) result++;
+        if (mulmod(a, b, denominator) != 0) result++;
     }
 }

@@ -21,7 +21,7 @@ describe('Lend', () => {
   })
 
   it('', async () => {
-    tests = await TestCases.lend()
+    tests = await TestCases.mint()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
       console.log('\n', `Checking for Lend Test Case ${i + 1}`)
@@ -51,17 +51,14 @@ describe('Lend', () => {
         console.log(`Ignored due to wrong minting parameters`)
         continue
       }
-      const lendParams: LendParams = {
-        assetIn: testCase.lendAssetIn,
-        interestDecrease: testCase.lendInterestDecrease,
-        cdpDecrease: testCase.lendCdpDecrease,
-      }
+      const lendParam = await TestCases.lend(await pair.state())
       let lendTxData: any
       try {
-        lendTxData = await lendFixture(mint, signers[0], lendParams)
+        lendTxData = await lendFixture(mint, signers[0], lendParam)
         pair = lendTxData.pair
         pairSim = lendTxData.pairSim
-      } catch {
+      } catch (error) {
+        // console.log((error as TypeError).message);
         console.log(`Lending transaction expected to revert; check for failure`)
         try {
           await expect(
@@ -71,9 +68,9 @@ describe('Lend', () => {
                 pair.maturity,
                 signers[0].address,
                 signers[0].address,
-                lendParams.assetIn,
-                lendParams.interestDecrease,
-                lendParams.cdpDecrease
+                lendParam.lendAssetIn,
+                lendParam.lendInterestDecrease,
+                lendParam.lendCdpDecrease
               )
           ).to.be.reverted
           console.log('Transaction reverted')
@@ -118,14 +115,14 @@ describe('Lend', () => {
       console.log('Should have correct total claims')
       const claims = await pair.totalClaims()
       const claimsSim = pairSim.getPool(updatedMaturity).state.totalClaims
-      expect(claims.bond).to.equalBigInt(claimsSim.bond)
-      expect(claims.insurance).to.equalBigInt(claimsSim.insurance)
+      expect(claims.bondPrincipal).to.equalBigInt(claimsSim.bondPrincipal)
+      expect(claims.insurancePrincipal).to.equalBigInt(claimsSim.insurancePrincipal)
 
       console.log('Should have correct claims of')
       const claimsOf = await pair.claimsOf(signers[0])
       const claimsOfSim = pairSim.getClaims(pairSim.getPool(updatedMaturity), signers[0].address)
-      expect(claimsOf.bond).to.equalBigInt(claimsOfSim.bond)
-      expect(claimsOf.insurance).to.equalBigInt(claimsOfSim.insurance)
+      expect(claimsOf.bondPrincipal).to.equalBigInt(claimsOfSim.bondPrincipal)
+      expect(claimsOf.insurancePrincipal).to.equalBigInt(claimsOfSim.insurancePrincipal)
 
       console.log('Should have correct dues of')
       const duesOf = await pair.dueOf(0n)

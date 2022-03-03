@@ -31,12 +31,12 @@ interface IFactory {
     /// @return The address of the pending owner.
     function pendingOwner() external view returns (address);
 
-    /// @dev Return the fee earned by liquidity providers.
-    /// @return The fee following UQ0.16 format.
+    /// @dev Return the fee per second earned by liquidity providers.
+    /// @return The fee following UQ0.40 format.
     function fee() external view returns (uint16);
 
     /// @dev Return the protocol fee per second earned by the owner.
-    /// @return The protocol fee per seconde following UQ0.40 format.
+    /// @return The protocol fee per second following UQ0.40 format.
     function protocolFee() external view returns (uint16);
 
     /// @dev Returns the address of a deployed pair.
@@ -60,6 +60,7 @@ interface IFactory {
     function setOwner(address _pendingOwner) external;
 
     /// @dev Set the pending owner as the owner of the factory.
+    /// @dev Reset the pending owner to zero.
     /// @dev Can only be called by the pending owner.
     function acceptOwner() external;
 }
