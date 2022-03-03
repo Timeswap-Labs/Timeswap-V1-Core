@@ -74,7 +74,7 @@ describe('MintMultiple', () => {
         pairSim = mint2.pairSim
       } catch (error) {
         console.log(`Case number: ${i + 1} expected to fail at second mint`)
-        console.log((error as TypeError).message);
+        console.log((error as TypeError).message)
         await expect(
           pair.pairContractCallee
             .connect(signers[0])

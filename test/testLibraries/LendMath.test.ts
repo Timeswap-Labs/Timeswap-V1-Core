@@ -41,7 +41,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 0n,
-  totalClaims: { bondPrincipal: 1n, bondInterest: 9n,insurancePrincipal: 1n, insuranceInterest:  9n},
+  totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
   totalDebtCreated: 0n,
   x: 100n,
   y: 100n,
@@ -79,8 +79,13 @@ describe('LendMath', () => {
     expect(returnValue1).to.equal(returnValue2)
   })
   it('GetBondInterest should return the expected bondOut', async () => {
-    const returnValue1 = await lendMathTestContract.getBondInterest(maturity,  interestDecrease)
-    let returnValue2 = await LendMath.getBondInterest(BigInt(maturity.toString()), assetIn, interestDecrease, await now())
+    const returnValue1 = await lendMathTestContract.getBondInterest(maturity, interestDecrease)
+    let returnValue2 = await LendMath.getBondInterest(
+      BigInt(maturity.toString()),
+      assetIn,
+      interestDecrease,
+      await now()
+    )
     expect(returnValue1).to.be.equalBigInt(returnValue2)
   })
 

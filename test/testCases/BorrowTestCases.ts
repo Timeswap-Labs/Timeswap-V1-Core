@@ -27,15 +27,14 @@ export interface BorrowParams {
 }
 
 export async function borrow(state: ConstantProduct, reserves: Tokens): Promise<any> {
-  const assetOut = await pseudoRandomBigUint(BigNumber.from(state.asset));
-  const borrowCollateralIn = await pseudoRandomBigUint(BigNumber.from(state.asset));
-  const interestIncrease = await pseudoRandomBigUint(BigNumber.from(divUp((assetOut*state.interest), reserves.asset)));
-  const cdpIncrease = await pseudoRandomBigUint(BigNumber.from(divUp((assetOut*state.cdp),reserves.asset)));
-  return ({
+  const assetOut = await pseudoRandomBigUint(BigNumber.from(state.asset))
+  const borrowCollateralIn = await pseudoRandomBigUint(BigNumber.from(state.asset))
+  const interestIncrease = await pseudoRandomBigUint(BigNumber.from(divUp(assetOut * state.interest, reserves.asset)))
+  const cdpIncrease = await pseudoRandomBigUint(BigNumber.from(divUp(assetOut * state.cdp, reserves.asset)))
+  return {
     assetOut,
     borrowCollateralIn,
     interestIncrease,
-    cdpIncrease
-  })
+    cdpIncrease,
+  }
 }
-

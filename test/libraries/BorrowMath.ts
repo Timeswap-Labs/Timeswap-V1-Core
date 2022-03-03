@@ -1,29 +1,22 @@
 import { doesNotMatch } from 'assert'
 import { checkConstantProduct } from '../libraries/ConstantProduct'
 import { divUp, shiftRightUp } from '../libraries/Math'
-export function getFees(
-  maturity: bigint,
-  assetOut: bigint,
-  fee: bigint,
-  protocolFee: bigint,
-  now: bigint
-  ){
-    let duration = maturity - now
+export function getFees(maturity: bigint, assetOut: bigint, fee: bigint, protocolFee: bigint, now: bigint) {
+  let duration = maturity - now
 
-    let denominator = (duration * fee) + 0x10000000000n
+  let denominator = duration * fee + 0x10000000000n
 
-    let adjusted = assetOut*0x10000000000n/denominator
-    let feeStoredIncrease = assetOut - adjusted
+  let adjusted = (assetOut * 0x10000000000n) / denominator
+  let feeStoredIncrease = assetOut - adjusted
 
-    denominator = (duration*protocolFee)+0x10000000000n
-    adjusted = adjusted*0x10000000000n/denominator
-    let protocolFeeStoredIncrease = (assetOut-adjusted)-feeStoredIncrease
-    return {
-      feeStoredIncrease: feeStoredIncrease,
-      protocolFeeStoredIncrease: protocolFeeStoredIncrease
-    }
-
+  denominator = duration * protocolFee + 0x10000000000n
+  adjusted = (adjusted * 0x10000000000n) / denominator
+  let protocolFeeStoredIncrease = assetOut - adjusted - feeStoredIncrease
+  return {
+    feeStoredIncrease: feeStoredIncrease,
+    protocolFeeStoredIncrease: protocolFeeStoredIncrease,
   }
+}
 export function check(
   state: {
     asset: bigint
@@ -32,26 +25,25 @@ export function check(
   },
   assetOut: bigint,
   interestIncrease: bigint,
-  cdpIncrease: bigint,
+  cdpIncrease: bigint
 ): boolean | string {
   const xReserve = state.asset - assetOut
   const yReserve = state.interest + interestIncrease
   const zReserve = state.cdp + cdpIncrease
-  if(!checkConstantProduct(state,xReserve,yReserve,zReserve)) return "E301"
+  if (!checkConstantProduct(state, xReserve, yReserve, zReserve)) return 'E301'
 
   let yMax = assetOut
   yMax *= state.interest
   yMax = divUp(yMax, xReserve)
-  if(interestIncrease > yMax) return 'E214'
+  if (interestIncrease > yMax) return 'E214'
 
   let zMax = assetOut
   zMax *= state.cdp
-  zMax = divUp(zMax,xReserve)
-  if(cdpIncrease > zMax) return 'E215'
+  zMax = divUp(zMax, xReserve)
+  if (cdpIncrease > zMax) return 'E215'
 
   return true
 }
-
 
 export function adjust(increase: bigint, reserve: bigint, feeBase: bigint): bigint {
   let adjusted = reserve

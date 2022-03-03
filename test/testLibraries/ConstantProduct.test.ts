@@ -35,7 +35,7 @@ interface StateTestParams {
 let state: StateParams = {
   reserves: { asset: 10n, collateral: 10n },
   totalLiquidity: 10n,
-  totalClaims: { bondPrincipal: 1n, bondInterest: 9n,insurancePrincipal: 1n, insuranceInterest:  9n},
+  totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
   totalDebtCreated: 10n,
   x: 100n,
   y: 100n,
@@ -72,7 +72,7 @@ describe('constantProduct', () => {
     state = {
       reserves: { asset: 100n, collateral: 100n },
       totalLiquidity: 10n,
-      totalClaims: { bondPrincipal: 1n, bondInterest: 9n,insurancePrincipal: 1n, insuranceInterest:  9n },
+      totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
       totalDebtCreated: 10n,
       x: 20n,
       y: 10n,

@@ -1,7 +1,7 @@
 import { mulDiv, mulDivUp } from '../libraries/FullMath'
 import { State } from '../shared/PairInterface'
 import { divUp, shiftRightUp } from './Math'
-import { now as blockTimestamp } from '../shared/Helper';
+import { now as blockTimestamp } from '../shared/Helper'
 export interface Tokens {
   asset: bigint
   collateral: bigint
@@ -38,24 +38,19 @@ export function getLiquidity2(
   assetIn: bigint,
   interestIncrease: bigint,
   cdpIncrease: bigint
-): bigint | string{
-  const fromX = mulDiv(state.totalLiquidity,assetIn,state.asset)
-  const fromY = mulDiv(state.totalLiquidity,interestIncrease,state.interest)
-  const fromZ = mulDiv(state.totalLiquidity,cdpIncrease,state.cdp)
+): bigint | string {
+  const fromX = mulDiv(state.totalLiquidity, assetIn, state.asset)
+  const fromY = mulDiv(state.totalLiquidity, interestIncrease, state.interest)
+  const fromZ = mulDiv(state.totalLiquidity, cdpIncrease, state.cdp)
 
-  if(fromY> fromX) return 'E214'
-  if(fromZ>fromX) return 'E215'
+  if (fromY > fromX) return 'E214'
+  if (fromZ > fromX) return 'E215'
 
-  return (fromY <= fromZ ? fromY : fromZ)
+  return fromY <= fromZ ? fromY : fromZ
 }
 
-
-
-export function getFee(
-  state: State,
-  liquidityOut: bigint
-){
-  return (state.totalLiquidity == 0n ? 0n : mulDivUp(state.feeStored,liquidityOut,state.totalLiquidity))
+export function getFee(state: State, liquidityOut: bigint) {
+  return state.totalLiquidity == 0n ? 0n : mulDivUp(state.feeStored, liquidityOut, state.totalLiquidity)
 }
 
 export function min(w: bigint, x: bigint, y: bigint): bigint {
@@ -98,5 +93,5 @@ export default {
   getLiquidity2,
   getDebt,
   getCollateral,
-  getFee
+  getFee,
 }

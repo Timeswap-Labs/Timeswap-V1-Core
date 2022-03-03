@@ -65,7 +65,7 @@ export function tokensDefault(): Tokens {
 }
 
 export function totalClaimsDefault(): TotalClaims {
-  return { bondPrincipal: 0n, bondInterest: 0n, insurancePrincipal: 0n , insuranceInterest: 0n}
+  return { bondPrincipal: 0n, bondInterest: 0n, insurancePrincipal: 0n, insuranceInterest: 0n }
 }
 
 export function dueDefault(): Due {
@@ -81,7 +81,7 @@ export function stateDefault(): State {
     asset: 0n,
     interest: 0n,
     cdp: 0n,
-    feeStored: 0n
+    feeStored: 0n,
   }
 }
 

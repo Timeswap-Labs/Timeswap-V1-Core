@@ -51,10 +51,10 @@ describe('Borrow', () => {
         console.log(`Ignored due to wrong miniting parameters`)
         continue
       }
-      const stateAfterMint = await pair.state();
-      const reservesAfterMint = await pair.totalReserves();
-      const borrowParams= await TestCases.borrow(stateAfterMint, reservesAfterMint);
-      let error;
+      const stateAfterMint = await pair.state()
+      const reservesAfterMint = await pair.totalReserves()
+      const borrowParams = await TestCases.borrow(stateAfterMint, reservesAfterMint)
+      let error
       try {
         const borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
         pair = borrowTxData.pair
@@ -112,12 +112,12 @@ describe('Borrow', () => {
           expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
           expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         }
-        continue;
+        continue
       } catch (borrowFixtureError) {
         error = borrowFixtureError
         console.log(`Borrow Test Case number: ${i + 1} expected to revert`)
       }
-      try{
+      try {
         await expect(
           pair.pairContractCallee
             .connect(signers[0])
@@ -130,10 +130,9 @@ describe('Borrow', () => {
               borrowParams.cdpIncrease
             )
         ).to.be.reverted
-        console.log('Transaction Reverted');
-        continue;
-      }
-      catch (err) {
+        console.log('Transaction Reverted')
+        continue
+      } catch (err) {
         console.log(`Borrowing Tx with the following params did not revert (expected revert)`)
         console.log(testCase)
         expect.fail()

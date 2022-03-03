@@ -3,7 +3,7 @@ import { State, totalClaimsDefault } from '../shared/PairInterface'
 import { divUp } from './Math'
 
 export function getAsset(state: State, liquidityIn: bigint): bigint {
-  let totalBond = state.totalClaims.bondPrincipal +state.totalClaims.bondInterest
+  let totalBond = state.totalClaims.bondPrincipal + state.totalClaims.bondInterest
   if (state.reserves.asset <= totalBond) return 0n
   let _assetOut = state.reserves.asset
   _assetOut -= totalBond
@@ -29,12 +29,12 @@ export function getCollateral(state: State, liquidityIn: bigint): bigint {
   _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
   return _collateralOut
 }
-export function getFee(state: State, liquidityIn: bigint){
-  return mulDiv(state.feeStored,liquidityIn,state.totalLiquidity)
+export function getFee(state: State, liquidityIn: bigint) {
+  return mulDiv(state.feeStored, liquidityIn, state.totalLiquidity)
 }
 
 export default {
   getAsset,
   getCollateral,
-  getFee
+  getFee,
 }

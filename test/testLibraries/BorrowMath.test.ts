@@ -38,7 +38,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 0n,
-  totalClaims: { bondPrincipal: 0n, bondInterest: 0n,insurancePrincipal: 0n, insuranceInterest: 0n },
+  totalClaims: { bondPrincipal: 0n, bondInterest: 0n, insurancePrincipal: 0n, insuranceInterest: 0n },
   totalDebtCreated: 0n,
   x: 5000n,
   y: 10000n,
@@ -51,8 +51,7 @@ const stateTest: StateTestParams = {
   cdp: 10000n,
 }
 
-let 
-borrowMathTestContract: BorrowMathTest
+let borrowMathTestContract: BorrowMathTest
 let maturity: BigNumberish
 
 const assetOut: bigint = 10n

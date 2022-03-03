@@ -25,7 +25,7 @@ export default {
   },
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true
+      allowUnlimitedContractSize: true,
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${process.env['INFURA_PROJECT_ID']}`,

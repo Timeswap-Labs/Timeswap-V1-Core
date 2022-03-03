@@ -14,15 +14,13 @@ export async function factoryInit(
   ownerAddress: Address = signers[10].address,
   fee: BigInt = constants.FEE,
   protocolFee: BigInt = constants.PROTOCOL_FEE,
-  timeswapMathAddress: Address,
+  timeswapMathAddress: Address
 ): Promise<Factory> {
-  const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory', 
-    {
-      libraries: {
-        TimeswapMath: timeswapMathAddress
-      }
-    }
-  )
+  const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory', {
+    libraries: {
+      TimeswapMath: timeswapMathAddress,
+    },
+  })
   const factory = (await factoryContractFactory.deploy(ownerAddress, fee, protocolFee)) as Factory
   await factory.deployed()
   return factory

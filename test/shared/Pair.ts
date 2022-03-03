@@ -10,7 +10,6 @@ import { factoryInit } from './Factory'
 import { ConstantProduct, Due, Tokens, TotalClaims } from './PairInterface'
 import { now } from '../shared/Helper'
 
-
 export class Pair {
   constructor(
     public pairContractCallee: PairContractCallee,
@@ -52,13 +51,28 @@ export class Pair {
   }
 
   async totalClaims(): Promise<TotalClaims> {
-    const { bondPrincipal, bondInterest, insurancePrincipal, insuranceInterest } = await this.pairContract.totalClaims(this.maturity)
-    return { bondPrincipal: BigInt(bondPrincipal.toString()), bondInterest:BigInt(bondInterest.toString()), insurancePrincipal: BigInt(insurancePrincipal.toString()), insuranceInterest: BigInt(insuranceInterest.toString()) }
+    const { bondPrincipal, bondInterest, insurancePrincipal, insuranceInterest } = await this.pairContract.totalClaims(
+      this.maturity
+    )
+    return {
+      bondPrincipal: BigInt(bondPrincipal.toString()),
+      bondInterest: BigInt(bondInterest.toString()),
+      insurancePrincipal: BigInt(insurancePrincipal.toString()),
+      insuranceInterest: BigInt(insuranceInterest.toString()),
+    }
   }
 
   async claimsOf(signerWithAddress: SignerWithAddress): Promise<TotalClaims> {
-    const { bondPrincipal, bondInterest, insurancePrincipal, insuranceInterest  } = await this.pairContract.claimsOf(this.maturity, signerWithAddress.address)
-    return { bondPrincipal: BigInt(bondPrincipal.toString()), bondInterest:BigInt(bondInterest.toString()), insurancePrincipal: BigInt(insurancePrincipal.toString()), insuranceInterest: BigInt(insuranceInterest.toString())  }
+    const { bondPrincipal, bondInterest, insurancePrincipal, insuranceInterest } = await this.pairContract.claimsOf(
+      this.maturity,
+      signerWithAddress.address
+    )
+    return {
+      bondPrincipal: BigInt(bondPrincipal.toString()),
+      bondInterest: BigInt(bondInterest.toString()),
+      insurancePrincipal: BigInt(insurancePrincipal.toString()),
+      insuranceInterest: BigInt(insuranceInterest.toString()),
+    }
   }
 
   async totalDebtCreated(): Promise<bigint> {
@@ -100,11 +114,12 @@ export class PairSigner extends Pair {
   async burn(liquidityIn: bigint) {
     const txn = await this.pairContract
       .connect(this.signerWithAddress)
-      .burn(
-        {maturity: this.maturity,
+      .burn({
+        maturity: this.maturity,
         assetTo: this.signerWithAddress.address,
         collateralTo: this.signerWithAddress.address,
-        liquidityIn: liquidityIn} )
+        liquidityIn: liquidityIn,
+      })
     await txn.wait()
     return txn
   }
@@ -124,19 +139,18 @@ export class PairSigner extends Pair {
     return txn
   }
 
-  async withdraw(bondPrincipal: bigint,bondInterest:bigint, insurancePrincipal: bigint,insuranceInterest:bigint) {
-    const txn = await this.pairContract
-      .connect(this.signerWithAddress)
-      .withdraw({
-        maturity: this.maturity,
-        assetTo: this.signerWithAddress.address,
-        collateralTo: this.signerWithAddress.address,
-        claimsIn: {
+  async withdraw(bondPrincipal: bigint, bondInterest: bigint, insurancePrincipal: bigint, insuranceInterest: bigint) {
+    const txn = await this.pairContract.connect(this.signerWithAddress).withdraw({
+      maturity: this.maturity,
+      assetTo: this.signerWithAddress.address,
+      collateralTo: this.signerWithAddress.address,
+      claimsIn: {
         bondPrincipal: bondPrincipal,
         bondInterest: bondInterest,
         insurancePrincipal: insurancePrincipal,
         insuranceInterest: insuranceInterest,
-      }})
+      },
+    })
     await txn.wait()
     return txn
   }
@@ -170,15 +184,15 @@ export class PairSigner extends Pair {
 
 export async function pairInit(asset: TestToken, collateral: TestToken, maturity: bigint) {
   const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
-  const timeswapMathLibraryFactory = await ethers.getContractFactory('TimeswapMath');
-  const timeswapMathLibraryContract = timeswapMathLibraryFactory.deploy();
+  const timeswapMathLibraryFactory = await ethers.getContractFactory('TimeswapMath')
+  const timeswapMathLibraryContract = timeswapMathLibraryFactory.deploy()
   const timeswapMathAddress = (await timeswapMathLibraryContract).address
   const pairContractFactory = await ethers.getContractFactory('TimeswapPair', {
     libraries: {
-      TimeswapMath: timeswapMathAddress
-    }
+      TimeswapMath: timeswapMathAddress,
+    },
   })
-  const factory = await factoryInit(undefined, undefined,undefined, timeswapMathAddress);
+  const factory = await factoryInit(undefined, undefined, undefined, timeswapMathAddress)
   await factory.createPair(asset.address, collateral.address)
 
   const pairContract = pairContractFactory.attach(

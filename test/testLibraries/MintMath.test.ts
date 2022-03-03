@@ -46,7 +46,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 50n,
-  totalClaims: { bondPrincipal: 0n, bondInterest:0n,insuranceInterest: 0n, insurancePrincipal:0n },
+  totalClaims: { bondPrincipal: 0n, bondInterest: 0n, insuranceInterest: 0n, insurancePrincipal: 0n },
   totalDebtCreated: 0n,
   x: 100n,
   y: 10n,
@@ -56,7 +56,7 @@ const state: StateParams = {
 const stateTest: StateTestParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 50n,
-  totalClaims: { bondPrincipal: 0n, bondInterest:0n,insuranceInterest: 0n, insurancePrincipal:0n },
+  totalClaims: { bondPrincipal: 0n, bondInterest: 0n, insuranceInterest: 0n, insurancePrincipal: 0n },
   totalDebtCreated: 0n,
   asset: 100n,
   interest: 10n,
@@ -81,11 +81,8 @@ describe('MintMath', () => {
   })
 
   it('Getting LiquidityTotal for AssetIn', async () => {
-    expect(await MintMathTestContract.getLiquidity1(assetIn)).to.be.equalBigInt(
-      await MintMath.getLiquidity1(assetIn)
-    )
+    expect(await MintMathTestContract.getLiquidity1(assetIn)).to.be.equalBigInt(await MintMath.getLiquidity1(assetIn))
   })
-
 
   // it('Getting expected Liquidity', async () => {
 

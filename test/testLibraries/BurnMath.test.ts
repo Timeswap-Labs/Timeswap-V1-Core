@@ -39,7 +39,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 10n, collateral: 10n },
   totalLiquidity: 10n,
-  totalClaims: { bondPrincipal: 1n, bondInterest: 9n,insurancePrincipal: 1n, insuranceInterest:  9n},
+  totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
   totalDebtCreated: 10n,
   x: 100n,
   y: 100n,
@@ -49,7 +49,7 @@ const state: StateParams = {
 const stateTest: StateTestParams = {
   reserves: { asset: 10n, collateral: 10n },
   totalLiquidity: 10n,
-  totalClaims: { bondPrincipal: 1n,bondInterest: 9n, insurancePrincipal: 1n , insuranceInterest: 9n},
+  totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
   totalDebtCreated: 10n,
   asset: 100n,
   interest: 100n,

@@ -65,11 +65,11 @@ export async function mintFixture(fixture: Fixture, signer: SignerWithAddress, m
     throw Error('state of Pair and PairSim not same')
   }
   const { assetIn, collateralIn, interestIncrease, cdpIncrease, maturity, currentTimeStamp } = mintParams
-  const dueOutDebt = MintMath.getDebt(maturity, assetIn, interestIncrease, await now() + 1n)
+  const dueOutDebt = MintMath.getDebt(maturity, assetIn, interestIncrease, (await now()) + 1n)
   if (dueOutDebt > BigInt(MaxUint112.toString())) {
     throw Error('dueOut.debt > MaxUint112')
   }
-  const dueOutCollateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease, await now() + 1n)
+  const dueOutCollateral = MintMath.getCollateral(maturity, assetIn, interestIncrease, cdpIncrease, (await now()) + 1n)
   if (dueOutCollateral > BigInt(MaxUint112.toString())) {
     throw Error('dueOut.Collateral > MaxUint112')
   }
@@ -101,27 +101,18 @@ export async function lendFixture(fixture: Fixture, signer: SignerWithAddress, l
     (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
   if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
   //LendMath.check
-  let block;
+  let block
   try {
-    LendMath.check(await pair.state(), lendParam.lendAssetIn, lendParam.lendInterestDecrease, lendParam.lendCdpDecrease);
-    LendMath.getBondInterest(
-      pair.maturity,
-      lendParam.lendInterestDecrease,
-      await now(),
-    )
-    LendMath.getInsurancePrincipal(
-      pairContractState,
-      lendParam.lendAssetIn
-    )
-    LendMath.getInsuranceInterest(
-      pair.maturity,
-      lendParam.lendCdpDecrease,
-      await now()
-    )
-    const txn = await pair.upgrade(signer).lend(lendParam.lendAssetIn, lendParam.lendInterestDecrease, lendParam.lendCdpDecrease)
+    LendMath.check(await pair.state(), lendParam.lendAssetIn, lendParam.lendInterestDecrease, lendParam.lendCdpDecrease)
+    LendMath.getBondInterest(pair.maturity, lendParam.lendInterestDecrease, await now())
+    LendMath.getInsurancePrincipal(pairContractState, lendParam.lendAssetIn)
+    LendMath.getInsuranceInterest(pair.maturity, lendParam.lendCdpDecrease, await now())
+    const txn = await pair
+      .upgrade(signer)
+      .lend(lendParam.lendAssetIn, lendParam.lendInterestDecrease, lendParam.lendCdpDecrease)
     block = await getBlock(txn.blockHash!)
   } catch (error) {
-    throw error as TypeError;
+    throw error as TypeError
   }
   const lendData = pairSim.lend(
     pair.maturity,
@@ -156,15 +147,15 @@ export async function borrowFixture(
   const pairSimPool = pairSim.getPool(pair.maturity)
   const pairSimContractState = pairSimPool.state
   let k_pairSimContract = (pairSimContractState.asset * pairSimContractState.interest * pairSimContractState.cdp) << 32n
-  if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same');
+  if (k_pairContract != k_pairSimContract) throw Error('state of Pair and PairSim not same')
   const value: any = BorrowMath.check(
     pairContractState,
     borrowParams.assetOut,
     borrowParams.interestIncrease,
-    borrowParams.cdpIncrease,
+    borrowParams.cdpIncrease
   )
   if (value != true) {
-    throw value;
+    throw value
   }
 
   const dueOutDebt = BorrowMath.getDebt(
@@ -185,7 +176,7 @@ export async function borrowFixture(
     await now()
   )
   if (dueOutCollateral > BigInt(MaxUint112.toString())) {
-    throw Error("dueOut.collateral greater than Uint112")
+    throw Error('dueOut.collateral greater than Uint112')
   }
 
   const txn = await pair
@@ -237,16 +228,14 @@ export async function withdrawFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const txnWithdraw = await pair
     .upgrade(signer)
-    .withdraw(withdrawParams.bondPrincipal, withdrawParams.bondInterest, withdrawParams.insurancePrincipal, withdrawParams.insuranceInterest)
+    .withdraw(
+      withdrawParams.bondPrincipal,
+      withdrawParams.bondInterest,
+      withdrawParams.insurancePrincipal,
+      withdrawParams.insuranceInterest
+    )
   const blockWithdraw = await getBlock(txnWithdraw.blockHash!)
-  pairSim.withdraw(
-    pair.maturity,
-    signer.address,
-    signer.address,
-    withdrawParams,
-    signer.address,
-    blockWithdraw
-  )
+  pairSim.withdraw(pair.maturity, signer.address, signer.address, withdrawParams, signer.address, blockWithdraw)
   return { pair, pairSim, assetToken, collateralToken }
 }
 

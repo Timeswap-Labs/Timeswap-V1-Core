@@ -13,14 +13,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   })
 
-  
   await deploy('TimeswapFactory', {
     from: factoryDeployer,
     args: [factoryOwner, fee, protocolFee],
     log: true,
     libraries: {
-      TimeswapMath: TimeswapMath.address
-    }
+      TimeswapMath: TimeswapMath.address,
+    },
   })
 }
 export default func

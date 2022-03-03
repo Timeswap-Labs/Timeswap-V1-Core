@@ -22,7 +22,7 @@ describe('Mint', () => {
   before(async () => {
     snapshot = await ethers.provider.send('evm_snapshot', [])
   })
-  
+
   it('', async () => {
     tests = await TestCases.mint()
     for (let i = 0; i < tests.length; i++) {
@@ -50,7 +50,7 @@ describe('Mint', () => {
         mint = await mintFixture(constructor, signers[0], mintParams)
         console.log('\n', `Case number: ${i + 1} expected to succeed`)
       } catch (error) {
-        console.log(error);
+        console.log(error)
         console.log(`Case number: ${i + 1} expected to fail`)
         console.log('Transaction expected to revert')
         await expect(

@@ -23,7 +23,7 @@ describe('Loss Burn', () => {
     tests = await TestCases.mint()
     for (let i = 0; i < tests.length; i++) {
       let testCase: any = tests[i]
-      console.log("\n", `Checking for Burn Test Case ${i + 1}`)
+      console.log('\n', `Checking for Burn Test Case ${i + 1}`)
       await ethers.provider.send('evm_revert', [snapshot])
       await ethers.provider.send('evm_snapshot', [])
       signers = await ethers.getSigners()
@@ -33,7 +33,7 @@ describe('Loss Burn', () => {
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-      const mintParameters: MintParams = testCase;
+      const mintParameters: MintParams = testCase
       let mint: any
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters)
@@ -45,7 +45,7 @@ describe('Loss Burn', () => {
       }
       const lendParam = await TestCases.lend(await pair.state())
       let lendTxData: any
-      let lendData;
+      let lendData
       try {
         lendTxData = await lendFixture(mint, signers[0], lendParam)
         // console.log(lendParam);
@@ -57,7 +57,7 @@ describe('Loss Burn', () => {
         console.log('Case ignored due to error in lending')
         continue
       }
-      const borrowParams = await TestCases.borrow(await pair.state(), await pair.totalReserves());
+      const borrowParams = await TestCases.borrow(await pair.state(), await pair.totalReserves())
       let returnObj: any
       try {
         returnObj = await borrowFixture(lendTxData, signers[0], borrowParams)
@@ -74,8 +74,8 @@ describe('Loss Burn', () => {
         pair = burn.pair
         pairSim = burn.pairSim
       } catch (error) {
-        console.log('error in burning');
-        console.log(error);
+        console.log('error in burning')
+        console.log(error)
         continue
       }
       if (pair != undefined && pairSim != undefined) {

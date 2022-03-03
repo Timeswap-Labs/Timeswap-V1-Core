@@ -40,22 +40,22 @@ describe('Withdraw', () => {
       try {
         const mintParameters: MintParams = tests[i]
         mint = await mintFixture(constructor, signers[0], mintParameters)
-        pair = mint.pair;
-        pairSim = mint.pairSim;
+        pair = mint.pair
+        pairSim = mint.pairSim
       } catch (error) {
         erm = 'minting error'
         console.log(`Ignored due to wrong miniting parameters`)
         continue
       }
       let lendTxData
-      let lendData;
+      let lendData
       try {
-        const lendParam = await TestCases.lend(await pair.state())  
+        const lendParam = await TestCases.lend(await pair.state())
         lendTxData = await lendFixture(mint, signers[0], lendParam)
-        lendData = lendTxData.lendData;
+        lendData = lendTxData.lendData
       } catch (error) {
-        console.log("error in lending hence ignored: ", (error as TypeError).message);
-        continue;
+        console.log('error in lending hence ignored: ', (error as TypeError).message)
+        continue
       }
       await advanceTimeAndBlock(Number(updatedMaturity))
       const withdraw = await withdrawFixture(lendTxData, signers[0], lendData)

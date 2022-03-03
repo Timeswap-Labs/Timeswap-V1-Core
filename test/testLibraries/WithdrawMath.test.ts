@@ -40,7 +40,7 @@ interface StateTestParams {
 const state: StateParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 0n,
-  totalClaims: { bondPrincipal: 0n, bondInterest:0n,insuranceInterest: 0n, insurancePrincipal:0n  },
+  totalClaims: { bondPrincipal: 0n, bondInterest: 0n, insuranceInterest: 0n, insurancePrincipal: 0n },
   totalDebtCreated: 0n,
   x: 5000n,
   y: 10000n,
@@ -50,7 +50,7 @@ const state: StateParams = {
 const stateTest: StateTestParams = {
   reserves: { asset: 0n, collateral: 0n },
   totalLiquidity: 0n,
-  totalClaims: { bondPrincipal: 0n, bondInterest:0n,insuranceInterest: 0n, insurancePrincipal:0n },
+  totalClaims: { bondPrincipal: 0n, bondInterest: 0n, insuranceInterest: 0n, insurancePrincipal: 0n },
   totalDebtCreated: 0n,
   asset: 5000n,
   interest: 10000n,
@@ -72,14 +72,14 @@ describe('Withdraw Math', () => {
   })
 
   it('getAsset should return the expected asset out', async () => {
-    const returnValue1 = await WithdrawMathTestContract.getAsset(state, bondPrincipal,bondInterest)
-    let returnValue2 = await WithdrawMath.getAsset(stateTest, bondPrincipal,bondInterest)
+    const returnValue1 = await WithdrawMathTestContract.getAsset(state, bondPrincipal, bondInterest)
+    let returnValue2 = await WithdrawMath.getAsset(stateTest, bondPrincipal, bondInterest)
     expect(returnValue1).to.equalBigInt(returnValue2)
   })
 
   it('getCollateral should return the expected collateral out', async () => {
-    const returnValue1 = await WithdrawMathTestContract.getCollateral(state, insurancePrincipal,insuranceInterest)
-    let returnValue2 = await WithdrawMath.getCollateral(stateTest, insurancePrincipal,insuranceInterest)
+    const returnValue1 = await WithdrawMathTestContract.getCollateral(state, insurancePrincipal, insuranceInterest)
+    let returnValue2 = await WithdrawMath.getCollateral(stateTest, insurancePrincipal, insuranceInterest)
     expect(returnValue1).to.equalBigInt(returnValue2)
   })
 })
