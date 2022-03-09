@@ -222,7 +222,7 @@ contract TimeswapPair is IPair {
         require(param.liquidityIn != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity > 0, 'E206');
+        require(pool.state.totalLiquidity != 0, 'E206');
 
         uint128 _assetOut;
         uint256 feeOut;
