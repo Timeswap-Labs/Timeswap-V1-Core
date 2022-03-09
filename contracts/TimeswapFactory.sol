@@ -58,7 +58,7 @@ contract TimeswapFactory is IFactory {
     }
 
     /// @inheritdoc IFactory
-    function setOwner(address _pendingOwner) external override {
+    function setPendingOwner(address _pendingOwner) external override {
         require(msg.sender == owner, 'E102');
         require(_pendingOwner != address(0), 'E101');
         pendingOwner = _pendingOwner;
