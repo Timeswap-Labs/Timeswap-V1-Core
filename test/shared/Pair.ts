@@ -112,14 +112,12 @@ export class PairSigner extends Pair {
   }
 
   async burn(liquidityIn: bigint) {
-    const txn = await this.pairContract
-      .connect(this.signerWithAddress)
-      .burn({
-        maturity: this.maturity,
-        assetTo: this.signerWithAddress.address,
-        collateralTo: this.signerWithAddress.address,
-        liquidityIn: liquidityIn,
-      })
+    const txn = await this.pairContract.connect(this.signerWithAddress).burn({
+      maturity: this.maturity,
+      assetTo: this.signerWithAddress.address,
+      collateralTo: this.signerWithAddress.address,
+      liquidityIn: liquidityIn,
+    })
     await txn.wait()
     return txn
   }
