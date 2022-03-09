@@ -46,7 +46,8 @@ contract TimeswapFactory is IFactory {
     /// @inheritdoc IFactory
     function createPair(IERC20 asset, IERC20 collateral) external override returns (IPair pair) {
         require(asset != collateral, 'E103');
-        require(asset != IERC20(address(0)) && collateral != IERC20(address(0)), 'E101');
+        require(asset != IERC20(address(0)), 'E101');
+        require(collateral != IERC20(address(0)), 'E101');
         require(getPair[asset][collateral] == IPair(address(0)), 'E104');
 
         pair = new TimeswapPair{salt: keccak256(abi.encode(asset, collateral))}(asset, collateral, fee, protocolFee);
