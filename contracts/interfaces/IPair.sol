@@ -289,12 +289,14 @@ interface IPair {
     function collateral() external view returns (IERC20);
 
     //// @dev Return the fee per second earned by liquidity providers.
+    /// @dev Must be downcasted to uint16.
     //// @return The transaction fee following the UQ0.40 format.
-    function fee() external view returns (uint16);
+    function fee() external view returns (uint256);
 
     /// @dev Return the protocol fee per second earned by the owner.
+    /// @dev Must be downcasted to uint16.
     /// @return The protocol fee per second following the UQ0.40 format.
-    function protocolFee() external view returns (uint16);
+    function protocolFee() external view returns (uint256);
 
     /// @dev Return the fee stored of the Pool given maturity.
     /// @param maturity The unix timestamp maturity of the Pool.

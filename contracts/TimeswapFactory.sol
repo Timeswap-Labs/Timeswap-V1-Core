@@ -18,9 +18,9 @@ contract TimeswapFactory is IFactory {
     /// @inheritdoc IFactory
     address public override pendingOwner;
     /// @inheritdoc IFactory
-    uint16 public immutable override fee;
+    uint256 public immutable override fee;
     /// @inheritdoc IFactory
-    uint16 public immutable override protocolFee;
+    uint256 public immutable override protocolFee;
 
     /// @inheritdoc IFactory
     mapping(IERC20 => mapping(IERC20 => IPair)) public override getPair;
@@ -52,7 +52,7 @@ contract TimeswapFactory is IFactory {
         require(collateral != IERC20(address(0)), 'E101');
         require(getPair[asset][collateral] == IPair(address(0)), 'E104');
 
-        pair = new TimeswapPair{salt: keccak256(abi.encode(asset, collateral))}(asset, collateral, fee, protocolFee);
+        pair = new TimeswapPair{salt: keccak256(abi.encode(asset, collateral))}(asset, collateral, uint16(fee), uint16(protocolFee));
 
         getPair[asset][collateral] = pair;
 

@@ -28,9 +28,9 @@ contract TimeswapPair is IPair, ReentrancyGuard {
     /// @inheritdoc IPair
     IERC20 public immutable override collateral;
     /// @inheritdoc IPair
-    uint16 public immutable override fee;
+    uint256 public immutable override fee;
     /// @inheritdoc IPair
-    uint16 public immutable override protocolFee;
+    uint256 public immutable override protocolFee;
 
     /// @inheritdoc IPair
     uint256 public override protocolFeeStored;
