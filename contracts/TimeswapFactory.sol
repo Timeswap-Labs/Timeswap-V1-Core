@@ -36,6 +36,8 @@ contract TimeswapFactory is IFactory {
         uint16 _protocolFee
     ) {
         require(_owner != address(0), 'E101');
+        require(_fee != 0);
+        require(_protocolFee != 0);
         owner = _owner;
         fee = _fee;
         protocolFee = _protocolFee;
