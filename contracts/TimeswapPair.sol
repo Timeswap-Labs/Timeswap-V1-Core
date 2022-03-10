@@ -471,7 +471,7 @@ contract TimeswapPair is IPair, ReentrancyGuard {
             Due storage due = dues[param.ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
             if (param.owner != msg.sender) require(param.collateralsOut[i] == 0, 'E213');
-            require(uint256(assetIn) * due.collateral >= uint256(collateralOut) * due.debt, 'E303');
+            require(uint256(param.assetsIn[i]) * due.collateral >= uint256(param.collateralsOut[i]) * due.debt, 'E303');
             due.debt -= param.assetsIn[i];
             due.collateral -= param.collateralsOut[i];
             assetIn += param.assetsIn[i];
