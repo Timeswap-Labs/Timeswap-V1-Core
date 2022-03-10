@@ -147,6 +147,7 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         require(param.zIncrease != 0, 'E205');
         
         Pool storage pool = pools[param.maturity];
+        State memory state = pool.state;
 
         uint256 feeStoredIncrease;
         (liquidityOut, dueOut, feeStoredIncrease) = TimeswapMath.mint(
@@ -158,21 +159,22 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         );
 
         require(liquidityOut != 0, 'E212');
-        pool.state.totalLiquidity += liquidityOut;
+        state.totalLiquidity += liquidityOut;
         pool.liquidities[param.liquidityTo] += liquidityOut;
 
-        pool.state.feeStored += feeStoredIncrease;
-
+        state.feeStored += feeStoredIncrease;
 
         id = pool.dues[param.dueTo].insert(dueOut);
 
-        pool.state.reserves.asset += param.xIncrease;
-        pool.state.reserves.collateral += dueOut.collateral;
-        pool.state.totalDebtCreated += dueOut.debt;
+        state.reserves.asset += param.xIncrease;
+        state.reserves.collateral += dueOut.collateral;
+        state.totalDebtCreated += dueOut.debt;
 
-        pool.state.x += param.xIncrease;
-        pool.state.y += param.yIncrease;
-        pool.state.z += param.zIncrease;
+        state.x += param.xIncrease;
+        state.y += param.yIncrease;
+        state.z += param.zIncrease;
+
+        pool.state = state;
 
         assetIn = param.xIncrease;
         assetIn += feeStoredIncrease;
@@ -210,7 +212,8 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         require(param.liquidityIn != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity != 0, 'E206');
+        State memory state = pool.state;
+        require(state.totalLiquidity != 0, 'E206');
 
         uint128 _assetOut;
         uint256 feeOut;
@@ -219,7 +222,7 @@ contract TimeswapPair is IPair, ReentrancyGuard {
             param.liquidityIn
         );
 
-        pool.state.totalLiquidity -= param.liquidityIn;
+        state.totalLiquidity -= param.liquidityIn;
 
         pool.liquidities[msg.sender] -= param.liquidityIn;
 
@@ -227,14 +230,16 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         assetOut += feeOut;
 
         if (assetOut != 0) {
-            pool.state.reserves.asset -= _assetOut;
-            pool.state.feeStored -= feeOut;
+            state.reserves.asset -= _assetOut;
+            state.feeStored -= feeOut;
             asset.safeTransfer(param.assetTo, assetOut);
         }
         if (collateralOut != 0) {
-            pool.state.reserves.collateral -= collateralOut;
+            state.reserves.collateral -= collateralOut;
             collateral.safeTransfer(param.collateralTo, collateralOut);
         }
+
+        pool.state = state;
 
         emit Burn(
             param.maturity,
@@ -266,7 +271,8 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         require(param.xIncrease != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity != 0, 'E206');
+        State memory state = pool.state;
+        require(state.totalLiquidity != 0, 'E206');
 
         uint256 feeStoredIncrease;
         uint256 protocolFeeStoredIncrease;
@@ -280,24 +286,26 @@ contract TimeswapPair is IPair, ReentrancyGuard {
             protocolFee
         );
 
-        pool.state.feeStored += feeStoredIncrease;
+        state.feeStored += feeStoredIncrease;
         protocolFeeStored += protocolFeeStoredIncrease;
 
-        pool.state.totalClaims.bondPrincipal += claimsOut.bondPrincipal;
-        pool.state.totalClaims.bondInterest += claimsOut.bondInterest;
-        pool.state.totalClaims.insurancePrincipal += claimsOut.insurancePrincipal;
-        pool.state.totalClaims.insuranceInterest += claimsOut.insuranceInterest;
+        state.totalClaims.bondPrincipal += claimsOut.bondPrincipal;
+        state.totalClaims.bondInterest += claimsOut.bondInterest;
+        state.totalClaims.insurancePrincipal += claimsOut.insurancePrincipal;
+        state.totalClaims.insuranceInterest += claimsOut.insuranceInterest;
 
         pool.claims[param.bondTo].bondPrincipal += claimsOut.bondPrincipal;
         pool.claims[param.bondTo].bondInterest += claimsOut.bondInterest;
         pool.claims[param.insuranceTo].insurancePrincipal += claimsOut.insurancePrincipal;
         pool.claims[param.insuranceTo].insuranceInterest += claimsOut.insuranceInterest;
 
-        pool.state.reserves.asset += param.xIncrease;
+        state.reserves.asset += param.xIncrease;
 
-        pool.state.x += param.xIncrease;
-        pool.state.y -= param.yDecrease;
-        pool.state.z -= param.zDecrease;
+        state.x += param.xIncrease;
+        state.y -= param.yDecrease;
+        state.z -= param.zDecrease;
+
+        pool.state = state;
 
         assetIn = param.xIncrease;
         assetIn += feeStoredIncrease;
@@ -341,29 +349,34 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         );
 
         Pool storage pool = pools[param.maturity];
+        State memory state = pool.state;
 
         tokensOut = TimeswapMath.withdraw(pool.state, param.claimsIn);
 
-        pool.state.totalClaims.bondPrincipal -= param.claimsIn.bondPrincipal;
-        pool.state.totalClaims.bondInterest -= param.claimsIn.bondInterest;
-        pool.state.totalClaims.insurancePrincipal -= param.claimsIn.insurancePrincipal;
-        pool.state.totalClaims.insuranceInterest -= param.claimsIn.insuranceInterest;
+        state.totalClaims.bondPrincipal -= param.claimsIn.bondPrincipal;
+        state.totalClaims.bondInterest -= param.claimsIn.bondInterest;
+        state.totalClaims.insurancePrincipal -= param.claimsIn.insurancePrincipal;
+        state.totalClaims.insuranceInterest -= param.claimsIn.insuranceInterest;
 
-        Claims storage sender = pool.claims[msg.sender];
+        Claims memory sender = pool.claims[msg.sender];
 
         sender.bondPrincipal -= param.claimsIn.bondPrincipal;
         sender.bondInterest -= param.claimsIn.bondInterest;
         sender.insurancePrincipal -= param.claimsIn.insurancePrincipal;
         sender.insuranceInterest -= param.claimsIn.insuranceInterest;
 
+        pool.claims[msg.sender] = sender;
+
         if (tokensOut.asset != 0) {
-            pool.state.reserves.asset -= tokensOut.asset;
+            state.reserves.asset -= tokensOut.asset;
             asset.safeTransfer(param.assetTo, tokensOut.asset);
         }
         if (tokensOut.collateral != 0) {
-            pool.state.reserves.collateral -= tokensOut.collateral;
+            state.reserves.collateral -= tokensOut.collateral;
             collateral.safeTransfer(param.collateralTo, tokensOut.collateral);
         }
+
+        pool.state = state;
 
         emit Withdraw(
             param.maturity,
@@ -394,7 +407,8 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         require(param.xDecrease != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity != 0, 'E206');
+        State memory state = pool.state;
+        require(state.totalLiquidity != 0, 'E206');
 
         uint256 feeStoredIncrease;
         uint256 protocolFeeStoredIncrease;
@@ -408,18 +422,20 @@ contract TimeswapPair is IPair, ReentrancyGuard {
             protocolFee
         );
 
-        pool.state.feeStored += feeStoredIncrease;
+        state.feeStored += feeStoredIncrease;
         protocolFeeStored += protocolFeeStoredIncrease;
 
         id = pool.dues[param.dueTo].insert(dueOut);
 
-        pool.state.reserves.asset -= param.xDecrease;
-        pool.state.reserves.collateral += dueOut.collateral;
-        pool.state.totalDebtCreated += dueOut.debt;
+        state.reserves.asset -= param.xDecrease;
+        state.reserves.collateral += dueOut.collateral;
+        state.totalDebtCreated += dueOut.debt;
 
-        pool.state.x -= param.xDecrease;
-        pool.state.y += param.yIncrease;
-        pool.state.z += param.zIncrease;
+        state.x -= param.xDecrease;
+        state.y += param.yIncrease;
+        state.z += param.zIncrease;
+
+        pool.state = state;
 
         assetOut = param.xDecrease;
         assetOut -= feeStoredIncrease;
@@ -470,12 +486,18 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         for (uint256 i; i < length;) {
             Due storage due = dues[param.ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
-            if (param.owner != msg.sender) require(param.collateralsOut[i] == 0, 'E213');
-            require(uint256(param.assetsIn[i]) * due.collateral >= uint256(param.collateralsOut[i]) * due.debt, 'E303');
-            due.debt -= param.assetsIn[i];
-            due.collateral -= param.collateralsOut[i];
-            assetIn += param.assetsIn[i];
-            collateralOut += param.collateralsOut[i];
+
+            uint112 _assetIn = param.assetsIn[i];
+            uint112 _collateralOut = param.collateralsOut[i];
+
+            if (param.owner != msg.sender) require(_collateralOut == 0, 'E213');
+            require(uint256(_assetIn) * due.collateral >= uint256(_collateralOut) * due.debt, 'E303');
+            
+            due.debt -= _assetIn;
+            due.collateral -= _collateralOut;
+            assetIn += _assetIn;
+            collateralOut += _collateralOut;
+
             unchecked { ++i; }
         }
 
