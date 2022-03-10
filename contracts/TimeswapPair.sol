@@ -524,6 +524,7 @@ contract TimeswapPair is IPair, ReentrancyGuard {
     /// @inheritdoc IPair
     function collectProtocolFee(address to) external override nonReentrant returns (uint256 protocolFeeOut) {
         require(msg.sender == factory.owner(), 'E216');
+        require(to != address(0), 'E201');
 
         protocolFeeOut = protocolFeeStored;
         protocolFeeStored = 0;
