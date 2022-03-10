@@ -9,12 +9,13 @@ import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
 /// @notice It is recommended to use Timeswap Convenience to interact with this contract.
 /// @notice All error messages are coded and can be found in the documentation.
-contract TimeswapPair is IPair {
+contract TimeswapPair is IPair, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Array for Due[];
 
@@ -36,9 +37,6 @@ contract TimeswapPair is IPair {
 
     /// @dev Stores the individual states of each Pool.
     mapping(uint256 => Pool) private pools;
-
-    /// @dev Stores the access state for reentrancy guard.
-    uint256 private locked = 1;
 
     /* ===== VIEW =====*/
 
@@ -116,22 +114,12 @@ contract TimeswapPair is IPair {
         IERC20 _collateral,
         uint16 _fee,
         uint16 _protocolFee
-    ) {
+    ) ReentrancyGuard() {
         factory = IFactory(msg.sender);
         asset = _asset;
         collateral = _collateral;
         fee = _fee;
         protocolFee = _protocolFee;
-    }
-
-    /* ===== MODIFIER ===== */
-
-    /// @dev The modifier for reentrancy guard.
-    modifier lock() {
-        require(locked == 1, 'E211');
-        locked = 2;
-        _;
-        locked = 1;
     }
 
     /* ===== UPDATE ===== */
@@ -140,7 +128,7 @@ contract TimeswapPair is IPair {
     function mint(MintParam calldata param)
         external
         override
-        lock
+        nonReentrant
         returns (
             uint256 assetIn,
             uint256 liquidityOut,
@@ -208,7 +196,7 @@ contract TimeswapPair is IPair {
     function burn(BurnParam calldata param) 
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint256 assetOut, 
             uint128 collateralOut
@@ -264,7 +252,7 @@ contract TimeswapPair is IPair {
     function lend(LendParam calldata param) 
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint256 assetIn,
             Claims memory claimsOut
@@ -334,7 +322,7 @@ contract TimeswapPair is IPair {
     function withdraw(WithdrawParam calldata param)
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             Tokens memory tokensOut
         ) 
@@ -391,7 +379,7 @@ contract TimeswapPair is IPair {
     function borrow(BorrowParam calldata param)
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint256 assetOut,
             uint256 id, 
@@ -459,7 +447,7 @@ contract TimeswapPair is IPair {
     function pay(PayParam calldata param)
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint128 assetIn, 
             uint128 collateralOut
@@ -510,7 +498,7 @@ contract TimeswapPair is IPair {
     }
 
     /// @inheritdoc IPair
-    function collectProtocolFee(address to) external override lock returns (uint256 protocolFeeOut) {
+    function collectProtocolFee(address to) external override nonReentrant returns (uint256 protocolFeeOut) {
         require(msg.sender == factory.owner(), 'E216');
 
         protocolFeeOut = protocolFeeStored;
