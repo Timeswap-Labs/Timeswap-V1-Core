@@ -457,15 +457,17 @@ contract TimeswapPair is IPair, ReentrancyGuard {
         require(param.owner != address(0), 'E201');
         require(param.to != address(0), 'E201');
         require(param.to != address(this), 'E204');
-        require(param.ids.length == param.assetsIn.length, 'E205');
-        require(param.ids.length == param.collateralsOut.length, 'E205');
+        
+        uint256 length = param.ids.length;
+        require(length== param.assetsIn.length, 'E205');
+        require(length == param.collateralsOut.length, 'E205');
 
         Pool storage pool = pools[param.maturity];
 
         Due[] storage dues = pool.dues[param.owner];
-        require(dues.length >= param.ids.length, 'E205');
+        require(dues.length >= length, 'E205');
 
-        for (uint256 i; i < param.ids.length;) {
+        for (uint256 i; i < length;) {
             Due storage due = dues[param.ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
             if (param.owner != msg.sender) require(param.collateralsOut[i] == 0, 'E213');
