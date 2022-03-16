@@ -23,12 +23,12 @@ let collateralToken: IERC20
 const assetIn: bigint = 0n
 const collateralIn: bigint = 0n
 
-describe('Borrow Math', () => {
+describe('Callback Library Test', () => {
   before(async () => {
     signers = await ethers.getSigners()
     maturity = (await now()) + 10000n
-    assetToken = await testTokenNew('Ether', 'WETH', 0n)
-    collateralToken = await testTokenNew('Matic', 'MATIC', 0n)
+    assetToken = await testTokenNew('Ether', 'WETH', 1000n) as unknown as IERC20
+    collateralToken = await testTokenNew('Matic', 'MATIC', 1000n) as unknown as IERC20
     const CallbackTestContractFactory = await ethers.getContractFactory('CallbackTest')
     const CallbackTestCalleeContractFactory = await ethers.getContractFactory('CallbackTestCallee')
     CallbackTestContract = (await CallbackTestContractFactory.deploy()) as CallbackTest
