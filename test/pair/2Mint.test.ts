@@ -50,7 +50,6 @@ describe('Mint', () => {
         mint = await mintFixture(constructor, signers[0], mintParams)
         console.log('\n', `Case number: ${i + 1} expected to succeed`)
       } catch (error) {
-        console.log(error)
         console.log(`Case number: ${i + 1} expected to fail`)
         console.log('Transaction expected to revert')
         await expect(

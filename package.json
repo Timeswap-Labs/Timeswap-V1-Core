@@ -1,7 +1,7 @@
 {
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test test/pair/*",
+    "test": "hardhat test",
     "test:hardhat": "hardhat test --network hardhat",
     "coverage": "hardhat compile && hardhat coverage",
     "prepare": "hardhat compile"
