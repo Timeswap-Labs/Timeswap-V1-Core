@@ -67,4 +67,24 @@ contract TimeswapMathTest {
     ) external pure returns (IPair.Tokens memory tokensOut) {
         return TimeswapMath.withdraw(state, claimsIn);
     }
+
+    function borrow(
+        uint256 maturity,
+        IPair.State memory state,
+        uint112 xDecrease,
+        uint112 yIncrease,
+        uint112 zIncrease,
+        uint256 fee,
+        uint256 protocolFee
+    )
+        external
+        view
+        returns (
+            IPair.Due memory dueOut,
+            uint256 feeStoredIncrease,
+            uint256 protocolFeeStoredIncrease
+        )
+        {
+            return TimeswapMath.borrow(maturity, state, xDecrease, yIncrease, zIncrease, fee, protocolFee);
+        }
 }
