@@ -12,6 +12,7 @@ import { PROTOCOL_FEE } from '../shared/Constants'
 import { expect } from '../shared/Expect'
 import { now } from '../shared/Helper'
 import { State } from '../shared/PairInterface'
+import LendMath from '../libraries/LendMath'
 
 const { solidity } = waffle
 chai.use(solidity)
@@ -80,258 +81,606 @@ let signers: SignerWithAddress[];
 describe("TimeswapMath", () => {
     let TimeswapMathTestContract: TimeswapMathTest;
 
-    // beforeEach("", async () => {
-    //     signers = await ethers.getSigners()
-    //     maturity = (await now()) + 10000n
-    //     const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
-    //     const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
-    //     const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
-    //         {
-    //             libraries: {
-    //                 TimeswapMath: TimeswapMathContract.address
-    //             }
-    //         }
-    //     )
-    //     TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
-    //     await TimeswapMathTestContract.deployed()
+    // describe('Mint Math', () => {
+    //     let liquidityOut: any
+    //     let feeStoredIncrease: any
+    //     let dueOut: any
+
+    //     describe("New Liquidity", () => {
+    //         before("", async () => {
+    //             signers = await ethers.getSigners()
+    //             maturity = (await now()) + 10000n
+    //             const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+    //             const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+    //             const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+    //                 {
+    //                     libraries: {
+    //                         TimeswapMath: TimeswapMathContract.address
+    //                     }
+    //                 }
+    //             )
+    //             TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+    //             await TimeswapMathTestContract.deployed();
+
+    //             [liquidityOut, dueOut, feeStoredIncrease] = await TimeswapMathTestContract.mint(
+    //                 maturity,
+    //                 state,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 cdpIncrease
+    //             )
+    //         })
+
+    //         it('LiquidityTotal, newLiquidity', async () => {
+    //             const liquidityOutComputed = MintMath.getLiquidity1(assetIn);
+    //             expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
+    //         })
+
+    //         it('Debt, newLiquidity', async () => {
+    //             const debtComputed = MintMath.getDebt(
+    //                 maturity as bigint,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 (await now())
+    //             )
+    //             expect(dueOut[0].eq(debtComputed)).to.true;
+    //         })
+
+    //         it('Collateral, newLiquidity', async () => {
+    //             const collateralComputed = MintMath.getCollateral(
+    //                 maturity as bigint,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 cdpIncrease,
+    //                 (await now())
+    //             )
+    //             expect(dueOut[1].eq(collateralComputed)).to.true;
+    //         })
+
+    //         it('StartBlock, newLiquidity', async () => {
+    //             const startBlockComputed = await ethers.provider.getBlockNumber();
+    //             expect(dueOut[2]).to.equal(startBlockComputed);
+    //         })
+
+    //         it('Fee Stored, newLiquidity', async () => {
+    //             const liquidityOutComputed = MintMath.getLiquidity1(assetIn);
+
+    //             const feeStoredComputed = MintMath.getFee(
+    //                 stateTest,
+    //                 liquidityOutComputed as bigint,
+    //             )
+    //             expect(feeStoredIncrease.eq(feeStoredComputed)).to.true;
+    //         })
+    //     })
+
+    //     describe("Additional Liquidity", () => {
+    //         before("", async () => {
+    //             signers = await ethers.getSigners()
+    //             maturity = (await now()) + 10000n
+    //             state.totalLiquidity = 50n;
+    //             stateTest.totalLiquidity = 50n;
+    //             const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+    //             const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+    //             const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+    //                 {
+    //                     libraries: {
+    //                         TimeswapMath: TimeswapMathContract.address
+    //                     }
+    //                 }
+    //             )
+    //             TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+    //             await TimeswapMathTestContract.deployed();
+    //             [liquidityOut, dueOut, feeStoredIncrease] = await TimeswapMathTestContract.mint(
+    //                 maturity,
+    //                 state,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 cdpIncrease
+    //             )
+    //         })
+
+    //         it('LiquidityTotal, additional liquidity', async () => {
+    //             const liquidityOutComputed = MintMath.getLiquidity2(stateTest,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 cdpIncrease);
+    //             expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
+    //         })
+
+    //         it('Debt, additional liquidity', async () => {
+    //             const debtComputed = MintMath.getDebt(
+    //                 maturity as bigint,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 (await now())
+    //             )
+    //             expect(dueOut[0].eq(debtComputed)).to.true;
+    //         })
+
+    //         it('Collateral, additional liquidity', async () => {
+    //             const collateralComputed = MintMath.getCollateral(
+    //                 maturity as bigint,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 cdpIncrease,
+    //                 (await now())
+    //             )
+    //             expect(dueOut[1].eq(collateralComputed)).to.true;
+    //         })
+
+    //         it('StartBlock, additional liquidity', async () => {
+    //             const startBlockComputed = await ethers.provider.getBlockNumber();
+    //             expect(dueOut[2]).to.equal(startBlockComputed);
+    //         })
+
+    //         it('Fee Stored, additional liquidity', async () => {
+    //             const liquidityOutComputed = MintMath.getLiquidity2(stateTest,
+    //                 assetIn,
+    //                 interestIncrease,
+    //                 cdpIncrease);
+
+    //             const feeStoredComputed = MintMath.getFee(
+    //                 stateTest,
+    //                 liquidityOutComputed as bigint,
+    //             )
+    //             expect(feeStoredIncrease.eq(feeStoredComputed)).to.true;
+    //         })
+    //     })
     // })
-
-    describe('Mint Math', () => {
-        let liquidityOut: any
-        let feeStoredIncrease: any
-        let dueOut: any
-
-        describe("New Liquidity", () => {
-            before("", async () => {
-                signers = await ethers.getSigners()
-                maturity = (await now()) + 10000n
-                const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
-                const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
-                const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
-                    {
-                        libraries: {
-                            TimeswapMath: TimeswapMathContract.address
-                        }
-                    }
-                )
-                TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
-                await TimeswapMathTestContract.deployed();
-
-                [liquidityOut, dueOut, feeStoredIncrease] = await TimeswapMathTestContract.mint(
-                    maturity,
-                    state,
-                    assetIn,
-                    interestIncrease,
-                    cdpIncrease
-                )
-
-            })
-
-            it('LiquidityTotal, newLiquidity', async () => {
-                const liquidityOutComputed = MintMath.getLiquidity1(assetIn);
-                expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
-            })
-
-            it('Debt, newLiquidity', async () => {
-                const debtComputed = MintMath.getDebt(
-                    maturity as bigint,
-                    assetIn,
-                    interestIncrease,
-                    (await now())
-                )
-                expect(dueOut[0].eq(debtComputed)).to.true;
-            })
-
-            it('Collateral, newLiquidity', async () => {
-                const collateralComputed = MintMath.getCollateral(
-                    maturity as bigint,
-                    assetIn,
-                    interestIncrease,
-                    cdpIncrease,
-                    (await now())
-                )
-                expect(dueOut[1].eq(collateralComputed)).to.true;
-            })
-
-            it('StartBlock, newLiquidity', async () => {
-                const startBlockComputed = await ethers.provider.getBlockNumber();
-                expect(dueOut[2]).to.equal(startBlockComputed);
-            })
-
-            it('Fee Stored, newLiquidity', async () => {
-                const liquidityOutComputed = MintMath.getLiquidity1(assetIn);
-
-                const feeStoredComputed = MintMath.getFee(
-                    stateTest,
-                    liquidityOutComputed as bigint,
-                )
-                expect(feeStoredIncrease.eq(feeStoredComputed)).to.true;
-            })
-        })
-
-        describe("Additional Liquidity", () => {
-            before("", async () => {
-                signers = await ethers.getSigners()
-                maturity = (await now()) + 10000n
-                state.totalLiquidity = 50n;
-                stateTest.totalLiquidity = 50n;
-                const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
-                const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
-                const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
-                    {
-                        libraries: {
-                            TimeswapMath: TimeswapMathContract.address
-                        }
-                    }
-                )
-                TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
-                await TimeswapMathTestContract.deployed();
-
-                [liquidityOut, dueOut, feeStoredIncrease] = await TimeswapMathTestContract.mint(
-                    maturity,
-                    state,
-                    assetIn,
-                    interestIncrease,
-                    cdpIncrease
-                )
-
-            })
-
-            it('LiquidityTotal, additional liquidity', async () => {
-                const liquidityOutComputed = MintMath.getLiquidity2(stateTest,
-                    assetIn,
-                    interestIncrease,
-                    cdpIncrease);
-                expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
-            })
-
-            it('Debt, additional liquidity', async () => {
-                const debtComputed = MintMath.getDebt(
-                    maturity as bigint,
-                    assetIn,
-                    interestIncrease,
-                    (await now())
-                )
-                expect(dueOut[0].eq(debtComputed)).to.true;
-            })
-
-            it('Collateral, additional liquidity', async () => {
-                const collateralComputed = MintMath.getCollateral(
-                    maturity as bigint,
-                    assetIn,
-                    interestIncrease,
-                    cdpIncrease,
-                    (await now())
-                )
-                expect(dueOut[1].eq(collateralComputed)).to.true;
-            })
-
-            it('StartBlock, additional liquidity', async () => {
-                const startBlockComputed = await ethers.provider.getBlockNumber();
-                expect(dueOut[2]).to.equal(startBlockComputed);
-            })
-
-            it('Fee Stored, additional liquidity', async () => {
-                const liquidityOutComputed = MintMath.getLiquidity2(stateTest,
-                    assetIn,
-                    interestIncrease,
-                    cdpIncrease);
-
-                const feeStoredComputed = MintMath.getFee(
-                    stateTest,
-                    liquidityOutComputed as bigint,
-                )
-                expect(feeStoredIncrease.eq(feeStoredComputed)).to.true;
-            })
-        })
-
-
-
-
-        // it('Getting LiquidityTotal for AssetIn, additional Liquidity', async () => {
-        //     state.totalLiquidity = 50n;
-        //     stateTest.totalLiquidity = 50n;
-        //     const {
-        //         liquidityOut,
-        //         dueOut,
-        //         feeStoredIncrease
-        //     } = await TimeswapMathTestContract.mint(
-        //         maturity,
-        //         state,
-        //         assetIn,
-        //         interestIncrease,
-        //         cdpIncrease
-        //     )
-        //     const liquidityOutComputed = MintMath.getLiquidity2(
-        //         stateTest,
-        //         assetIn,
-        //         interestIncrease,
-        //         cdpIncrease
-        //     );
-        //     const debtComputed = MintMath.getDebt(
-        //         maturity as bigint,
-        //         assetIn,
-        //         interestIncrease,
-        //         (await now())
-        //     )
-        //     const collateralComputed = MintMath.getCollateral(
-        //         maturity as bigint,
-        //         assetIn,
-        //         interestIncrease,
-        //         cdpIncrease,
-        //         (await now())
-        //     )
-        //     const feeStoredComputed = MintMath.getFee(
-        //         stateTest,
-        //         liquidityOutComputed as bigint,
-        //     )
-        //     const startBlockComputed = await ethers.provider.getBlockNumber();
-        //     expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
-        //     expect(dueOut[0].eq(debtComputed)).to.true;
-        //     expect(dueOut[1].eq(collateralComputed)).to.true;
-        //     expect(dueOut[2]).to.equal(startBlockComputed);
-        //     expect(feeStoredIncrease.eq(feeStoredComputed)).to.true;
-
-        // })
-    })
 
     // describe('Burn Math', () => {
-    //     it('Getting LiquidityTotal for AssetIn, newLiquidity', async () => {
-    //         // const fee: bigint = 2n
-    //         const {
-    //             liquidityOut
-    //         } = await TimeswapMathTestContract.mint(
-    //             maturity,
-    //             state,
-    //             assetIn,
-    //             interestIncrease,
-    //             cdpIncrease
-    //         )
-    //         const liquidityOutComputed = MintMath.getLiquidity1(assetIn);
-    //         expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
+    //     let assetOut: BigNumberish
+    //     let collateralOut: BigNumberish
+    //     let feeOut:BigNumberish
+    //     let liquidityIn = 10n
+
+    //     describe("totalAssets > totalBond", () => {
+    //         before("", async () => {
+    //             signers = await ethers.getSigners()
+    //             maturity = (await now()) + 10000n
+    //             const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+    //             const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+    //             const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+    //                 {
+    //                     libraries: {
+    //                         TimeswapMath: TimeswapMathContract.address
+    //                     }
+    //                 }
+    //             )
+    //             TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+    //             await TimeswapMathTestContract.deployed();
+    //             state = {
+    //                 reserves: { asset: 100n, collateral: 100n },
+    //                 feeStored: 1n,
+    //                 totalLiquidity: 100n,
+    //                 totalClaims: { bondPrincipal: 10n, bondInterest: 10n, insuranceInterest: 10n, insurancePrincipal: 10n },
+    //                 totalDebtCreated: 100n,
+    //                 x: 100n,
+    //                 y: 10n,
+    //                 z: 1n,
+    //             };
+    //             stateTest = {
+    //                 reserves: { asset: 100n, collateral: 100n },
+    //                 totalLiquidity: 100n,
+    //                 totalClaims: { bondPrincipal: 10n, bondInterest: 10n, insuranceInterest: 10n, insurancePrincipal: 10n },
+    //                 totalDebtCreated: 100n,
+    //                 asset: 100n,
+    //                 interest: 10n,
+    //                 cdp: 1n,
+    //                 feeStored: 1n
+    //             };
+    //             [assetOut, collateralOut, feeOut] = await TimeswapMathTestContract.burn(
+    //                 state,
+    //                 liquidityIn
+    //             )
+    //         })
+    //         it("AssetOut", () => {
+    //             const assetOutComputed = BurnMath.getAsset(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(assetOut == assetOutComputed).to.true;
+    //         })
+    //         it("CollateralOut", () => {
+    //             const collateralOutComputed = BurnMath.getCollateral(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(collateralOut == collateralOutComputed).to.true;
+    //         })
+    //         it("FeeOut", () => {
+    //             const feeOutComputed = BurnMath.getFee(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(feeOut == feeOutComputed).to.true;
+    //         })
     //     })
 
-    //     it('Getting LiquidityTotal for AssetIn, additional Liquidity', async () => {
-    //         state.totalLiquidity = 50n;
-    //         const {
-    //             liquidityOut
-    //         } = await TimeswapMathTestContract.mint(
+    //     describe("totalAsset == totalBond", () => {
+    //         before("", async () => {
+    //             signers = await ethers.getSigners()
+    //             maturity = (await now()) + 10000n
+    //             const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+    //             const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+    //             const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+    //                 {
+    //                     libraries: {
+    //                         TimeswapMath: TimeswapMathContract.address
+    //                     }
+    //                 }
+    //             )
+    //             TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+    //             await TimeswapMathTestContract.deployed();
+    //             state = {
+    //                 reserves: { asset: 100n, collateral: 100n },
+    //                 feeStored: 1n,
+    //                 totalLiquidity: 100n,
+    //                 totalClaims: { bondPrincipal: 50n, bondInterest: 50n, insuranceInterest: 10n, insurancePrincipal: 10n },
+    //                 totalDebtCreated: 100n,
+    //                 x: 100n,
+    //                 y: 10n,
+    //                 z: 1n,
+    //             };
+    //             stateTest = {
+    //                 reserves: { asset: 100n, collateral: 100n },
+    //                 totalLiquidity: 100n,
+    //                 totalClaims: { bondPrincipal: 50n, bondInterest: 50n, insuranceInterest: 10n, insurancePrincipal: 10n },
+    //                 totalDebtCreated: 100n,
+    //                 asset: 100n,
+    //                 interest: 10n,
+    //                 cdp: 1n,
+    //                 feeStored: 1n
+    //             };
+    //             [assetOut, collateralOut, feeOut] = await TimeswapMathTestContract.burn(
+    //                 state,
+    //                 liquidityIn
+    //             )
+
+    //         })
+    //         it("AssetOut", () => {
+    //             const assetOutComputed = BurnMath.getAsset(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(assetOut == assetOutComputed).to.true;
+    //         })
+    //         it("CollateralOut", () => {
+    //             const collateralOutComputed = BurnMath.getCollateral(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(collateralOut == collateralOutComputed).to.true;
+    //         })
+    //         it("FeeOut", () => {
+    //             const feeOutComputed = BurnMath.getFee(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(feeOut == feeOutComputed).to.true;
+    //         })
+    //     })
+
+    //     describe("totalAsset < totalBond", () => {
+    //         before("", async () => {
+    //             signers = await ethers.getSigners()
+    //             maturity = (await now()) + 10000n
+    //             const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+    //             const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+    //             const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+    //                 {
+    //                     libraries: {
+    //                         TimeswapMath: TimeswapMathContract.address
+    //                     }
+    //                 }
+    //             )
+    //             TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+    //             await TimeswapMathTestContract.deployed();
+    //             state = {
+    //                 reserves: { asset: 90n, collateral: 100n },
+    //                 feeStored: 1n,
+    //                 totalLiquidity: 100n,
+    //                 totalClaims: { bondPrincipal: 50n, bondInterest: 50n, insuranceInterest: 10n, insurancePrincipal: 10n },
+    //                 totalDebtCreated: 100n,
+    //                 x: 100n,
+    //                 y: 10n,
+    //                 z: 1n,
+    //             };
+    //             stateTest = {
+    //                 reserves: { asset: 90n, collateral: 100n },
+    //                 totalLiquidity: 100n,
+    //                 totalClaims: { bondPrincipal: 50n, bondInterest: 50n, insuranceInterest: 10n, insurancePrincipal: 10n },
+    //                 totalDebtCreated: 100n,
+    //                 asset: 100n,
+    //                 interest: 10n,
+    //                 cdp: 1n,
+    //                 feeStored: 1n
+    //             };
+    //             [assetOut, collateralOut, feeOut] = await TimeswapMathTestContract.burn(
+    //                 state,
+    //                 liquidityIn
+    //             )
+
+    //         })
+    //         it("AssetOut", () => {
+    //             const assetOutComputed = BurnMath.getAsset(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(assetOut == assetOutComputed).to.true;
+    //         })
+    //         it("CollateralOut", () => {
+    //             const collateralOutComputed = BurnMath.getCollateral(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(collateralOut == collateralOutComputed).to.true;
+    //         })
+    //         it("FeeOut", () => {
+    //             const feeOutComputed = BurnMath.getFee(
+    //                 stateTest,
+    //                 liquidityIn
+    //             )
+    //             expect(feeOut == feeOutComputed).to.true;
+    //         })
+    //     })
+    // })
+
+    // describe('Lend Math', () => {
+    //     const state: IPair.StateStruct = {
+    //         reserves: { asset: 10n, collateral: 10n },
+    //         feeStored: 10n,
+    //         totalLiquidity: 10n,
+    //         totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
+    //         totalDebtCreated: 10n,
+    //         x: 10n,
+    //         y: 10n,
+    //         z: 10n,
+    //     };
+    //     const stateTest: StateTestParams = {
+    //         reserves: { asset: 10n, collateral: 10n },
+    //         totalLiquidity: 10n,
+    //         totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
+    //         totalDebtCreated: 10n,
+    //         asset: 10n,
+    //         interest: 10n,
+    //         cdp: 10n,
+    //     }
+    //     const xIncrease = 2000n;
+    //     const yDecrease = 1n;
+    //     const zDecrease = 1n;
+    //     const fee = 2n;
+    //     const protocolFee = 1n;
+    //     let result: any;
+
+    //     before("", async () => {
+    //         signers = await ethers.getSigners()
+    //         maturity = (await now()) + 10000n
+    //         const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+    //         const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+    //         const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+    //             {
+    //                 libraries: {
+    //                     TimeswapMath: TimeswapMathContract.address
+    //                 }
+    //             }
+    //         )
+    //         TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+    //         await TimeswapMathTestContract.deployed();
+    //         result = await TimeswapMathTestContract.lend(
     //             maturity,
     //             state,
-    //             assetIn,
-    //             interestIncrease,
-    //             cdpIncrease
+    //             xIncrease,
+    //             yDecrease,
+    //             zDecrease,
+    //             fee,
+    //             protocolFee
     //         )
-    //         const liquidityOutComputed = MintMath.getLiquidity2(
-    //             stateTest,
-    //             assetIn,
-    //             interestIncrease,
-    //             cdpIncrease
-    //         );
-    //         expect(liquidityOut.eq(liquidityOutComputed)).to.be.true;
     //     })
-    //     // })
+    //     it("bondInterest", async () => {
+    //         const bondInterest = LendMath.getBondInterest(
+    //             maturity as bigint,
+    //             yDecrease,
+    //             (await now())
+    //         )
+    //         expect((result[0].bondInterest).eq(bondInterest)).to.true;
+    //     })
+    //     it("insurancePrincipal", async () => {
+    //         const insurancePrincipal = LendMath.getInsurancePrincipal(
+    //             stateTest,
+    //             xIncrease
+    //         )
+    //         expect((result[0].insurancePrincipal).eq(insurancePrincipal)).to.true;
+    //     })
+    //     it("insuranceInterest", async () => {
+    //         const insuranceInterest = LendMath.getInsuranceInterest(
+    //             maturity as bigint,
+    //             yDecrease,
+    //             (await now())
+    //         )
+    //         expect((result[0].insuranceInterest).eq(insuranceInterest)).to.true;
+    //     })
+    //     it("Fees", async () => {
+    //         const {feeStoredIncrease, protocolFeeStoredIncrease} = LendMath.getFees(
+    //             maturity as bigint,
+    //             xIncrease,
+    //             fee,
+    //             protocolFee,
+    //             (await now())
+    //         )
+    //         expect((result[1]).eq(feeStoredIncrease)).to.true;
+    //         expect((result[2]).eq(protocolFeeStoredIncrease)).to.true;
+    //     })
     // })
+
+    describe('Withdraw Math', () => {
+        describe("totalAssets > totalBond", () => {
+            const state = {
+                reserves: { asset: 1000n, collateral: 1000n },
+                totalLiquidity: 500n,
+                totalClaims: { bondPrincipal: 100n, bondInterest: 100n, insuranceInterest: 100n, insurancePrincipal: 100n },
+                totalDebtCreated: 300n,
+                x: 5000n,
+                y: 10000n,
+                z: 10000n,
+                feeStored: 10n,
+            };
+            const stateTest: State = {
+                reserves: { asset: 1000n, collateral: 1000n },
+                totalLiquidity: 500n,
+                totalClaims: { bondPrincipal: 100n, bondInterest: 100n, insuranceInterest: 100n, insurancePrincipal: 100n },
+                totalDebtCreated: 300n,
+                asset: 5000n,
+                interest: 10000n,
+                cdp: 10000n,
+                feeStored: 10n,
+            };
+            const claimsIn = {
+                bondPrincipal: 10n, bondInterest: 10n, insuranceInterest: 10n, insurancePrincipal: 10n
+            }
+            let result: any;
+
+            before("", async () => {
+                signers = await ethers.getSigners()
+                maturity = (await now()) + 10000n
+                const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+                const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+                const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+                    {
+                        libraries: {
+                            TimeswapMath: TimeswapMathContract.address
+                        }
+                    }
+                )
+                TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+                await TimeswapMathTestContract.deployed();
+                
+                result = await TimeswapMathTestContract.withdraw(
+                    state,
+                    claimsIn
+                )
+            })
+            it("tokens out", () => {
+                const tokensOut = WithdrawMath.getTokensOut(
+                    stateTest,
+                    claimsIn
+                );
+                expect((result[0]).eq(tokensOut.asset)).to.true;
+                expect((result[1]).eq(tokensOut.collateral)).to.true;
+            })
+        })
+
+        describe("totalAssets == totalBond", () => {
+            const state = {
+                reserves: { asset: 1000n, collateral: 1000n },
+                totalLiquidity: 500n,
+                totalClaims: { bondPrincipal: 500n, bondInterest: 500n, insuranceInterest: 100n, insurancePrincipal: 100n },
+                totalDebtCreated: 300n,
+                x: 5000n,
+                y: 10000n,
+                z: 10000n,
+                feeStored: 10n,
+            };
+            const stateTest: State = {
+                reserves: { asset: 1000n, collateral: 1000n },
+                totalLiquidity: 500n,
+                totalClaims: { bondPrincipal: 500n, bondInterest: 500n, insuranceInterest: 100n, insurancePrincipal: 100n },
+                totalDebtCreated: 300n,
+                asset: 5000n,
+                interest: 10000n,
+                cdp: 10000n,
+                feeStored: 10n,
+            };
+            const claimsIn = {
+                bondPrincipal: 10n, bondInterest: 10n, insuranceInterest: 10n, insurancePrincipal: 10n
+            }
+            let result: any;
+
+            before("", async () => {
+                signers = await ethers.getSigners()
+                maturity = (await now()) + 10000n
+                const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+                const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+                const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+                    {
+                        libraries: {
+                            TimeswapMath: TimeswapMathContract.address
+                        }
+                    }
+                )
+                TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+                await TimeswapMathTestContract.deployed();
+                result = await TimeswapMathTestContract.withdraw(
+                    state,
+                    claimsIn
+                )
+            })
+            it("tokens out", () => {
+                const tokensOut = WithdrawMath.getTokensOut(
+                    stateTest,
+                    claimsIn
+                );
+                expect((result[0]).eq(tokensOut.asset)).to.true;
+                expect((result[1]).eq(tokensOut.collateral)).to.true;
+            })
+        })
+
+        describe("totalAssets < totalBond", () => {
+            const state = {
+                reserves: { asset: 900n, collateral: 1000n },
+                totalLiquidity: 500n,
+                totalClaims: { bondPrincipal: 500n, bondInterest: 500n, insuranceInterest: 100n, insurancePrincipal: 100n },
+                totalDebtCreated: 300n,
+                x: 5000n,
+                y: 10000n,
+                z: 10000n,
+                feeStored: 10n,
+            };
+            const stateTest: State = {
+                reserves: { asset: 900n, collateral: 1000n },
+                totalLiquidity: 500n,
+                totalClaims: { bondPrincipal: 500n, bondInterest: 500n, insuranceInterest: 100n, insurancePrincipal: 100n },
+                totalDebtCreated: 300n,
+                asset: 5000n,
+                interest: 10000n,
+                cdp: 10000n,
+                feeStored: 10n,
+            };
+            const claimsIn = {
+                bondPrincipal: 10n, bondInterest: 10n, insuranceInterest: 10n, insurancePrincipal: 10n
+            }
+            let result: any;
+
+            before("", async () => {
+                signers = await ethers.getSigners()
+                maturity = (await now()) + 10000n
+                const TimeswapMathContractFactory = await ethers.getContractFactory("TimeswapMath");
+                const TimeswapMathContract = await TimeswapMathContractFactory.deploy();
+                const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest',
+                    {
+                        libraries: {
+                            TimeswapMath: TimeswapMathContract.address
+                        }
+                    }
+                )
+                TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+                await TimeswapMathTestContract.deployed();
+                result = await TimeswapMathTestContract.withdraw(
+                    state,
+                    claimsIn
+                )
+            })
+            it("tokens out", () => {
+                const tokensOut = WithdrawMath.getTokensOut(
+                    stateTest,
+                    claimsIn
+                );
+                expect((result[0]).eq(tokensOut.asset)).to.true;
+                expect((result[1]).eq(tokensOut.collateral)).to.true;
+            })
+        })
+    })
+    
 })
 
 
