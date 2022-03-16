@@ -28,5 +28,43 @@ contract TimeswapMathTest {
             );
         }
 
-   
+    function burn(
+        IPair.State memory state,
+        uint256 liquidityIn
+    )
+        external
+        pure
+        returns (
+            uint128 assetOut,
+            uint128 collateralOut,
+            uint256 feeOut
+        ) {
+            return TimeswapMath.burn(state, liquidityIn);
+        }
+    
+    function lend(
+        uint256 maturity,
+        IPair.State memory state,
+        uint112 xIncrease,
+        uint112 yDecrease,
+        uint112 zDecrease,
+        uint256 fee,
+        uint256 protocolFee
+    )
+        external
+        view
+        returns (
+            IPair.Claims memory claimsOut,
+            uint256 feeStoredIncrease,
+            uint256 protocolFeeStoredIncrease
+        ) {
+            return TimeswapMath.lend(maturity, state, xIncrease, yDecrease, zDecrease, fee, protocolFee);
+        }
+
+    function withdraw(
+        IPair.State memory state,
+        IPair.Claims memory claimsIn
+    ) external pure returns (IPair.Tokens memory tokensOut) {
+        return TimeswapMath.withdraw(state, claimsIn);
+    }
 }
