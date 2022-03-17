@@ -28,12 +28,12 @@ describe('Deploying Pair Contract', () => {
     signers = await ethers.getSigners()
     let timeSwapMathFactory = await ethers.getContractFactory('TimeswapMath')
     timeSwapMathContractAddresss = await (await timeSwapMathFactory.deploy()).address
-    factory = (await factoryInit(signers[0].address, undefined, undefined, timeSwapMathContractAddresss)) as IFactory
+    factory = (await factoryInit(signers[0].address, undefined, undefined, timeSwapMathContractAddresss)) as unknown as IFactory
   })
 
   beforeEach(async () => {
-    assetToken = await testTokenNew('Ether', 'WETH', assetValue)
-    collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
+    assetToken = await testTokenNew('Ether', 'WETH', assetValue) as unknown as IERC20
+    collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue) as unknown as IERC20
   })
 
   it('Creat pair deploys a pair contract', async () => {

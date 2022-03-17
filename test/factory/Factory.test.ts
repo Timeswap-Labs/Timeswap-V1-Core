@@ -30,7 +30,7 @@ describe('Factory Contract', () => {
   it('Set Owner and accept owner from another account', async () => {
     // setting new owner and emitting event
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`)
-    await expect(factory.connect(signers[10]).setOwner(signers[1].address))
+    await expect(factory.connect(signers[10]).setPendingOwner(signers[1].address))
       .to.emit(factory, 'SetOwner')
       .withArgs(signers[1].address)
     // accepting ownership and emitting event
@@ -43,17 +43,17 @@ describe('Factory Contract', () => {
 
   it('Setting New Owner from non-owner account: Reverted', async () => {
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`)
-    await expect(factory.connect(signers[9]).setOwner(signers[1].address)).to.be.revertedWith('E102')
+    await expect(factory.connect(signers[9]).setPendingOwner(signers[1].address)).to.be.revertedWith('E102')
   })
 
   it('Setting New Owner to ZeroAddress: Reverted', async () => {
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`)
-    await expect(factory.connect(signers[10]).setOwner(ethers.constants.AddressZero)).to.be.revertedWith('E101')
+    await expect(factory.connect(signers[10]).setPendingOwner(ethers.constants.AddressZero)).to.be.revertedWith('E101')
   })
 
   it('Accept owner from third account: Reverted', async () => {
     console.log(`Deploying TimeSwap Factory with fee: ${fee} and protocolFee: ${protocol_fee}`)
-    await factory.connect(signers[10]).setOwner(signers[1].address)
+    await factory.connect(signers[10]).setPendingOwner(signers[1].address)
     await expect(factory.connect(signers[2]).acceptOwner()).to.be.revertedWith('E102')
   })
 })
@@ -110,23 +110,21 @@ describe('', async () => {
 })
 
 describe('', async () => {
-  it('Deploying factory with 0 fee', async () => {
+  it('Deploying factory with 0 fee: reverted', async () => {
     console.log('Deploying factory with 0 fee')
     let signerAddress = await ethers.getSigners()
     let timeSwapMathFactory = await ethers.getContractFactory('TimeswapMath')
     let timeSwapMathContract = await timeSwapMathFactory.deploy()
-    let factoryContract = await factoryInit(signerAddress[1].address, 0n, undefined, timeSwapMathContract.address)
-    expect(await factoryContract.owner()).to.be.equal(signerAddress[1].address)
+    await expect(factoryInit(signerAddress[1].address, 0n, undefined, timeSwapMathContract.address)).to.be.reverted    
   })
 })
 
 describe('', async () => {
-  it('Deploying factory with 0 protocol fee', async () => {
+  it('Deploying factory with 0 protocol fee: reverted', async () => {
     console.log('Deploying factory with 0 protocol fee')
     let signerAddress = await ethers.getSigners()
     let timeSwapMathFactory = await ethers.getContractFactory('TimeswapMath')
     let timeSwapMathContract = await timeSwapMathFactory.deploy()
-    let factoryContract = await factoryInit(signerAddress[1].address, undefined, 0n, timeSwapMathContract.address)
-    expect(await factoryContract.owner()).to.be.equal(signerAddress[1].address)
+    await expect(factoryInit(signerAddress[1].address, undefined, 0n, timeSwapMathContract.address)).to.be.reverted    
   })
 })

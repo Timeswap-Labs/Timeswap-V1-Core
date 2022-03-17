@@ -19,6 +19,7 @@ interface Claims {
 }
 interface StateParams {
   reserves: Token
+  feeStored: bigint
   totalLiquidity: bigint
   totalClaims: Claims
   totalDebtCreated: bigint
@@ -32,27 +33,8 @@ interface StateTestParams {
   cdp: bigint
 }
 
-let state: StateParams = {
-  reserves: { asset: 10n, collateral: 10n },
-  totalLiquidity: 10n,
-  totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
-  totalDebtCreated: 10n,
-  x: 100n,
-  y: 100n,
-  z: 100n,
-}
-
-const stateTest: StateTestParams = {
-  asset: 100n,
-  interest: 100n,
-  cdp: 100n,
-}
 
 let constantProductTestContract: ConstantProductTest
-
-let assetReserve: bigint = 100n
-let interestAdjusted: bigint = 100n
-let cdpAdjusted: bigint = 100n
 
 describe('constantProduct', () => {
   beforeEach(async () => {
@@ -62,6 +44,24 @@ describe('constantProduct', () => {
   })
 
   it('checkConstantProduct should reverted', async () => {
+    let state: StateParams = {
+      reserves: { asset: 10n, collateral: 10n },
+      feeStored: 2n,
+      totalLiquidity: 10n,
+      totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
+      totalDebtCreated: 10n,
+      x: 1000n,
+      y: 1000n,
+      z: 1000n,
+    }
+    const stateTest: StateTestParams = {
+      asset: 1000n,
+      interest: 1000n,
+      cdp: 1000n,
+    }
+    let assetReserve: bigint = 100n
+    let interestAdjusted: bigint = 100n
+    let cdpAdjusted: bigint = 100n
     await expect(
       constantProductTestContract.checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted)
     ).to.be.revertedWith('E301')
@@ -69,8 +69,9 @@ describe('constantProduct', () => {
   })
 
   it('checkConstantProduct should return true', async () => {
-    state = {
+    let state = {
       reserves: { asset: 100n, collateral: 100n },
+      feeStored: 2n,
       totalLiquidity: 10n,
       totalClaims: { bondPrincipal: 1n, bondInterest: 9n, insurancePrincipal: 1n, insuranceInterest: 9n },
       totalDebtCreated: 10n,
@@ -78,14 +79,14 @@ describe('constantProduct', () => {
       y: 10n,
       z: 1n,
     }
-    const stateTest: StateTestParams = {
+    let stateTest: StateTestParams = {
       asset: 20n,
       interest: 10n,
       cdp: 1n,
     }
-    assetReserve = 30n
-    interestAdjusted = 10n
-    cdpAdjusted = 1n << 32n
+    let assetReserve = 30n
+    let interestAdjusted = 10n
+    let cdpAdjusted = 1n << 32n
     expect(await constantProductTestContract.checkConstantProduct(state, assetReserve, interestAdjusted, cdpAdjusted))
       .to.be.true
     expect(ConstantProduct.checkConstantProduct(stateTest, assetReserve, interestAdjusted, cdpAdjusted)).to.be.true

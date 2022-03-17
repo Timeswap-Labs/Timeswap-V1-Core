@@ -117,8 +117,8 @@ library TimeswapMath {
         uint112 xIncrease,
         uint112 yDecrease,
         uint112 zDecrease,
-        uint16 fee,
-        uint16 protocolFee
+        uint256 fee,
+        uint256 protocolFee
     )
         external
         view
@@ -192,8 +192,8 @@ library TimeswapMath {
     function lendGetFees(
         uint256 maturity,
         uint112 xIncrease,
-        uint16 fee,
-        uint16 protocolFee
+        uint256 fee,
+        uint256 protocolFee
     ) private view returns (
         uint256 feeStoredIncrease,
         uint256 protocolFeeStoredIncrease
@@ -298,8 +298,8 @@ library TimeswapMath {
         uint112 xDecrease,
         uint112 yIncrease,
         uint112 zIncrease,
-        uint16 fee,
-        uint16 protocolFee
+        uint256 fee,
+        uint256 protocolFee
     )
         external
         view
@@ -380,8 +380,8 @@ library TimeswapMath {
     function borrowGetFees(
         uint256 maturity,
         uint112 xDecrease,
-        uint16 fee,
-        uint16 protocolFee
+        uint256 fee,
+        uint256 protocolFee
     ) private view returns (
             uint256 feeStoredIncrease,
             uint256 protocolFeeStoredIncrease

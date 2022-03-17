@@ -17,7 +17,7 @@ library ConstantProduct {
         (uint256 prod0, uint256 prod1) = (uint256(yAdjusted) * zAdjusted).mul512(xReserve);
         (uint256 _prod0, uint256 _prod1) = ((uint256(state.y) * state.z)).mul512(state.x);
 
-        require(prod1 >= _prod1, 'E301(1)');
-        if (prod1 == _prod1) require(prod0 >= _prod0, 'E301(2)');
+        require(prod1 >= _prod1, 'E301');
+        if (prod1 == _prod1) require(prod0 >= _prod0, 'E301');
     }
 }

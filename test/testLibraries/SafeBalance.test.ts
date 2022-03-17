@@ -22,7 +22,7 @@ describe('Checking SafeBalance', () => {
   })
 
   beforeEach(async () => {
-    token = await testTokenNew('Ether', 'WETH', tokenMinted)
+    token = await testTokenNew('Ether', 'WETH', tokenMinted) as unknown as IERC20;
     const SafeBalanceTestContractFactory = await ethers.getContractFactory('SafeBalanceTest')
     safeBalTestContract = (await SafeBalanceTestContractFactory.deploy()) as SafeBalanceTest
     await safeBalTestContract.deployed()

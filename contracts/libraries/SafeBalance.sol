@@ -13,7 +13,7 @@ library SafeBalance {
         bytes memory data =
             address(token).functionStaticCall(
                 abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)),
-                "balanceOf Call to IERC20 token not successful"
+                "Failed ERC20 balanceOf"
             );
         return abi.decode(data, (uint256));
     }

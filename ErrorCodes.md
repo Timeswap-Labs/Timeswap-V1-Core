@@ -44,6 +44,10 @@ Can occur in `createPair`
 
 Check the `asset` and the `collateral` passed, and verify that they are the intended tokens. If they are the intended tokens then don't proceed to create a pair, and try getting the existing pair.
 
+### E105
+
+Fee and protocol fee should not be zero.
+
 ## `Pair.sol`
 
 ### E201

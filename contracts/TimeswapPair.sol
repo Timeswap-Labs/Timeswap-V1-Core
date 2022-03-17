@@ -9,12 +9,13 @@ import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Array} from './libraries/Array.sol';
 import {Callback} from './libraries/Callback.sol';
 import {BlockNumber} from './libraries/BlockNumber.sol';
+import {ReentrancyGuard} from '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 /// @title Timeswap Pair
 /// @author Timeswap Labs
 /// @notice It is recommended to use Timeswap Convenience to interact with this contract.
 /// @notice All error messages are coded and can be found in the documentation.
-contract TimeswapPair is IPair {
+contract TimeswapPair is IPair, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Array for Due[];
 
@@ -27,18 +28,15 @@ contract TimeswapPair is IPair {
     /// @inheritdoc IPair
     IERC20 public immutable override collateral;
     /// @inheritdoc IPair
-    uint16 public immutable override fee;
+    uint256 public immutable override fee;
     /// @inheritdoc IPair
-    uint16 public immutable override protocolFee;
+    uint256 public immutable override protocolFee;
 
     /// @inheritdoc IPair
     uint256 public override protocolFeeStored;
 
     /// @dev Stores the individual states of each Pool.
     mapping(uint256 => Pool) private pools;
-
-    /// @dev Stores the access state for reentrancy guard.
-    uint256 private locked = 1;
 
     /* ===== VIEW =====*/
 
@@ -116,22 +114,12 @@ contract TimeswapPair is IPair {
         IERC20 _collateral,
         uint16 _fee,
         uint16 _protocolFee
-    ) {
+    ) ReentrancyGuard() {
         factory = IFactory(msg.sender);
         asset = _asset;
         collateral = _collateral;
         fee = _fee;
         protocolFee = _protocolFee;
-    }
-
-    /* ===== MODIFIER ===== */
-
-    /// @dev The modifier for reentrancy guard.
-    modifier lock() {
-        require(locked == 1, 'E211');
-        locked = 2;
-        _;
-        locked = 1;
     }
 
     /* ===== UPDATE ===== */
@@ -140,7 +128,7 @@ contract TimeswapPair is IPair {
     function mint(MintParam calldata param)
         external
         override
-        lock
+        nonReentrant
         returns (
             uint256 assetIn,
             uint256 liquidityOut,
@@ -159,6 +147,7 @@ contract TimeswapPair is IPair {
         require(param.zIncrease != 0, 'E205');
         
         Pool storage pool = pools[param.maturity];
+        State memory state = pool.state;
 
         uint256 feeStoredIncrease;
         (liquidityOut, dueOut, feeStoredIncrease) = TimeswapMath.mint(
@@ -170,21 +159,22 @@ contract TimeswapPair is IPair {
         );
 
         require(liquidityOut != 0, 'E212');
-        pool.state.totalLiquidity += liquidityOut;
+        state.totalLiquidity += liquidityOut;
         pool.liquidities[param.liquidityTo] += liquidityOut;
 
-        pool.state.feeStored += feeStoredIncrease;
-
+        state.feeStored += feeStoredIncrease;
 
         id = pool.dues[param.dueTo].insert(dueOut);
 
-        pool.state.reserves.asset += param.xIncrease;
-        pool.state.reserves.collateral += dueOut.collateral;
-        pool.state.totalDebtCreated += dueOut.debt;
+        state.reserves.asset += param.xIncrease;
+        state.reserves.collateral += dueOut.collateral;
+        state.totalDebtCreated += dueOut.debt;
 
-        pool.state.x += param.xIncrease;
-        pool.state.y += param.yIncrease;
-        pool.state.z += param.zIncrease;
+        state.x += param.xIncrease;
+        state.y += param.yIncrease;
+        state.z += param.zIncrease;
+
+        pool.state = state;
 
         assetIn = param.xIncrease;
         assetIn += feeStoredIncrease;
@@ -208,7 +198,7 @@ contract TimeswapPair is IPair {
     function burn(BurnParam calldata param) 
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint256 assetOut, 
             uint128 collateralOut
@@ -222,7 +212,8 @@ contract TimeswapPair is IPair {
         require(param.liquidityIn != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity > 0, 'E206');
+        State memory state = pool.state;
+        require(state.totalLiquidity != 0, 'E206');
 
         uint128 _assetOut;
         uint256 feeOut;
@@ -231,7 +222,7 @@ contract TimeswapPair is IPair {
             param.liquidityIn
         );
 
-        pool.state.totalLiquidity -= param.liquidityIn;
+        state.totalLiquidity -= param.liquidityIn;
 
         pool.liquidities[msg.sender] -= param.liquidityIn;
 
@@ -239,14 +230,16 @@ contract TimeswapPair is IPair {
         assetOut += feeOut;
 
         if (assetOut != 0) {
-            pool.state.reserves.asset -= _assetOut;
-            pool.state.feeStored -= feeOut;
+            state.reserves.asset -= _assetOut;
+            state.feeStored -= feeOut;
             asset.safeTransfer(param.assetTo, assetOut);
         }
         if (collateralOut != 0) {
-            pool.state.reserves.collateral -= collateralOut;
+            state.reserves.collateral -= collateralOut;
             collateral.safeTransfer(param.collateralTo, collateralOut);
         }
+
+        pool.state = state;
 
         emit Burn(
             param.maturity,
@@ -264,7 +257,7 @@ contract TimeswapPair is IPair {
     function lend(LendParam calldata param) 
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint256 assetIn,
             Claims memory claimsOut
@@ -278,7 +271,8 @@ contract TimeswapPair is IPair {
         require(param.xIncrease != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity != 0, 'E206');
+        State memory state = pool.state;
+        require(state.totalLiquidity != 0, 'E206');
 
         uint256 feeStoredIncrease;
         uint256 protocolFeeStoredIncrease;
@@ -292,24 +286,26 @@ contract TimeswapPair is IPair {
             protocolFee
         );
 
-        pool.state.feeStored += feeStoredIncrease;
+        state.feeStored += feeStoredIncrease;
         protocolFeeStored += protocolFeeStoredIncrease;
 
-        pool.state.totalClaims.bondPrincipal += claimsOut.bondPrincipal;
-        pool.state.totalClaims.bondInterest += claimsOut.bondInterest;
-        pool.state.totalClaims.insurancePrincipal += claimsOut.insurancePrincipal;
-        pool.state.totalClaims.insuranceInterest += claimsOut.insuranceInterest;
+        state.totalClaims.bondPrincipal += claimsOut.bondPrincipal;
+        state.totalClaims.bondInterest += claimsOut.bondInterest;
+        state.totalClaims.insurancePrincipal += claimsOut.insurancePrincipal;
+        state.totalClaims.insuranceInterest += claimsOut.insuranceInterest;
 
         pool.claims[param.bondTo].bondPrincipal += claimsOut.bondPrincipal;
         pool.claims[param.bondTo].bondInterest += claimsOut.bondInterest;
         pool.claims[param.insuranceTo].insurancePrincipal += claimsOut.insurancePrincipal;
         pool.claims[param.insuranceTo].insuranceInterest += claimsOut.insuranceInterest;
 
-        pool.state.reserves.asset += param.xIncrease;
+        state.reserves.asset += param.xIncrease;
 
-        pool.state.x += param.xIncrease;
-        pool.state.y -= param.yDecrease;
-        pool.state.z -= param.zDecrease;
+        state.x += param.xIncrease;
+        state.y -= param.yDecrease;
+        state.z -= param.zDecrease;
+
+        pool.state = state;
 
         assetIn = param.xIncrease;
         assetIn += feeStoredIncrease;
@@ -334,7 +330,7 @@ contract TimeswapPair is IPair {
     function withdraw(WithdrawParam calldata param)
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             Tokens memory tokensOut
         ) 
@@ -353,29 +349,34 @@ contract TimeswapPair is IPair {
         );
 
         Pool storage pool = pools[param.maturity];
+        State memory state = pool.state;
 
         tokensOut = TimeswapMath.withdraw(pool.state, param.claimsIn);
 
-        pool.state.totalClaims.bondPrincipal -= param.claimsIn.bondPrincipal;
-        pool.state.totalClaims.bondInterest -= param.claimsIn.bondInterest;
-        pool.state.totalClaims.insurancePrincipal -= param.claimsIn.insurancePrincipal;
-        pool.state.totalClaims.insuranceInterest -= param.claimsIn.insuranceInterest;
+        state.totalClaims.bondPrincipal -= param.claimsIn.bondPrincipal;
+        state.totalClaims.bondInterest -= param.claimsIn.bondInterest;
+        state.totalClaims.insurancePrincipal -= param.claimsIn.insurancePrincipal;
+        state.totalClaims.insuranceInterest -= param.claimsIn.insuranceInterest;
 
-        Claims storage sender = pool.claims[msg.sender];
+        Claims memory sender = pool.claims[msg.sender];
 
         sender.bondPrincipal -= param.claimsIn.bondPrincipal;
         sender.bondInterest -= param.claimsIn.bondInterest;
         sender.insurancePrincipal -= param.claimsIn.insurancePrincipal;
         sender.insuranceInterest -= param.claimsIn.insuranceInterest;
 
+        pool.claims[msg.sender] = sender;
+
         if (tokensOut.asset != 0) {
-            pool.state.reserves.asset -= tokensOut.asset;
+            state.reserves.asset -= tokensOut.asset;
             asset.safeTransfer(param.assetTo, tokensOut.asset);
         }
         if (tokensOut.collateral != 0) {
-            pool.state.reserves.collateral -= tokensOut.collateral;
+            state.reserves.collateral -= tokensOut.collateral;
             collateral.safeTransfer(param.collateralTo, tokensOut.collateral);
         }
+
+        pool.state = state;
 
         emit Withdraw(
             param.maturity,
@@ -391,7 +392,7 @@ contract TimeswapPair is IPair {
     function borrow(BorrowParam calldata param)
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint256 assetOut,
             uint256 id, 
@@ -406,7 +407,8 @@ contract TimeswapPair is IPair {
         require(param.xDecrease != 0, 'E205');
 
         Pool storage pool = pools[param.maturity];
-        require(pool.state.totalLiquidity != 0, 'E206');
+        State memory state = pool.state;
+        require(state.totalLiquidity != 0, 'E206');
 
         uint256 feeStoredIncrease;
         uint256 protocolFeeStoredIncrease;
@@ -420,18 +422,20 @@ contract TimeswapPair is IPair {
             protocolFee
         );
 
-        pool.state.feeStored += feeStoredIncrease;
+        state.feeStored += feeStoredIncrease;
         protocolFeeStored += protocolFeeStoredIncrease;
 
         id = pool.dues[param.dueTo].insert(dueOut);
 
-        pool.state.reserves.asset -= param.xDecrease;
-        pool.state.reserves.collateral += dueOut.collateral;
-        pool.state.totalDebtCreated += dueOut.debt;
+        state.reserves.asset -= param.xDecrease;
+        state.reserves.collateral += dueOut.collateral;
+        state.totalDebtCreated += dueOut.debt;
 
-        pool.state.x -= param.xDecrease;
-        pool.state.y += param.yIncrease;
-        pool.state.z += param.zIncrease;
+        state.x -= param.xDecrease;
+        state.y += param.yIncrease;
+        state.z += param.zIncrease;
+
+        pool.state = state;
 
         assetOut = param.xDecrease;
         assetOut -= feeStoredIncrease;
@@ -459,7 +463,7 @@ contract TimeswapPair is IPair {
     function pay(PayParam calldata param)
         external 
         override 
-        lock 
+        nonReentrant 
         returns (
             uint128 assetIn, 
             uint128 collateralOut
@@ -469,23 +473,31 @@ contract TimeswapPair is IPair {
         require(param.owner != address(0), 'E201');
         require(param.to != address(0), 'E201');
         require(param.to != address(this), 'E204');
-        require(param.ids.length == param.assetsIn.length, 'E205');
-        require(param.ids.length == param.collateralsOut.length, 'E205');
+        
+        uint256 length = param.ids.length;
+        require(length== param.assetsIn.length, 'E205');
+        require(length == param.collateralsOut.length, 'E205');
 
         Pool storage pool = pools[param.maturity];
 
         Due[] storage dues = pool.dues[param.owner];
-        require(dues.length >= param.ids.length, 'E205');
+        require(dues.length >= length, 'E205');
 
-        for (uint256 i; i < param.ids.length;) {
+        for (uint256 i; i < length;) {
             Due storage due = dues[param.ids[i]];
             require(due.startBlock != BlockNumber.get(), 'E207');
-            if (param.owner != msg.sender) require(param.collateralsOut[i] == 0, 'E213');
-            require(uint256(assetIn) * due.collateral >= uint256(collateralOut) * due.debt, 'E303');
-            due.debt -= param.assetsIn[i];
-            due.collateral -= param.collateralsOut[i];
-            assetIn += param.assetsIn[i];
-            collateralOut += param.collateralsOut[i];
+
+            uint112 _assetIn = param.assetsIn[i];
+            uint112 _collateralOut = param.collateralsOut[i];
+
+            if (param.owner != msg.sender) require(_collateralOut == 0, 'E213');
+            require(uint256(_assetIn) * due.collateral >= uint256(_collateralOut) * due.debt, 'E303');
+            
+            due.debt -= _assetIn;
+            due.collateral -= _collateralOut;
+            assetIn += _assetIn;
+            collateralOut += _collateralOut;
+
             unchecked { ++i; }
         }
 
@@ -510,8 +522,9 @@ contract TimeswapPair is IPair {
     }
 
     /// @inheritdoc IPair
-    function collectProtocolFee(address to) external override lock returns (uint256 protocolFeeOut) {
+    function collectProtocolFee(address to) external override nonReentrant returns (uint256 protocolFeeOut) {
         require(msg.sender == factory.owner(), 'E216');
+        require(to != address(0), 'E201');
 
         protocolFeeOut = protocolFeeStored;
         protocolFeeStored = 0;

@@ -32,12 +32,14 @@ interface IFactory {
     function pendingOwner() external view returns (address);
 
     /// @dev Return the fee per second earned by liquidity providers.
+    /// @dev Must be downcasted to uint16.
     /// @return The fee following UQ0.40 format.
-    function fee() external view returns (uint16);
+    function fee() external view returns (uint256);
 
     /// @dev Return the protocol fee per second earned by the owner.
+    /// @dev Must be downcasted to uint16.
     /// @return The protocol fee per second following UQ0.40 format.
-    function protocolFee() external view returns (uint16);
+    function protocolFee() external view returns (uint256);
 
     /// @dev Returns the address of a deployed pair.
     /// @param asset The address of the ERC20 being lent and borrowed.
@@ -57,7 +59,7 @@ interface IFactory {
     /// @dev Set the pending owner of the factory.
     /// @dev Can only be called by the current owner.
     /// @param _pendingOwner the chosen pending owner.
-    function setOwner(address _pendingOwner) external;
+    function setPendingOwner(address _pendingOwner) external;
 
     /// @dev Set the pending owner as the owner of the factory.
     /// @dev Reset the pending owner to zero.
