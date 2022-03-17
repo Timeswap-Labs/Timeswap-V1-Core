@@ -33,7 +33,6 @@ interface StateTestParams {
   cdp: bigint
 }
 
-
 let constantProductTestContract: ConstantProductTest
 
 describe('constantProduct', () => {

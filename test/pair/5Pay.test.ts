@@ -62,10 +62,10 @@ describe('Pay', () => {
       let borrowTxData: any
       try {
         try {
-          borrowTxData = await borrowFixture(mint, signers[0], borrowParams)  
+          borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
         } catch (error) {
-          console.log(error);
-        }  
+          console.log(error)
+        }
         if (borrowTxData.pair != undefined) {
           pair = borrowTxData.pair
           pairSim = borrowTxData.pairSim

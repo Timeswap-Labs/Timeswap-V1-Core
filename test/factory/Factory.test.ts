@@ -115,7 +115,7 @@ describe('', async () => {
     let signerAddress = await ethers.getSigners()
     let timeSwapMathFactory = await ethers.getContractFactory('TimeswapMath')
     let timeSwapMathContract = await timeSwapMathFactory.deploy()
-    await expect(factoryInit(signerAddress[1].address, 0n, undefined, timeSwapMathContract.address)).to.be.reverted    
+    await expect(factoryInit(signerAddress[1].address, 0n, undefined, timeSwapMathContract.address)).to.be.reverted
   })
 })
 
@@ -125,6 +125,6 @@ describe('', async () => {
     let signerAddress = await ethers.getSigners()
     let timeSwapMathFactory = await ethers.getContractFactory('TimeswapMath')
     let timeSwapMathContract = await timeSwapMathFactory.deploy()
-    await expect(factoryInit(signerAddress[1].address, undefined, 0n, timeSwapMathContract.address)).to.be.reverted    
+    await expect(factoryInit(signerAddress[1].address, undefined, 0n, timeSwapMathContract.address)).to.be.reverted
   })
 })
