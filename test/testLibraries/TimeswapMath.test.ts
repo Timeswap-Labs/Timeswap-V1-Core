@@ -97,7 +97,6 @@ describe('TimeswapMath', () => {
         })
         TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
         await TimeswapMathTestContract.deployed()
-
         ;[liquidityOut, dueOut, feeStoredIncrease] = await TimeswapMathTestContract.mint(
           maturity,
           state,
