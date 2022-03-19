@@ -230,15 +230,25 @@ export class PairSim {
     let pool = this.getPool(maturity)
 
     let tokensOut = tokensDefault()
+    let feeOut;
+
     tokensOut.asset = BurnMath.getAsset(pool.state, liquidityIn)
     tokensOut.collateral = BurnMath.getCollateral(pool.state, liquidityIn)
-    let feeOut = BurnMath.getFee(pool.state, liquidityIn)
-    pool.state.totalLiquidity -= liquidityIn
-    tokensOut.asset += feeOut
-    this.removeLiquidity(pool, liquidityIn, sender)
+    feeOut = BurnMath.getFee(pool.state, liquidityIn)
 
-    pool.state.reserves.asset -= tokensOut.asset + feeOut
-    pool.state.reserves.collateral -= tokensOut.collateral
+    pool.state.totalLiquidity -= liquidityIn
+  
+    this.removeLiquidity(pool, liquidityIn, sender);
+    
+    tokensOut.asset += feeOut
+
+    if (tokensOut.asset != 0n) {
+      pool.state.reserves.asset -= tokensOut.asset;
+      pool.state.feeStored -= feeOut;
+  }
+    if (tokensOut.collateral != 0n) {
+      pool.state.reserves.collateral -= tokensOut.collateral ;
+  }
 
     return tokensOut
   }

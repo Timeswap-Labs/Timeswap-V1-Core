@@ -54,7 +54,7 @@ describe('Withdraw', () => {
         lendTxData = await lendFixture(mint, signers[0], lendParam)
         lendData = lendTxData.lendData
       } catch (error) {
-        console.log('error in lending hence ignored: ', (error as TypeError).message)
+        console.log('error in lending hence ignored')
         continue
       }
       await advanceTimeAndBlock(Number(updatedMaturity))
@@ -114,6 +114,11 @@ describe('Withdraw', () => {
           expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
           expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         }
+
+        console.log('Should have correct feeStored')
+        const feeStored = await pair.feeStored();
+        const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity));
+        expect(feeStored.eq(feeStoredSim)).to.true;
       }
     }
   })
