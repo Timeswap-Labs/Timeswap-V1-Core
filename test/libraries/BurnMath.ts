@@ -9,9 +9,7 @@ export function getAsset(state: State, liquidityIn: bigint): bigint {
     _assetOut -= totalBond
     _assetOut = mulDiv(_assetOut, liquidityIn, state.totalLiquidity)
     return _assetOut
-  }
-  else return 0n
-
+  } else return 0n
 }
 
 export function getCollateral(state: State, liquidityIn: bigint): bigint {
@@ -31,13 +29,12 @@ export function getCollateral(state: State, liquidityIn: bigint): bigint {
       subtrahend = divUp(subtrahend, totalBond)
       _collateralOut -= subtrahend
       _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
-      console.log("returning");
+      console.log('returning')
       return _collateralOut
     } else {
       return 0n
     }
   }
-
 }
 export function getFee(state: State, liquidityIn: bigint) {
   return mulDiv(state.feeStored, liquidityIn, state.totalLiquidity)

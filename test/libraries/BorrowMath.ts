@@ -2,21 +2,21 @@ import { doesNotMatch } from 'assert'
 import { checkConstantProduct } from '../libraries/ConstantProduct'
 import { divUp, shiftRightUp } from '../libraries/Math'
 export function getFees(maturity: bigint, assetOut: bigint, fee: bigint, protocolFee: bigint, now: bigint) {
-  let totalFee = fee + protocolFee;
+  let totalFee = fee + protocolFee
 
-  let denominator = (maturity - now) * totalFee 
+  let denominator = (maturity - now) * totalFee
   denominator = denominator + 0x10000000000n
 
-  let adjusted = assetOut;
-  adjusted = adjusted * 0x10000000000n;
-  adjusted = adjusted / denominator;
-  
+  let adjusted = assetOut
+  adjusted = adjusted * 0x10000000000n
+  adjusted = adjusted / denominator
+
   let totalFeeStoredIncrease = assetOut - adjusted
-  let feeStoredIncrease = totalFeeStoredIncrease;
-  feeStoredIncrease = feeStoredIncrease*fee;
-  feeStoredIncrease = feeStoredIncrease /totalFee;
-  let protocolFeeStoredIncrease = totalFeeStoredIncrease - feeStoredIncrease;
-  
+  let feeStoredIncrease = totalFeeStoredIncrease
+  feeStoredIncrease = feeStoredIncrease * fee
+  feeStoredIncrease = feeStoredIncrease / totalFee
+  let protocolFeeStoredIncrease = totalFeeStoredIncrease - feeStoredIncrease
+
   return {
     feeStoredIncrease: feeStoredIncrease,
     protocolFeeStoredIncrease: protocolFeeStoredIncrease,

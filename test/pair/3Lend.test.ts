@@ -135,9 +135,9 @@ describe('Lend', () => {
       }
 
       console.log('Should have correct feeStored')
-      const feeStored = await pair.feeStored(updatedMaturity);
-      const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity));
-      expect(feeStored.eq(feeStoredSim)).to.true;
+      const feeStored = await pair.feeStored(updatedMaturity)
+      const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity))
+      expect(feeStored.eq(feeStoredSim)).to.true
     }
   })
 })
