@@ -230,15 +230,25 @@ export class PairSim {
     let pool = this.getPool(maturity)
 
     let tokensOut = tokensDefault()
+    let feeOut;
+
     tokensOut.asset = BurnMath.getAsset(pool.state, liquidityIn)
     tokensOut.collateral = BurnMath.getCollateral(pool.state, liquidityIn)
-    let feeOut = BurnMath.getFee(pool.state, liquidityIn)
-    pool.state.totalLiquidity -= liquidityIn
-    tokensOut.asset += feeOut
-    this.removeLiquidity(pool, liquidityIn, sender)
+    feeOut = BurnMath.getFee(pool.state, liquidityIn)
 
-    pool.state.reserves.asset -= tokensOut.asset + feeOut
-    pool.state.reserves.collateral -= tokensOut.collateral
+    pool.state.totalLiquidity -= liquidityIn
+  
+    this.removeLiquidity(pool, liquidityIn, sender);
+    
+    tokensOut.asset += feeOut
+
+    if (tokensOut.asset != 0n) {
+      pool.state.reserves.asset -= tokensOut.asset;
+      pool.state.feeStored -= feeOut;
+  }
+    if (tokensOut.collateral != 0n) {
+      pool.state.reserves.collateral -= tokensOut.collateral ;
+  }
 
     return tokensOut
   }
@@ -362,13 +372,20 @@ export class PairSim {
 
     const pool = this.getPool(maturity)
 
-    if (pool.state.totalLiquidity <= 0) return 'Invalid'
-
+    if (pool.state.totalLiquidity <= 0) return 'Invalid';
     if (!BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease)) return 'constant product check'
     let dueOut = dueDefault()
 
     dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease, now)
     dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease, now)
+    const {
+      feeStoredIncrease,
+      protocolFeeStoredIncrease
+    } = BorrowMath.getFees(
+      maturity, assetOut, this.fee,this.protocolFee,now
+    )
+    pool.state.feeStored += feeStoredIncrease
+    this.protocolFeeStored += protocolFeeStoredIncrease
     dueOut.startBlock = blockNumber
 
     const dues = this.getDues(pool, dueTo)

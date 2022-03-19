@@ -34,7 +34,7 @@ describe('Borrow', () => {
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-      const mintParameters: MintParams = {
+      let mintParameters: MintParams = {
         assetIn: testCase.assetIn,
         collateralIn: testCase.collateralIn,
         interestIncrease: testCase.interestIncrease,
@@ -42,6 +42,14 @@ describe('Borrow', () => {
         maturity: updatedMaturity,
         currentTimeStamp: testCase.currentTimeStamp,
       }
+      // mintParameters = {
+      //     assetIn: 2648728184194027714900000000000000n,
+      //     collateralIn: 3774192276233360975400000000000000n,
+      //     interestIncrease: 4774530983753534921700000000000000n,
+      //     cdpIncrease: 1524234782014559790200000000000000n,
+      //     maturity: 1679232185n,
+      //     currentTimeStamp: 1647675233n
+      // }
       let mint: any
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters)
@@ -53,10 +61,19 @@ describe('Borrow', () => {
       }
       const stateAfterMint = await pair.state()
       const reservesAfterMint = await pair.totalReserves()
-      const borrowParams = await TestCases.borrow(stateAfterMint, reservesAfterMint)
+      let borrowParams = await TestCases.borrow(stateAfterMint, reservesAfterMint)
+      // borrowParams = {
+      //   assetOut: 6756250141049202917100000000000n,
+      //   borrowCollateralIn: 2256370335146184154400000000000000n,
+      //   interestIncrease: 3139760408365147470900000000000n,
+      //   cdpIncrease: 3414621487706639065700000000000n
+      // }
       let error
       try {
         const borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
+        // console.log("successful borrow for case number:", i + 1);
+        // console.log(borrowParams);
+        // console.log("-----------");
         pair = borrowTxData.pair
         pairSim = borrowTxData.pairSim
 
@@ -112,6 +129,12 @@ describe('Borrow', () => {
           expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
           expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         }
+        
+        console.log('Should have correct feeStored')
+        const feeStored = await pair.feeStored();
+        const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity));
+        expect(feeStored.eq(feeStoredSim)).to.true;
+
         continue
       } catch (borrowFixtureError) {
         error = borrowFixtureError

@@ -131,6 +131,11 @@ describe('Loss Burn', () => {
           expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
           expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
         }
+
+        console.log('Should have correct feeStored')
+        const feeStored = await pair.feeStored();
+        const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity));
+        expect(feeStored.eq(feeStoredSim)).to.true;
       }
     }
   })

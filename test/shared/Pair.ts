@@ -1,5 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { ContractTransaction } from 'ethers'
+import { BigNumber, ContractTransaction } from 'ethers'
 import { ethers } from 'hardhat'
 import { Address } from 'hardhat-deploy/dist/types'
 import type { TestToken } from '../../typechain/TestToken'
@@ -24,6 +24,10 @@ export class Pair {
 
   async factory(): Promise<Address> {
     return await this.pairContract.factory()
+  }
+
+  async feeStored(): Promise<BigNumber> {
+    return await this.pairContract.feeStored(this.maturity)
   }
 
   async state(): Promise<ConstantProduct> {

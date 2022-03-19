@@ -74,7 +74,6 @@ describe('MintMultiple', () => {
         pairSim = mint2.pairSim
       } catch (error) {
         console.log(`Case number: ${i + 1} expected to fail at second mint`)
-        console.log((error as TypeError).message)
         await expect(
           pair.pairContractCallee
             .connect(signers[0])
@@ -146,6 +145,10 @@ describe('MintMultiple', () => {
         expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
         expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
       }
+      console.log('Should have correct feeStored')
+      const feeStored = await pair.feeStored();
+      const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity));
+      expect(feeStored.eq(feeStoredSim)).to.true;
     }
   })
 })
