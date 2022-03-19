@@ -87,7 +87,7 @@ describe('Pay', () => {
           console.log(testCase)
           continue
         }
-      } catch {}
+      } catch { }
       console.log('Should have correct reserves')
       const reserves = await pair.totalReserves()
       const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
@@ -138,6 +138,10 @@ describe('Pay', () => {
         expect(duesOf[i].debt).to.equalBigInt(duesOfSim[i].debt)
         expect(duesOf[i].startBlock).to.equalBigInt(duesOfSim[i].startBlock)
       }
+      console.log('Should have correct feeStored')
+      const feeStored = await pair.feeStored();
+      const feeStoredSim = pairSim.feeStored(pairSim.getPool(updatedMaturity));
+      expect(feeStored.eq(feeStoredSim)).to.true;
     }
   })
 })
