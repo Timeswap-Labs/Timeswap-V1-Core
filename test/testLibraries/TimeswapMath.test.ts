@@ -620,6 +620,157 @@ describe('TimeswapMath', () => {
         expect(result[1].eq(tokensOut.collateral)).to.true
       })
     })
+
+    describe('totalAssets < totalBond; totalAsset < BondPrincipal; totalCollateral > totalInsurance', () => {
+      const state = {
+        reserves: { asset: 900n, collateral: 900n },
+        totalLiquidity: 500n,
+        totalClaims: { bondPrincipal: 1000n, bondInterest: 500n, insuranceInterest: 100n, insurancePrincipal: 100n },
+        totalDebtCreated: 300n,
+        x: 5000n,
+        y: 10000n,
+        z: 10000n,
+        feeStored: 10n,
+      }
+      const stateTest: State = {
+        reserves: { asset: 900n, collateral: 900n },
+        totalLiquidity: 500n,
+        totalClaims: { bondPrincipal: 1000n, bondInterest: 500n, insuranceInterest: 100n, insurancePrincipal: 100n },
+        totalDebtCreated: 300n,
+        asset: 5000n,
+        interest: 10000n,
+        cdp: 10000n,
+        feeStored: 10n,
+      }
+      const claimsIn = {
+        bondPrincipal: 10n,
+        bondInterest: 10n,
+        insuranceInterest: 10n,
+        insurancePrincipal: 10n,
+      }
+      let result: any
+
+      before('', async () => {
+        signers = await ethers.getSigners()
+        maturity = (await now()) + 10000n
+        const TimeswapMathContractFactory = await ethers.getContractFactory('TimeswapMath')
+        const TimeswapMathContract = await TimeswapMathContractFactory.deploy()
+        const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest', {
+          libraries: {
+            TimeswapMath: TimeswapMathContract.address,
+          },
+        })
+        TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+        await TimeswapMathTestContract.deployed()
+        result = await TimeswapMathTestContract.withdraw(state, claimsIn)
+      })
+      it('tokens out', () => {
+        const tokensOut = WithdrawMath.getTokensOut(stateTest, claimsIn)
+        expect(result[0].eq(tokensOut.asset)).to.true
+        expect(result[1].eq(tokensOut.collateral)).to.true
+      })
+    })
+
+    describe('totalAssets < totalBond; totalAsset < BondPrincipal; totalCollateral < totalInsurance; totalCollateral > totalInsurancePrincipal', () => {
+      const state = {
+        reserves: { asset: 999n, collateral: 900n },
+        totalLiquidity: 500n,
+        totalClaims: { bondPrincipal: 1000n, bondInterest: 1n, insuranceInterest: 2n, insurancePrincipal: 450449n },
+        totalDebtCreated: 300n,
+        x: 5000n,
+        y: 10000n,
+        z: 10000n,
+        feeStored: 10n,
+      }
+      const stateTest: State = {
+        reserves: { asset: 999n, collateral: 900n },
+        totalLiquidity: 500n,
+        totalClaims: { bondPrincipal: 1000n, bondInterest: 1n, insuranceInterest: 2n, insurancePrincipal: 450449n },
+        totalDebtCreated: 300n,
+        asset: 5000n,
+        interest: 10000n,
+        cdp: 10000n,
+        feeStored: 10n,
+      }
+      const claimsIn = {
+        bondPrincipal: 10n,
+        bondInterest: 10n,
+        insuranceInterest: 10n,
+        insurancePrincipal: 10n,
+      }
+      let result: any
+
+      before('', async () => {
+        signers = await ethers.getSigners()
+        maturity = (await now()) + 10000n
+        const TimeswapMathContractFactory = await ethers.getContractFactory('TimeswapMath')
+        const TimeswapMathContract = await TimeswapMathContractFactory.deploy()
+        const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest', {
+          libraries: {
+            TimeswapMath: TimeswapMathContract.address,
+          },
+        })
+        TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+        await TimeswapMathTestContract.deployed()
+        result = await TimeswapMathTestContract.withdraw(state, claimsIn)
+      })
+
+      it('tokens out', () => {
+        const tokensOut = WithdrawMath.getTokensOut(stateTest, claimsIn)
+        expect(result[0].eq(tokensOut.asset)).to.true
+        expect(result[1].eq(tokensOut.collateral)).to.true
+      })
+    })
+
+    describe('totalAssets < totalBond; totalAsset < BondPrincipal; totalCollateral < totalInsurance; totalCollateral < InsurancePrincipal', () => {
+      const state = {
+        reserves: { asset: 999n, collateral: 900n },
+        totalLiquidity: 500n,
+        totalClaims: { bondPrincipal: 1000n, bondInterest: 1n, insuranceInterest: 10n, insurancePrincipal: 450451n },
+        totalDebtCreated: 300n,
+        x: 5000n,
+        y: 10000n,
+        z: 10000n,
+        feeStored: 10n,
+      }
+      const stateTest: State = {
+        reserves: { asset: 999n, collateral: 900n },
+        totalLiquidity: 500n,
+        totalClaims: { bondPrincipal: 1000n, bondInterest: 1n, insuranceInterest: 10n, insurancePrincipal: 450451n },
+        totalDebtCreated: 300n,
+        asset: 5000n,
+        interest: 10000n,
+        cdp: 10000n,
+        feeStored: 10n,
+      }
+      const claimsIn = {
+        bondPrincipal: 10n,
+        bondInterest: 10n,
+        insuranceInterest: 10n,
+        insurancePrincipal: 10n,
+      }
+      let result: any
+
+      before('', async () => {
+        signers = await ethers.getSigners()
+        maturity = (await now()) + 10000n
+        const TimeswapMathContractFactory = await ethers.getContractFactory('TimeswapMath')
+        const TimeswapMathContract = await TimeswapMathContractFactory.deploy()
+        const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest', {
+          libraries: {
+            TimeswapMath: TimeswapMathContract.address,
+          },
+        })
+        TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+        await TimeswapMathTestContract.deployed()
+        result = await TimeswapMathTestContract.withdraw(state, claimsIn)
+      })
+      it('tokens out', () => {
+        const tokensOut = WithdrawMath.getTokensOut(stateTest, claimsIn)
+        expect(result[0].eq(tokensOut.asset)).to.true
+        expect(result[1].eq(tokensOut.collateral)).to.true
+      })
+    })
   })
 
   describe('Borrow Math', () => {
