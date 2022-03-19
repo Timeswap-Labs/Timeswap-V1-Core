@@ -2,21 +2,27 @@ import { doesNotMatch } from 'assert'
 import { checkConstantProduct } from '../libraries/ConstantProduct'
 import { divUp, shiftRightUp } from '../libraries/Math'
 export function getFees(maturity: bigint, assetOut: bigint, fee: bigint, protocolFee: bigint, now: bigint) {
-  let duration = maturity - now
+  let totalFee = fee + protocolFee;
 
-  let denominator = duration * fee + 0x10000000000n
+  let denominator = (maturity - now) * totalFee 
+  denominator = denominator + 0x10000000000n
 
-  let adjusted = (assetOut * 0x10000000000n) / denominator
-  let feeStoredIncrease = assetOut - adjusted
-
-  denominator = duration * protocolFee + 0x10000000000n
-  adjusted = (adjusted * 0x10000000000n) / denominator
-  let protocolFeeStoredIncrease = assetOut - adjusted - feeStoredIncrease
+  let adjusted = assetOut;
+  adjusted = adjusted * 0x10000000000n;
+  adjusted = adjusted / denominator;
+  
+  let totalFeeStoredIncrease = assetOut - adjusted
+  let feeStoredIncrease = totalFeeStoredIncrease;
+  feeStoredIncrease = feeStoredIncrease*fee;
+  feeStoredIncrease = feeStoredIncrease /totalFee;
+  let protocolFeeStoredIncrease = totalFeeStoredIncrease - feeStoredIncrease;
+  
   return {
     feeStoredIncrease: feeStoredIncrease,
     protocolFeeStoredIncrease: protocolFeeStoredIncrease,
   }
 }
+
 export function check(
   state: {
     asset: bigint
@@ -93,6 +99,7 @@ export function getCollateral(
 }
 
 export default {
+  getFees,
   check,
   adjust,
   readjust,

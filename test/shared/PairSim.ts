@@ -362,13 +362,20 @@ export class PairSim {
 
     const pool = this.getPool(maturity)
 
-    if (pool.state.totalLiquidity <= 0) return 'Invalid'
-
+    if (pool.state.totalLiquidity <= 0) return 'Invalid';
     if (!BorrowMath.check(pool.state, assetOut, interestIncrease, cdpIncrease)) return 'constant product check'
     let dueOut = dueDefault()
 
     dueOut.debt = BorrowMath.getDebt(maturity, assetOut, interestIncrease, now)
     dueOut.collateral = BorrowMath.getCollateral(maturity, pool.state, assetOut, cdpIncrease, now)
+    const {
+      feeStoredIncrease,
+      protocolFeeStoredIncrease
+    } = BorrowMath.getFees(
+      maturity, assetOut, this.fee,this.protocolFee,now
+    )
+    pool.state.feeStored += feeStoredIncrease
+    this.protocolFeeStored += protocolFeeStoredIncrease
     dueOut.startBlock = blockNumber
 
     const dues = this.getDues(pool, dueTo)
