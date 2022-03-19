@@ -351,6 +351,55 @@ describe('TimeswapMath', () => {
         expect(feeOut == feeOutComputed).to.true
       })
     })
+
+    describe('totalAsset < totalBond; collateral*bond < deficit * totalInsurance', () => {
+      before('', async () => {
+        signers = await ethers.getSigners()
+        maturity = (await now()) + 10000n
+        const TimeswapMathContractFactory = await ethers.getContractFactory('TimeswapMath')
+        const TimeswapMathContract = await TimeswapMathContractFactory.deploy()
+        const TimeswapMathTestContractFactory = await ethers.getContractFactory('TimeswapMathTest', {
+          libraries: {
+            TimeswapMath: TimeswapMathContract.address,
+          },
+        })
+        TimeswapMathTestContract = (await TimeswapMathTestContractFactory.deploy()) as TimeswapMathTest
+        await TimeswapMathTestContract.deployed()
+        state = {
+          reserves: { asset: 90n, collateral: 100n },
+          feeStored: 1n,
+          totalLiquidity: 100n,
+          totalClaims: { bondPrincipal: 50n, bondInterest: 50n, insuranceInterest: 1000n, insurancePrincipal: 1000n },
+          totalDebtCreated: 100n,
+          x: 100n,
+          y: 10n,
+          z: 1n,
+        }
+        stateTest = {
+          reserves: { asset: 90n, collateral: 100n },
+          totalLiquidity: 100n,
+          totalClaims: { bondPrincipal: 50n, bondInterest: 50n, insuranceInterest: 1000n, insurancePrincipal: 1000n },
+          totalDebtCreated: 100n,
+          asset: 100n,
+          interest: 10n,
+          cdp: 1n,
+          feeStored: 1n,
+        }
+        ;[assetOut, collateralOut, feeOut] = await TimeswapMathTestContract.burn(state, liquidityIn)
+      })
+      it('AssetOut', () => {
+        const assetOutComputed = BurnMath.getAsset(stateTest, liquidityIn)
+        expect(assetOut == assetOutComputed).to.true
+      })
+      it('CollateralOut', () => {
+        const collateralOutComputed = BurnMath.getCollateral(stateTest, liquidityIn)
+        expect(collateralOut == collateralOutComputed).to.true
+      })
+      it('FeeOut', () => {
+        const feeOutComputed = BurnMath.getFee(stateTest, liquidityIn)
+        expect(feeOut == feeOutComputed).to.true
+      })
+    })
   })
 
   describe('Lend Math', () => {

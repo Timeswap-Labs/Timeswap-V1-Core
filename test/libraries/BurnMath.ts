@@ -10,7 +10,7 @@ export function getAsset(state: State, liquidityIn: bigint): bigint {
     _assetOut = mulDiv(_assetOut, liquidityIn, state.totalLiquidity)
     return _assetOut
   }
-  if (state.reserves.asset < totalBond) return 0n
+  else return 0n
 
 }
 
@@ -21,19 +21,23 @@ export function getCollateral(state: State, liquidityIn: bigint): bigint {
   if (state.reserves.asset >= totalBond) {
     _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
     return _collateralOut
+  } else {
+    let deficit = totalBond
+    deficit -= state.reserves.asset
+    if (state.reserves.collateral * totalBond > deficit * totalInsurance) {
+      let _collateralOut = state.reserves.collateral
+      let subtrahend = deficit
+      subtrahend *= totalInsurance
+      subtrahend = divUp(subtrahend, totalBond)
+      _collateralOut -= subtrahend
+      _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
+      console.log("returning");
+      return _collateralOut
+    } else {
+      return 0n
+    }
   }
-  let deficit = totalBond
-  deficit -= state.reserves.asset
-  if (state.reserves.collateral * totalBond > deficit * totalInsurance) {
-    let _collateralOut = state.reserves.collateral
-    let subtrahend = deficit
-    subtrahend *= totalInsurance
-    subtrahend = divUp(subtrahend, totalBond)
-    _collateralOut -= subtrahend
-    _collateralOut = mulDiv(_collateralOut, liquidityIn, state.totalLiquidity)
-    return _collateralOut
-  }
-  if (state.reserves.collateral * totalBond <= deficit * totalInsurance) return 0n
+
 }
 export function getFee(state: State, liquidityIn: bigint) {
   return mulDiv(state.feeStored, liquidityIn, state.totalLiquidity)
