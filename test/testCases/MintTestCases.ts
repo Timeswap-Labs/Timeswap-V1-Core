@@ -2,7 +2,6 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { now, pseudoRandomBigUint } from '../shared/Helper'
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1)
-const MaxUint105 = BigNumber.from(2).pow(105).sub(1)
 
 const count = 10
 export interface MintParams {
