@@ -235,7 +235,7 @@ export class PairSim {
     tokensOut.asset = BurnMath.getAsset(pool.state, liquidityIn)
     tokensOut.collateral = BurnMath.getCollateral(pool.state, liquidityIn)
     feeOut = BurnMath.getFee(pool.state, liquidityIn)
-    
+
     pool.state.totalLiquidity -= liquidityIn
 
     this.removeLiquidity(pool, liquidityIn, sender)

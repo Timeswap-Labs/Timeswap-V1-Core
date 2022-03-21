@@ -6,7 +6,7 @@ import BorrowMath from '../libraries/BorrowMath'
 import LendMath from '../libraries/LendMath'
 import MintMath from '../libraries/MintMath'
 import { now } from '../shared/Helper'
-import { BorrowParams, Lend, MintParams, PayParams,  } from '../testCases'
+import { BorrowParams, Lend, MintParams, PayParams } from '../testCases'
 import { FEE, PROTOCOL_FEE } from './Constants'
 import { getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
@@ -137,7 +137,7 @@ export async function borrowFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state()
   const totalliquidity = await pair.totalLiquidity()
-  if (totalliquidity <= 0) throw Error('Invalid') 
+  if (totalliquidity <= 0) throw Error('Invalid')
   if (borrowParams.assetOut <= 0) throw Error('Invalid')
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n
   const pairSimPool = pairSim.getPool(pair.maturity)
