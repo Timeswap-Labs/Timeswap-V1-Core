@@ -14,7 +14,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Timeswap-Labs/Timeswap-V1-Core"
-    },
+  },
   "files": [
     "contracts/interfaces",
     "contracts/libraries",
