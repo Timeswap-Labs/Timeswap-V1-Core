@@ -1,6 +1,5 @@
 # Timeswap V1 Core
 
-
 In-depth documentation on Timeswap is available at [timeswap.io](https://timeswap.gitbook.io/timeswap/).
 
 # Local Development
@@ -18,7 +17,6 @@ The following assumes the use of `node@>=14`.
 ## Run Tests
 
 `yarn test`
-
 
 ## Licensing
 
