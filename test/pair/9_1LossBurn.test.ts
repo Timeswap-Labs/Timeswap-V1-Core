@@ -78,7 +78,6 @@ describe('Loss Burn', () => {
         pairSim = burn.pairSim
       } catch (error) {
         console.log('error in burning')
-        console.log(error)
         continue
       }
       if (pair != undefined && pairSim != undefined) {

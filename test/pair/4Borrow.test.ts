@@ -140,7 +140,6 @@ describe('Borrow', () => {
         continue
       } catch (err) {
         console.log(`Borrowing Tx with the following params did not revert (expected revert)`)
-        console.log(testCase)
         expect.fail()
       }
     }
