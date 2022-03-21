@@ -6,7 +6,6 @@ import { TimeswapMathTest, IPair } from '../../typechain/TimeswapMathTest'
 import MintMath from '../libraries/MintMath'
 import BorrowMath from '../libraries/BorrowMath'
 import BurnMath from '../libraries/BurnMath'
-import PayMath from '../libraries/PayMath' // TODO
 import WithdrawMath from '../libraries/WithdrawMath'
 import { expect } from '../shared/Expect'
 import { now } from '../shared/Helper'

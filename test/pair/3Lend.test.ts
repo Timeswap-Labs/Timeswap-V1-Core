@@ -58,7 +58,6 @@ describe('Lend', () => {
         pair = lendTxData.pair
         pairSim = lendTxData.pairSim
       } catch (error) {
-        // console.log((error as TypeError).message);
         console.log(`Lending transaction expected to revert; check for failure`)
         try {
           await expect(

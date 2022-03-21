@@ -5,7 +5,7 @@ import { expect } from '../shared/Expect'
 import { borrowFixture, constructorFixture, lendFixture, mintFixture, withdrawFixture } from '../shared/Fixtures'
 import { advanceTimeAndBlock, now } from '../shared/Helper'
 import * as TestCases from '../testCases'
-import { BorrowParams, LendParams, MintParams } from '../testCases'
+import { MintParams } from '../testCases'
 
 const MaxUint224 = BigNumber.from(2).pow(224).sub(1)
 let signers: SignerWithAddress[]
@@ -49,12 +49,10 @@ describe('Withdraw', () => {
       let lendData
       try {
         lendTxData = await lendFixture(mint, signers[0], lendParam)
-        // console.log(lendParam);
         pair = lendTxData.pair
         pairSim = lendTxData.pairSim
         lendData = lendTxData.lendData
       } catch (error) {
-        // console.log("lending error: ", (error as TypeError).message);
         console.log('Case ignored due to error in lending')
         continue
       }
@@ -62,9 +60,7 @@ describe('Withdraw', () => {
       let returnObj: any
       try {
         returnObj = await borrowFixture(lendTxData, signers[0], borrowParams)
-        // console.log(borrowParams);
       } catch (error) {
-        // console.log("borrowing error: ", error);
         console.log('Case ignored due to error in borrowing')
         continue
       }
@@ -72,7 +68,6 @@ describe('Withdraw', () => {
       let withdraw
       try {
         withdraw = await withdrawFixture(returnObj, signers[0], lendData)
-        // console.log("withdraw done");
         pair = withdraw.pair
         pairSim = withdraw.pairSim
       } catch (error) {

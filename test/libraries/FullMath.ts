@@ -1,5 +1,3 @@
-// NOTE: Does not include mul512
-
 export function mulDiv(a: bigint, b: bigint, denominator: bigint): bigint {
   let z = a * b
   z = z / denominator

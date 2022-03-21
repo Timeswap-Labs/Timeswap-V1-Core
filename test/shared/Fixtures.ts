@@ -4,10 +4,9 @@ import { ethers } from 'hardhat'
 import type { TestToken } from '../../typechain/TestToken'
 import BorrowMath from '../libraries/BorrowMath'
 import LendMath from '../libraries/LendMath'
-import { divUp } from '../libraries/Math'
 import MintMath from '../libraries/MintMath'
 import { now } from '../shared/Helper'
-import { BorrowParams, Lend, lend, LendParams, MintParams, PayParams, WithdrawParams } from '../testCases'
+import { BorrowParams, Lend, MintParams, PayParams,  } from '../testCases'
 import { FEE, PROTOCOL_FEE } from './Constants'
 import { getBlock } from './Helper'
 import { Pair, pairInit } from './Pair'
@@ -16,8 +15,6 @@ import { PairSim } from './PairSim'
 import { testTokenNew } from './TestToken'
 
 const MaxUint112 = BigNumber.from(2).pow(112).sub(1)
-const MaxUint128 = BigNumber.from(2).pow(128).sub(1)
-const MaxUint256 = BigNumber.from(2).pow(256).sub(1)
 
 export async function constructorFixture(
   assetValue: bigint,
@@ -140,9 +137,8 @@ export async function borrowFixture(
   const { pair, pairSim, assetToken, collateralToken } = fixture
   const pairContractState = await pair.state()
   const totalliquidity = await pair.totalLiquidity()
-  if (totalliquidity <= 0) throw Error('Invalid') // require(pool.state.totalLiquidity > 0, 'E206');
+  if (totalliquidity <= 0) throw Error('Invalid') 
   if (borrowParams.assetOut <= 0) throw Error('Invalid')
-  // checking the constantProduct is the same prior to the tx
   let k_pairContract = (pairContractState.asset * pairContractState.interest * pairContractState.cdp) << 32n
   const pairSimPool = pairSim.getPool(pair.maturity)
   const pairSimContractState = pairSimPool.state

@@ -1,4 +1,4 @@
-import { State, Tokens, TotalClaims, totalClaimsDefault } from '../shared/PairInterface'
+import { State, Tokens, TotalClaims } from '../shared/PairInterface'
 import { mulDiv } from './FullMath'
 
 export function getTokensOut(state: State, claimsIn: TotalClaims): Tokens {
@@ -75,60 +75,6 @@ export function getTokensOut(state: State, claimsIn: TotalClaims): Tokens {
 
   return tokensOut
 }
-
-// export function getAsset(state: State, bondPrincipalIn: bigint, bondInterestIn: bigint): bigint {
-//   let totalAsset = state.asset;
-//   let totalBond = state.totalClaims.bondPrincipal + state.totalClaims.bondInterest
-//   let _assetOut;
-
-//   if (totalAsset >= totalBond) {
-//     _assetOut = bondPrincipalIn;
-//     _assetOut += bondInterestIn;
-//   } else {
-//     if (totalAsset >= state.totalClaims.bondPrincipal) {
-//       let remaining = totalAsset;
-//       remaining -= state.totalClaims.bondPrincipal;
-//       _assetOut = bondInterestIn;
-//       _assetOut *= remaining;
-//       _assetOut /= state.totalClaims.bondInterest;
-//       _assetOut += bondPrincipalIn;
-//     } else {
-//       _assetOut = bondPrincipalIn;
-//       _assetOut *= totalAsset;
-//       _assetOut /= state.totalClaims.bondPrincipal;
-//     }
-//   }
-//   return _assetOut
-// }
-
-// export function getCollateral(state: State, bondPrincipalIn: bigint, bondInterestIn: bigint, insurancePrincipalIn: bigint, insuranceInterestIn: bigint) {
-//   let totalBond = state.totalClaims.bondPrincipal + state.totalClaims.bondInterest
-//   let totalInsurance = state.totalClaims.insurancePrincipal + state.totalClaims.insuranceInterest
-//   if (state.reserves.asset >= totalBond) return 0n
-//   let deficit = totalBond
-//   deficit -= state.reserves.asset
-//   let insurancePrincipal = state.totalClaims.insurancePrincipal * deficit
-//   let insuranceInterest = state.totalClaims.insuranceInterest * deficit
-//   let _insurancePrincipalIn = insurancePrincipalIn * deficit
-//   let totalCollateral = state.reserves.collateral * totalBond
-
-//   if (totalCollateral >= insurancePrincipal) {
-//     let _insuranceInterestIn = insuranceInterest * deficit
-//     let remaining = totalCollateral - insurancePrincipal
-//     if (remaining >= insuranceInterest) {
-//       let _collateralOut = (_insuranceInterestIn + _insurancePrincipalIn) / totalBond
-//       return _collateralOut
-//     }
-//     else {
-//       let _collateralOut = (_insuranceInterestIn * remaining / (insuranceInterest * totalBond)) + (_insurancePrincipalIn / totalBond)
-//       return _collateralOut
-//     }
-//   }
-//   else {
-//     let _collateralOut = _insurancePrincipalIn * totalCollateral / (insurancePrincipal * totalBond)
-//     return _collateralOut
-//   }
-// }
 
 export default {
   getTokensOut,

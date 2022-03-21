@@ -33,7 +33,14 @@ describe('Loss Burn', () => {
       const currentBlockTime = await now()
       updatedMaturity = currentBlockTime + 31556952n
       const constructor = await constructorFixture(assetInValue, collateralInValue, updatedMaturity)
-      const mintParameters: MintParams = testCase
+      const mintParameters: MintParams = {
+        assetIn: testCase.assetIn,
+        collateralIn: testCase.collateralIn,
+        interestIncrease: testCase.interestIncrease,
+        cdpIncrease: testCase.cdpIncrease,
+        maturity: updatedMaturity,
+        currentTimeStamp: testCase.currentTimeStamp,
+      }
       let mint: any
       try {
         mint = await mintFixture(constructor, signers[0], mintParameters)
@@ -48,12 +55,10 @@ describe('Loss Burn', () => {
       let lendData
       try {
         lendTxData = await lendFixture(mint, signers[0], lendParam)
-        // console.log(lendParam);
         pair = lendTxData.pair
         pairSim = lendTxData.pairSim
         lendData = lendTxData.lendData
       } catch (error) {
-        // console.log("lending error: ", (error as TypeError).message);
         console.log('Case ignored due to error in lending')
         continue
       }
@@ -61,9 +66,7 @@ describe('Loss Burn', () => {
       let returnObj: any
       try {
         returnObj = await borrowFixture(lendTxData, signers[0], borrowParams)
-        // console.log(borrowParams);
       } catch (error) {
-        // console.log("borrowing error: ", error);
         console.log('Case ignored due to error in borrowing')
         continue
       }
@@ -83,7 +86,7 @@ describe('Loss Burn', () => {
         console.log('Should have correct reserves')
         const reserves = await pair.totalReserves()
         const reservesSim = pairSim.getPool(updatedMaturity).state.reserves
-        // expect(reserves.asset).to.equalBigInt(reservesSim.asset)
+        expect(reserves.asset).to.equalBigInt(reservesSim.asset)
         expect(reserves.collateral).to.equalBigInt(reservesSim.collateral)
 
         console.log('Should have correct state')
