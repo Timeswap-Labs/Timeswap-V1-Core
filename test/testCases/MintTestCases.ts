@@ -34,4 +34,3 @@ export async function mintTestCases(): Promise<MintParams[]> {
     })
   return testcases
 }
-
