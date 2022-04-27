@@ -148,6 +148,10 @@ z parameter is increased than the max z increase.
 
 Can only be called by the factory owner.
 
+### E217
+
+Y change must be greater than the min Y change.
+
 ## Libraries
 
 ### E301
