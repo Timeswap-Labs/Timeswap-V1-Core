@@ -2,7 +2,7 @@
   "name": "@timeswap-labs/timeswap-v1-core",
   "license": "BUSL-1.1",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org/"
   },
   "version": "1.1.0",
   "homepage": "https://timeswap.io",
