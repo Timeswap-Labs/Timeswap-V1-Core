@@ -156,7 +156,7 @@ library TimeswapMath {
 
         uint256 yMin = xIncrease;
         yMin *= state.y;
-        yMin /= yReserve;
+        yMin /= xReserve;
         yMin >>= 4;
         require(yDecrease >= yMin, 'E217');
     }
