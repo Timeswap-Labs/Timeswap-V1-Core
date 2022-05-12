@@ -153,6 +153,12 @@ library TimeswapMath {
         uint112 yReserve = state.y - yDecrease;
         uint112 zReserve = state.z - zDecrease;
         state.checkConstantProduct(xReserve, yReserve, zReserve);
+
+        uint256 yMin = xIncrease;
+        yMin *= state.y;
+        yMin /= xReserve;
+        yMin >>= 4;
+        require(yDecrease >= yMin, 'E217');
     }
 
     function getBondInterest(
@@ -343,6 +349,10 @@ library TimeswapMath {
         zMax *= state.z;
         zMax = zMax.divUp(xReserve);
         require(zIncrease <= zMax, 'E215');
+
+        uint256 yMin = yMax;
+        yMin = yMin.shiftRightUp(4);
+        require(yIncrease >= yMin, 'E217');
     }
 
     function getDebt(
