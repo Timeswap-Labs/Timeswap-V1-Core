@@ -55,6 +55,13 @@ export function check(
   if (zReserve > BigInt(MaxUint112.toString())) throw new Error('zReserve > Uint112')
 
   if (!checkConstantProduct(state, xReserve, yReserve, zReserve)) throw 'Invariance'
+
+  const yMin = (assetIn*yReserve/xReserve)>>4n
+  if(interestDecrease>=yMin) throw new Error('yDecrease is smaller than yMin')
+  // console.log('yMin is',yMin);
+  // console.log('yDecrease is', interestDecrease);
+  console.log((interestDecrease >= yMin)? 'follows': 'does not follow')
+
   return true
 }
 

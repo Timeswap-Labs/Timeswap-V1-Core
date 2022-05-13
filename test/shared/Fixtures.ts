@@ -109,6 +109,7 @@ export async function lendFixture(fixture: Fixture, signer: SignerWithAddress, l
       .lend(lendParam.lendAssetIn, lendParam.lendInterestDecrease, lendParam.lendCdpDecrease)
     block = await getBlock(txn.blockHash!)
   } catch (error) {
+    console.log(error)
     throw error as TypeError
   }
   const lendData = pairSim.lend(

@@ -12,7 +12,7 @@ let signers: SignerWithAddress[]
 let assetInValue: bigint = BigInt(MaxUint224.toString())
 let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
-describe('Borrow', () => {
+describe.only('Borrow', () => {
   let tests: any
   let snapshot: any
 
