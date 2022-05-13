@@ -50,7 +50,7 @@ export function check(
 
   let yMin = yMax
   yMin *= shiftRightUp(yMin,4n)
-  if (interestIncrease > yMin) return 'E217'
+  if (interestIncrease >= yMin) return 'E217'
 
   return true
 }
