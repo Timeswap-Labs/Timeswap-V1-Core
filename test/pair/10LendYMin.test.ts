@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
+import { divUp, shiftRightUp } from '../libraries/Math'
 import { expect } from '../shared/Expect'
 import { borrowFixture, constructorFixture, lendFixture, mintFixture } from '../shared/Fixtures'
 import { now } from '../shared/Helper'
@@ -13,7 +14,7 @@ let signers: SignerWithAddress[]
 let assetInValue: bigint = BigInt(MaxUint224.toString())
 let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
-describe.only('Lend Y MIN', () => {
+describe('Lend Y MIN', () => {
   let tests: any
   let snapshot: any
 
@@ -53,7 +54,8 @@ describe.only('Lend Y MIN', () => {
         continue
       }
       let lendParam = await TestCases.lend(await pair.state())
-      lendParam.lendInterestDecrease = 1n;
+      const yMin = (lendParam.lendAssetIn*mintParameters.interestIncrease/(mintParameters.assetIn+lendParam.lendAssetIn))>>4n
+      lendParam.lendInterestDecrease = yMin -1n;
       let lendTxData: any
       try {
         lendTxData = await lendFixture(mint, signers[0], lendParam)
@@ -141,7 +143,7 @@ describe.only('Lend Y MIN', () => {
     }
   })
 })
-describe.only('Borrow Y Min', () => {
+describe('Borrow Y Min', () => {
     let tests: any
     let snapshot: any
   
@@ -183,7 +185,8 @@ describe.only('Borrow Y Min', () => {
         const stateAfterMint = await pair.state()
         const reservesAfterMint = await pair.totalReserves()
         let borrowParams = await TestCases.borrow(stateAfterMint, reservesAfterMint)
-        borrowParams.interestIncrease = 1n
+        const yMin = shiftRightUp(divUp((borrowParams.assetOut*mintParameters.interestIncrease),(borrowParams.assetOut+mintParameters.assetIn)),4n)
+        borrowParams.interestIncrease = yMin -1n
         let error
         try {
           const borrowTxData = await borrowFixture(mint, signers[0], borrowParams)
@@ -276,3 +279,5 @@ describe.only('Borrow Y Min', () => {
     })
   })
   
+
+
