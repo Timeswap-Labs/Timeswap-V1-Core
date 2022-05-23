@@ -14,7 +14,7 @@ let signers: SignerWithAddress[]
 let assetInValue: bigint = BigInt(MaxUint224.toString())
 let collateralInValue: bigint = BigInt(MaxUint224.toString())
 
-describe('Lend Y MIN', () => {
+describe('Lend YMin', () => {
   let tests: any
   let snapshot: any
 
@@ -143,7 +143,8 @@ describe('Lend Y MIN', () => {
     }
   })
 })
-describe('Borrow Y Min', () => {
+
+describe('Borrow YMin', () => {
     let tests: any
     let snapshot: any
   
@@ -185,7 +186,7 @@ describe('Borrow Y Min', () => {
         const stateAfterMint = await pair.state()
         const reservesAfterMint = await pair.totalReserves()
         let borrowParams = await TestCases.borrow(stateAfterMint, reservesAfterMint)
-        const yMin = shiftRightUp(divUp((borrowParams.assetOut*mintParameters.interestIncrease),(borrowParams.assetOut+mintParameters.assetIn)),4n)
+        const yMin = shiftRightUp(divUp((borrowParams.assetOut*stateAfterMint.interest),(stateAfterMint.asset - borrowParams.assetOut)),4n)
         borrowParams.interestIncrease = yMin -1n
         let error
         try {
@@ -254,6 +255,7 @@ describe('Borrow Y Min', () => {
           continue
         } catch (borrowFixtureError) {
           error = borrowFixtureError
+          console.log(error);
           console.log(`Borrow Test Case number: ${i + 1} expected to revert`)
         }
         try {

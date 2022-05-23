@@ -19,7 +19,6 @@ export interface LendParams {
 export async function lend(state: ConstantProduct): Promise<Lend> {
   const currentProduct = BigInt(state.interest * state.cdp * state.asset)
   let lendAssetIn = pseudoRandomBigUint(MaxUint112.sub(BigNumber.from(String(state.asset))))
-  console.log('lend asset in is',lendAssetIn)
   while (lendAssetIn < state.asset) {
     let diff = state.asset - lendAssetIn
     lendAssetIn += diff + pseudoRandomBigUint(BigNumber.from(2 ** 10))

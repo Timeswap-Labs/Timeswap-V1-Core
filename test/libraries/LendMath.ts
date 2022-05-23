@@ -57,13 +57,7 @@ export function check(
   if (!checkConstantProduct(state, xReserve, yReserve, zReserve)) throw 'Invariance'
 
   const yMin = (assetIn*yReserve/xReserve)>>4n
-  // if(interestDecrease>=yMin) throw new Error('yDecrease is smaller than yMin')
-  if (interestDecrease >= yMin) return 'E217'
-
-  // console.log('yMin is',yMin);
-  // console.log('yDecrease is', interestDecrease);
-  // console.log((interestDecrease >= yMin)? 'follows': 'does not follow')
-
+  if (interestDecrease >= yMin) throw new Error('E217'); 
   return true
 }
 
