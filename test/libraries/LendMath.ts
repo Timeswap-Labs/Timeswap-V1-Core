@@ -55,6 +55,9 @@ export function check(
   if (zReserve > BigInt(MaxUint112.toString())) throw new Error('zReserve > Uint112')
 
   if (!checkConstantProduct(state, xReserve, yReserve, zReserve)) throw 'Invariance'
+
+  const yMin = (assetIn*yReserve/xReserve)>>4n
+  if (interestDecrease >= yMin) throw new Error('E217'); 
   return true
 }
 

@@ -48,6 +48,10 @@ export function check(
   zMax = divUp(zMax, xReserve)
   if (cdpIncrease > zMax) return 'E215'
 
+  let yMin = yMax
+  yMin *= shiftRightUp(yMin,4n)
+  if (interestIncrease >= yMin) return 'E217'
+
   return true
 }
 
