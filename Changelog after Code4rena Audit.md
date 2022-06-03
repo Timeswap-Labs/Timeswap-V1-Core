@@ -22,10 +22,3 @@ Commits in relation to the change:
 - Core Repository: [ Merge pull request #85 from Timeswap-Labs/add-min 97e892b](https://github.com/Timeswap-Labs/Timeswap-V1-Core/commit/97e892b42339f13d51c3a940b0af83cddee5d27a)
 - Convenience Repository: [ Merge pull request #85 from Timeswap-Labs/add-min 641c38d](https://github.com/Timeswap-Labs/Timeswap-V1-Convenience/commit/641c38d62d3a1351e7d8c7207bf4eab1eb544fa6)
 
-2. **Circular imports: Refactored imports for proper compilation:**
-
-Timeswap Convenience interfaces failed verification on Polygonscan which is now fixed in the commit below.
-
-Commits in relation to the change:
-
-- Convenience Repository: [ Merge pull request #87 from Timeswap-Labs/verification-issue 5dc922e](https://github.com/Timeswap-Labs/Timeswap-V1-Convenience/commit/5dc922e708446c7bfa083f897695347b86a1c844)
