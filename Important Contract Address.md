@@ -4,7 +4,7 @@
 - Convenience
 - Pair Addresses
 
-## Week9(May 31, 2022 - Jun 7, 2022 )
+## Week9,10(May 31, 2022 - till date )
 
 Chain→ Polygon Mainnet
 UI —> [Currently Live on Main Dapp](https://app.timeswap.io/)
