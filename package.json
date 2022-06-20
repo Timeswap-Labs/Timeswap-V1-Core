@@ -60,7 +60,8 @@
   },
   "resolutions": {
     "yargs-parser": "18.1.2",
-    "async": "3.2.2"
+    "async": "3.2.2",
+    "undici": "5.5.1"
   },
   "scripts": {
     "compile": "hardhat compile",
