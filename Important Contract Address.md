@@ -4,6 +4,16 @@
 - Convenience
 - Pair Addresses
 
+## Week 12, 13 (June 23, 2022 - July 8, 2022 )
+
+Chain→ Polygon Mainnet
+
+| Name    | Address                                    | Link                                                                       |
+| ------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| Factory | 0x572583d84A72D2e2CBd72a6abC95CEe689828C42 | https://polygonscan.com/address/0x572583d84A72D2e2CBd72a6abC95CEe689828C42 |
+| Conv    | 0x7caA300DC0Ec197d396A588F2C05B6EC115B1E20 | https://polygonscan.com/address/0x7caA300DC0Ec197d396A588F2C05B6EC115B1E20 |
+| Pair    | 0xb496e5c860dc5f669d46c3444fb598cc7838f8b8 | https://polygonscan.com/address/0xb496e5c860dc5f669d46c3444fb598cc7838f8b8 |
+
 ## Week 9, 10, 11 (May 31, 2022 - June 22, 2022 )
 
 Chain→ Polygon Mainnet
@@ -33,8 +43,8 @@ UI —> [WEEK7 UI](https://week-4-7--timeswap-default.netlify.app)
 | Name | Address | Link |
 | ------- | ------------------------------------------ | -------------------------------------------------------------------------- |
 | Factory | 0x3a82fB3294a648368F5Ef07261Ec740B05Da9e85 | https://polygonscan.com/address/0x3a82fB3294a648368F5Ef07261Ec740B05Da9e85 |
-| Conv | 0xf4077Bd057Dddc2576b17889e175c839d9cEF2d3 | https://polygonscan.com/address/0xf4077bd057dddc2576b17889e175c839d9cef2d3 |
-| Pair | 0x002032c56543C384f0857e2Ff5bCA3a4B8Aeede7 | https://polygonscan.com/address/0x002032c56543c384f0857e2ff5bca3a4b8aeede7 |
+| Conv    | 0xf4077Bd057Dddc2576b17889e175c839d9cEF2d3 | https://polygonscan.com/address/0xf4077bd057dddc2576b17889e175c839d9cef2d3 |
+| Pair    | 0x002032c56543C384f0857e2Ff5bCA3a4B8Aeede7 | https://polygonscan.com/address/0x002032c56543c384f0857e2ff5bca3a4b8aeede7 |
 
 ## Week6 (May 9, 2022 - May 16, 2022)
 
